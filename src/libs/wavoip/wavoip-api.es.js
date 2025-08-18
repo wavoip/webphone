@@ -2117,7 +2117,7 @@ class Pn {
     this.device_token = e, this.wavoip_socket = t, this.wavoip_socket.bindListener("audio_transport:create", {
       id: this.id,
       fn: (n) => {
-        const r = `wss://${n.ip}:${n.port}`;
+        const r = `wss://${n.ip}:${n.port}?token=${this.device_token}`;
         this.start(r);
       }
     }), this.wavoip_socket.bindListener("audio_transport:terminate", {
