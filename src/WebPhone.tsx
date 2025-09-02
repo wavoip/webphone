@@ -8,7 +8,7 @@ export function WebPhone() {
     <div className="w-screen h-screen bg-lime-500">
       <DraggableProvider>
         <PhoneProvider>
-          <WavoipProvider>
+          <WavoipProvider tokens={["d4a8d1c1-18f9-4ff5-8712-edfffa71a2a2"]}>
             <PhoneWidget />
           </WavoipProvider>
         </PhoneProvider>
