@@ -1,30 +1,35 @@
-import { useDraggable } from "../providers/DraggableProvider";
-import { usePhone } from "../providers/ScreenProvider";
-import CallScreen from "./CallScreen";
-import IncomingScreen from "./IncomingScreen";
-import KeyboardScreen from "./KeyboardScreen";
-import OutgoingScreen from "./OutgoingScreen";
-import QrcodeScreen from "./QrcodeScreen";
+import { CallOffers } from "@/components/CallOffers";
+import StatusBar from "@/components/layout/status-bar/StatusBar";
+import { useDraggable } from "@/providers/DraggableProvider";
+import { usePhone } from "@/providers/ScreenProvider";
+import CallScreen from "@/screens/CallScreen";
+import KeyboardScreen from "@/screens/KeyboardScreen";
+import OutgoingScreen from "@/screens/OutgoingScreen";
+import QrcodeScreen from "@/screens/QrcodeScreen";
 
 export default function PhoneWidget() {
   const { screen, setScreen } = usePhone();
   const { position } = useDraggable();
 
   return (
-    <>
+    <div>
       {screen !== "closed" && (
         <div
+          className="w-60 h-120 rounded-2xl bg-background shadow-lg"
           style={{
             position: "absolute",
             left: position.x,
             top: position.y,
           }}
         >
-          {screen === "keyboard" && <KeyboardScreen />}
-          {screen === "outgoing" && <OutgoingScreen />}
-          {screen === "incoming" && <IncomingScreen />}
-          {screen === "call" && <CallScreen />}
-          {screen === "login" && <QrcodeScreen />}
+          <StatusBar />
+          <div className="size-full relative">
+            <CallOffers />
+            {screen === "keyboard" && <KeyboardScreen />}
+            {screen === "outgoing" && <OutgoingScreen />}
+            {screen === "call" && <CallScreen />}
+            {screen === "login" && <QrcodeScreen />}
+          </div>
         </div>
       )}
 
@@ -43,6 +48,6 @@ export default function PhoneWidget() {
           Webphone
         </button>
       )}
-    </>
+    </div>
   );
 }

@@ -41,7 +41,7 @@ export default function Keyboard() {
     <div className="w-full h-100 mx-auto p-4 rounded-2xl">
       {/* Campo onde aparece o número */}
       <div className="text-center mb-4">
-        <div className="text-2xl font-mono tracking-wide h-15 flex items-center justify-center border-b border-gray-300">
+        <div className="text-foreground text-2xl font-mono tracking-wide h-15 flex items-center justify-center border-b border-gray-300">
           {number || <span className="text-gray-500">Digite...</span>}
         </div>
       </div>

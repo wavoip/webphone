@@ -1,26 +1,76 @@
-import { UserCircleIcon } from "@phosphor-icons/react";
-import EndCallButton from "../components/ui/EndCallButton";
-import MuteButton from "../components/ui/MuteButton";
-import StatusBar from "../components/ui/StatusBar";
-import { useWavoip } from "../providers/WavoipProvider";
+import { MicrophoneIcon, MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function OutgoingScreen() {
-  const { callouts, callIndex } = useWavoip();
+  const { callOutgoing } = useWavoip();
+
+  const [status, setStatus] = useState<null | string>(null);
+  const [muted, setMuted] = useState(callOutgoing?.muted || false);
 
   return (
-    <div className="w-60 h-fit rounded-2xl bg-green-950 flex flex-col items-center shadow-lg">
-      <StatusBar />
-      <div className="flex flex-row h-15 mt-2">
-        <UserCircleIcon size={64} />
-        <div className="flex flex-col justify-center ml-4">
-          {callouts && callouts.length > 0 && <p>Chamando</p>}
-          {!callouts && <p>Ligando...</p>}
-          {callouts && callouts.length > 0 && <p>{callouts[callIndex].peer.split("@")[0]}</p>}
-        </div>
+    <div className="size-full grid grid-rows-3">
+      <div className="text-foreground flex justify-center items-center">
+        <p>{status || "Chamando"}</p>
       </div>
-      <div className="flex flex-row w-50 justify-evenly items-center mb-3 mt-1 border-t-2 border-green-900 pt-2">
-        <EndCallButton />
-        <MuteButton />
+      <div className="flex flex-col items-center justify-center text-foreground">
+        <UserCircleIcon className="size-full fill-muted-foreground" />
+        <p>{callOutgoing?.peer}</p>
+      </div>
+      <div className="flex w-full justify-evenly items-center">
+        <Button
+          type="button"
+          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+          onClick={(e) => {
+            e.currentTarget.disabled = true;
+            callOutgoing?.end().then(({ err }) => {
+              if (!err) {
+                setStatus("Chamada finalizada");
+              }
+              e.currentTarget.disabled = false;
+            });
+          }}
+        >
+          <PhoneSlashIcon className="size-6" />
+        </Button>
+        {muted ? (
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.currentTarget.disabled = true;
+              callOutgoing?.unmute().then(({ err }) => {
+                if (err) {
+                  setStatus(err);
+                  setTimeout(() => setStatus(null), 3000);
+                } else {
+                  setMuted(false);
+                }
+              });
+            }}
+            className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+          >
+            <MicrophoneSlashIcon className="size-6" />
+          </Button>
+        ) : (
+          <Button
+            type="button"
+            onClick={(e) => {
+              e.currentTarget.disabled = true;
+              callOutgoing?.mute().then(({ err }) => {
+                if (err) {
+                  setStatus(err);
+                  setTimeout(() => setStatus(null), 3000);
+                } else {
+                  setMuted(true);
+                }
+              });
+            }}
+            className="size-fit aspect-square rounded-full bg-green-500 hover:bg-green-400 hover:cursor-pointer"
+          >
+            <MicrophoneIcon className="size-6" />
+          </Button>
+        )}
       </div>
     </div>
   );

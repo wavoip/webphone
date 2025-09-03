@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 
-type Screen = "call" | "keyboard" | "outgoing" | "incoming" | "login" | "closed";
+type Screen = "call" | "keyboard" | "outgoing" | "login" | "closed";
 
 type PhoneContextType = {
   screen: Screen;
@@ -12,11 +12,7 @@ const PhoneContext = createContext<PhoneContextType | undefined>(undefined);
 export function PhoneProvider({ children }: { children: ReactNode }) {
   const [screen, setScreen] = useState<Screen>("keyboard");
 
-  return (
-    <PhoneContext.Provider value={{ screen, setScreen }}>
-      {children}
-    </PhoneContext.Provider>
-  );
+  return <PhoneContext.Provider value={{ screen, setScreen }}>{children}</PhoneContext.Provider>;
 }
 
 export function usePhone() {

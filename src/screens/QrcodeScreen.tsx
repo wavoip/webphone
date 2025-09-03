@@ -1,4 +1,3 @@
-import StatusBar from "../components/ui/StatusBar";
 import { usePhone } from "../providers/ScreenProvider";
 import { useWavoip } from "../providers/WavoipProvider";
 
@@ -10,7 +9,6 @@ export default function QrcodeScreen() {
 
   return (
     <div className="w-60 h-120 rounded-2xl bg-green-950 flex flex-col shadow-lg">
-      <StatusBar />
       {devices.map((device, index) => (
         <div key={device.token} className="flex flex-row h-15 mt-2">
           <p>{device.status || `Device ${index + 1}`}</p>
