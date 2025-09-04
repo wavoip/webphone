@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/a11y/noStaticElementInteractions: <explanation> */
 import React, { createContext, type ReactNode, useCallback, useContext, useState } from "react";
 
 type Position = { x: number; y: number };
@@ -46,6 +45,7 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
 
   return (
     <DraggableContext.Provider value={{ position, setPosition, startDrag, stopDrag, isDragging }}>
+      {/** biome-ignore lint/a11y/noStaticElementInteractions: Drag and Drop */}
       <div
         className="w-screen h-screen bg-transparent z-0 text-white flex rounded-lg shadow-lg select-none"
         onMouseMove={handleMouseMove}

@@ -1,23 +1,3 @@
-<<<<<<< Updated upstream
-import React, { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import type { CallActive, CallOffer, CallOutgoing, MultimediaError } from "wavoip-api";
-import { Wavoip } from "wavoip-api";
-import { usePhone } from "./ScreenProvider";
-
-interface WavoipContextProps {
-  wavoipInstance: Wavoip;
-  offers?: CallOffer[];
-  callouts?: CallOutgoing[];
-  callactives?: CallActive[];
-  multimediaError?: MultimediaError;
-  makeCall?: (to: string) => Promise<void>;
-  callingTo?: string | null;
-  callingMe?: string | null;
-  setCallingMe?: React.Dispatch<React.SetStateAction<string | null>>;
-  callIndex: number;
-  setCallIndex: React.Dispatch<React.SetStateAction<number>>;
-  setCallActives: React.Dispatch<React.SetStateAction<CallActive[]>>;
-=======
 import React, { createContext, type ReactNode, useContext, useState } from "react";
 import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "wavoip-api";
 import { usePhone } from "@/providers/ScreenProvider";
@@ -32,27 +12,11 @@ interface WavoipContextProps {
   makeCall: (to: string) => Promise<void>;
   addDevice: (token: string) => void;
   removeDevice: (token: string) => void;
->>>>>>> Stashed changes
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
 interface WavoipProviderProps {
-<<<<<<< Updated upstream
-  children: ReactNode;
-}
-
-export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
-  const { setScreen } = usePhone();
-  const token = ["d4a8d1c1-18f9-4ff5-8712-edfffa71a2a2"];
-  const [wavoipInstance] = useState(() => new Wavoip({ tokens: token }));
-  const [callingTo, setCallingTo] = useState<string | null>(null);
-  const [callingMe, setCallingMe] = useState<string | null>(null);
-  const [callOffers, setCallOffers] = useState<CallOffer[]>([]);
-  const [callOutgoings, setCallOutgoings] = useState<CallOutgoing[]>([]);
-  const [callActives, setCallActives] = useState<CallActive[]>([]);
-  const [callIndex, setCallIndex] = useState(0);
-=======
   wavoip: Wavoip;
   children: ReactNode;
 }
@@ -84,62 +48,8 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
   // ]);
   const [callOutgoing, setCallOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [callActive, setCallActive] = useState<CallActive | undefined>(undefined);
->>>>>>> Stashed changes
+  const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
 
-  const setupCallOutgoing = useCallback(
-    (call: CallOutgoing) => {
-      if (!call) return;
-      call.onPeerAccept((activeCall) => {
-        console.log("Chamada aceita pelo peer:", activeCall);
-        setScreen("call");
-        setCallingTo(activeCall.peer);
-        setCallActives((prev) => [...prev, activeCall]);
-      });
-
-<<<<<<< Updated upstream
-      call.onPeerReject(() => {
-        console.log("Chamada rejeitada pelo peer");
-        setScreen("keyboard");
-      });
-
-      call.onUnanswered(() => {
-        console.log("Chamada não atendida");
-        setScreen("keyboard");
-      });
-
-      call.onEnd(() => {
-        console.log("Chamada encerrada");
-        setScreen("keyboard");
-      });
-    },
-    [setScreen],
-  );
-
-  useEffect(() => {
-    setupCallOutgoing(callOutgoings[callIndex]);
-    console.log("CallOutgoing configurada");
-  }, [callOutgoings, callIndex, setupCallOutgoing]);
-
-  async function makeCall(to: string) {
-    const result = await wavoipInstance.startCall({ fromTokens: token, to });
-
-    if (result.err) {
-      console.error("Erro ao iniciar chamada:", result.err.message);
-      return;
-    }
-    setScreen("outgoing");
-    callOutgoings.push(result.call);
-  }
-
-  useEffect(() => {
-    wavoipInstance.onOffer((offer) => {
-      console.log("Nova oferta de chamada recebida:", offer);
-      setScreen("incoming");
-      setCallingMe?.(offer.peer || null);
-      callOffers.push(offer);
-    });
-  }, [wavoipInstance, setScreen, callOffers]);
-=======
   async function makeCall(to: string) {
     const { call, err } = await wavoipInstance.startCall({ to });
 
@@ -253,25 +163,11 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
   });
 
   wavoipInstance.onMultimediaError((err) => setMultimediaError(err));
->>>>>>> Stashed changes
 
   return (
     <WavoipContext.Provider
       value={{
         wavoipInstance,
-<<<<<<< Updated upstream
-        offers: callOffers,
-        callouts: callOutgoings,
-        callactives: callActives,
-        multimediaError: undefined,
-        makeCall,
-        callingTo,
-        callingMe,
-        setCallingMe,
-        callIndex,
-        setCallIndex,
-        setCallActives,
-=======
         devices,
         offers,
         callOutgoing,
@@ -280,7 +176,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
         makeCall,
         addDevice,
         removeDevice,
->>>>>>> Stashed changes
       }}
     >
       {children}
