@@ -5,7 +5,7 @@ import StatusBar from "../components/ui/StatusBar";
 import { useWavoip } from "../providers/WavoipProvider";
 
 export default function IncomingScreen() {
-  const { wavoipInstance, offers, callIndex } = useWavoip();
+  const { wavoipInstance, offers } = useWavoip();
 
   return (
     <div className="w-60 h-fit rounded-2xl bg-green-950 flex flex-col items-center shadow-lg">

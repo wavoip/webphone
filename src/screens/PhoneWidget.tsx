@@ -24,7 +24,7 @@ export default function PhoneWidget() {
           {screen === "outgoing" && <OutgoingScreen />}
           {screen === "incoming" && <IncomingScreen />}
           {screen === "call" && <CallScreen />}
-          {screen === "login" && <QrcodeScreen />}
+          {screen === "qrcode" && <QrcodeScreen />}
         </div>
       )}
 

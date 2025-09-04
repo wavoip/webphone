@@ -1,6 +1,5 @@
 import React, { createContext, type ReactNode, useContext, useState } from "react";
-import type { CallActive, CallOffer, CallOutgoing, MultimediaError } from "wavoip-api";
-import { Wavoip } from "wavoip-api";
+import type { CallActive, CallOffer, CallOutgoing, MultimediaError, Wavoip } from "wavoip-api";
 import { usePhone } from "@/providers/ScreenProvider";
 
 interface WavoipContextProps {
@@ -15,19 +14,15 @@ interface WavoipContextProps {
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
 interface WavoipProviderProps {
-  tokens: string[];
+  wavoipInstance: Wavoip;
   children: ReactNode;
 }
 
-export const WavoipProvider: React.FC<WavoipProviderProps> = ({ tokens, children }) => {
+export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoipInstance, children }) => {
   const { setScreen } = usePhone();
-
-  const [wavoipInstance] = useState(() => new Wavoip({ tokens: tokens }));
-
   const [callOffers, setCallOffers] = useState<CallOffer[]>([]);
   const [callOutgoing, setCallOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [callActive, setCallActive] = useState<CallActive | undefined>(undefined);
-
   const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
 
   function setupCallOutgoing(call: CallOutgoing) {
@@ -60,9 +55,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ tokens, children
       console.error("Erro ao iniciar chamada:", result.err.message);
       return;
     }
-
     setupCallOutgoing(result.call);
-
     setCallOutgoing(result.call);
     setScreen("outgoing");
   }

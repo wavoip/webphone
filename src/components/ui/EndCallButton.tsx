@@ -4,16 +4,16 @@ import { useWavoip } from "../../providers/WavoipProvider";
 
 export default function EndCallButton() {
   const { setScreen } = usePhone();
-  const { callactives, callouts } = useWavoip();
+  const { callActive, callOutgoing } = useWavoip();
 
   const handleEndCall = () => {
-    if (callactives && callactives.length > 0) {
-      callactives[0].end();
+    if (callActive) {
+      callActive.end();
       setScreen("keyboard");
       console.log("Call ended");
     }
-    if (callouts && callouts.length > 0) {
-      callouts[0].end();
+    if (callOutgoing) {
+      callOutgoing.end();
       setScreen("keyboard");
       console.log("Call ended");
     }

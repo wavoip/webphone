@@ -6,7 +6,7 @@ import StatusBar from "../components/ui/StatusBar";
 import { useWavoip } from "../providers/WavoipProvider";
 
 export default function CallScreen() {
-  const { callactives } = useWavoip();
+  const { callActive } = useWavoip();
   const [durationSeconds, setDurationSeconds] = useState(0);
 
   const duration = useMemo(() => {
@@ -24,8 +24,8 @@ export default function CallScreen() {
       <StatusBar />
       <div className="flex flex-col justify-center items-center h-30 mt-2">
         <UserCircleIcon size={64} />
-        {callactives && callactives.length > 0 && <p>{callactives[0].peer.split("@")[0]}</p>}
-        {callactives && callactives.length > 0 && <p>{duration}</p>}
+        {callActive && <p>{callActive.peer.split("@")[0]}</p>}
+        {callActive && <p>{duration}</p>}
       </div>
       <div className="flex flex-row w-50 justify-evenly items-center mb-3 mt-1 border-t-2 border-green-900 pt-2">
         <EndCallButton />

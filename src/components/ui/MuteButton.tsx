@@ -4,16 +4,16 @@ import { useWavoip } from "../../providers/WavoipProvider";
 
 export default function MuteButton() {
   const [isMuted, setIsMuted] = useState(false);
-  const { callactives, callIndex } = useWavoip();
+  const { callActive } = useWavoip();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: The dependency is intentional
   useEffect(() => {
     console.log(isMuted ? "Microfone mutado" : "Microfone desmutado");
-    if (callactives && callactives.length > 0 && !isMuted) {
-      callactives[callIndex]?.mute;
+    if (callActive && !isMuted) {
+      callActive.mute;
     }
-    if (callactives && callactives.length > 0 && isMuted) {
-      callactives[callIndex]?.unmute;
+    if (callActive && isMuted) {
+      callActive.unmute;
     }
   }, [isMuted]);
 
