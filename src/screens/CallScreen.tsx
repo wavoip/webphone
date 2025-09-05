@@ -41,21 +41,6 @@ export default function CallScreen() {
         <p className="text-foreground">{status || formatDuration(durationSeconds)}</p>
       </div>
       <div className="flex justify-evenly items-center">
-        <Button
-          type="button"
-          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
-          onClick={(e) => {
-            e.currentTarget.disabled = true;
-            callActive?.end().then(({ err }) => {
-              if (!err) {
-                setStatus("Chamada finalizada");
-              }
-              e.currentTarget.disabled = false;
-            });
-          }}
-        >
-          <PhoneSlashIcon className="size-6" />
-        </Button>
         {muted ? (
           <Button
             type="button"
@@ -89,6 +74,21 @@ export default function CallScreen() {
             <MicrophoneIcon className="size-6" />
           </Button>
         )}
+        <Button
+          type="button"
+          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+          onClick={(e) => {
+            e.currentTarget.disabled = true;
+            callActive?.end().then(({ err }) => {
+              if (!err) {
+                setStatus("Chamada finalizada");
+              }
+              e.currentTarget.disabled = false;
+            });
+          }}
+        >
+          <PhoneSlashIcon className="size-6" />
+        </Button>
       </div>
     </div>
   );

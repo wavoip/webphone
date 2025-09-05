@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { WebPhone } from "./WebPhone.tsx";
+import { WebPhone } from "@/WebPhone";
 
 // createRoot(document.getElementById("root")!).render(
 //   <StrictMode>

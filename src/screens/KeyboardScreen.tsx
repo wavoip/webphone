@@ -51,7 +51,8 @@ export default function KeyboardScreen() {
           <Button
             key={num}
             type="button"
-            className="aspect-square size-full rounded-full bg-muted hover:bg-muted-foreground hover:text-background hover:cursor-pointer text-foreground flex flex-col justify-center items-center gap-0"
+            variant={"secondary"}
+            className="aspect-square size-full rounded-full hover:bg-muted-foreground hover:text-background hover:cursor-pointer text-foreground flex flex-col justify-center items-center gap-0"
             onClick={() => handleClick(num)}
           >
             <p className="text-lg font-bold">{num}</p>
@@ -63,14 +64,15 @@ export default function KeyboardScreen() {
       <div className="w-full flex justify-evenly justify-items-center">
         <Button
           type="button"
+          variant={"secondary"}
           onClick={handleDelete}
-          className="size-fit aspect-square !p-2 bg-muted hover:bg-muted-foreground hover:text-background text-foreground hover:cursor-pointer"
+          className="size-fit aspect-square !p-2 hover:bg-muted-foreground hover:text-background text-foreground hover:cursor-pointer"
         >
           <BackspaceIcon className="size-6" />
         </Button>
         <Button
           type="button"
-          className="size-fit aspect-square !p-2 bg-green-500 hover:bg-green-400 hover:cursor-pointer"
+          className="size-fit aspect-square !p-2 bg-green-500 hover:bg-green-700 hover:cursor-pointer"
           onClick={() => makeCall(number)}
         >
           <PhoneIcon className="size-6" />

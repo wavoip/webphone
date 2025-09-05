@@ -1,10 +1,17 @@
 import React, { createContext, type ReactNode, useContext, useState } from "react";
-import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "wavoip-api";
-import { usePhone } from "@/providers/ScreenProvider";
+import {
+  type CallActive,
+  type CallOffer,
+  type CallOutgoing,
+  type Device,
+  type MultimediaError,
+  Wavoip,
+} from "wavoip-api";
+import { useScreen } from "@/providers/ScreenProvider";
 
 interface WavoipContextProps {
   wavoipInstance: Wavoip;
-  devices: Device[];
+  devices: (Device & { enable: boolean })[];
   offers: CallOffer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
@@ -12,21 +19,24 @@ interface WavoipContextProps {
   makeCall: (to: string) => Promise<void>;
   addDevice: (token: string) => void;
   removeDevice: (token: string) => void;
+  enableDevice: (token: string) => void;
+  disableDevice: (token: string) => void;
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
 interface WavoipProviderProps {
-  wavoip: Wavoip;
   children: ReactNode;
 }
 
-export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children }) => {
-  const { setScreen } = usePhone();
+export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
+  const { setScreen } = useScreen();
 
-  const [wavoipInstance] = useState(wavoip);
+  const [wavoipInstance] = useState(() => new Wavoip({ tokens: ["d4a8d1c1-18f9-4ff5-8712-edfffa71a2a2"] }));
 
-  const [devices, setDevices] = useState<Device[]>(() => wavoipInstance.getDevices());
+  const [devices, setDevices] = useState<(Device & { enable: boolean })[]>(() =>
+    wavoipInstance.getDevices().map((device) => ({ ...device, enable: true })),
+  );
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
   // const [offers, setOffers] = useState<CallOffer[]>([
@@ -74,6 +84,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
 
     const callOutgoinIntegrated: CallOutgoing = {
       ...call,
+      peer: call.peer.split("@")[0],
       onPeerAccept: (cb) => {
         call.onPeerAccept((activeCall) => {
           console.log("Chamada aceita pelo peer:", activeCall);
@@ -99,11 +110,22 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
   }
 
   function addDevice(token: string) {
-    setDevices(wavoipInstance.addDevices([token]));
+    // biome-ignore lint/style/noNonNullAssertion: Existe
+    const device = wavoipInstance.addDevices([token]).find((device) => device.token === token)!;
+    setDevices((prev) => [...prev, { ...device, enable: ["open", "CONNECTED"].includes(device.status as string) }]);
   }
 
   function removeDevice(token: string) {
-    setDevices(wavoipInstance.removeDevices([token]));
+    wavoipInstance.removeDevices([token]);
+    setDevices((prev) => prev.filter((device) => device.token !== token));
+  }
+
+  function enableDevice(token: string) {
+    setDevices((prev) => prev.map((device) => (device.token === token ? { ...device, enable: true } : device)));
+  }
+
+  function disableDevice(token: string) {
+    setDevices((prev) => prev.map((device) => (device.token === token ? { ...device, enable: false } : device)));
   }
 
   wavoipInstance.onOffer((offer) => {
@@ -119,6 +141,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
 
     const offerIntegrated: CallOffer = {
       ...offer,
+      peer: offer.peer.split("@")[0],
       onEnd: (cb) => {
         offer.onEnd(() => {
           cb();
@@ -140,6 +163,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
 
           const callIntegrated: CallActive = {
             ...call,
+            peer: call.peer.split("@")[0],
             onEnd: (cb) => {
               call.onEnd(() => {
                 cb();
@@ -176,6 +200,8 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ wavoip, children
         makeCall,
         addDevice,
         removeDevice,
+        enableDevice,
+        disableDevice,
       }}
     >
       {children}

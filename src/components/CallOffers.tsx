@@ -1,9 +1,12 @@
 import { PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export function CallOffers() {
   const { offers } = useWavoip();
+
+  const [actionMade, setActionMade] = useState(false);
 
   return (
     <div className="absolute top-0 left-0 w-full flex flex-col gap-1">
@@ -12,15 +15,16 @@ export function CallOffers() {
           key={offer.id}
           className="flex justify-between items-center p-2 text-foreground m-1 rounded-md bg-muted shadow-sm"
         >
-          <p className="text-sm">{offer.peer}</p>
+          <p className="text-sm text-ellipsis">{offer.peer}</p>
           <div className="flex items-center gap-1">
             <Button
               type="button"
               className="size-fit aspect-square !p-2 bg-red-500 hover:bg-red-400 hover:cursor-pointer"
-              onClick={(e) => {
-                e.currentTarget.disabled = true;
+              disabled={actionMade}
+              onClick={() => {
+                setActionMade(true);
                 offer.reject().then(() => {
-                  e.currentTarget.disabled = false;
+                  setActionMade(false);
                 });
               }}
             >
@@ -29,10 +33,11 @@ export function CallOffers() {
             <Button
               type="button"
               className="size-fit aspect-square !p-2 bg-green-500 hover:bg-green-400 hover:cursor-pointer"
-              onClick={(e) => {
-                e.currentTarget.disabled = true;
+              disabled={actionMade}
+              onClick={() => {
+                setActionMade(true);
                 offer.accept().then(() => {
-                  e.currentTarget.disabled = false;
+                  setActionMade(false);
                 });
               }}
             >

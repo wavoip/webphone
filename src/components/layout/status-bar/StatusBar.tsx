@@ -1,28 +1,30 @@
-import { ArrowsOutCardinalIcon, EyeClosedIcon } from "@phosphor-icons/react";
-import { DevicesInfo } from "@/components/layout/status-bar/DevicesInfo";
+import { EyeClosedIcon } from "@phosphor-icons/react";
+import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Ping } from "@/components/layout/status-bar/Ping";
+import { SettingsModal } from "@/components/layout/status-bar/SettingsModal";
+import { Button } from "@/components/ui/button";
 import { useDraggable } from "@/providers/DraggableProvider";
-import { usePhone } from "@/providers/ScreenProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function StatusBar() {
-  const { startDrag } = useDraggable();
-  const { setScreen } = usePhone();
+  const { startDrag, close } = useDraggable();
   const { callActive, devices } = useWavoip();
 
   return (
-    <div className="w-full h-6 bg-foreground flex justify-between shadow-lg px-2 rounded-2xl rounded-bl-none rounded-br-none">
-      <div>
-        <DevicesInfo devices={devices} />
+    // biome-ignore lint/a11y/noStaticElementInteractions: Drag
+    <div
+      onMouseDown={startDrag}
+      className="w-full h-9 bg-foreground flex justify-between items-center shadow-lg px-2 rounded-2xl rounded-bl-none rounded-br-none hover:cursor-pointer"
+    >
+      <div className="flex items-center">
+        <SettingsModal devices={devices} />
+        <DevicesAlert devices={devices} />
       </div>
       <div className="flex gap-2">{callActive && <Ping call={callActive} />}</div>
-      <div>
-        <button type="button" onMouseDown={startDrag} className="active:bg-green-800 rounded-2xl">
-          <ArrowsOutCardinalIcon size={24} />
-        </button>
-        <button type="button" onClick={() => setScreen("closed")}>
-          <EyeClosedIcon size={24} />
-        </button>
+      <div className="flex items-center">
+        <Button type="button" variant={"ghost"} className="size-fit !p-0.5 aspect-square" onClick={() => close()}>
+          <EyeClosedIcon />
+        </Button>
       </div>
     </div>
   );
