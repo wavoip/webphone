@@ -1,4 +1,4 @@
-import React, { createContext, type ReactNode, useContext, useState } from "react";
+import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import {
   type CallActive,
   type CallOffer,
@@ -24,6 +24,18 @@ interface WavoipContextProps {
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
+const localStorageKey = "wavoip:tokens";
+const deviceSettings = new Map<string, { token: string; enable: boolean }>(
+  localStorage
+    .getItem(localStorageKey)
+    ?.split(";")
+    .map((device) => {
+      const [token, enable] = device.split(":");
+
+      return [token, { token, enable: enable === "true" }];
+    }) || [],
+);
+console.log(deviceSettings);
 
 interface WavoipProviderProps {
   children: ReactNode;
@@ -32,10 +44,13 @@ interface WavoipProviderProps {
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   const { setScreen } = useScreen();
 
-  const [wavoipInstance] = useState(() => new Wavoip({ tokens: [] }));
+  const [wavoipInstance] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
 
   const [devices, setDevices] = useState<(Device & { enable: boolean })[]>(() =>
-    wavoipInstance.getDevices().map((device) => ({ ...device, enable: true })),
+    wavoipInstance.getDevices().map((device) => ({
+      ...device,
+      enable: !!deviceSettings.get(device.token)?.enable || ["open", "CONNECTED"].includes(device.status as string),
+    })),
   );
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
@@ -122,8 +137,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   }
 
   function addDevice(token: string) {
-    // biome-ignore lint/style/noNonNullAssertion: Existe
-    const device = wavoipInstance.addDevices([token]).find((device) => device.token === token)!;
+    const [device] = wavoipInstance.addDevices([token]);
     setDevices((prev) => [...prev, { ...device, enable: ["open", "CONNECTED"].includes(device.status as string) }]);
   }
 
@@ -197,6 +211,29 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   });
 
   wavoipInstance.onMultimediaError((err) => setMultimediaError(err));
+
+  useEffect(() => {
+    let tokensMemory = "";
+
+    for (const device of devices) {
+      tokensMemory += `${tokensMemory ? ";" : ""}${device.token}:${device.enable}`;
+      device.onQRCode((qrcode) => {
+        setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...device, qrcode } : d)));
+      });
+      device.onStatus((status) => {
+        setDevices((prev) =>
+          prev.map((d) =>
+            d.token === device.token
+              ? { ...device, status, enable: ["open", "CONNECTED"].includes(status as string) }
+              : d,
+          ),
+        );
+      });
+    }
+
+    localStorage.setItem(localStorageKey, tokensMemory);
+    localStorage.getItem(localStorageKey);
+  }, [devices]);
 
   return (
     <WavoipContext.Provider

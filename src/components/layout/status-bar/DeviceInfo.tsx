@@ -1,5 +1,5 @@
 import { QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { Device } from "wavoip-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,43 +13,36 @@ type Props = {
 };
 
 export function DeviceInfo({ device, setShowQRCode }: Props) {
-  const { wavoipInstance, removeDevice, disableDevice, enableDevice } = useWavoip();
-
-  const _device = wavoipInstance.getDevices().find(({ token }) => device.token === token);
-  const [qrcode, setQrcode] = useState(_device?.qrcode || device.qrcode);
-  const [status, setStatus] = useState(_device?.status || device.status);
-
-  device.onQRCode((qrcode) => {
-    setQrcode(qrcode);
-  });
-
-  device.onStatus((status) => {
-    setStatus(status);
-  });
+  const { removeDevice, disableDevice, enableDevice } = useWavoip();
 
   const badgeVariant = useMemo(
     () =>
-      ["DISCONNECTED", "close", "error", "EXTERNAL_INTEGRATION_ERROR"].includes(status as string)
+      ["DISCONNECTED", "close", "error", "EXTERNAL_INTEGRATION_ERROR"].includes(device.status as string)
         ? "destructive"
-        : ["BUILDING", "RESTARTING", "HIBERNATING", "WAITING_PAYMENT"].includes(status as string)
+        : ["BUILDING", "RESTARTING", "HIBERNATING", "WAITING_PAYMENT"].includes(device.status as string)
           ? "secondary"
           : "default",
-    [status],
+    [device.status],
   );
 
   return (
-    <div className="flex justify-between items-center gap-2 p-2 bg-muted rounded-md">
+    <div
+      data-enable={device.enable}
+      className="flex justify-between items-center gap-2 p-2 bg-muted data-[enable=false]:bg-muted-foreground/30 rounded-md"
+    >
       <div className="flex flex-col gap-2">
-        <p className="font-medium">{device.token}</p>
+        <p data-enable={device.enable} className="font-medium data-[enable=false]:text-muted-foreground">
+          {device.token}
+        </p>
         <div className="flex items-center gap-2">
-          {status && <Badge variant={badgeVariant}>{status.toUpperCase()}</Badge>}
-          {qrcode && (
+          {device.status && <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>}
+          {device.qrcode && (
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant={"outline"}
                   className="size-fit !p-0.5 aspect-square hover:cursor-pointer"
-                  onClick={() => setShowQRCode(qrcode)}
+                  onClick={() => setShowQRCode(device.qrcode)}
                 >
                   <QrCodeIcon className="size-6" />
                 </Button>
@@ -73,7 +66,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           className="hover:cursor-pointer"
           checked={device.enable}
           onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
-          disabled={!["open", "CONNECTED"].includes(status as string)}
+          disabled={!["open", "CONNECTED"].includes(device.status as string)}
         />
       </div>
     </div>

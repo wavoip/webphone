@@ -1,6 +1,6 @@
 import { GearIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import type { Device } from "wavoip-api";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
@@ -26,6 +26,8 @@ export function SettingsModal({ devices }: Props) {
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
+
+  const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
 
   return (
     <Dialog
@@ -55,7 +57,7 @@ export function SettingsModal({ devices }: Props) {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle>Configurações</DialogTitle>
+              <DialogTitle>Dispositivos</DialogTitle>
             </DialogHeader>
             <DialogDescription />
             <div className="flex justify-between items-center gap-2">
@@ -77,7 +79,7 @@ export function SettingsModal({ devices }: Props) {
               </Button>
             </div>
             <div className="basis-0 flex-1 overflow-auto flex flex-col gap-2">
-              {devices.map((device) => (
+              {devicesSorted.map((device) => (
                 <DeviceInfo key={device.token} device={device} setShowQRCode={setQrcode} />
               ))}
             </div>
