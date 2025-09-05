@@ -16,6 +16,7 @@ export default function CallScreen() {
     callActive?.onPeerMute(() => setPeerMuted(true));
     callActive?.onPeerUnmute(() => setPeerMuted(false));
     callActive?.onError((err) => setStatus(err));
+    callActive?.onEnd(() => setStatus("Chamada encerrada"));
 
     intervalRef.current = setInterval(() => {
       setDurationSeconds((prev) => prev + 1);
@@ -26,7 +27,7 @@ export default function CallScreen() {
         clearInterval(intervalRef.current);
       }
     };
-  }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute]);
+  }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute, callActive?.onEnd]);
 
   return (
     <div className="size-full flex flex-col justify-evenly gap-4 px-2">

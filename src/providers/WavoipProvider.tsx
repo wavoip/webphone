@@ -39,29 +39,15 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   );
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
-  // const [offers, setOffers] = useState<CallOffer[]>([
-  //   {
-  //     id: "teste",
-  //     accept: () => new Promise<CallActive | null>((resolve) => resolve(null)),
-  //     reject: () => new Promise<{ err: string | null }>((resolve) => resolve({ err: null })),
-  //     device_token: "token foda",
-  //     muted: false,
-  //     direction: "INCOMING",
-  //     peer: "PUTA",
-  //     peerMuted: false,
-  //     status: "RINGING",
-  //     onAcceptedElsewhere: () => {},
-  //     onEnd: () => {},
-  //     onRejectedElsewhere: () => {},
-  //     onUnanswered: () => {},
-  //   },
-  // ]);
   const [callOutgoing, setCallOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [callActive, setCallActive] = useState<CallActive | undefined>(undefined);
   const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
 
   async function makeCall(to: string) {
-    const { call, err } = await wavoipInstance.startCall({ to });
+    const { call, err } = await wavoipInstance.startCall({
+      fromTokens: devices.filter((device) => device.enable).map((device) => device.token),
+      to,
+    });
 
     if (err) {
       console.error("Erro ao iniciar chamada:", err.message);
@@ -69,13 +55,26 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
     }
 
     call.onPeerAccept((activeCall) => {
-      console.log("Chamada aceita pelo peer:", activeCall);
+      const callIntegrated: CallActive = {
+        ...activeCall,
+        peer: activeCall.peer.split("@")[0],
+        onEnd: (cb) => {
+          call.onEnd(() => {
+            cb();
+            setTimeout(() => {
+              setCallActive(undefined);
+              setScreen("keyboard");
+            }, 3000);
+          });
+        },
+      };
+
       setScreen("call");
-      setCallActive(activeCall);
+      setCallActive(callIntegrated);
+      setCallOutgoing(undefined);
     });
 
     call.onEnd(() => {
-      console.log("Chamada encerrada");
       setTimeout(() => {
         setScreen("keyboard");
         setCallOutgoing(undefined);
@@ -87,15 +86,28 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
       peer: call.peer.split("@")[0],
       onPeerAccept: (cb) => {
         call.onPeerAccept((activeCall) => {
-          console.log("Chamada aceita pelo peer:", activeCall);
-          cb(activeCall);
+          const callIntegrated: CallActive = {
+            ...activeCall,
+            peer: activeCall.peer.split("@")[0],
+            onEnd: (cb) => {
+              call.onEnd(() => {
+                cb();
+                setTimeout(() => {
+                  setCallActive(undefined);
+                  setScreen("keyboard");
+                }, 3000);
+              });
+            },
+          };
+
           setScreen("call");
-          setCallActive(activeCall);
+          setCallActive(callIntegrated);
+          setCallOutgoing(undefined);
+          cb(callIntegrated);
         });
       },
       onEnd: (cb) => {
         call.onEnd(() => {
-          console.log("Chamada encerrada");
           cb();
           setTimeout(() => {
             setScreen("keyboard");
@@ -129,8 +141,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   }
 
   wavoipInstance.onOffer((offer) => {
-    console.log("Nova oferta de chamada recebida:", offer);
-
     if (callActive) {
       return;
     }
@@ -170,7 +180,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
                 setTimeout(() => {
                   setCallActive(undefined);
                   setScreen("keyboard");
-                });
+                }, 3000);
               });
             },
           };

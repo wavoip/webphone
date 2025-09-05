@@ -1,5 +1,5 @@
 import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { CallActive } from "wavoip-api";
 
 type Props = {
@@ -15,6 +15,12 @@ export function Ping({ call }: Props) {
     setPing(ping);
     setConnectionStrength(getPingLevel(ping));
   });
+
+  useEffect(() => {
+    if (!call) {
+      setPing(null);
+    }
+  }, [call]);
 
   if (!ping) {
     return null;

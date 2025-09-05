@@ -10,7 +10,7 @@ export default function OutgoingScreen() {
   const [muted, setMuted] = useState(callOutgoing?.muted || false);
 
   return (
-    <div className="size-full grid grid-rows-3">
+    <div className="flex-1 flex flex-col justify-evenly">
       <div className="text-foreground flex justify-center items-center">
         <p>{status || "Chamando"}</p>
       </div>
@@ -19,24 +19,10 @@ export default function OutgoingScreen() {
         <p>{callOutgoing?.peer}</p>
       </div>
       <div className="flex w-full justify-evenly items-center">
-        <Button
-          type="button"
-          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
-          onClick={(e) => {
-            e.currentTarget.disabled = true;
-            callOutgoing?.end().then(({ err }) => {
-              if (!err) {
-                setStatus("Chamada finalizada");
-              }
-              e.currentTarget.disabled = false;
-            });
-          }}
-        >
-          <PhoneSlashIcon className="size-6" />
-        </Button>
         {muted ? (
           <Button
             type="button"
+            variant={"secondary"}
             onClick={(e) => {
               e.currentTarget.disabled = true;
               callOutgoing?.unmute().then(({ err }) => {
@@ -71,6 +57,21 @@ export default function OutgoingScreen() {
             <MicrophoneIcon className="size-6" />
           </Button>
         )}
+        <Button
+          type="button"
+          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+          onClick={(e) => {
+            e.currentTarget.disabled = true;
+            callOutgoing?.end().then(({ err }) => {
+              if (!err) {
+                setStatus("Chamada finalizada");
+              }
+              e.currentTarget.disabled = false;
+            });
+          }}
+        >
+          <PhoneSlashIcon className="size-6" />
+        </Button>
       </div>
     </div>
   );
