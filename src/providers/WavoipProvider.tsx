@@ -32,7 +32,7 @@ interface WavoipProviderProps {
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
   const { setScreen } = useScreen();
 
-  const [wavoipInstance] = useState(() => new Wavoip({ tokens: ["d4a8d1c1-18f9-4ff5-8712-edfffa71a2a2"] }));
+  const [wavoipInstance] = useState(() => new Wavoip({ tokens: [] }));
 
   const [devices, setDevices] = useState<(Device & { enable: boolean })[]>(() =>
     wavoipInstance.getDevices().map((device) => ({ ...device, enable: true })),
