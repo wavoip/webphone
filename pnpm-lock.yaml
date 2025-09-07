@@ -1905,7 +1905,7 @@ packages:
         optional: true
 
   wavoip-api@file:wavoip-api-2.0.0.tgz:
-    resolution: {integrity: sha512-3UJ626quU/2hSWzAHJnHZkufZDFQOP2aPkVcAX4wdIDcyOHfe9ZKdhanw4WW+YaYI2YWdI8Apxg+hA94SUBWBw==, tarball: file:wavoip-api-2.0.0.tgz}
+    resolution: {integrity: sha512-cVysveOav1xv+Bcof1GnCofMI7bQoTL+9/YyuTn8i/gLU03ZBL/AZv9NU1Yxc0fnoeZog+JEqBloHSh73ejHmA==, tarball: file:wavoip-api-2.0.0.tgz}
     version: 2.0.0
 
   which@2.0.2:

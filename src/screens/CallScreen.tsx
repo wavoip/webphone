@@ -1,10 +1,12 @@
 import { MicrophoneIcon, MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useScreen } from "@/providers/ScreenProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function CallScreen() {
   const { callActive } = useWavoip();
+  const { setScreen } = useScreen();
 
   const [muted, setMuted] = useState(callActive?.muted || false);
   const [peerMuted, setPeerMuted] = useState(callActive?.peerMuted || false);
@@ -83,8 +85,10 @@ export default function CallScreen() {
             callActive?.end().then(({ err }) => {
               if (!err) {
                 setStatus("Chamada finalizada");
+                setTimeout(() => {
+                  setScreen("keyboard");
+                }, 3000);
               }
-              e.currentTarget.disabled = false;
             });
           }}
         >

@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
 import { PhoneIcon } from "@phosphor-icons/react/dist/ssr";
-import React, { createContext, type ReactNode, useCallback, useContext, useState } from "react";
+import React, { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 type Position = { x: number; y: number };
 
@@ -39,13 +39,40 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       if (!isDragging) return;
+      let x = e.clientX - offset.x;
+      let y = e.clientY - offset.y;
+      if (x < 0) {
+        x = 0;
+      }
+      if (y < 0) {
+        y = 0;
+      }
+      if (x > document.body.clientWidth - 240) {
+        x = document.body.clientWidth - 240;
+      }
+      if (y > document.body.clientHeight - 480) {
+        y = document.body.clientHeight - 480;
+      }
       setPosition({
-        x: e.clientX - offset.x,
-        y: e.clientY - offset.y,
+        x: x,
+        y: y,
       });
     },
     [isDragging, offset],
   );
+
+  useEffect(() => {
+    function handleResize() {
+      setPosition({
+        x: 0,
+        y: 0,
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <DraggableContext.Provider
