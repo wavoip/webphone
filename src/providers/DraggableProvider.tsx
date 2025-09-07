@@ -11,6 +11,7 @@ interface DraggableContextType {
   startDrag: (e: React.MouseEvent) => void;
   stopDrag: () => void;
   close: () => void;
+  setModal: () => void;
 }
 
 const DraggableContext = createContext<DraggableContextType | undefined>(undefined);
@@ -20,16 +21,19 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState<Position>({ x: 0, y: 0 });
   const [closed, setClosed] = useState(false);
+  const [modal, setModal] = useState(false);
 
   const startDrag = useCallback(
     (e: React.MouseEvent) => {
-      setIsDragging(true);
-      setOffset({
-        x: e.clientX - position.x,
-        y: e.clientY - position.y,
-      });
+      if (!modal) {
+        setIsDragging(true);
+        setOffset({
+          x: e.clientX - position.x,
+          y: e.clientY - position.y,
+        });
+      }
     },
-    [position],
+    [position, modal],
   );
 
   const stopDrag = () => {
@@ -76,7 +80,15 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
 
   return (
     <DraggableContext.Provider
-      value={{ position, setPosition, startDrag, stopDrag, isDragging, close: () => setClosed(true) }}
+      value={{
+        position,
+        setPosition,
+        startDrag,
+        stopDrag,
+        isDragging,
+        close: () => setClosed(true),
+        setModal: () => setModal(!modal),
+      }}
     >
       {/** biome-ignore lint/a11y/noStaticElementInteractions: Drag and Drop */}
       <div

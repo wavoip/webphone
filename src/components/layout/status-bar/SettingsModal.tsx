@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useDraggable } from "@/providers/DraggableProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -22,7 +23,7 @@ type Props = {
 
 export function SettingsModal({ devices }: Props) {
   const { addDevice } = useWavoip();
-
+  const { setModal } = useDraggable();
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
@@ -38,7 +39,7 @@ export function SettingsModal({ devices }: Props) {
           setQrcode(null);
           return;
         }
-
+        setModal();
         setOpen(open);
       }}
     >
