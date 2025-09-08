@@ -35,7 +35,6 @@ const deviceSettings = new Map<string, { token: string; enable: boolean }>(
       return [token, { token, enable: enable === "true" }];
     }) || [],
 );
-console.log(deviceSettings);
 
 interface WavoipProviderProps {
   children: ReactNode;

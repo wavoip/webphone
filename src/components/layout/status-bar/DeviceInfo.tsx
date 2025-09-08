@@ -1,4 +1,5 @@
 import { QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
+import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import { useMemo } from "react";
 import type { Device } from "wavoip-api";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +18,9 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
 
   const badgeVariant = useMemo(
     () =>
-      ["DISCONNECTED", "close", "error", "EXTERNAL_INTEGRATION_ERROR"].includes(device.status as string)
+      ["disconnected", "close", "error", "EXTERNAL_INTEGRATION_ERROR"].includes(device.status as string)
         ? "destructive"
-        : ["BUILDING", "RESTARTING", "HIBERNATING", "WAITING_PAYMENT"].includes(device.status as string)
+        : ["BUILDING", "restarting", "hibernating", "WAITING_PAYMENT"].includes(device.status as string)
           ? "secondary"
           : "default",
     [device.status],
@@ -35,7 +36,28 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           {device.token}
         </p>
         <div className="flex items-center gap-2">
-          {device.status && <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>}
+          {device.status && (
+            <>
+              <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>
+              {["disconnected", "hibernating"].includes(device.status) && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className="size-fit !p-0.5 aspect-square hover:cursor-pointer"
+                      onClick={() => device.powerOn()}
+                    >
+                      <PowerIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ligar Dispositivo</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </>
+          )}
+
           {device.qrcode && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -55,6 +77,12 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         </div>
       </div>
       <div className="flex gap-2 items-center">
+        <Switch
+          className="hover:cursor-pointer"
+          checked={device.enable}
+          onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
+          disabled={!["open", "CONNECTED"].includes(device.status as string)}
+        />
         <Button
           variant={"destructive"}
           className="size-fit !p-1.5 aspect-square hover:cursor-pointer"
@@ -62,12 +90,6 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         >
           <TrashIcon />
         </Button>
-        <Switch
-          className="hover:cursor-pointer"
-          checked={device.enable}
-          onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
-          disabled={!["open", "CONNECTED"].includes(device.status as string)}
-        />
       </div>
     </div>
   );
