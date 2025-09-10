@@ -27,7 +27,7 @@ export function Ping({ call }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 text-background">
       {connectionStrength === "low" ? (
         <WifiLowIcon className="size-6" />
       ) : connectionStrength === "medium" ? (

@@ -7,12 +7,13 @@ import { useDraggable } from "@/providers/DraggableProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function StatusBar() {
-  const { startDrag, close } = useDraggable();
+  const { startDrag, stopDrag, close } = useDraggable();
   const { callActive, devices } = useWavoip();
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
+      onMouseUp={stopDrag}
       onMouseDown={startDrag}
       className="w-full h-9 bg-foreground flex justify-between items-center shadow-lg px-2 rounded-2xl rounded-bl-none rounded-br-none hover:cursor-pointer"
     >
@@ -22,7 +23,12 @@ export default function StatusBar() {
       </div>
       <div className="flex gap-2">{callActive && <Ping call={callActive} />}</div>
       <div className="flex items-center">
-        <Button type="button" variant={"ghost"} className="size-fit !p-0.5 aspect-square" onClick={() => close()}>
+        <Button
+          type="button"
+          variant={"ghost"}
+          className="text-background size-fit !p-0.5 aspect-square"
+          onClick={() => close()}
+        >
           <EyeClosedIcon />
         </Button>
       </div>

@@ -40,7 +40,9 @@ export default function KeyboardScreen() {
           value={number}
           onChange={(e) => {
             const numbers = e.target.value.match(/\d+/g);
-            setNumber(numbers ? numbers.join("") : "");
+            if (numbers?.length) {
+              setNumber(numbers.join(""));
+            }
           }}
           className="border-b-2 border-l-0 border-r-0 border-t-0 shadow-none rounded-none text-xl text-foreground text-center focus-visible:ring-0"
         />
@@ -72,7 +74,8 @@ export default function KeyboardScreen() {
         </Button>
         <Button
           type="button"
-          className="size-fit aspect-square !p-2 bg-green-500 hover:bg-green-700 hover:cursor-pointer"
+          size={"icon"}
+          className="text-background size-fit aspect-square p-2 bg-green-500 hover:bg-green-700 hover:cursor-pointer"
           onClick={() => makeCall(number)}
         >
           <PhoneIcon className="size-6" />

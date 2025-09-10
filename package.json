@@ -1,13 +1,31 @@
 {
-  "name": "webhphone",
-  "private": true,
-  "version": "0.0.0",
+  "name": "wavoip-webphone",
+  "version": "1.0.0",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    },
+    "./style.css": "./dist/style.css",
+    "./web": {
+      "import": "./dist/web.es.js",
+      "require": "./dist/web.umd.js"
+    }
+  },
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
+    "dev": "vite -c vite.react.config.ts",
+    "build": "tsc -b && pnpm dlx @tailwindcss/cli -i ./src/index.css -o ./src/style.css && vite build -c vite.react.config.ts && vite build -c vite.web.config.ts",
+    "lint": "pnpm exec biome check .",
     "preview": "vite preview"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
@@ -29,6 +47,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@tailwindcss/cli": "^4.1.13",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
@@ -37,6 +56,10 @@
     "tw-animate-css": "^1.3.7",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "vite-plugin-css-injected-by-js": "^3.5.2",
+    "vite-plugin-dts": "^4.5.4",
+    "vite-plugin-static-copy": "^3.1.2",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }

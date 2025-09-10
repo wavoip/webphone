@@ -8,4 +8,8 @@ import { WebPhone } from "@/WebPhone";
 //   </StrictMode>,
 // );
 
-createRoot(document.getElementById("root")!).render(<WebPhone />);
+const root = document.getElementById("root")!;
+root.style.height = "100vh";
+root.style.width = "100vw";
+
+createRoot(root).render(<WebPhone />);

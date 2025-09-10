@@ -9,10 +9,14 @@ type Props = {
 };
 
 export function DevicesAlert({ devices }: Props) {
-  const disconnectedDevices = useMemo(() => devices.filter(({ status }) => status === "DISCONNECTED"), [devices]);
+  const disconnectedDevices = useMemo(() => devices.filter(({ status }) => status === "disconnected"), [devices]);
   const qrcodeDevices = useMemo(() => devices.filter(({ status }) => status === "connecting"), [devices]);
   const closedDevices = useMemo(() => devices.filter(({ status }) => status === "close"), [devices]);
   const hibernatedDevices = useMemo(() => devices.filter(({ status }) => status === "hibernating"), [devices]);
+  const errorDevices = useMemo(
+    () => devices.filter(({ status }) => status === "error" || status === "EXTERNAL_INTEGRATION_ERROR"),
+    [devices],
+  );
 
   const hasWarnings =
     disconnectedDevices.length && qrcodeDevices.length && closedDevices.length && hibernatedDevices.length;
@@ -24,7 +28,7 @@ export function DevicesAlert({ devices }: Props) {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <WarningIcon size={24} />
+        <WarningIcon className="size-6 text-foreground" />
       </TooltipTrigger>
       <TooltipContent className="flex flex-col items-center gap-1">
         {!!disconnectedDevices.length && (
@@ -62,6 +66,16 @@ export function DevicesAlert({ devices }: Props) {
             <p>Dispositivos hibernando</p>
             <div className="flex gap-1">
               {hibernatedDevices.map((device) => (
+                <Badge key={device.token}>{device.token}</Badge>
+              ))}
+            </div>
+          </div>
+        )}
+        {!!errorDevices.length && (
+          <div className="flex flex-col items-start">
+            <p>Dispositivos com erro</p>
+            <div className="flex gap-1">
+              {errorDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}
             </div>

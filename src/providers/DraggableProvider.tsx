@@ -11,7 +11,9 @@ interface DraggableContextType {
   startDrag: (e: React.MouseEvent) => void;
   stopDrag: () => void;
   close: () => void;
+  open: () => void;
   setModal: () => void;
+  handleMouseMove: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
 const DraggableContext = createContext<DraggableContextType | undefined>(undefined);
@@ -86,34 +88,33 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
         startDrag,
         stopDrag,
         isDragging,
-        close: () => setClosed(true),
+        handleMouseMove,
+        close: () => {
+          if (!closed) setClosed(true);
+        },
+        open: () => {
+          if (closed) setClosed(false);
+        },
         setModal: () => setModal(!modal),
       }}
     >
-      {/** biome-ignore lint/a11y/noStaticElementInteractions: Drag and Drop */}
-      <div
-        className="w-screen h-screen bg-transparent z-0 text-white flex rounded-lg shadow-lg select-none"
-        onMouseMove={handleMouseMove}
-        onMouseUp={stopDrag}
-      >
-        {closed ? (
-          <Button
-            type="button"
-            onClick={() => setClosed(false)}
-            className="!p-3 rounded-full aspect-square size-fit bg-green-500 text-white font-bold hover:bg-green-600"
-            style={{
-              position: "fixed",
-              bottom: "20px",
-              right: "20px",
-              zIndex: 9999,
-            }}
-          >
-            <PhoneIcon className="size-8" />
-          </Button>
-        ) : (
-          children
-        )}
-      </div>
+      {closed ? (
+        <Button
+          type="button"
+          onClick={() => setClosed(false)}
+          className="absolute bottom-0 right-0 !p-3 rounded-full aspect-square size-fit bg-green-500 text-white font-bold hover:bg-green-600"
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            zIndex: 9999,
+          }}
+        >
+          <PhoneIcon className="size-8" />
+        </Button>
+      ) : (
+        children
+      )}
     </DraggableContext.Provider>
   );
 }

@@ -26,7 +26,7 @@ export function DeviceInfo({ device }: Props) {
     <div className="flex justify-between items-center gap-2 p-2 bg-muted rounded-md">
       <p>Dispositivo: {device.token.split("-")[0]}</p>
       <p>Status: {status}</p>
-      {(status === "connecting" || status === "DISCONNECTED" || status === "close") && qrcode && (
+      {(status === "connecting" || status === "close") && qrcode && (
         <QRCode value={qrcode} size={150} level="L"></QRCode>
       )}
       {status === "open" && <p>Pronto para uso</p>}

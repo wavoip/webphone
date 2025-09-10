@@ -1,12 +1,6 @@
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import {
-  type CallActive,
-  type CallOffer,
-  type CallOutgoing,
-  type Device,
-  type MultimediaError,
-  Wavoip,
-} from "wavoip-api";
+import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "wavoip-api";
+import { useDraggable } from "@/providers/DraggableProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 
 interface WavoipContextProps {
@@ -24,26 +18,17 @@ interface WavoipContextProps {
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
-const localStorageKey = "wavoip:tokens";
-const deviceSettings = new Map<string, { token: string; enable: boolean }>(
-  localStorage
-    .getItem(localStorageKey)
-    ?.split(";")
-    .map((device) => {
-      const [token, enable] = device.split(":");
-
-      return [token, { token, enable: enable === "true" }];
-    }) || [],
-);
+export const localStorageKey = "wavoip:tokens";
 
 interface WavoipProviderProps {
   children: ReactNode;
+  wavoipInstance: Wavoip;
+  deviceSettings: Map<string, { token: string; enable: boolean }>;
 }
 
-export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
+export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoipInstance, deviceSettings }) => {
   const { setScreen } = useScreen();
-
-  const [wavoipInstance] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
+  const { open } = useDraggable();
 
   const [devices, setDevices] = useState<(Device & { enable: boolean })[]>(() =>
     wavoipInstance.getDevices().map((device) => ({
@@ -207,6 +192,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children }) => {
     };
 
     setOffers((prev) => [...prev, offerIntegrated]);
+    open();
   });
 
   wavoipInstance.onMultimediaError((err) => setMultimediaError(err));

@@ -1,14 +1,29 @@
-import PhoneWidget from "@/PhoneWidget";
+import { useState } from "react";
+import { Wavoip } from "wavoip-api";
+import { Widget } from "@/components/Widget";
 import { DraggableProvider } from "@/providers/DraggableProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
-import { WavoipProvider } from "@/providers/WavoipProvider";
+import { localStorageKey, WavoipProvider } from "@/providers/WavoipProvider";
+
+const deviceSettings = new Map<string, { token: string; enable: boolean }>(
+  localStorage
+    .getItem(localStorageKey)
+    ?.split(";")
+    .map((device) => {
+      const [token, enable] = device.split(":");
+
+      return [token, { token, enable: enable === "true" }];
+    }) || [],
+);
 
 export function WebPhone() {
+  const [wavoip] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
+
   return (
     <DraggableProvider>
       <ScreenProvider>
-        <WavoipProvider>
-          <PhoneWidget />
+        <WavoipProvider wavoipInstance={wavoip} deviceSettings={deviceSettings}>
+          <Widget />
         </WavoipProvider>
       </ScreenProvider>
     </DraggableProvider>

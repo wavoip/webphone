@@ -43,7 +43,7 @@ export function SettingsModal({ devices }: Props) {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="hover:cursor-pointer hover:bg-background hover:text-foreground p-0.5 rounded-md">
+      <DialogTrigger className="text-background hover:cursor-pointer hover:bg-background hover:text-foreground p-0.5 rounded-md">
         <GearIcon />
       </DialogTrigger>
       <DialogContent className="flex flex-col h-1/2">
