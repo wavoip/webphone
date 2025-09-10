@@ -1,5 +1,5 @@
+import { Wavoip } from "@wavoip/wavoip-api";
 import { useState } from "react";
-import { Wavoip } from "wavoip-api";
 import { Widget } from "@/components/Widget";
 import { DraggableProvider } from "@/providers/DraggableProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";

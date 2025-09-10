@@ -1,7 +1,7 @@
 import { WarningIcon } from "@phosphor-icons/react";
+import type { Device } from "@wavoip/wavoip-api";
 import { Badge } from "lucide-react";
 import { useMemo } from "react";
-import type { Device } from "wavoip-api";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Props = {

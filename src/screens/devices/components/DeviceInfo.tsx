@@ -1,7 +1,7 @@
 import { TrashIcon } from "@phosphor-icons/react";
+import type { Device } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import QRCode from "react-qr-code";
-import type { Device } from "wavoip-api";
 import { Button } from "@/components/ui/button";
 import { useWavoip } from "@/providers/WavoipProvider";
 

@@ -1,5 +1,5 @@
+import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "@wavoip/wavoip-api";
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "wavoip-api";
 import { useDraggable } from "@/providers/DraggableProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 

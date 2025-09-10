@@ -1,8 +1,8 @@
 import { GearIcon } from "@phosphor-icons/react";
+import type { Device } from "@wavoip/wavoip-api";
 import { PlusIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import QRCode from "react-qr-code";
-import type { Device } from "wavoip-api";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
 import {

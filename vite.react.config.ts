@@ -22,7 +22,7 @@ export default defineConfig({
   build: {
     lib: {
       entry: "src/index.ts",
-      name: "wavoip-webphone",
+      name: "wavoipWebphone",
       formats: ["es", "umd"],
       fileName: (format) => {
         return `index.${format}.js`;

@@ -1,7 +1,7 @@
 import { QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
+import type { Device } from "@wavoip/wavoip-api";
 import { useMemo } from "react";
-import type { Device } from "wavoip-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
