@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
-type Screen = "call" | "keyboard" | "outgoing" | "incoming" | "devices";
+type Screen = "call" | "keyboard" | "outgoing" | "incoming";
 
 type ScreenContextType = {
   screen: Screen;

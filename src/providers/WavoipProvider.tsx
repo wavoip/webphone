@@ -1,5 +1,6 @@
-import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "@wavoip/wavoip-api";
+import type { CallActive, CallOffer, CallOutgoing, Device, Wavoip } from "@wavoip/wavoip-api";
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useDraggable } from "@/providers/DraggableProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 
@@ -9,7 +10,6 @@ interface WavoipContextProps {
   offers: CallOffer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
-  multimediaError?: MultimediaError;
   makeCall: (to: string) => Promise<void>;
   addDevice: (token: string) => void;
   removeDevice: (token: string) => void;
@@ -40,7 +40,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
   const [offers, setOffers] = useState<CallOffer[]>([]);
   const [callOutgoing, setCallOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [callActive, setCallActive] = useState<CallActive | undefined>(undefined);
-  const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
 
   async function makeCall(to: string) {
     const { call, err } = await wavoipInstance.startCall({
@@ -49,7 +48,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     });
 
     if (err) {
-      console.error("Erro ao iniciar chamada:", err.message);
       return;
     }
 
@@ -157,9 +155,9 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
         });
       },
       accept: () =>
-        offer.accept().then((call) => {
+        offer.accept().then(({ call, err }) => {
           if (!call) {
-            return call;
+            return { call, err };
           }
 
           call.onEnd(() => {
@@ -187,7 +185,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
           setScreen("call");
           setOffers([]);
 
-          return callIntegrated;
+          return { call: callIntegrated, err };
         }),
     };
 
@@ -195,7 +193,36 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     open();
   });
 
-  wavoipInstance.onMultimediaError((err) => setMultimediaError(err));
+  wavoipInstance.onMultimediaError((err) => {
+    if (err.type === "audio") {
+      if (err.reason === "NotAllowedError") {
+        toast.error("Permissão do alto falante foi negada");
+      }
+    }
+
+    if (err.type === "microphone") {
+      if (err.reason === "NotAllowedError") {
+        toast.error("Permissão do microfone foi negada");
+      }
+      if (err.reason === "OverconstrainedError") {
+        toast.error("Microfone não suporta os requisitos de áudio");
+      }
+      if (err.reason === "SecurityError") {
+        toast.error("Não é possível acessar o microfone, a página é insegura");
+      }
+      if (err.reason === "NotReadableError") {
+        toast.error("Não foi possível acessar o microfone");
+      }
+      if (err.reason === "NotFoundError") {
+        toast.error("Nenhum microfone encontrado");
+      }
+      if (err.reason === "AbortError") {
+        toast.error("O hardware do microfone não pode ser inicializado");
+      }
+    }
+
+    toast.error(err.reason);
+  });
 
   useEffect(() => {
     let tokensMemory = "";
@@ -228,7 +255,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
         offers,
         callOutgoing,
         callActive,
-        multimediaError,
         makeCall,
         addDevice,
         removeDevice,

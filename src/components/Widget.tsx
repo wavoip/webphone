@@ -3,7 +3,6 @@ import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { useDraggable } from "@/providers/DraggableProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 import CallScreen from "@/screens/CallScreen";
-import { DevicesScreen } from "@/screens/devices/DevicesScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
 
@@ -27,7 +26,6 @@ export function Widget() {
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}
-        {screen === "devices" && <DevicesScreen />}
       </div>
     </div>
   );
