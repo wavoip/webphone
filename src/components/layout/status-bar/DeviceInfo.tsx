@@ -29,13 +29,13 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="flex justify-between items-center gap-2 p-2 bg-muted data-[enable=false]:bg-muted-foreground/30 rounded-md"
+      className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:p-2 wv:bg-muted wv:data-[enable=false]:bg-muted-foreground/30 wv:rounded-md"
     >
-      <div className="flex flex-col gap-2">
-        <p data-enable={device.enable} className="font-medium data-[enable=false]:text-muted-foreground">
+      <div className="wv:flex wv:flex-col wv:gap-2">
+        <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
           {device.token}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="wv:flex wv:items-center wv:gap-2">
           {device.status && (
             <>
               <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>
@@ -44,7 +44,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                   <TooltipTrigger asChild>
                     <Button
                       variant={"outline"}
-                      className="size-fit !p-0.5 aspect-square hover:cursor-pointer"
+                      className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
                       onClick={() => device.powerOn()}
                     >
                       <PowerIcon />
@@ -63,7 +63,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
               <TooltipTrigger asChild>
                 <Button
                   variant={"outline"}
-                  className="size-fit !p-0.5 aspect-square hover:cursor-pointer"
+                  className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
                   onClick={() => setShowQRCode(device.qrcode)}
                 >
                   <QrCodeIcon className="size-6" />
@@ -76,16 +76,16 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           )}
         </div>
       </div>
-      <div className="flex gap-2 items-center">
+      <div className="wv:flex wv:gap-2 wv:items-center">
         <Switch
-          className="hover:cursor-pointer"
+          className="wv:hover:cursor-pointer"
           checked={device.enable}
           onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
           disabled={!["open", "CONNECTED"].includes(device.status as string)}
         />
         <Button
           variant={"destructive"}
-          className="size-fit !p-1.5 aspect-square hover:cursor-pointer"
+          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
           onClick={() => removeDevice(device.token)}
         >
           <TrashIcon />

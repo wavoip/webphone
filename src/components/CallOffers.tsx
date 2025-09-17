@@ -10,17 +10,17 @@ export function CallOffers() {
   const [actionMade, setActionMade] = useState(false);
 
   return (
-    <div className="absolute top-0 left-0 w-full flex flex-col gap-1">
+    <div className="wv:absolute wv:top-0 wv:left-0 wv:w-full wv:flex wv:flex-col wv:gap-1">
       {offers.slice(0, 3).map((offer) => (
         <div
           key={offer.id}
-          className="flex justify-between items-center p-2 text-foreground m-1 rounded-md bg-muted shadow-sm"
+          className="wv:flex wv:justify-between wv:items-center wv:p-2 wv:text-foreground wv:m-1 wv:rounded-md wv:bg-muted wv:shadow-sm"
         >
-          <p className="text-sm text-ellipsis">{offer.peer}</p>
-          <div className="flex items-center gap-1">
+          <p className="wv:text-sm wv:text-ellipsis">{offer.peer}</p>
+          <div className="wv:flex wv:items-center wv:gap-1">
             <Button
               type="button"
-              className="size-fit aspect-square !p-2 bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+              className="wv:size-fit wv:aspect-square !wv:p-2 wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
               disabled={actionMade}
               onClick={() => {
                 setActionMade(true);
@@ -36,7 +36,7 @@ export function CallOffers() {
             </Button>
             <Button
               type="button"
-              className="size-fit aspect-square !p-2 bg-green-500 hover:bg-green-400 hover:cursor-pointer"
+              className="wv:size-fit wv:aspect-square !wv:p-2 wv:bg-green-500 wv:hover:bg-green-400 wv:hover:cursor-pointer"
               disabled={actionMade}
               onClick={() => {
                 setActionMade(true);
@@ -48,7 +48,7 @@ export function CallOffers() {
                 });
               }}
             >
-              <PhoneIcon className="size-4" />
+              <PhoneIcon className="wv:size-4" />
             </Button>
           </div>
         </div>

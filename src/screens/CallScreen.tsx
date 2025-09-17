@@ -32,18 +32,18 @@ export default function CallScreen() {
   }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute, callActive?.onEnd]);
 
   return (
-    <div className="size-full flex flex-col justify-evenly gap-4 px-2">
-      <div className="flex flex-col justify-center items-center">
-        <p className="text-foreground">{callActive?.peer}</p>
-        <div className="relative w-full">
-          <UserCircleIcon className="size-full aspect-square fill-muted-foreground" />
+    <div className="wv:size-full wv:flex wv:flex-col wv:justify-evenly wv:gap-4 wv:px-2">
+      <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
+        <p className="wv:text-foreground">{callActive?.peer}</p>
+        <div className="wv:relative wv:w-full">
+          <UserCircleIcon className="wv:size-full wv:aspect-square wv:fill-muted-foreground" />
           {peerMuted && (
-            <MicrophoneSlashIcon className="absolute size-10 p-2 rounded-full bottom-[20%] right-[10%] bg-red-400" />
+            <MicrophoneSlashIcon className="wv:absolute wv:size-10 wv:p-2 wv:rounded-full wv:bottom-[20%] wv:right-[10%] wv:bg-red-400" />
           )}
         </div>
-        <p className="text-foreground">{status || formatDuration(durationSeconds)}</p>
+        <p className="wv:text-foreground">{status || formatDuration(durationSeconds)}</p>
       </div>
-      <div className="flex justify-evenly items-center">
+      <div className="wv:flex wv:justify-evenly wv:items-center">
         {muted ? (
           <Button
             type="button"
@@ -56,9 +56,9 @@ export default function CallScreen() {
                 }
               });
             }}
-            className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
           >
-            <MicrophoneSlashIcon className="size-6" />
+            <MicrophoneSlashIcon className="wv:size-6" />
           </Button>
         ) : (
           <Button
@@ -72,14 +72,14 @@ export default function CallScreen() {
                 }
               });
             }}
-            className="size-fit aspect-square rounded-full bg-green-500 hover:bg-green-400 hover:cursor-pointer"
+            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-green-500 wv:hover:bg-green-400 wv:hover:cursor-pointer"
           >
-            <MicrophoneIcon className="size-6" />
+            <MicrophoneIcon className="wv:size-6" />
           </Button>
         )}
         <Button
           type="button"
-          className="size-fit aspect-square rounded-full bg-red-500 hover:bg-red-400 hover:cursor-pointer"
+          className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
           onClick={(e) => {
             e.currentTarget.disabled = true;
             callActive?.end().then(({ err }) => {
@@ -92,7 +92,7 @@ export default function CallScreen() {
             });
           }}
         >
-          <PhoneSlashIcon className="size-6" />
+          <PhoneSlashIcon className="wv:size-6" />
         </Button>
       </div>
     </div>

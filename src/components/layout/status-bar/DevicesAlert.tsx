@@ -28,13 +28,13 @@ export function DevicesAlert({ devices }: Props) {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <WarningIcon className="size-6 text-foreground" />
+        <WarningIcon className="wv:size-6 wv:text-foreground" />
       </TooltipTrigger>
-      <TooltipContent className="flex flex-col items-center gap-1">
+      <TooltipContent className="wv:flex wv:flex-col wv:items-center wv:gap-1">
         {!!disconnectedDevices.length && (
-          <div className="flex flex-col items-start justify-center">
+          <div className="wv:flex wv:flex-col wv:items-start wv:justify-center">
             <p>Dispositivos desconectados</p>
-            <div className="flex gap-1">
+            <div className="wv:flex wv:gap-1">
               {disconnectedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}
@@ -42,9 +42,9 @@ export function DevicesAlert({ devices }: Props) {
           </div>
         )}
         {!!qrcodeDevices.length && (
-          <div className="flex flex-col items-start">
+          <div className="wv:flex wv:flex-col wv:items-start">
             <p>Dispositivos para ler QRCode</p>
-            <div className="flex gap-1">
+            <div className="wv:flex wv:gap-1">
               {qrcodeDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}
@@ -52,9 +52,9 @@ export function DevicesAlert({ devices }: Props) {
           </div>
         )}
         {!!closedDevices.length && (
-          <div className="flex flex-col items-start">
+          <div className="wv:flex wv:flex-col wv:items-start">
             <p>Dispositivos fechados</p>
-            <div className="flex gap-1">
+            <div className="wv:flex wv:gap-1">
               {closedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}
@@ -62,9 +62,9 @@ export function DevicesAlert({ devices }: Props) {
           </div>
         )}
         {!!hibernatedDevices.length && (
-          <div className="flex flex-col items-start">
+          <div className="wv:flex wv:flex-col wv:items-start">
             <p>Dispositivos hibernando</p>
-            <div className="flex gap-1">
+            <div className="wv:flex wv:gap-1">
               {hibernatedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}
@@ -72,9 +72,9 @@ export function DevicesAlert({ devices }: Props) {
           </div>
         )}
         {!!errorDevices.length && (
-          <div className="flex flex-col items-start">
+          <div className="wv:flex wv:flex-col wv:items-start">
             <p>Dispositivos com erro</p>
-            <div className="flex gap-1">
+            <div className="wv:flex wv:gap-1">
               {errorDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
               ))}

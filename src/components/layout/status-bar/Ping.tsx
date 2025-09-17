@@ -27,17 +27,17 @@ export function Ping({ call }: Props) {
   }
 
   return (
-    <div className="flex items-center gap-2 text-background">
+    <div className="wv:flex wv:items-center wv:gap-2 wv:text-background">
       {connectionStrength === "low" ? (
-        <WifiLowIcon className="size-6" />
+        <WifiLowIcon className="wv:size-6" />
       ) : connectionStrength === "medium" ? (
-        <WifiMediumIcon className="size-6" />
+        <WifiMediumIcon className="wv:size-6" />
       ) : connectionStrength === "high" ? (
-        <WifiHighIcon className="size-6" />
+        <WifiHighIcon className="wv:size-6" />
       ) : (
-        <WifiSlashIcon className="size-6" />
+        <WifiSlashIcon className="wv:size-6" />
       )}
-      <p className="text-sm">{ping.toFixed(2)} ms</p>
+      <p className="wv:text-sm">{ping.toFixed(2)} ms</p>
     </div>
   );
 }

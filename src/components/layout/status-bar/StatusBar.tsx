@@ -6,7 +6,11 @@ import { Button } from "@/components/ui/button";
 import { useDraggable } from "@/providers/DraggableProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-export default function StatusBar() {
+type Props = {
+  root: Element;
+};
+
+export default function StatusBar({ root }: Props) {
   const { startDrag, stopDrag, close } = useDraggable();
   const { callActive, devices } = useWavoip();
 
@@ -15,18 +19,18 @@ export default function StatusBar() {
     <div
       onMouseUp={stopDrag}
       onMouseDown={startDrag}
-      className="w-full h-9 bg-foreground flex justify-between items-center shadow-lg px-2 rounded-2xl rounded-bl-none rounded-br-none hover:cursor-pointer"
+      className="wv:w-full wv:h-9 wv:bg-foreground wv:flex wv:justify-between wv:items-center wv:shadow-lg wv:px-2 wv:rounded-2xl wv:rounded-bl-none wv:rounded-br-none wv:hover:cursor-pointer"
     >
-      <div className="flex items-center">
-        <SettingsModal devices={devices} />
+      <div className="wv:flex wv:items-center">
+        <SettingsModal devices={devices} root={root} />
         <DevicesAlert devices={devices} />
       </div>
-      <div className="flex gap-2">{callActive && <Ping call={callActive} />}</div>
-      <div className="flex items-center">
+      <div className="wv:flex wv:gap-2">{callActive && <Ping call={callActive} />}</div>
+      <div className="wv:flex wv:items-center">
         <Button
           type="button"
           variant={"ghost"}
-          className="text-background size-fit !p-0.5 aspect-square"
+          className="wv:text-background wv:size-fit wv:!p-0.5 wv:aspect-square"
           onClick={() => close()}
         >
           <EyeClosedIcon />

@@ -6,7 +6,11 @@ import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
 
-export function Widget() {
+type Props = {
+  root: Element;
+};
+
+export function Widget({ root }: Props) {
   const { screen } = useScreen();
   const { position, handleMouseMove } = useDraggable();
 
@@ -14,14 +18,14 @@ export function Widget() {
     // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
       onMouseMove={handleMouseMove}
-      className="wavoip absolute flex flex-col w-60 h-120 rounded-2xl bg-background shadow-lg"
+      className="wv:absolute wv:z-[99999999] wv:flex wv:flex-col wv:w-60 wv:h-120 wv:rounded-2xl wv:bg-background wv:shadow-lg"
       style={{
         left: position.x,
         top: position.y,
       }}
     >
-      <StatusBar />
-      <div className="flex flex-1 relative">
+      <StatusBar root={root} />
+      <div className="wv:flex wv:flex-1 wv:relative">
         <CallOffers />
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}

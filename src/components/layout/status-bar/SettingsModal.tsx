@@ -19,9 +19,10 @@ import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
   devices: (Device & { enable: boolean })[];
+  root: Element;
 };
 
-export function SettingsModal({ devices }: Props) {
+export function SettingsModal({ devices, root }: Props) {
   const { addDevice } = useWavoip();
   const { setModal } = useDraggable();
   const [open, setOpen] = useState(false);
@@ -43,17 +44,17 @@ export function SettingsModal({ devices }: Props) {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="text-background hover:cursor-pointer hover:bg-background hover:text-foreground p-0.5 rounded-md">
+      <DialogTrigger className="wv:text-background wv:hover:cursor-pointer wv:hover:bg-background wv:hover:text-foreground wv:p-0.5 wv:rounded-md">
         <GearIcon />
       </DialogTrigger>
-      <DialogContent className="flex flex-col h-1/2">
+      <DialogContent className="wv:flex wv:flex-col wv:h-1/2 wv:z-[999999999999]" container={root}>
         {qrcode ? (
           <>
             <DialogHeader>
               <DialogTitle>QRCode</DialogTitle>
             </DialogHeader>
             <DialogDescription>Aponte a câmera do celular</DialogDescription>
-            <QRCode value={qrcode} level="L" className="size-full"></QRCode>
+            <QRCode value={qrcode} level="L" className="wv:size-full"></QRCode>
           </>
         ) : (
           <>
@@ -61,12 +62,12 @@ export function SettingsModal({ devices }: Props) {
               <DialogTitle>Dispositivos</DialogTitle>
             </DialogHeader>
             <DialogDescription />
-            <div className="flex justify-between items-center gap-2">
+            <div className="wv:flex wv:justify-between wv:items-center wv:gap-2">
               <Input
                 placeholder="Token"
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                className="focus-visible:ring-0 flex-1"
+                className="wv:focus-visible:ring-0 wv:flex-1"
               />
               <Button
                 type="button"
@@ -74,12 +75,12 @@ export function SettingsModal({ devices }: Props) {
                   addDevice(token);
                   setToken("");
                 }}
-                className="bg-green-400 size-fit !p-1.5 h-full aspect-square hover:cursor-pointer"
+                className="wv:bg-green-400 wv:size-fit !wv:p-1.5 wv:h-full wv:aspect-square wv:hover:cursor-pointer"
               >
                 <PlusIcon />
               </Button>
             </div>
-            <div className="basis-0 flex-1 overflow-auto flex flex-col gap-2">
+            <div className="wv:basis-0 wv:flex-1 wv:overflow-auto wv:flex wv:flex-col wv:gap-2">
               {devicesSorted.map((device) => (
                 <DeviceInfo key={device.token} device={device} setShowQRCode={setQrcode} />
               ))}

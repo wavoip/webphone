@@ -17,14 +17,18 @@ const deviceSettings = new Map<string, { token: string; enable: boolean }>(
     }) || [],
 );
 
-export function WebPhone() {
+type Props = {
+  root: Element;
+};
+
+export function WebPhone({ root }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
 
   return (
     <DraggableProvider>
       <ScreenProvider>
         <WavoipProvider wavoipInstance={wavoip} deviceSettings={deviceSettings}>
-          <Widget />
+          <Widget root={root} />
           <Toaster richColors closeButton />
         </WavoipProvider>
       </ScreenProvider>

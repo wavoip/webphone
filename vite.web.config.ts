@@ -1,10 +1,10 @@
 import path from "node:path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import cssInjectedByJsPlugin from "vite-plugin-css-injected-by-js";
+import dts from "vite-plugin-dts";
 
 export default defineConfig({
-  plugins: [react(), cssInjectedByJsPlugin()],
+  plugins: [react(), dts({ insertTypesEntry: true, tsconfigPath: "./tsconfig.app.json", rollupTypes: true })],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -12,14 +12,14 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: "src/web.ts",
+      entry: "src/index.tsx",
       name: "wavoipWebphone",
       formats: ["es", "umd"],
       fileName: (format) => {
-        return `web.${format}.js`;
+        return `index.${format}.js`;
       },
     },
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       external: [],
       output: {

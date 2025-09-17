@@ -19,10 +19,13 @@ interface DraggableContextType {
 const DraggableContext = createContext<DraggableContextType | undefined>(undefined);
 
 export function DraggableProvider({ children }: { children: ReactNode }) {
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [position, setPosition] = useState<Position>({
+    x: document.body.clientWidth / 3,
+    y: document.body.clientHeight / 3,
+  });
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState<Position>({ x: 0, y: 0 });
-  const [closed, setClosed] = useState(false);
+  const [closed, setClosed] = useState(true);
   const [modal, setModal] = useState(false);
 
   const startDrag = useCallback(
@@ -102,7 +105,8 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
         <Button
           type="button"
           onClick={() => setClosed(false)}
-          className="absolute bottom-0 right-0 !p-3 rounded-full aspect-square size-fit bg-green-500 text-white font-bold hover:bg-green-600"
+          size={"icon"}
+          className="wv:absolute wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
           style={{
             position: "fixed",
             bottom: "20px",
@@ -110,7 +114,7 @@ export function DraggableProvider({ children }: { children: ReactNode }) {
             zIndex: 9999,
           }}
         >
-          <PhoneIcon className="size-8" />
+          <PhoneIcon className="wv:size-8" />
         </Button>
       ) : (
         children
