@@ -60,6 +60,16 @@ export function Ping({ call }: Props) {
       }
     });
 
+    call.onStatus((status) => {
+      if (status === "DISCONNECTED") {
+        setConnectionStrength(ConnectionStrenght.none);
+      }
+
+      if (status === "ACTIVE") {
+        setConnectionStrength(ConnectionStrenght.high);
+      }
+    });
+
     return () => {
       if (connectingRef.current) {
         clearInterval(connectingRef.current);
