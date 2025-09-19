@@ -1,15 +1,26 @@
-import { MicrophoneIcon, MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
+import type { CallOutgoing } from "@wavoip/wavoip-api";
+import { useEffect, useState } from "react";
+import { MicrophoneButton } from "@/components/MicrophoneButton";
 import { Button } from "@/components/ui/button";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function OutgoingScreen() {
-  const { callOutgoing } = useWavoip();
+  const { wavoipInstance, callOutgoing, multimediaError } = useWavoip();
   const { setScreen } = useScreen();
 
   const [status, setStatus] = useState<null | string>(null);
   const [muted, setMuted] = useState(callOutgoing?.muted || false);
+
+  useEffect(() => {
+    callOutgoing?.onPeerReject(() => {
+      setStatus("Chamada rejeitada");
+    });
+    callOutgoing?.onUnanswered(() => {
+      setStatus("Chamada não antendidada");
+    });
+  }, [callOutgoing]);
 
   return (
     <div className="wv:flex-1 wv:flex wv:flex-col wv:justify-evenly">
@@ -21,49 +32,18 @@ export default function OutgoingScreen() {
         <p>{callOutgoing?.peer}</p>
       </div>
       <div className="wv:flex wv:w-full wv:justify-evenly wv:items-center">
-        {muted ? (
-          <Button
-            type="button"
-            variant={"secondary"}
-            onClick={(e) => {
-              e.currentTarget.disabled = true;
-              callOutgoing?.unmute().then(({ err }) => {
-                if (err) {
-                  setStatus(err);
-                  setTimeout(() => setStatus(null), 3000);
-                } else {
-                  setMuted(false);
-                }
-              });
-            }}
-            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
-          >
-            <MicrophoneSlashIcon className="wv:size-6" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={(e) => {
-              e.currentTarget.disabled = true;
-              callOutgoing?.mute().then(({ err }) => {
-                if (err) {
-                  setStatus(err);
-                  setTimeout(() => setStatus(null), 3000);
-                } else {
-                  setMuted(true);
-                }
-              });
-            }}
-            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-green-500 wv:hover:bg-green-400 wv:hover:cursor-pointer"
-          >
-            <MicrophoneIcon className="wv:size-6" />
-          </Button>
-        )}
+        <MicrophoneButton
+          call={callOutgoing as CallOutgoing}
+          muted={muted}
+          multimediaError={multimediaError}
+          setStatus={setStatus}
+          setMuted={setMuted}
+          requestMicPerm={wavoipInstance.requestMicrophonePermission}
+        />
         <Button
           type="button"
           className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
-          onClick={(e) => {
-            e.currentTarget.disabled = true;
+          onClick={() => {
             callOutgoing?.end().then(({ err }) => {
               if (!err) {
                 setStatus("Chamada finalizada");

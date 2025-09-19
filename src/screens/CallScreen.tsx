@@ -1,35 +1,42 @@
-import { MicrophoneIcon, MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
+import { MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
+import type { CallActive } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
+import { MicrophoneButton } from "@/components/MicrophoneButton";
 import { Button } from "@/components/ui/button";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export default function CallScreen() {
-  const { callActive } = useWavoip();
+  const { wavoipInstance, callActive, multimediaError } = useWavoip();
   const { setScreen } = useScreen();
 
   const [muted, setMuted] = useState(callActive?.muted || false);
   const [peerMuted, setPeerMuted] = useState(callActive?.peerMuted || false);
   const [status, setStatus] = useState<null | string>(null);
+  const [volume, setVolume] = useState<number[]>(Array(10).map(() => 0));
   const [durationSeconds, setDurationSeconds] = useState(0);
-  const intervalRef = useRef<number | null>(null);
+  const durationRef = useRef<number | null>(null);
 
   useEffect(() => {
     callActive?.onPeerMute(() => setPeerMuted(true));
     callActive?.onPeerUnmute(() => setPeerMuted(false));
     callActive?.onError((err) => setStatus(err));
     callActive?.onEnd(() => setStatus("Chamada encerrada"));
+    callActive?.onVolume((volume) => {
+      console.log("VOLUME WEBPHONE", volume);
+      setVolume((prev) => [...prev.slice(1), Number(volume.toFixed(2))]);
+    });
 
-    intervalRef.current = setInterval(() => {
+    durationRef.current = setInterval(() => {
       setDurationSeconds((prev) => prev + 1);
     }, 1000) as unknown as number;
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (durationRef.current) {
+        clearInterval(durationRef.current);
       }
     };
-  }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute, callActive?.onEnd]);
+  }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute, callActive?.onEnd, callActive?.onVolume]);
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:justify-evenly wv:gap-4 wv:px-2">
@@ -44,39 +51,14 @@ export default function CallScreen() {
         <p className="wv:text-foreground">{status || formatDuration(durationSeconds)}</p>
       </div>
       <div className="wv:flex wv:justify-evenly wv:items-center">
-        {muted ? (
-          <Button
-            type="button"
-            onClick={() => {
-              callActive?.unmute().then(({ err }) => {
-                if (err) {
-                  setStatus(err);
-                } else {
-                  setMuted(false);
-                }
-              });
-            }}
-            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
-          >
-            <MicrophoneSlashIcon className="wv:size-6" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            onClick={() => {
-              callActive?.mute().then(({ err }) => {
-                if (err) {
-                  setStatus(err);
-                } else {
-                  setMuted(true);
-                }
-              });
-            }}
-            className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-green-500 wv:hover:bg-green-400 wv:hover:cursor-pointer"
-          >
-            <MicrophoneIcon className="wv:size-6" />
-          </Button>
-        )}
+        <MicrophoneButton
+          call={callActive as CallActive}
+          muted={muted}
+          multimediaError={multimediaError}
+          setStatus={setStatus}
+          setMuted={setMuted}
+          requestMicPerm={wavoipInstance.requestMicrophonePermission}
+        />
         <Button
           type="button"
           className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"

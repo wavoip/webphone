@@ -1,6 +1,5 @@
 import { Wavoip } from "@wavoip/wavoip-api";
 import { useState } from "react";
-import { Toaster } from "sonner";
 import { Widget } from "@/components/Widget";
 import { DraggableProvider } from "@/providers/DraggableProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
@@ -25,11 +24,10 @@ export function WebPhone({ root }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
 
   return (
-    <DraggableProvider>
+    <DraggableProvider root={root}>
       <ScreenProvider>
         <WavoipProvider wavoipInstance={wavoip} deviceSettings={deviceSettings}>
-          <Widget root={root} />
-          <Toaster richColors closeButton />
+          <Widget />
         </WavoipProvider>
       </ScreenProvider>
     </DraggableProvider>

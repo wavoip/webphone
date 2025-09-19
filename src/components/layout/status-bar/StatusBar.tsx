@@ -6,19 +6,21 @@ import { Button } from "@/components/ui/button";
 import { useDraggable } from "@/providers/DraggableProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-type Props = {
-  root: Element;
-};
-
-export default function StatusBar({ root }: Props) {
-  const { startDrag, stopDrag, close } = useDraggable();
+export default function StatusBar() {
+  const { root, startDrag, stopDrag, close } = useDraggable();
   const { callActive, devices } = useWavoip();
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
-      onMouseUp={stopDrag}
-      onMouseDown={startDrag}
+      onMouseUp={(e) => {
+        if (e.target !== e.currentTarget) return;
+        stopDrag();
+      }}
+      onMouseDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        startDrag(e);
+      }}
       className="wv:w-full wv:h-9 wv:bg-foreground wv:flex wv:justify-between wv:items-center wv:shadow-lg wv:px-2 wv:rounded-2xl wv:rounded-bl-none wv:rounded-br-none wv:hover:cursor-pointer"
     >
       <div className="wv:flex wv:items-center">

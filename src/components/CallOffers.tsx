@@ -1,6 +1,5 @@
 import { PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -26,7 +25,6 @@ export function CallOffers() {
                 setActionMade(true);
                 offer.reject().then(({ err }) => {
                   if (err) {
-                    toast.error(err);
                   }
                   setActionMade(false);
                 });
@@ -42,7 +40,6 @@ export function CallOffers() {
                 setActionMade(true);
                 offer.accept().then(({ err }) => {
                   if (err) {
-                    toast.error(err);
                   }
                   setActionMade(false);
                 });

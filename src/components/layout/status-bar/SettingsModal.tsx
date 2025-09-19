@@ -14,7 +14,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { useDraggable } from "@/providers/DraggableProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -24,7 +23,6 @@ type Props = {
 
 export function SettingsModal({ devices, root }: Props) {
   const { addDevice } = useWavoip();
-  const { setModal } = useDraggable();
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
@@ -40,14 +38,17 @@ export function SettingsModal({ devices, root }: Props) {
           setQrcode(null);
           return;
         }
-        setModal();
         setOpen(open);
       }}
     >
       <DialogTrigger className="wv:text-background wv:hover:cursor-pointer wv:hover:bg-background wv:hover:text-foreground wv:p-0.5 wv:rounded-md">
         <GearIcon />
       </DialogTrigger>
-      <DialogContent className="wv:flex wv:flex-col wv:h-1/2 wv:z-[999999999999]" container={root}>
+      <DialogContent
+        onClick={(e) => e.stopPropagation()}
+        className="wv:flex wv:flex-col wv:h-1/2 wv:z-[999999999999]"
+        container={root}
+      >
         {qrcode ? (
           <>
             <DialogHeader>
