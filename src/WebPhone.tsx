@@ -4,6 +4,8 @@ import { Widget } from "@/components/Widget";
 import { DraggableProvider } from "@/providers/DraggableProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { localStorageKey, WavoipProvider } from "@/providers/WavoipProvider";
+import { Toaster } from "@/components/ui/sonner";
+
 
 const deviceSettings = new Map<string, { token: string; enable: boolean }>(
   localStorage
@@ -28,6 +30,7 @@ export function WebPhone({ root }: Props) {
       <ScreenProvider>
         <WavoipProvider wavoipInstance={wavoip} deviceSettings={deviceSettings}>
           <Widget />
+          <Toaster position="top-right" />
         </WavoipProvider>
       </ScreenProvider>
     </DraggableProvider>

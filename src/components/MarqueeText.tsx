@@ -20,8 +20,6 @@ export default function MarqueeText({ children, speed = 15, className }: Props) 
     const containerWidth = containerRef?.current?.offsetWidth;
     const textWidth = textRef?.current?.offsetWidth;
 
-    console.log(containerWidth, textWidth, width, 'textWidth')
-
     setShouldAnimate(width > containerWidth);
   }, [children, containerRef, textRef, width]);
 
