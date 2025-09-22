@@ -11,10 +11,12 @@ export function Widget() {
   return (
     <>
       <StatusBar />
-      <div className="wv:flex wv:flex-1 wv:relative">
+      <div className="wv:flex wv:flex-1 wv:relative wv:px-7">
         <CallOffers />
         {screen === "keyboard" && <KeyboardScreen />}
-        {screen === "outgoing" && <OutgoingScreen />}
+        {/* {screen === "outgoing" && <OutgoingScreen />} */}
+        {/* <CallScreen /> */}
+        {screen === "outgoing" && <CallScreen />}
         {screen === "call" && <CallScreen />}
       </div>
     </>

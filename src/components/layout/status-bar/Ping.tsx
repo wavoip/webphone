@@ -41,7 +41,7 @@ export function Ping({ call }: Props) {
 
       if (status === "CONNECTING") {
         connectingRef.current = setInterval(() => {
-          setConnectionStrength((prev) => ((prev + 1) % 4) as ConnectionStrenght);
+          // setConnectionStrength((prev) => ((prev + 1) % 4) as ConnectionStrenght);
         }, 1000);
 
         return;
@@ -83,26 +83,38 @@ export function Ping({ call }: Props) {
 
   if (connectionStatus === "ERROR") {
     return (
-      <div className="wv:flex wv:items-center wv:gap-2 wv:text-background">
+      <div className="wv:flex wv:items-center wv:gap-2">
         <WifiXIcon className="wv:size-6" />
       </div>
     );
   }
 
+  const color = connectionStrength === ConnectionStrenght.none ? (
+    "red"
+  ) : connectionStrength === ConnectionStrenght.low ? (
+    "red"
+  ) : connectionStrength === ConnectionStrenght.medium ? (
+    "orange"
+  ) : connectionStrength === ConnectionStrenght.high ? (
+    "green"
+  ) : (
+    "red"
+  );
+
   return (
-    <div className="wv:flex wv:items-center wv:gap-2 wv:text-background">
+    <div className="wv:flex wv:items-center wv:gap-2 wv:group wv:relative wv:cursor-pointer wv:hover:text-accent-foreground" style={{ color: color }}>
+
       {connectionStrength === ConnectionStrenght.none ? (
-        <WifiNoneIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.low ? (
-        <WifiLowIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.medium ? (
-        <WifiMediumIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.high ? (
-        <WifiHighIcon className="wv:size-6" />
+        <WifiSlashIcon className="wv:size-5" />
+      ) : [ConnectionStrenght.low, ConnectionStrenght.medium, ConnectionStrenght.high].includes(connectionStrength) ? (
+        <WifiHighIcon className="wv:size-5" />
       ) : (
-        <WifiSlashIcon className="wv:size-6" />
+        <WifiSlashIcon className="wv:size-5" />
       )}
-      <p className="wv:text-sm">{ping?.toFixed(2)} ms</p>
+      <div className="wv:absolute wv:right-0 wv:translate-x-10 wv:opacity-0 wv:transition-all wv:duration-500 wv:ease-out wv:group-hover:translate-x-15 wv:group-hover:opacity-100">
+
+        <p className="wv:text-[12px] wv:whitespace-nowrap">{ping?.toFixed(2)} ms</p>
+      </div>
     </div>
   );
 }

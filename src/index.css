@@ -169,4 +169,47 @@
   body {
     @apply wv:bg-background wv:text-foreground;
   }
+  .marquee span {
+    background-color: red;
+    display: inline-block;
+    animation: marquee-alternate 15s linear infinite alternate;
+  }
+}
+
+.marquee-container {
+  position: relative;
+  width: 100%;         /* largura visível */
+  overflow: hidden;     
+  white-space: nowrap;  
+}
+
+.marquee-animate {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 15s linear infinite;
+  
+}
+
+.marquee-track span {
+  display: inline-block;
+  padding-right: 50px; /* espaço entre repetições */
+}
+
+.fade-text {
+  animation: fadeOpacity 3s ease-in-out infinite;
+}
+
+@keyframes marquee {
+  0%, 30% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%); /* metade do track, vai continuar com loop */
+  }
+}
+
+@keyframes fadeOpacity {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
 }

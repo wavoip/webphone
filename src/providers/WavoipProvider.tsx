@@ -212,6 +212,9 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
 
   useEffect(() => {
     wavoipInstance.requestMicrophonePermission();
+
+    // console.log(wavoipInstance.multimedia.audio.analyser_node, "wavoip multimedia")
+
   }, [wavoipInstance.requestMicrophonePermission]);
 
   return (

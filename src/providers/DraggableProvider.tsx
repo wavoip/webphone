@@ -121,7 +121,7 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
       </Button>
       <div
         data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col wv:w-60 wv:h-120 wv:rounded-2xl wv:bg-background wv:shadow-lg"
+        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:bg-background wv:shadow-lg"
         style={{
           left: position.x,
           top: position.y,

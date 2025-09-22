@@ -41,7 +41,7 @@ export function SettingsModal({ devices, root }: Props) {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="wv:text-background wv:hover:cursor-pointer wv:hover:bg-background wv:hover:text-foreground wv:p-0.5 wv:rounded-md">
+      <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:hover:text-foreground wv:p-0.5 wv:rounded-md">
         <GearIcon />
       </DialogTrigger>
       <DialogContent
