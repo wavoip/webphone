@@ -1,5 +1,6 @@
 import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import SoundDTMF0 from "@/assets/sounds/dtmf-0.mp3";
 import SoundDTMF1 from "@/assets/sounds/dtmf-1.mp3";
 import SoundDTMF2 from "@/assets/sounds/dtmf-2.mp3";
@@ -12,11 +13,10 @@ import SoundDTMF8 from "@/assets/sounds/dtmf-8.mp3";
 import SoundDTMF9 from "@/assets/sounds/dtmf-9.mp3";
 import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
-import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { handleMultimediaError, useWavoip } from "@/providers/WavoipProvider";
-import WaveBars from "@/components/WaveSound";
+import { useWavoip } from "@/providers/WavoipProvider";
+import { handleMultimediaError } from "@/lib/utils";
 
 const buttons = [
   {
@@ -87,13 +87,13 @@ export default function KeyboardScreen() {
   const [number, setNumber] = useState("");
   const [status, setStatus] = useState("");
 
-  const { multimediaError, makeCall } = useWavoip();
+  const { multimediaError, startCall } = useWavoip();
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        makeCall(number).then(({ err }) => {
+        startCall(number).then(({ err }) => {
           if (!err) return;
           setStatus(err.message);
           setTimeout(() => {
@@ -116,16 +116,6 @@ export default function KeyboardScreen() {
           onChange={(e) => {
             const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
             setNumber(digits);
-            // if (digits.length) {
-            //   const lastDigit = digits[digits.length - 1];
-            //   const button = buttons.find((item) => item.digit === lastDigit);
-            //   if (button) {
-            //     button.audio.pause();
-            //     button.audio.currentTime = 0
-            //     button.audio.play();
-            //   }
-
-            // }
           }}
           className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:text-[24px] wv:md:text-[24px]  wv:text-foreground wv:text-center wv:focus-visible:ring-0"
         />
@@ -142,12 +132,14 @@ export default function KeyboardScreen() {
             onClick={() => {
               setNumber((prev) => prev + digit);
               audio.pause();
-              audio.currentTime = 0
+              audio.currentTime = 0;
               audio.play();
             }}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">{digit}</p>
-            {!!letters && <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>}
+            {!!letters && (
+              <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
+            )}
           </Button>
         ))}
       </div>
@@ -159,7 +151,7 @@ export default function KeyboardScreen() {
           size={"icon"}
           onClick={() => {
             backspace_audio.pause();
-            backspace_audio.currentTime = 0
+            backspace_audio.currentTime = 0;
             backspace_audio.play();
 
             setNumber((prev) => prev.slice(0, -1));

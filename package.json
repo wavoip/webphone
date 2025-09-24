@@ -19,7 +19,7 @@
   },
   "scripts": {
     "dev": "vite -c vite.react.config.ts",
-    "build": "tsc -b && pnpm dlx @tailwindcss/cli -i ./src/index.css -o ./src/style.css && vite build -c vite.web.config.ts",
+    "build": "tsc -b && pnpm dlx @tailwindcss/cli -i ./src/assets/index.css -o ./src/assets/style.css && vite build -c vite.web.config.ts",
     "lint": "pnpm exec biome check .",
     "preview": "vite preview"
   },
@@ -31,7 +31,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@wavoip/wavoip-api": "^2.0.11",
+    "@wavoip/wavoip-api": "file:../wavoip-api/wavoip-wavoip-api-2.0.11.tgz",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.540.0",
@@ -40,6 +40,7 @@
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
     "react-qr-code": "^2.0.18",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.12"
   },

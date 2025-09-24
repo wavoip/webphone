@@ -1,11 +1,4 @@
-import {
-  WifiHighIcon,
-  WifiLowIcon,
-  WifiMediumIcon,
-  WifiNoneIcon,
-  WifiSlashIcon,
-  WifiXIcon,
-} from "@phosphor-icons/react";
+import { WifiHighIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
 import type { CallActive, MultimediaSocketStatus } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
 
@@ -36,18 +29,7 @@ export function Ping({ call }: Props) {
     });
 
     call.onConnectionStatus((status) => {
-      console.log("STATUS", status);
       setConnectionStatus(status);
-
-      if (status === "CONNECTING") {
-        connectingRef.current = setInterval(() => {
-          // setConnectionStrength((prev) => ((prev + 1) % 4) as ConnectionStrenght);
-        }, 1000);
-
-        return;
-      } else if (connectingRef.current) {
-        clearInterval(connectingRef.current);
-      }
 
       if (status === "CONNECTED") {
         setConnectionStrength(ConnectionStrenght.high);
@@ -89,21 +71,22 @@ export function Ping({ call }: Props) {
     );
   }
 
-  const color = connectionStrength === ConnectionStrenght.none ? (
-    "red"
-  ) : connectionStrength === ConnectionStrenght.low ? (
-    "red"
-  ) : connectionStrength === ConnectionStrenght.medium ? (
-    "orange"
-  ) : connectionStrength === ConnectionStrenght.high ? (
-    "green"
-  ) : (
-    "red"
-  );
+  const color =
+    connectionStrength === ConnectionStrenght.none
+      ? "red"
+      : connectionStrength === ConnectionStrenght.low
+        ? "red"
+        : connectionStrength === ConnectionStrenght.medium
+          ? "orange"
+          : connectionStrength === ConnectionStrenght.high
+            ? "green"
+            : "red";
 
   return (
-    <div className="wv:flex wv:items-center wv:gap-2 wv:group wv:relative wv:cursor-pointer wv:hover:text-accent-foreground" style={{ color: color }}>
-
+    <div
+      className="wv:flex wv:items-center wv:gap-2 wv:group wv:relative wv:cursor-pointer wv:hover:text-accent-foreground"
+      style={{ color: color }}
+    >
       {connectionStrength === ConnectionStrenght.none ? (
         <WifiSlashIcon className="wv:size-5" />
       ) : [ConnectionStrenght.low, ConnectionStrenght.medium, ConnectionStrenght.high].includes(connectionStrength) ? (
@@ -112,7 +95,6 @@ export function Ping({ call }: Props) {
         <WifiSlashIcon className="wv:size-5" />
       )}
       <div className="wv:absolute wv:right-0 wv:translate-x-10 wv:opacity-0 wv:transition-all wv:duration-500 wv:ease-out wv:group-hover:translate-x-15 wv:group-hover:opacity-100">
-
         <p className="wv:text-[12px] wv:whitespace-nowrap">{ping?.toFixed(2)} ms</p>
       </div>
     </div>
