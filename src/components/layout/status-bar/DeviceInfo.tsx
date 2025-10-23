@@ -1,7 +1,7 @@
-import { QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
+import { Phone, PhoneX, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Device } from "@wavoip/wavoip-api";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -15,6 +15,7 @@ type Props = {
 
 export function DeviceInfo({ device, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const badgeVariant = useMemo(
     () =>
@@ -29,13 +30,89 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:p-2 wv:bg-muted wv:data-[enable=false]:bg-muted-foreground/30 wv:rounded-md"
+      className="wv:relative wv:flex wv:justify-between wv:items-center wv:gap-2 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-muted-foreground/30 wv:rounded-md wv:overflow-hidden"
     >
-      <div className="wv:flex wv:flex-col wv:gap-2">
-        <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+      <div className="wv:flex wv:flex-col wv:gap-1">
+        {device.status && (
+          <>
+            {["disconnected", "hibernating"].includes(device.status) && (
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant={"outline"}
+                    className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
+                    onClick={() => device.powerOn()}
+                  >
+                    <PowerIcon />
+                  </Button>
+                  <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                    <Phone size={18} color="red" />
+                    <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                      +55 (11) 97395-1769
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ligar Dispositivo</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            {["connecting"].includes(device.status) && (
+              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                <QrCodeIcon size={18} />
+                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                  Aguardando vincular Whatsapp
+                </p>
+              </div>
+            )}
+            {["close"].includes(device.status) && (
+              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                <PhoneX size={18} color="red" />
+                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                  Desconectado
+                </p>
+              </div>
+            )}
+            {["error"].includes(device.status) && (
+              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                <PhoneX size={18} color="red" />
+                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                  Falha
+                </p>
+              </div>
+            )}
+            {["open"].includes(device.status) && (
+              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                <Phone size={18} color="green" />
+                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                  +55 (11) 97395-1769
+                </p>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* {device.qrcode && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"outline"}
+                className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
+                onClick={() => setShowQRCode(device.qrcode)}
+              >
+                <QrCodeIcon className="size-6" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Mostrar QRCode</p>
+            </TooltipContent>
+          </Tooltip>
+        )} */}
+
+        <p data-enable={device.enable} className="wv:text-[12px] wv:data-[enable=false]:text-muted-foreground">
           {device.token}
         </p>
-        <div className="wv:flex wv:items-center wv:gap-2">
+        {/* <div className="wv:flex wv:items-center wv:gap-2">
           {device.status && (
             <>
               <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>
@@ -74,7 +151,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
               </TooltipContent>
             </Tooltip>
           )}
-        </div>
+        </div> */}
       </div>
       <div className="wv:flex wv:gap-2 wv:items-center">
         <Switch
@@ -84,13 +161,47 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           disabled={!["open", "CONNECTED"].includes(device.status as string)}
         />
         <Button
-          variant={"destructive"}
-          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
-          onClick={() => removeDevice(device.token)}
+          variant={"ghost"}
+          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
+          onClick={() => { setConfirmDelete(true) }}
         >
           <TrashIcon />
         </Button>
       </div>
+
+      {confirmDelete && (
+        <div className="wv:absolute wv:flex wv:bg-[#ef4444] wv:w-full wv:h-full wv:left-0  wv:border wv:border-[white] wv:rounded-md wv:items-center wv:p-4">
+          <div className="wv:flex wv:flex-row wv:gap-1 wv:w-full wv:justify-between wv:gap-2">
+            <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+              <p data-enable={device.enable} className="wv:font-medium wv:text-[white] wv:select-none">
+                Deseja excluir esse dispositivo?
+              </p>
+            </div>
+            <div className="wv:flex wv:flex-row wv:gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label="Submit"
+                className="wv:bg-[transparent] wv:p-2 wv:px-[35px] wv:text-[white] wv:cursor-pointer wv:select-none"
+                onClick={() => {
+                  removeDevice(device.token)
+                }}
+              >
+                Excluir
+              </Button>
+              <Button
+                variant="outline"
+                className="wv:bg-[transparent] wv:p-2 wv:px-[10px] wv:text-[white] wv:cursor-pointer wv:select-none"
+                onClick={() => {
+                  setConfirmDelete(false);
+                }}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

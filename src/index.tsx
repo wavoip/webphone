@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
-import { WebPhone } from "@/WebPhone";
-import styles from "./style.css?inline";
+import { App } from "@/App";
+import styles from "@/assets/style.css?inline";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
@@ -26,7 +26,7 @@ class WebPhoneComponent {
 
     // Then render React
     this.root = ReactDOM.createRoot(containerRoot);
-    this.root.render(<WebPhone root={containerRoot} />);
+    this.root.render(<App root={containerRoot} />);
   }
 
   destroy() {

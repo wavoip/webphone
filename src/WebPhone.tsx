@@ -3,34 +3,23 @@ import { useState } from "react";
 import { Widget } from "@/components/Widget";
 import { DraggableProvider } from "@/providers/DraggableProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
-import { localStorageKey, WavoipProvider } from "@/providers/WavoipProvider";
+import { WavoipProvider } from "@/providers/WavoipProvider";
 import { Toaster } from "@/components/ui/sonner";
-
-
-const deviceSettings = new Map<string, { token: string; enable: boolean }>(
-  localStorage
-    .getItem(localStorageKey)
-    ?.split(";")
-    .map((device) => {
-      const [token, enable] = device.split(":");
-
-      return [token, { token, enable: enable === "true" }];
-    }) || [],
-);
+import { getSettings } from "@/lib/device-settings";
 
 type Props = {
   root: Element;
 };
 
 export function WebPhone({ root }: Props) {
-  const [wavoip] = useState(() => new Wavoip({ tokens: [...deviceSettings.keys()] }));
+  const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()] }));
 
+  console.log("wavoip", wavoip)
   return (
     <DraggableProvider root={root}>
       <ScreenProvider>
-        <WavoipProvider wavoipInstance={wavoip} deviceSettings={deviceSettings}>
+        <WavoipProvider wavoip={wavoip} >
           <Widget />
-          <Toaster position="top-right" />
         </WavoipProvider>
       </ScreenProvider>
     </DraggableProvider>
