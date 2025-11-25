@@ -1,62 +1,103 @@
-import { PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
-import type { CallOutgoing } from "@wavoip/wavoip-api";
+import { WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
-import { MicrophoneButton } from "@/components/MicrophoneButton";
-import { Button } from "@/components/ui/button";
-import { useScreen } from "@/providers/ScreenProvider";
+import Calling from "@/assets/sounds/calling.mp3";
+import Hangup from "@/assets/sounds/hangup.mp3";
+import PostalCode from "@/assets/sounds/postalcode.mp3";
+import { CallButtons } from "@/components/CallButtons";
+import MarqueeText from "@/components/MarqueeText";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-export default function OutgoingScreen() {
-  const { wavoipInstance, callOutgoing, multimediaError } = useWavoip();
-  const { setScreen } = useScreen();
+const calling_sound = new Audio(Calling);
+const hangup_sound = new Audio(Hangup);
+const postalcode_sound = new Audio(PostalCode);
 
-  const [status, setStatus] = useState<null | string>(null);
-  const [muted, setMuted] = useState(callOutgoing?.muted || false);
+export default function OutgoingScreen() {
+  const { callOutgoing } = useWavoip();
+
+  const [status, setStatus] = useState<null | string>("Ligando...");
 
   useEffect(() => {
+    callOutgoing?.onStatus((status) => {
+      if (status === "CALLING") {
+        setStatus("Ligando...");
+      }
+
+      if (status === "RINGING") {
+        calling_sound.currentTime = 0;
+        calling_sound.play();
+        calling_sound.loop = true;
+        setStatus("Chamando...");
+      }
+
+      if (status === "FAILED") {
+        postalcode_sound.currentTime = 0;
+        postalcode_sound.play();
+        setStatus("A ligação falhou");
+      }
+
+      if (status !== "CALLING" && status !== "RINGING") {
+        calling_sound.pause();
+      }
+    });
+
     callOutgoing?.onPeerReject(() => {
       setStatus("Chamada rejeitada");
     });
+
     callOutgoing?.onUnanswered(() => {
-      setStatus("Chamada não antendidada");
+      setStatus("Chamada não atendida");
+      postalcode_sound.currentTime = 0;
+      postalcode_sound.play();
     });
+
+    callOutgoing?.onEnd(() => {
+      setStatus("Chamada encerrada");
+      hangup_sound.currentTime = 0;
+      hangup_sound.play();
+    })
   }, [callOutgoing]);
 
   return (
-    <div className="wv:flex-1 wv:flex wv:flex-col wv:justify-evenly">
-      <div className="wv:text-foreground wv:flex wv:justify-center wv:items-center">
-        <p>{status || "Chamando"}</p>
+    <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
+      <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
+        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 ">
+          <WhatsappLogoIcon size={20} />
+          <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
+        </div>
+
+        <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
+          <Avatar className="wv:size-[50px] wv:rounded-xl">
+            <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
+            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
+          </Avatar>
+          <div className="wv:hidden  wv:group-hover/title:block">
+            <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+              {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+            </MarqueeText>
+          </div>
+          <div className="wv:flex wv:flex-col wv:justify-center wv:items-start">
+            {status && (
+              <p className="wv:text-foreground wv:opacity-75 wv:text-[14px] fade-text select-none">{status}</p>
+            )}
+
+            <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
+              <div className="wv:hidden  wv:group-hover/title:block">
+                <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+                  {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                </MarqueeText>
+              </div>
+
+              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+                {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="wv:flex wv:flex-col wv:items-center wv:justify-center wv:text-foreground">
-        <UserCircleIcon className="wv:size-full wv:fill-muted-foreground" />
-        <p>{callOutgoing?.peer}</p>
-      </div>
-      <div className="wv:flex wv:w-full wv:justify-evenly wv:items-center">
-        <MicrophoneButton
-          call={callOutgoing as CallOutgoing}
-          muted={muted}
-          multimediaError={multimediaError}
-          setStatus={setStatus}
-          setMuted={setMuted}
-          requestMicPerm={wavoipInstance.requestMicrophonePermission}
-        />
-        <Button
-          type="button"
-          className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
-          onClick={() => {
-            callOutgoing?.end().then(({ err }) => {
-              if (!err) {
-                setStatus("Chamada finalizada");
-                setTimeout(() => {
-                  setScreen("keyboard");
-                }, 2000);
-              }
-            });
-          }}
-        >
-          <PhoneSlashIcon className="wv:size-6" />
-        </Button>
-      </div>
+
+      <CallButtons call={callOutgoing} />
     </div>
   );
 }

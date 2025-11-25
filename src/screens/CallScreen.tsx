@@ -1,19 +1,20 @@
-import { MicrophoneSlashIcon, PhoneSlashIcon, UserCircleIcon } from "@phosphor-icons/react";
-import type { CallActive } from "@wavoip/wavoip-api";
+import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
-import { MicrophoneButton } from "@/components/MicrophoneButton";
-import { Button } from "@/components/ui/button";
-import { useScreen } from "@/providers/ScreenProvider";
+import HangUp from "@/assets/sounds/hangup.mp3";
+import { CallButtons } from "@/components/CallButtons";
+import MarqueeText from "@/components/MarqueeText";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { WaveSound } from "@/components/WaveSound";
+import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-export default function CallScreen() {
-  const { wavoipInstance, callActive, multimediaError } = useWavoip();
-  const { setScreen } = useScreen();
+const hang_up_sound = new Audio(HangUp);
 
-  const [muted, setMuted] = useState(callActive?.muted || false);
-  const [peerMuted, setPeerMuted] = useState(callActive?.peerMuted || false);
-  const [status, setStatus] = useState<null | string>(null);
-  const [volume, setVolume] = useState<number[]>(Array(10).map(() => 0));
+export default function CallScreen() {
+  const { callActive } = useWavoip();
+
+  const [peerMuted, setPeerMuted] = useState(callActive?.peer.muted || false);
+  const [status, setStatus] = useState<string | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
 
@@ -21,10 +22,11 @@ export default function CallScreen() {
     callActive?.onPeerMute(() => setPeerMuted(true));
     callActive?.onPeerUnmute(() => setPeerMuted(false));
     callActive?.onError((err) => setStatus(err));
-    callActive?.onEnd(() => setStatus("Chamada encerrada"));
-    callActive?.onVolume((volume) => {
-      console.log("VOLUME WEBPHONE", volume);
-      setVolume((prev) => [...prev.slice(1), Number(volume.toFixed(2))]);
+    callActive?.onEnd(() => {
+      setStatus("Chamada encerrada");
+      hang_up_sound.pause();
+      hang_up_sound.currentTime = 0;
+      hang_up_sound.play();
     });
 
     durationRef.current = setInterval(() => {
@@ -36,55 +38,65 @@ export default function CallScreen() {
         clearInterval(durationRef.current);
       }
     };
-  }, [callActive?.onError, callActive?.onPeerMute, callActive?.onPeerUnmute, callActive?.onEnd, callActive?.onVolume]);
+  }, [callActive]);
 
   return (
-    <div className="wv:size-full wv:flex wv:flex-col wv:justify-evenly wv:gap-4 wv:px-2">
-      <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
-        <p className="wv:text-foreground">{callActive?.peer}</p>
-        <div className="wv:relative wv:w-full">
-          <UserCircleIcon className="wv:size-full wv:aspect-square wv:fill-muted-foreground" />
-          {peerMuted && (
-            <MicrophoneSlashIcon className="wv:absolute wv:size-10 wv:p-2 wv:rounded-full wv:bottom-[20%] wv:right-[10%] wv:bg-red-400" />
+    <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
+      <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
+        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground ">
+          <WhatsappLogoIcon size={20} />
+          <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
+        </div>
+
+        <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
+          <Avatar className="wv:size-[50px] wv:rounded-xl">
+            <AvatarImage src={callActive?.peer.profilePicture || undefined} />
+            <AvatarFallback>{getFullnameLetters(callActive?.peer?.displayName)}</AvatarFallback>
+          </Avatar>
+          <div className="wv:flex wv:flex-col wv:justify-center wv:items-start wv:overflow-hidden">
+            <p className="wv:text-foreground wv:opacity-75 wv:text-[14px]">
+              {status || formatDuration(durationSeconds)}
+            </p>
+
+            <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:font-normal wv:w-full">
+              <div className="wv:hidden  wv:group-hover/title:block ">
+                <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
+                  {callActive?.peer.displayName || callActive?.peer.phone}
+                </MarqueeText>
+              </div>
+
+              <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+                {callActive?.peer.displayName || callActive?.peer.phone}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="wv:flex wv:grow-1 wv:justify-center wv:items-end wv:pb-[15px] wv:opacity-80">
+          {peerMuted ? (
+            <div className="wv:flex wv:text-foreground wv:h-[40px] wv:items-center wv:justify-cente wv:gap-1">
+              <MicrophoneSlashIcon />
+              <p className="wv:text-[16px]">Silenciado</p>
+            </div>
+          ) : (
+            <WaveSound call={callActive} />
           )}
         </div>
-        <p className="wv:text-foreground">{status || formatDuration(durationSeconds)}</p>
       </div>
-      <div className="wv:flex wv:justify-evenly wv:items-center">
-        <MicrophoneButton
-          call={callActive as CallActive}
-          muted={muted}
-          multimediaError={multimediaError}
-          setStatus={setStatus}
-          setMuted={setMuted}
-          requestMicPerm={wavoipInstance.requestMicrophonePermission}
-        />
-        <Button
-          type="button"
-          className="wv:size-fit wv:aspect-square wv:rounded-full wv:bg-red-500 wv:hover:bg-red-400 wv:hover:cursor-pointer"
-          onClick={(e) => {
-            e.currentTarget.disabled = true;
-            callActive?.end().then(({ err }) => {
-              if (!err) {
-                setStatus("Chamada finalizada");
-                setTimeout(() => {
-                  setScreen("keyboard");
-                }, 3000);
-              }
-            });
-          }}
-        >
-          <PhoneSlashIcon className="wv:size-6" />
-        </Button>
-      </div>
+
+      <CallButtons call={callActive} />
     </div>
   );
 }
 
-function formatDuration(duration: number) {
-  const hours = Math.floor(duration / 3600);
-  const minutes = Math.floor(duration / 60 - hours * 60);
-  const seconds = duration - minutes * 60;
+function formatDuration(seconds: number) {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor(seconds / 60 - hours * 60);
+  const secondsRest = seconds - minutes * 60;
 
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  if (hours) {
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secondsRest.toString().padStart(2, "0")}`;
+  } else {
+    return `${minutes.toString().padStart(2, "0")}:${secondsRest.toString().padStart(2, "0")}`;
+  }
 }

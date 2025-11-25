@@ -2,7 +2,7 @@ import { MicrophoneIcon, MicrophoneSlashIcon, WarningIcon } from "@phosphor-icon
 import type { CallActive, CallOutgoing, MultimediaError } from "@wavoip/wavoip-api";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { handleMultimediaError } from "@/providers/WavoipProvider";
+import { handleMultimediaError } from "@/lib/utils";
 
 type Props = {
   call: CallActive | CallOutgoing;

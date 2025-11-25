@@ -1,12 +1,5 @@
-import {
-  WifiHighIcon,
-  WifiLowIcon,
-  WifiMediumIcon,
-  WifiNoneIcon,
-  WifiSlashIcon,
-  WifiXIcon,
-} from "@phosphor-icons/react";
-import type { CallActive, MultimediaSocketStatus } from "@wavoip/wavoip-api";
+import { WifiHighIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
+import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -24,37 +17,26 @@ type ConnectionStrenght = (typeof ConnectionStrenght)[keyof typeof ConnectionStr
 
 export function Ping({ call }: Props) {
   const [ping, setPing] = useState<number | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<MultimediaSocketStatus>(call.connection_status);
+  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connection_status);
   const [connectionStrength, setConnectionStrength] = useState<ConnectionStrenght>(ConnectionStrenght.high);
   const connectingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     call.onStats((stats) => {
-      const ping = stats.rtt.client.avg + stats.rtt.whatsapp.avg;
+      const ping = stats.rtt.avg;
       setPing(ping);
       setConnectionStrength(getPingLevel(ping));
     });
 
     call.onConnectionStatus((status) => {
-      console.log("STATUS", status);
       setConnectionStatus(status);
 
-      if (status === "CONNECTING") {
-        connectingRef.current = setInterval(() => {
-          setConnectionStrength((prev) => ((prev + 1) % 4) as ConnectionStrenght);
-        }, 1000);
-
-        return;
-      } else if (connectingRef.current) {
-        clearInterval(connectingRef.current);
-      }
-
-      if (status === "CONNECTED") {
+      if (status === "connected") {
         setConnectionStrength(ConnectionStrenght.high);
         return;
       }
 
-      if (status === "CLOSED" || status === "ERROR") {
+      if (status === "disconnected") {
         setConnectionStrength(ConnectionStrenght.none);
         return;
       }
@@ -81,28 +63,40 @@ export function Ping({ call }: Props) {
     return null;
   }
 
-  if (connectionStatus === "ERROR") {
+  if (connectionStatus === "disconnected") {
     return (
-      <div className="wv:flex wv:items-center wv:gap-2 wv:text-background">
+      <div className="wv:flex wv:items-center wv:gap-2">
         <WifiXIcon className="wv:size-6" />
       </div>
     );
   }
 
+  const color =
+    connectionStrength === ConnectionStrenght.none
+      ? "red"
+      : connectionStrength === ConnectionStrenght.low
+        ? "red"
+        : connectionStrength === ConnectionStrenght.medium
+          ? "orange"
+          : connectionStrength === ConnectionStrenght.high
+            ? "green"
+            : "red";
+
   return (
-    <div className="wv:flex wv:items-center wv:gap-2 wv:text-background">
+    <div
+      className="wv:flex wv:items-center wv:gap-2 wv:group wv:relative wv:cursor-pointer wv:hover:text-accent-foreground"
+      style={{ color: color }}
+    >
       {connectionStrength === ConnectionStrenght.none ? (
-        <WifiNoneIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.low ? (
-        <WifiLowIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.medium ? (
-        <WifiMediumIcon className="wv:size-6" />
-      ) : connectionStrength === ConnectionStrenght.high ? (
-        <WifiHighIcon className="wv:size-6" />
+        <WifiSlashIcon className="wv:size-5" />
+      ) : [ConnectionStrenght.low, ConnectionStrenght.medium, ConnectionStrenght.high].includes(connectionStrength) ? (
+        <WifiHighIcon className="wv:size-5" />
       ) : (
-        <WifiSlashIcon className="wv:size-6" />
+        <WifiSlashIcon className="wv:size-5" />
       )}
-      <p className="wv:text-sm">{ping?.toFixed(2)} ms</p>
+      <div className="wv:absolute wv:right-0 wv:translate-x-10 wv:opacity-0 wv:transition-all wv:duration-500 wv:ease-out wv:group-hover:translate-x-15 wv:group-hover:opacity-100">
+        <p className="wv:text-[12px] wv:whitespace-nowrap">{ping?.toFixed(2)} ms</p>
+      </div>
     </div>
   );
 }

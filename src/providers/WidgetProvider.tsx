@@ -1,4 +1,4 @@
-import { PhoneIcon } from "@phosphor-icons/react/dist/ssr";
+import { PhoneIcon } from "@phosphor-icons/react";
 import {
   createContext,
   type MouseEvent,
@@ -9,31 +9,35 @@ import {
   useRef,
   useState,
 } from "react";
+import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
+import { buildAPI } from "@/lib/webphone-api";
 
 type Position = { x: number; y: number };
 
-interface DraggableContextType {
+interface WidgetContextType {
   root: Element;
   position: Position;
   isDragging: boolean;
   setPosition: (pos: Position) => void;
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
+  closed: boolean;
   close: () => void;
   open: () => void;
+  toggle: () => void;
 }
 
-const DraggableContext = createContext<DraggableContextType | undefined>(undefined);
+const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-export function DraggableProvider({ children, root }: { children: ReactNode; root: Element }) {
+export function WidgetProvider({ children, root }: { children: ReactNode; root: Element }) {
   const [position, setPosition] = useState<Position>({
     x: document.body.clientWidth / 3,
     y: document.body.clientHeight / 3,
   });
   const [isDragging, setIsDragging] = useState(false);
   const [closed, setClosed] = useState(true);
-  const offsetRef = useRef({ x: 0, y: 0 });
+  const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     let x = e.clientX - offsetRef.current.x;
@@ -45,8 +49,8 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
     if (y < 0) {
       y = 0;
     }
-    if (x > document.body.clientWidth - 240) {
-      x = document.body.clientWidth - 240;
+    if (x > document.body.clientWidth - 280) {
+      x = document.body.clientWidth - 280;
     }
     if (y > document.body.clientHeight - 480) {
       y = document.body.clientHeight - 480;
@@ -60,6 +64,7 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
 
   const startDrag = useCallback(
     (e: MouseEvent) => {
+      document.body.style.userSelect = "none";
       setIsDragging(true);
       offsetRef.current = { x: e.clientX - position.x, y: e.clientY - position.y };
       document.addEventListener("mousemove", handleMouseMove);
@@ -67,10 +72,23 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
     [handleMouseMove, position.x, position.y],
   );
 
-  const stopDrag = () => {
+  const stopDrag = useCallback(() => {
     setIsDragging(false);
+    document.body.style.userSelect = "unset";
     document.removeEventListener("mousemove", handleMouseMove);
-  };
+  }, [handleMouseMove]);
+
+  const open = useCallback(() => {
+    if (closed) setClosed(false);
+  }, [closed]);
+
+  const close = useCallback(() => {
+    if (!closed) setClosed(true);
+  }, [closed]);
+
+  const toggle = useCallback(() => {
+    setClosed((prev) => !prev);
+  }, []);
 
   useEffect(() => {
     function handleResize() {
@@ -80,15 +98,27 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
       });
     }
 
+    document.addEventListener("mouseleave", () => {
+      stopDrag(); // encerra o drag
+    });
+
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [stopDrag]);
+
+  buildAPI({
+    widget: {
+      open: open,
+      close: close,
+      toggle: toggle,
+    },
+  });
 
   return (
-    <DraggableContext.Provider
+    <WidgetContext.Provider
       value={{
         root,
         position,
@@ -96,11 +126,15 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
         startDrag,
         stopDrag,
         isDragging,
+        closed,
         close: () => {
           if (!closed) setClosed(true);
         },
         open: () => {
           if (closed) setClosed(false);
+        },
+        toggle: () => {
+          setClosed((prev) => !prev);
         },
       }}
     >
@@ -109,7 +143,7 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
         onClick={() => setClosed(false)}
         size={"icon"}
         data-closed={closed}
-        className="wv:data-[closed=false]:hidden wv:absolute wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+        className="wv:data-[closed=false]:hidden wv: wv:absolute sm:wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
         style={{
           position: "fixed",
           bottom: "20px",
@@ -119,9 +153,16 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
       >
         <PhoneIcon className="wv:size-8" />
       </Button>
+      <Toaster
+        position="top-right"
+        className="!w-[400px]"
+        toastOptions={{
+          className: "wv:max-w-[400px] wv:w-full",
+        }}
+      />
       <div
         data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col wv:w-60 wv:h-120 wv:rounded-2xl wv:bg-background wv:shadow-lg"
+        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col  wv:w-70 wv:h-120 wv:rounded-2xl  wv:max-sm:fixed  wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
           left: position.x,
           top: position.y,
@@ -129,12 +170,12 @@ export function DraggableProvider({ children, root }: { children: ReactNode; roo
       >
         {children}
       </div>
-    </DraggableContext.Provider>
+    </WidgetContext.Provider>
   );
 }
 
-export function useDraggable() {
-  const ctx = useContext(DraggableContext);
-  if (!ctx) throw new Error("useDraggable deve ser usado dentro de <DraggableProvider>");
+export function useWidget() {
+  const ctx = useContext(WidgetContext);
+  if (!ctx) throw new Error("useWidget deve ser usado dentro de <WidgetProvider>");
   return ctx;
 }
