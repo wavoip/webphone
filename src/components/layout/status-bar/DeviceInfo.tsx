@@ -1,4 +1,4 @@
-import { Phone, PhoneX, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
+import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Device } from "@wavoip/wavoip-api";
 import { useState } from "react";
@@ -30,14 +30,14 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                   <Button
                     variant={"outline"}
                     className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                    onClick={() => device.powerOn()}
+                    onClick={() => device.wakeUp()}
                   >
                     <PowerIcon />
                   </Button>
                   <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                    <Phone size={18} color="red" />
+                    <PhoneIcon size={18} color="red" />
                     <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                      {device.phone}
+                      {device.contact.unofficial?.phone}
                     </p>
                   </div>
                 </TooltipTrigger>
@@ -56,7 +56,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
             )}
             {["close"].includes(device.status) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <PhoneX size={18} color="red" />
+                <PhoneXIcon size={18} color="red" />
                 <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
                   Desconectado
                 </p>
@@ -64,17 +64,17 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
             )}
             {["error"].includes(device.status) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <PhoneX size={18} color="red" />
+                <PhoneXIcon size={18} color="red" />
                 <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
                   Falha
                 </p>
               </div>
             )}
-            {["open"].includes(device.status) && (
+            {["open", "UP"].includes(device.status) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <Phone size={18} color="green" />
+                <PhoneIcon size={18} color="green" />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  {device.phone}
+                  {device.contact.unofficial?.phone}
                 </p>
               </div>
             )}
@@ -161,7 +161,9 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         <Button
           variant={"ghost"}
           className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
-          onClick={() => { setConfirmDelete(true) }}
+          onClick={() => {
+            setConfirmDelete(true);
+          }}
         >
           <TrashIcon />
         </Button>
@@ -169,7 +171,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
 
       {confirmDelete && (
         <div className="wv:absolute wv:flex wv:bg-[#ef4444] wv:w-full wv:h-full wv:left-0  wv:border wv:border-[white] wv:rounded-md wv:items-center wv:p-4">
-          <div className="wv:flex wv:flex-row wv:gap-1 wv:w-full wv:justify-between wv:gap-2">
+          <div className="wv:flex wv:flex-row wv:gap-1 wv:w-full wv:justify-between">
             <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
               <p data-enable={device.enable} className="wv:font-medium wv:text-[white] wv:select-none">
                 Deseja excluir esse dispositivo?
@@ -182,7 +184,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                 aria-label="Submit"
                 className="wv:bg-[transparent] wv:p-2 wv:px-[35px] wv:text-[white] wv:cursor-pointer wv:select-none"
                 onClick={() => {
-                  removeDevice(device.token)
+                  removeDevice(device.token);
                 }}
               >
                 Excluir

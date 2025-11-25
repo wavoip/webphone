@@ -44,4 +44,4 @@ class WebPhoneComponent {
 
 const webphone = new WebPhoneComponent();
 
-export { webphone };
+export default webphone;

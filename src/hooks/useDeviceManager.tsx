@@ -18,9 +18,6 @@ export function useDeviceManager({ wavoip }: Props) {
     })),
   );
 
-
-  console.log(_devices, "devices")
-
   const addDevice = useCallback(
     (token: string) => {
       const [device] = wavoip.addDevices([token]);
@@ -59,7 +56,7 @@ export function useDeviceManager({ wavoip }: Props) {
   useEffect(() => {
     for (const device of _devices) {
       device.onContact((contact) => {
-        console.log("contact", contact)
+        console.log("contact", contact);
       });
 
       device.onQRCode((qrcode) => {

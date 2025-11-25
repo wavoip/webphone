@@ -1,4 +1,4 @@
-/*! tailwindcss v4.1.16 | MIT License | https://tailwindcss.com */
+/*! tailwindcss v4.1.17 | MIT License | https://tailwindcss.com */
 @layer properties;
 @layer theme, base, components, utilities;
 @layer theme {
@@ -1669,7 +1669,7 @@
   }
   .wv\:data-\[side\=bottom\]\:slide-in-from-top-2 {
     &[data-side="bottom"] {
-      --tw-enter-translate-y: calc(var(--wv-spacing) * 2*-1);
+      --tw-enter-translate-y: calc(2*var(--spacing)*-1);
     }
   }
   .wv\:data-\[side\=left\]\:-translate-x-1 {
@@ -1680,7 +1680,7 @@
   }
   .wv\:data-\[side\=left\]\:slide-in-from-right-2 {
     &[data-side="left"] {
-      --tw-enter-translate-x: calc(var(--wv-spacing) * 2);
+      --tw-enter-translate-x: calc(2*var(--spacing));
     }
   }
   .wv\:data-\[side\=right\]\:translate-x-1 {
@@ -1691,7 +1691,7 @@
   }
   .wv\:data-\[side\=right\]\:slide-in-from-left-2 {
     &[data-side="right"] {
-      --tw-enter-translate-x: calc(var(--wv-spacing) * 2*-1);
+      --tw-enter-translate-x: calc(2*var(--spacing)*-1);
     }
   }
   .wv\:data-\[side\=top\]\:-translate-y-1 {
@@ -1702,7 +1702,7 @@
   }
   .wv\:data-\[side\=top\]\:slide-in-from-bottom-2 {
     &[data-side="top"] {
-      --tw-enter-translate-y: calc(var(--wv-spacing) * 2);
+      --tw-enter-translate-y: calc(2*var(--spacing));
     }
   }
   .wv\:data-\[size\=default\]\:h-9 {

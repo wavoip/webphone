@@ -19,9 +19,16 @@ export default defineConfig({
         return `index.${format}.js`;
       },
     },
-    emptyOutDir: true,
     rollupOptions: {
       external: [],
+      plugins: [
+        {
+          name: "replace-process-env",
+          transform(code) {
+            return code.replace(/process\.env\.NODE_ENV/g, '"production"');
+          },
+        },
+      ],
       output: {
         globals: {
           react: "React",
@@ -29,5 +36,6 @@ export default defineConfig({
         },
       },
     },
+    emptyOutDir: true,
   },
 });

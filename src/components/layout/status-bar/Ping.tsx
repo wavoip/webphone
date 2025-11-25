@@ -1,5 +1,5 @@
 import { WifiHighIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, MultimediaSocketStatus } from "@wavoip/wavoip-api";
+import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -17,13 +17,13 @@ type ConnectionStrenght = (typeof ConnectionStrenght)[keyof typeof ConnectionStr
 
 export function Ping({ call }: Props) {
   const [ping, setPing] = useState<number | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<MultimediaSocketStatus>(call.connection_status);
+  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connection_status);
   const [connectionStrength, setConnectionStrength] = useState<ConnectionStrenght>(ConnectionStrenght.high);
   const connectingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     call.onStats((stats) => {
-      const ping = stats.rtt.client.avg + stats.rtt.whatsapp.avg;
+      const ping = stats.rtt.avg;
       setPing(ping);
       setConnectionStrength(getPingLevel(ping));
     });
@@ -31,12 +31,12 @@ export function Ping({ call }: Props) {
     call.onConnectionStatus((status) => {
       setConnectionStatus(status);
 
-      if (status === "CONNECTED") {
+      if (status === "connected") {
         setConnectionStrength(ConnectionStrenght.high);
         return;
       }
 
-      if (status === "CLOSED" || status === "ERROR") {
+      if (status === "disconnected") {
         setConnectionStrength(ConnectionStrenght.none);
         return;
       }
@@ -63,7 +63,7 @@ export function Ping({ call }: Props) {
     return null;
   }
 
-  if (connectionStatus === "ERROR") {
+  if (connectionStatus === "disconnected") {
     return (
       <div className="wv:flex wv:items-center wv:gap-2">
         <WifiXIcon className="wv:size-6" />
