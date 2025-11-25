@@ -11,6 +11,3 @@ root.id = "root";
 webphoneRoot.appendChild(root);
 
 createRoot(root).render(<App root={root} />);
-
-console.log(window.wavoip);
-window.wavoip?.widget.open();

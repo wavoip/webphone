@@ -1,13 +1,17 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import Calling from "@/assets/sounds/calling.mp3";
+import Hangup from "@/assets/sounds/hangup.mp3";
+import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-import Calling from "@/assets/sounds/calling.mp3";
-
 const calling_sound = new Audio(Calling);
+const hangup_sound = new Audio(Hangup);
+const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
   const { callOutgoing } = useWavoip();
@@ -17,7 +21,6 @@ export default function OutgoingScreen() {
   useEffect(() => {
     callOutgoing?.onStatus((status) => {
       if (status === "CALLING") {
-        // calling_sound.loop = true;
         setStatus("Ligando...");
       }
 
@@ -29,6 +32,8 @@ export default function OutgoingScreen() {
       }
 
       if (status === "FAILED") {
+        postalcode_sound.currentTime = 0;
+        postalcode_sound.play();
         setStatus("A ligação falhou");
       }
 
@@ -43,7 +48,15 @@ export default function OutgoingScreen() {
 
     callOutgoing?.onUnanswered(() => {
       setStatus("Chamada não atendida");
+      postalcode_sound.currentTime = 0;
+      postalcode_sound.play();
     });
+
+    callOutgoing?.onEnd(() => {
+      setStatus("Chamada encerrada");
+      hangup_sound.currentTime = 0;
+      hangup_sound.play();
+    })
   }, [callOutgoing]);
 
   return (
@@ -56,14 +69,12 @@ export default function OutgoingScreen() {
 
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
-            <AvatarImage src={callOutgoing?.peer.profile_picture || undefined} />
-            <AvatarFallback>
-              {callOutgoing?.peer.display_name?.slice(0, 2) || callOutgoing?.peer.number.slice(0, 2)}
-            </AvatarFallback>
+            <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
+            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
           </Avatar>
-          <div className="wv:hidden  wv:group-hover/title:block" >
+          <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
-              {callOutgoing?.peer.display_name || callOutgoing?.peer.number}
+              {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
             </MarqueeText>
           </div>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start">
@@ -72,14 +83,14 @@ export default function OutgoingScreen() {
             )}
 
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
-              <div className="wv:hidden  wv:group-hover/title:block" >
+              <div className="wv:hidden  wv:group-hover/title:block">
                 <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callOutgoing?.peer.display_name || callOutgoing?.peer.number}
+                  {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
                 </MarqueeText>
               </div>
 
-              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48" >
-                {callOutgoing?.peer.display_name || callOutgoing?.peer.number}
+              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+                {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
               </p>
             </div>
           </div>

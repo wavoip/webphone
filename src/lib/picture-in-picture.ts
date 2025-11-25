@@ -13,7 +13,9 @@ export const pictureInPicture: {
 };
 
 export function enablePiP() {
-  document.addEventListener("visibilitychange", handlePictureInPicture);
+  // document.addEventListener("visibilitychange", () => {
+  //   handlePictureInPicture(webphoneRef);
+  // });
 }
 
 export function disablePiP() {
@@ -66,7 +68,7 @@ async function drawPictureInPicture(canvas: HTMLCanvasElement) {
   const margin = 10;
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "black";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const pictureCoords = {
@@ -76,7 +78,7 @@ async function drawPictureInPicture(canvas: HTMLCanvasElement) {
     height: 0,
   };
 
-  if (call.peer.profile_picture) {
+  if (call.peer?.profilePicture) {
     pictureCoords.height = canvas.height / 2 - 2 * margin;
     pictureCoords.width = pictureCoords.height;
 
@@ -84,79 +86,96 @@ async function drawPictureInPicture(canvas: HTMLCanvasElement) {
 
     const img = new Image();
     img.crossOrigin = "anonymous";
-    img.src = call.peer.profile_picture;
+    img.src = call.peer?.profilePicture;
     img.onload = () => {
       ctx.drawImage(img, x, y, width, height);
     };
   }
 
-  const nameCoords = {
-    x: pictureCoords.x + pictureCoords.width + margin,
-    y: margin,
-  };
+  // const nameCoords = {
+  //   x: pictureCoords.x + pictureCoords.width + margin,
+  //   y: margin,
+  // };
 
-  ctx.fillStyle = "black";
-  ctx.font = "12px sans-serif";
-  ctx.fillText(call.peer.display_name || call.peer.number, nameCoords.x, nameCoords.y);
+  // ctx.fillStyle = "black";
+  // ctx.font = "12px sans-serif";
+  // ctx.fillText(call.peer.displayName || call.peer.number, nameCoords.x, nameCoords.y);
 
-  if ("audio_analyser" in call) {
-    const analyser = await call.audio_analyser;
-    const bufferLength = analyser.frequencyBinCount;
-    const soundBuffer = new Uint8Array(bufferLength);
-    analyser.getByteFrequencyData(soundBuffer);
+  // if ("audio_analyser" in call) {
+  //   const analyser = await call.audio_analyser;
+  //   const bufferLength = analyser.frequencyBinCount;
+  //   const soundBuffer = new Uint8Array(bufferLength);
+  //   analyser.getByteFrequencyData(soundBuffer);
 
-    const soundwaveCoords = {
-      x: pictureCoords.x,
-      y: pictureCoords.y + pictureCoords.height + margin,
-      width: canvas.width - 2 * margin,
-      height: canvas.height - pictureCoords.height - margin,
-    };
+  //   const soundwaveCoords = {
+  //     x: pictureCoords.x,
+  //     y: pictureCoords.y + pictureCoords.height + margin,
+  //     width: canvas.width - 2 * margin,
+  //     height: canvas.height - pictureCoords.height - margin,
+  //   };
 
-    drawSoundwave(canvas, soundBuffer, {
-      x: soundwaveCoords.x,
-      y: soundwaveCoords.y,
-      width: soundwaveCoords.width,
-      height: soundwaveCoords.height,
-      gap: 5
-    });
-  }
+  //   drawSoundwave(canvas, soundBuffer, {
+  //     x: soundwaveCoords.x,
+  //     y: soundwaveCoords.y,
+  //     width: soundwaveCoords.width,
+  //     height: soundwaveCoords.height,
+  //     gap: 5,
+  //   });
+  // }
 }
 
 export function drawSoundwave(
   canvas: HTMLCanvasElement,
   soundBuffer: Uint8Array,
-  config: { x?: number; y?: number; width?: number; height?: number; bars?: number; gap?: number },
+  config: {
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+    bars?: number;
+    gap?: number;
+    color?: string;
+  } = {},
 ) {
-  let { x, y, width, height, bars, gap } = config;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
-  x = x || 0;
-  y = y || 0;
-  bars = bars || 15;
-  gap = gap || 3;
-  width = width || canvas.width;
-  height = height || canvas.height;
+  const dpr = window.devicePixelRatio || 1;
+  const displayWidth = canvas.clientWidth;
+  const displayHeight = canvas.clientHeight;
 
-  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
+  // Ajusta a resolução interna
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+  ctx.scale(dpr, dpr);
+
+  ctx.imageSmoothingEnabled = false;
+  ctx.translate(0.5, 0.5); // evita subpixel blur
+
+  const {
+    x = 0,
+    y = 0,
+    bars = 15,
+    gap = 2,
+    width = displayWidth,
+    height = displayHeight,
+    color = config.color ?? "#00ff66",
+  } = config;
+
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = color;
 
   const step = Math.floor(soundBuffer.length / bars);
   const barWidth = (width - gap * (bars - 1)) / bars;
 
   for (let i = 0; i < bars; i++) {
     let sum = 0;
-
-    for (let j = 0; j < step; j++) {
-      sum += soundBuffer[i * step + j];
-    }
+    for (let j = 0; j < step; j++) sum += soundBuffer[i * step + j];
 
     const avg = sum / step;
-
-    let barHeight = (avg / 255) * height;
-    barHeight = barHeight > 4 ? barHeight : 4;
-
-    const barX = i * (barWidth + gap);
-    const barY = (height - barHeight) / 2;
-
-    ctx.fillStyle = "green";
+    const barHeight = Math.max((avg / 255) * height, 3);
+    const barX = x + i * (barWidth + gap);
+    const barY = y + (height - barHeight) / 2;
 
     drawRoundedRect(ctx, barX, barY, barWidth, barHeight, 2);
   }

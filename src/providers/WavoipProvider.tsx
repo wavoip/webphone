@@ -3,7 +3,6 @@ import React, { createContext, type ReactNode, useContext, useEffect, useState }
 import { useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
 import { buildAPI } from "@/lib/webphone-api";
-import { useWidget } from "@/providers/WidgetProvider";
 
 interface WavoipContextProps {
   wavoip: Wavoip;
@@ -16,7 +15,10 @@ interface WavoipContextProps {
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;
-  startCall: (to: string, fromTokens: string[]) => Promise<{
+  startCall: (
+    to: string,
+    fromTokens: string[],
+  ) => Promise<{
     err: {
       message: string;
       devices: {
@@ -35,10 +37,11 @@ interface WavoipProviderProps {
 }
 
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
-  const { open: openWidget, toggle: toggleWidget, close: closeWidget } = useWidget();
+  // const { open: openWidget, toggle: toggleWidget, close: closeWidget } = useWidget();
   const { devices, addDevice, removeDevice, disableDevice, enableDevice } = useDeviceManager({
     wavoip: wavoip,
   });
+
   const { offers, callOutgoing, callActive, startCall } = useCallManager({ wavoip, devices });
 
   const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
@@ -48,8 +51,20 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
   });
 
   useEffect(() => {
-    wavoip.requestMicrophonePermission();
-  }, [wavoip.requestMicrophonePermission]);
+    // Caso tenha call ativa, dá um aviso prévio caso o usuário tente navegar ou fechar essa página
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (callActive) {
+        event.preventDefault();
+        event.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [callActive]);
 
   useEffect(() => {
     return () => {
@@ -58,17 +73,19 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
   }, []);
 
   buildAPI({
-    getDevices: wavoip.getDevices,
-    addDevice: addDevice,
-    removeDevice: removeDevice,
-    enableDevice: enableDevice,
-    disableDevice: disableDevice,
-    startCall: startCall,
-    widget: {
-      open: openWidget,
-      close: closeWidget,
-      toggle: toggleWidget,
+    call: {
+      startCall: startCall,
+      getCallActive: () => callActive,
+      getCallOutgoing: () => callOutgoing,
+      getOffers: () => offers,
     },
+    device: {
+      getDevices: wavoip.getDevices,
+      addDevice: addDevice,
+      removeDevice: removeDevice,
+      enableDevice: enableDevice,
+      disableDevice: disableDevice,
+    }
   });
 
   return (

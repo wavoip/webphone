@@ -15,9 +15,9 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useWavoip } from "@/providers/WavoipProvider";
 import { handleMultimediaError } from "@/lib/utils";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
+import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [
   {
@@ -101,58 +101,55 @@ export default function KeyboardScreen() {
     setError("");
     setStatus(`Ligando de ${device}`);
 
-    await startCall(number, [device])
-      .then(({ err }) => {
-        if (!err) return setStatus("Ok"), setCallIsLoading(false);
+    await startCall(number, [device]).then(({ err }) => {
+      if (!err) return setStatus("Ok"), setCallIsLoading(false);
 
-        const error_message = err?.devices[0]?.reason ?? err.message;
+      const error_message = err?.devices[0]?.reason ?? err.message;
 
-        if (error_message === "Número não existe") {
-          setError(error_message);
-          setStatus("");
-          setCallIsLoading(false);
+      if (error_message === "Número não existe") {
+        setError(error_message);
+        setStatus("");
+        setCallIsLoading(false);
 
-          setTimeout(() => {
-            setError("");
-          }, 4000);
+        setTimeout(() => {
+          setError("");
+        }, 4000);
 
-          return;
-        }
+        return;
+      }
 
-        addNotification({
-          id: new Date(),
-          type: "CALL_FAILED",
-          detail: `${device} -> ${number}`,
-          message: error_message,
-          token: device,
-          isRead: false,
-          isHidden: false,
-          created_at: new Date(),
-        });
-
-        if (!isLast) {
-          // setStatus(err.message);
-          handleCall(devices.slice(1))
-        } else {
-          setStatus("Nenhum dispositivo está disponível");
-          setCallIsLoading(false);
-
-          setTimeout(() => {
-            setStatus("");
-          }, 3000);
-        }
-
+      addNotification({
+        id: new Date(),
+        type: "CALL_FAILED",
+        detail: `${device} -> ${number}`,
+        message: error_message,
+        token: device,
+        isRead: false,
+        isHidden: false,
+        created_at: new Date(),
       });
 
-  }
+      if (!isLast) {
+        // setStatus(err.message);
+        handleCall(devices.slice(1));
+      } else {
+        setStatus("Nenhum dispositivo está disponível");
+        setCallIsLoading(false);
+
+        setTimeout(() => {
+          setStatus("");
+        }, 3000);
+      }
+    });
+  };
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
 
-        const tokens = devices.filter((device) => device.enable).map((device) => device.token)
-        handleCall(["(35) 99994-2312", "(35) 97395-1769", ...tokens]);
+        const tokens = devices.filter((device) => device.enable).map((device) => device.token);
+        handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
     >
@@ -168,7 +165,7 @@ export default function KeyboardScreen() {
             const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
             setNumber(digits);
           }}
-          className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[24px]  wv:max-sm:text-[30px] wv:md:text-[24px]"
+          className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[24px]  wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
         />
         {/* <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">Brasil</p> */}
 
@@ -184,11 +181,7 @@ export default function KeyboardScreen() {
           </div>
         )}
 
-        {error && (
-          <p className="wv:text-[10px] wv:font-light wv:text-[red] wv:tracking-[.15em]">{error}</p>
-        )}
-
-
+        {error && <p className="wv:text-[10px] wv:font-light wv:text-[red] wv:tracking-[.15em]">{error}</p>}
       </div>
 
       <div className="wv:flex wv:max-w-[300px] wv:w-full">
@@ -198,7 +191,23 @@ export default function KeyboardScreen() {
               key={`webphone-keyboard-${key}`}
               type="button"
               variant={"secondary"}
-              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#F2F2F5] wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation"
+              className="wv:aspect-square wv:size-full wv:rounded-full 
+
+              
+              wv:hover:cursor-pointer 
+
+              wv:text-foreground 
+             wv:bg-muted
+              wv:hover:bg-accent
+              wv:active:bg-accent/60
+
+               wv:flex wv:flex-col 
+               wv:justify-center
+                wv:items-center wv:gap-0 
+
+              wv:transition-colors 
+              wv:duration-200 
+              wv:touch-manipulation"
               onClick={() => {
                 setNumber((prev) => prev + digit);
                 audio.pause();
@@ -231,7 +240,7 @@ export default function KeyboardScreen() {
             }}
             className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] vw:border-none wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
           >
-            <BackspaceIcon className="wv:size-6 wv:max-lg:size-8" weight="fill" />
+            <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
           <Button
@@ -244,10 +253,7 @@ export default function KeyboardScreen() {
             <PhoneIcon className="wv:size-7" weight="fill" />
           </Button>
         </div>
-      </div >
-
-
-
-    </form >
+      </div>
+    </form>
   );
 }

@@ -18,6 +18,9 @@ export function useDeviceManager({ wavoip }: Props) {
     })),
   );
 
+
+  console.log(_devices, "devices")
+
   const addDevice = useCallback(
     (token: string) => {
       const [device] = wavoip.addDevices([token]);
@@ -26,18 +29,20 @@ export function useDeviceManager({ wavoip }: Props) {
         return;
       }
 
-      setDevices((prev) => [...prev, {
-        ...device,
-        enable: ["open", "CONNECTOED"].includes(device.status as string),
-      }]);
+      setDevices((prev) => [
+        ...prev,
+        {
+          ...device,
+          enable: ["open", "CONNECTOED"].includes(device.status as string),
+        },
+      ]);
     },
     [wavoip.addDevices],
   );
 
   const removeDevice = useCallback(
     (token: string) => {
-      let response = wavoip.removeDevices([token]);
-      console.log("response", response);
+      wavoip.removeDevices([token]);
       setDevices((prev) => prev.filter((device) => device.token !== token));
     },
     [wavoip.removeDevices],
@@ -53,6 +58,10 @@ export function useDeviceManager({ wavoip }: Props) {
 
   useEffect(() => {
     for (const device of _devices) {
+      device.onContact((contact) => {
+        console.log("contact", contact)
+      });
+
       device.onQRCode((qrcode) => {
         setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...device, qrcode } : d)));
       });

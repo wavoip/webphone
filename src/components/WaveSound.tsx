@@ -1,4 +1,5 @@
 import type { CallActive } from "@wavoip/wavoip-api";
+import { useTheme } from "next-themes";
 import { type RefObject, useEffect, useRef } from "react";
 import { drawSoundwave } from "@/lib/picture-in-picture";
 
@@ -7,6 +8,7 @@ type Props = {
 };
 
 export function WaveSound({ call }: Props) {
+  const { theme } = useTheme();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationIDRef = useRef<number | null>(null);
 
@@ -16,9 +18,9 @@ export function WaveSound({ call }: Props) {
         return;
       }
 
-      draw(canvasRef.current, analyser, animationIDRef);
+      draw(canvasRef.current, analyser, animationIDRef, theme);
     });
-  }, [call?.audio_analyser]);
+  }, [call?.audio_analyser, theme]);
 
   useEffect(() => {
     return () => {
@@ -30,12 +32,21 @@ export function WaveSound({ call }: Props) {
 
   return (
     <div className="text-center">
-      <canvas ref={canvasRef} width={75} height={40} />
+      <canvas
+        ref={canvasRef}
+        width={75}
+        height={35}
+        style={{
+          width: "75px", // tamanho visual exato
+          height: "50px",
+          display: "block",
+        }}
+      />
     </div>
   );
 }
 
-function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, animationRef: RefObject<number | null>) {
+function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, animationRef: RefObject<number | null>, theme?: string) {
   animationRef.current = requestAnimationFrame(() => draw(canvas, analyser, animationRef));
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
@@ -46,5 +57,5 @@ function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, animationRef: R
   ctx.fillStyle = "white";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  drawSoundwave(canvas, dataArray, { gap: 2 });
+  drawSoundwave(canvas, dataArray, { gap: 2, color: theme === "dark" ? "#00ff66" : "#008000" });
 }

@@ -1,8 +1,7 @@
 import { Phone, PhoneX, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Device } from "@wavoip/wavoip-api";
-import { useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -16,16 +15,6 @@ type Props = {
 export function DeviceInfo({ device, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const badgeVariant = useMemo(
-    () =>
-      ["disconnected", "close", "error", "EXTERNAL_INTEGRATION_ERROR"].includes(device.status as string)
-        ? "destructive"
-        : ["BUILDING", "restarting", "hibernating", "WAITING_PAYMENT"].includes(device.status as string)
-          ? "secondary"
-          : "default",
-    [device.status],
-  );
 
   return (
     <div
@@ -47,8 +36,8 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                   </Button>
                   <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                     <Phone size={18} color="red" />
-                    <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
-                      +55 (11) 97395-1769
+                    <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                      {device.phone}
                     </p>
                   </div>
                 </TooltipTrigger>
@@ -57,10 +46,10 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                 </TooltipContent>
               </Tooltip>
             )}
-            {["connecting"].includes(device.status) && (
+            {(["connecting"].includes(device.status) || device.qrcode) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <QrCodeIcon size={18} />
-                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
                   Aguardando vincular Whatsapp
                 </p>
               </div>
@@ -84,32 +73,23 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
             {["open"].includes(device.status) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <Phone size={18} color="green" />
-                <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
-                  +55 (11) 97395-1769
+                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                  {device.phone}
                 </p>
               </div>
             )}
+            {/* {["UP"].includes(device.status) && (
+              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                <Phone size={18} color="green" />
+                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                  Disponível
+                </p>
+              </div>
+            )} */}
           </>
         )}
 
-        {/* {device.qrcode && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={"outline"}
-                className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                onClick={() => setShowQRCode(device.qrcode)}
-              >
-                <QrCodeIcon className="size-6" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Mostrar QRCode</p>
-            </TooltipContent>
-          </Tooltip>
-        )} */}
-
-        <p data-enable={device.enable} className="wv:text-[12px] wv:data-[enable=false]:text-muted-foreground">
+        <p data-enable={device.enable} className="wv:text-[12px] wv:text-foreground">
           {device.token}
         </p>
         {/* <div className="wv:flex wv:items-center wv:gap-2">
@@ -160,6 +140,24 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
           disabled={!["open", "CONNECTED"].includes(device.status as string)}
         />
+
+        {device.qrcode && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"ghost"}
+                className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
+                onClick={() => setShowQRCode(device.qrcode)}
+              >
+                <QrCodeIcon className="size-6" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Mostrar QRCode</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+
         <Button
           variant={"ghost"}
           className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"

@@ -16,6 +16,7 @@ type Props = {
 };
 
 export function CallButtons({ call }: Props) {
+  const [actionMade, setActionMade] = useState(false);
   const [muted, setMuted] = useState(false);
 
   return (
@@ -31,7 +32,7 @@ export function CallButtons({ call }: Props) {
             <PauseIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Espera</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
       </div>
 
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -45,7 +46,7 @@ export function CallButtons({ call }: Props) {
             <VideoCameraSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Video</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
       </div>
 
       {muted ? (
@@ -55,12 +56,13 @@ export function CallButtons({ call }: Props) {
             variant={"secondary"}
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:h-[55px] wv:w-[55px]"
             onClick={() => call?.unmute().then(() => setMuted(false))}
+            disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold wv:text-[red] ">
               <MicrophoneSlashIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-muted-40 wv:tracking-[.15em] wv:text-center">Falar</p>
+          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Falar</p>
         </div>
       ) : (
         <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -69,12 +71,13 @@ export function CallButtons({ call }: Props) {
             variant={"secondary"}
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:h-[55px] wv:w-[55px]"
             onClick={() => call?.mute().then(() => setMuted(true))}
+            disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
               <MicrophoneIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Silenciar</p>
+          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Silenciar</p>
         </div>
       )}
 
@@ -89,20 +92,26 @@ export function CallButtons({ call }: Props) {
             <PhoneTransferIcon size={32} weight="fill" />{" "}
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Transferir</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Transferir</p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button
           type="button"
           variant={"secondary"}
-          className="wv:aspect-square wv:size-[55px] wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#e7000b]"
-          onClick={() => call?.end()}
+          className="wv:aspect-square wv:size-[55px] wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#e7000b]"
+          onClick={() => {
+            setActionMade(true);
+            call?.end().finally(() => {
+              // setActionMade(false);
+            });
+          }}
+          disabled={actionMade}
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Finalizar</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foregroud wv:tracking-[.15em] wv:text-center">Finalizar</p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button
@@ -115,7 +124,7 @@ export function CallButtons({ call }: Props) {
             <DotsNineIcon size={32} />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:text-center">Teclado</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>
       </div>
     </div>
   );

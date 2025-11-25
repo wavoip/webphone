@@ -9,7 +9,9 @@ import {
   useRef,
   useState,
 } from "react";
+import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
+import { buildAPI } from "@/lib/webphone-api";
 
 type Position = { x: number; y: number };
 
@@ -70,12 +72,23 @@ export function WidgetProvider({ children, root }: { children: ReactNode; root: 
     [handleMouseMove, position.x, position.y],
   );
 
-  const stopDrag = () => {
+  const stopDrag = useCallback(() => {
     setIsDragging(false);
     document.body.style.userSelect = "unset";
     document.removeEventListener("mousemove", handleMouseMove);
+  }, [handleMouseMove]);
 
-  };
+  const open = useCallback(() => {
+    if (closed) setClosed(false);
+  }, [closed]);
+
+  const close = useCallback(() => {
+    if (!closed) setClosed(true);
+  }, [closed]);
+
+  const toggle = useCallback(() => {
+    setClosed((prev) => !prev);
+  }, []);
 
   useEffect(() => {
     function handleResize() {
@@ -94,7 +107,15 @@ export function WidgetProvider({ children, root }: { children: ReactNode; root: 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [stopDrag]);
+
+  buildAPI({
+    widget: {
+      open: open,
+      close: close,
+      toggle: toggle,
+    },
+  });
 
   return (
     <WidgetContext.Provider
@@ -122,7 +143,7 @@ export function WidgetProvider({ children, root }: { children: ReactNode; root: 
         onClick={() => setClosed(false)}
         size={"icon"}
         data-closed={closed}
-        className="wv:data-[closed=false]:hidden wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+        className="wv:data-[closed=false]:hidden wv: wv:absolute sm:wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
         style={{
           position: "fixed",
           bottom: "20px",
@@ -132,58 +153,16 @@ export function WidgetProvider({ children, root }: { children: ReactNode; root: 
       >
         <PhoneIcon className="wv:size-8" />
       </Button>
-      <div
-        // data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:fixed wv:flex wv:flex-col wv:w-dvw wv:h-dvh wv:bg-background wv:shadow-lg wv:touch-manipulation"
-        style={{
-          left: 0,
-          top: 0,
+      <Toaster
+        position="top-right"
+        className="!w-[400px]"
+        toastOptions={{
+          className: "wv:max-w-[400px] wv:w-full",
         }}
-      >
-        {children}
-      </div>
-    </WidgetContext.Provider>
-  );
-
-  return (
-    <WidgetContext.Provider
-      value={{
-        root,
-        position,
-        setPosition,
-        startDrag,
-        stopDrag,
-        isDragging,
-        closed,
-        close: () => {
-          if (!closed) setClosed(true);
-        },
-        open: () => {
-          if (closed) setClosed(false);
-        },
-        toggle: () => {
-          setClosed((prev) => !prev);
-        },
-      }}
-    >
-      <Button
-        type="button"
-        onClick={() => setClosed(false)}
-        size={"icon"}
+      />
+      <div
         data-closed={closed}
-        className="wv:data-[closed=false]:hidden wv:absolute wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          zIndex: 9999,
-        }}
-      >
-        <PhoneIcon className="wv:size-8" />
-      </Button>
-      <div
-        // data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:bg-background wv:shadow-lg"
+        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col  wv:w-70 wv:h-120 wv:rounded-2xl  wv:max-sm:fixed  wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
           left: position.x,
           top: position.y,

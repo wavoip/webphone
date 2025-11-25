@@ -1,13 +1,12 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
+import HangUp from "@/assets/sounds/hangup.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
+import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
-
-
-import HangUp from "@/assets/sounds/hangup.mp3";
 
 const hang_up_sound = new Audio(HangUp);
 
@@ -24,7 +23,7 @@ export default function CallScreen() {
     callActive?.onPeerUnmute(() => setPeerMuted(false));
     callActive?.onError((err) => setStatus(err));
     callActive?.onEnd(() => {
-      setStatus("Chamada encerrada")
+      setStatus("Chamada encerrada");
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
@@ -44,34 +43,30 @@ export default function CallScreen() {
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
       <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
-        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 ">
+        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground ">
           <WhatsappLogoIcon size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>
 
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
-            <AvatarImage src={callActive?.peer.profile_picture || undefined} />
-            <AvatarFallback>
-              {callActive?.peer?.display_name?.slice(0, 2) || callActive?.peer?.number?.slice(0, 2) || callActive?.peer?.slice(0, 2)}
-            </AvatarFallback>
+            <AvatarImage src={callActive?.peer.profilePicture || undefined} />
+            <AvatarFallback>{getFullnameLetters(callActive?.peer?.displayName)}</AvatarFallback>
           </Avatar>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start wv:overflow-hidden">
             <p className="wv:text-foreground wv:opacity-75 wv:text-[14px]">
               {status || formatDuration(durationSeconds)}
             </p>
 
-
-
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:font-normal wv:w-full">
-              <div className="wv:hidden  wv:group-hover/title:block " >
-                <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callActive?.peer.display_name || callActive?.peer.number}
+              <div className="wv:hidden  wv:group-hover/title:block ">
+                <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
+                  {callActive?.peer.displayName || callActive?.peer.phone}
                 </MarqueeText>
               </div>
 
-              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48" >
-                {callActive?.peer.display_name || callActive?.peer.number}
+              <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+                {callActive?.peer.displayName || callActive?.peer.phone}
               </p>
             </div>
           </div>
@@ -79,7 +74,7 @@ export default function CallScreen() {
 
         <div className="wv:flex wv:grow-1 wv:justify-center wv:items-end wv:pb-[15px] wv:opacity-80">
           {peerMuted ? (
-            <div className="wv:flex wv:h-[40px] wv:items-center wv:justify-cente wv:gap-1">
+            <div className="wv:flex wv:text-foreground wv:h-[40px] wv:items-center wv:justify-cente wv:gap-1">
               <MicrophoneSlashIcon />
               <p className="wv:text-[16px]">Silenciado</p>
             </div>
