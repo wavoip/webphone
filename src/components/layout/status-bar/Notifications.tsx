@@ -118,7 +118,7 @@ export function Notifications() {
               className="wv:text-[blue] wv:text-[12px] wv:select-none wv:p-1 wv:cursor-pointer"
               disabled={items >= notifications.length}
             >
-              <p >Ver mais</p>
+              <p>Ver mais</p>
             </Button>
 
             <Button

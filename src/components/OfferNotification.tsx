@@ -35,7 +35,7 @@ export function OfferNotification({ offer }: Props) {
   }, [offer]);
 
   return (
-    <div className="wv:flex wv:flex-col wv:gap-3 wv:w-[365px]">
+    <div className="wv:flex wv:flex-col wv:gap-3 wv:w-[365px] wv:bg-background wv:rounded-md wv:shadow-md wv:p-2 wv:m-2">
       <div className="wv:flex wv:flex-row wv:gap-1">
         <div className="wv:flex wv:flex-row wv:justify-between wv:gap-2 ">
           <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-75 wv:text-foreground">
@@ -63,7 +63,6 @@ export function OfferNotification({ offer }: Props) {
               {error && <p className="wv:text-xm wv:text-ellipsis wv:text-red-600">{error}</p>}
               {status && <p className="wv:text-foreground wv:opacity-40 wv:text-[14px] wv:select-none">{status}</p>}
             </>
-
           ) : (
             <p className="wv:text-foreground wv:opacity-40 wv:text-[14px] wv:select-none">{offer.peer?.phone}</p>
           )}

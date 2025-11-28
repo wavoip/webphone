@@ -9,7 +9,7 @@ import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
-  const { root, startDrag, stopDrag, close } = useWidget();
+  const { startDrag, stopDrag, close } = useWidget();
   const { showNotifications, showSettings } = useSettings();
   const { callActive, devices } = useWavoip();
 
@@ -28,7 +28,7 @@ export default function StatusBar() {
       <div className="wv:flex wv:gap-2">{callActive && <Ping call={callActive} />}</div>
       <div className="wv:flex wv:items-center wv:gap-2">
         {showNotifications && <Notifications />}
-        {showSettings && <SettingsModal devices={devices} root={root} />}
+        {showSettings && <SettingsModal devices={devices} />}
         <DevicesAlert devices={devices} />
         <Button
           type="button"
