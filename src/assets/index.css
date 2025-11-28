@@ -5,8 +5,6 @@
 
 /* Root CSS variables */
 :host, :root {
-  position: fixed;
-  inset: 0; /* shorthand for top/right/bottom/left:0 */
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
