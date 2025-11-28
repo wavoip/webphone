@@ -1,6 +1,6 @@
 import ReactDOM from "react-dom/client";
 import { App } from "@/App";
-import styles from "@/assets/style.css?inline";
+import styles from "@/assets/index.css?inline";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
@@ -11,22 +11,20 @@ class WebPhoneComponent {
 
     this.container = document.createElement("div");
     this.container.id = "webphone";
-    const shadow = this.container.attachShadow({ mode: "open" });
     document.body.appendChild(this.container);
 
-    // Inject Tailwind CSS
-    const styleTag = document.createElement("style");
-    styleTag.textContent = styles;
-    shadow.appendChild(styleTag);
+    const shadowRoot = this.container.attachShadow({ mode: "closed" });
 
-    // Create React root container inside shadow first
-    const containerRoot = document.createElement("div");
-    containerRoot.id = "root";
-    shadow.appendChild(containerRoot);
+    const style = document.createElement("style");
+    style.textContent = styles;
+    shadowRoot.appendChild(style);
 
-    // Then render React
-    this.root = ReactDOM.createRoot(containerRoot);
-    this.root.render(<App root={containerRoot} />);
+    const shadowContainer = document.createElement("div");
+    shadowContainer.id = "root";
+    shadowRoot.appendChild(shadowContainer);
+
+    this.root = ReactDOM.createRoot(shadowContainer);
+    this.root.render(<App shadowRoot={shadowRoot} />);
   }
 
   destroy() {

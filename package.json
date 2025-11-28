@@ -18,8 +18,8 @@
     }
   },
   "scripts": {
-    "dev": "vite -c vite.react.config.ts",
-    "build": "tsc -b && pnpm dlx @tailwindcss/cli -i ./src/assets/index.css -o ./src/assets/style.css && vite build -c vite.web.config.ts",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
     "lint": "pnpm exec biome check .",
     "preview": "vite preview"
   },

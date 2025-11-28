@@ -16,7 +16,6 @@ import { buildAPI } from "@/lib/webphone-api";
 type Position = { x: number; y: number };
 
 interface WidgetContextType {
-  root: Element;
   position: Position;
   isDragging: boolean;
   setPosition: (pos: Position) => void;
@@ -30,7 +29,7 @@ interface WidgetContextType {
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-export function WidgetProvider({ children, root }: { children: ReactNode; root: Element }) {
+export function WidgetProvider({ children }: { children: ReactNode }) {
   const [position, setPosition] = useState<Position>({
     x: document.body.clientWidth / 3,
     y: document.body.clientHeight / 3,
@@ -120,7 +119,6 @@ export function WidgetProvider({ children, root }: { children: ReactNode; root: 
   return (
     <WidgetContext.Provider
       value={{
-        root,
         position,
         setPosition,
         startDrag,
