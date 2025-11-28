@@ -46,7 +46,12 @@ export function WaveSound({ call }: Props) {
   );
 }
 
-function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, animationRef: RefObject<number | null>, theme?: string) {
+function draw(
+  canvas: HTMLCanvasElement,
+  analyser: AnalyserNode,
+  animationRef: RefObject<number | null>,
+  theme?: string,
+) {
   animationRef.current = requestAnimationFrame(() => draw(canvas, analyser, animationRef));
   const bufferLength = analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);

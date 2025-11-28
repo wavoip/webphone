@@ -124,6 +124,8 @@ async function drawPictureInPicture(canvas: HTMLCanvasElement) {
   // }
 }
 
+let smooth: number[] = [];
+
 export function drawSoundwave(
   canvas: HTMLCanvasElement,
   soundBuffer: Uint8Array,
@@ -141,25 +143,21 @@ export function drawSoundwave(
   if (!ctx) return;
 
   const dpr = window.devicePixelRatio || 1;
-  const displayWidth = canvas.clientWidth;
-  const displayHeight = canvas.clientHeight;
-
-  // Ajusta a resolução interna
-  canvas.width = displayWidth * dpr;
-  canvas.height = displayHeight * dpr;
+  canvas.width = canvas.clientWidth * dpr;
+  canvas.height = canvas.clientHeight * dpr;
   ctx.scale(dpr, dpr);
 
   ctx.imageSmoothingEnabled = false;
-  ctx.translate(0.5, 0.5); // evita subpixel blur
+  ctx.translate(0.5, 0.5);
 
   const {
     x = 0,
     y = 0,
+    width = canvas.clientWidth,
+    height = canvas.clientHeight,
     bars = 15,
     gap = 2,
-    width = displayWidth,
-    height = displayHeight,
-    color = config.color ?? "#00ff66",
+    color = "#00ff66",
   } = config;
 
   ctx.clearRect(0, 0, width, height);
@@ -168,19 +166,36 @@ export function drawSoundwave(
   const step = Math.floor(soundBuffer.length / bars);
   const barWidth = (width - gap * (bars - 1)) / bars;
 
-  for (let i = 0; i < bars; i++) {
-    let sum = 0;
-    for (let j = 0; j < step; j++) sum += soundBuffer[i * step + j];
+  // prepare smoothing array
+  if (smooth.length !== bars) smooth = Array(bars).fill(0);
 
+  const center = Math.floor(bars / 2);
+
+  for (let k = 0; k < bars; k++) {
+    const offset = k - center;
+    const index = Math.abs(offset); // espelha o buffer
+
+    // média da frequência para esse grupo
+    let sum = 0;
+    for (let j = 0; j < step; j++) {
+      sum += soundBuffer[index * step + j];
+    }
     const avg = sum / step;
-    const barHeight = Math.max((avg / 255) * height, 3);
-    const barX = x + i * (barWidth + gap);
+
+    // log scaling
+    const log = Math.pow(avg / 255, 0.6);
+    const targetHeight = Math.max(log * height, 3);
+
+    // easing
+    smooth[k] = smooth[k] * 0.75 + targetHeight * 0.25;
+
+    const barHeight = smooth[k];
+    const barX = x + center * (barWidth + gap) + offset * (barWidth + gap);
     const barY = y + (height - barHeight) / 2;
 
-    drawRoundedRect(ctx, barX, barY, barWidth, barHeight, 2);
+    drawRoundedRect(ctx, barX, barY, barWidth, barHeight, 3);
   }
 }
-
 function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
