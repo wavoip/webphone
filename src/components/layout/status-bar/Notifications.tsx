@@ -18,7 +18,6 @@ export function Notifications() {
     setItems(items + 5);
   };
 
-  // console.log(fr1, "fr1")
   const hasNotification = notifications.filter((notification) => !notification.isHidden).length > 0;
 
   const notificationsToRead = useMemo(() => {

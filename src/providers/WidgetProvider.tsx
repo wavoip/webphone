@@ -9,9 +9,10 @@ import {
   useRef,
   useState,
 } from "react";
-import { Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/sonner";
 import { buildAPI } from "@/lib/webphone-api";
+import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
 
@@ -30,6 +31,7 @@ interface WidgetContextType {
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 export function WidgetProvider({ children }: { children: ReactNode }) {
+  const { theme } = useTheme();
   const [position, setPosition] = useState<Position>({
     x: document.body.clientWidth / 3,
     y: document.body.clientHeight / 3,
@@ -151,7 +153,9 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
       >
         <PhoneIcon className="wv:size-8" />
       </Button>
+
       <Toaster
+        theme={theme}
         position="top-right"
         className="!w-[400px]"
         toastOptions={{

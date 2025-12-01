@@ -55,10 +55,6 @@ export function useDeviceManager({ wavoip }: Props) {
 
   useEffect(() => {
     for (const device of _devices) {
-      device.onContact((contact) => {
-        console.log("contact", contact);
-      });
-
       device.onQRCode((qrcode) => {
         setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...device, qrcode } : d)));
       });

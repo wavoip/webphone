@@ -22,13 +22,13 @@ export function App({ shadowRoot }: Props) {
       <SettingsProvider>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <WidgetProvider>
-            <ScreenProvider>
-              <WavoipProvider wavoip={wavoip}>
-                <NotificationsProvider>
+            <NotificationsProvider>
+              <ScreenProvider>
+                <WavoipProvider wavoip={wavoip}>
                   <WebPhone />
-                </NotificationsProvider>
-              </WavoipProvider>
-            </ScreenProvider>
+                </WavoipProvider>
+              </ScreenProvider>
+            </NotificationsProvider>
           </WidgetProvider>
         </ThemeProvider>
       </SettingsProvider>

@@ -37,7 +37,6 @@ interface WavoipProviderProps {
 }
 
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
-  // const { open: openWidget, toggle: toggleWidget, close: closeWidget } = useWidget();
   const { devices, addDevice, removeDevice, disableDevice, enableDevice } = useDeviceManager({
     wavoip: wavoip,
   });
@@ -56,6 +55,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
       if (callActive) {
         event.preventDefault();
         event.returnValue = "";
+        return "";
       }
     };
 
@@ -85,7 +85,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
       removeDevice: removeDevice,
       enableDevice: enableDevice,
       disableDevice: disableDevice,
-    }
+    },
   });
 
   return (

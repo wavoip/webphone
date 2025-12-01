@@ -64,10 +64,12 @@ export function useCallManager({ wavoip, devices }: Props) {
   const startRingtone = useCallback(() => {
     ringtone_sound.currentTime = 0;
     ringtone_sound.loop = true;
+    ringtone_sound.volume = 0.25;
     ringtone_sound.play();
 
     vibration_sound.loop = true;
     vibration_sound.currentTime = 0;
+    vibration_sound.volume = 0.25;
     vibration_sound.play();
   }, []);
 
@@ -83,9 +85,7 @@ export function useCallManager({ wavoip, devices }: Props) {
       if (callActive) return;
 
       function onOfferEnd() {
-        console.log("on offer end 1", offer.id, offers)
         setOffers((prev) => prev.filter(({ id }) => id !== offer.id));
-        console.log("on offer end 2", offer.id, offers)
         stopRingtone();
 
         setTimeout(() => {
@@ -130,6 +130,7 @@ export function useCallManager({ wavoip, devices }: Props) {
             enablePiP();
             setOffers([]);
             const callIntegrated = onCallAccept(call);
+            openWidget();
 
             return { call: callIntegrated, err };
           });
@@ -155,14 +156,12 @@ export function useCallManager({ wavoip, devices }: Props) {
         duration: 100000,
         className: "wv:max-w-[400px] wv:!w-full",
       });
-      openWidget();
     },
-    [offers, callActive, onCallAccept, openWidget, startRingtone, stopRingtone],
+    [callActive, onCallAccept, openWidget, startRingtone, stopRingtone],
   );
 
   const startCall = useCallback(
     async (to: string, fromTokens: string[] | null) => {
-
       const { call, err } = await wavoip.startCall({
         fromTokens: fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
         to,

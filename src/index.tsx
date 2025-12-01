@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
+import sonnerStyles from "sonner/dist/styles.css?inline";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
@@ -16,7 +17,10 @@ class WebPhoneComponent {
     const shadowRoot = this.container.attachShadow({ mode: "closed" });
 
     const style = document.createElement("style");
-    style.textContent = styles;
+    style.textContent = `
+    ${styles} 
+    ${sonnerStyles.replace(/(\[data-sonner-[^\]]+\])/g, `:host $1`)}
+    `;
     shadowRoot.appendChild(style);
 
     const shadowContainer = document.createElement("div");

@@ -35,7 +35,7 @@ export function OfferNotification({ offer }: Props) {
   }, [offer]);
 
   return (
-    <div className="wv:flex wv:flex-col wv:gap-3 wv:w-[365px] wv:bg-background wv:rounded-md wv:shadow-md wv:p-2 wv:m-2">
+    <div className="wv:flex wv:flex-col wv:gap-3 wv:w-[365px] wv:bg-background">
       <div className="wv:flex wv:flex-row wv:gap-1">
         <div className="wv:flex wv:flex-row wv:justify-between wv:gap-2 ">
           <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-75 wv:text-foreground">

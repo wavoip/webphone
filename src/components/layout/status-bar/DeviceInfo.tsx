@@ -159,8 +159,8 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         )}
 
         <Button
-          variant={"ghost"}
-          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
+          variant={"destructive"}
+          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
           onClick={() => {
             setConfirmDelete(true);
           }}
