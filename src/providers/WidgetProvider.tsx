@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { buildAPI } from "@/lib/webphone-api";
 import { useTheme } from "@/providers/ThemeProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 
 type Position = { x: number; y: number };
 
@@ -32,6 +33,8 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 export function WidgetProvider({ children }: { children: ReactNode }) {
   const { theme } = useTheme();
+  const { showWidgetButton } = useSettings();
+
   const [position, setPosition] = useState<Position>({
     x: document.body.clientWidth / 3,
     y: document.body.clientHeight / 3,
@@ -138,21 +141,23 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
         },
       }}
     >
-      <Button
-        type="button"
-        onClick={() => setClosed(false)}
-        size={"icon"}
-        data-closed={closed}
-        className="wv:data-[closed=false]:hidden wv: wv:absolute sm:wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          zIndex: 9999,
-        }}
-      >
-        <PhoneIcon className="wv:size-8" />
-      </Button>
+      {showWidgetButton && (
+        <Button
+          type="button"
+          onClick={() => setClosed(false)}
+          size={"icon"}
+          data-closed={closed}
+          className="wv:data-[closed=false]:hidden wv: wv:absolute sm:wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            zIndex: 9999,
+          }}
+        >
+          <PhoneIcon className="wv:size-8" />
+        </Button>
+      )}
 
       <Toaster
         theme={theme}
@@ -162,6 +167,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
           className: "wv:max-w-[400px] wv:w-full",
         }}
       />
+
       <div
         data-closed={closed}
         className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col  wv:w-70 wv:h-120 wv:rounded-2xl  wv:max-sm:fixed  wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
