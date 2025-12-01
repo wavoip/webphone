@@ -16,26 +16,32 @@ type Props = {
 
 const ringtone_sound = new Audio(Ringtone);
 const vibration_sound = new Audio(Vibration);
+let widgetStatusCache: null | boolean = null;
 
 export function useCallManager({ wavoip, devices }: Props) {
   const { setScreen } = useScreen();
-  const { open: openWidget } = useWidget();
+  const { closed: widgetIsClosed, setClosed: setWidgetClosed, open: openWidget } = useWidget();
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
-  const [callOutgoing, setCallOutgoing] = useState<CallOutgoing | undefined>(undefined);
-  const [callActive, setCallActive] = useState<CallActive | undefined>(undefined);
+  const [outgoing, setOutgoing] = useState<CallOutgoing | undefined>(undefined);
+  const [active, setActive] = useState<CallActive | undefined>(undefined);
 
   const onCallEnd = useCallback(() => {
     disableConfirmClose();
     disablePiP();
 
     setTimeout(() => {
+      if (widgetStatusCache) {
+        setWidgetClosed(widgetStatusCache);
+        widgetStatusCache = null;
+      }
+
       setScreen("keyboard");
-      setCallOutgoing(undefined);
-      setCallActive(undefined);
+      setOutgoing(undefined);
+      setActive(undefined);
       pictureInPicture.call = null;
     }, 3000);
-  }, [setScreen]);
+  }, [setScreen, setWidgetClosed]);
 
   const onCallAccept = useCallback(
     (call: CallActive) => {
@@ -53,7 +59,7 @@ export function useCallManager({ wavoip, devices }: Props) {
       };
 
       setScreen("call");
-      setCallActive(callIntegrated);
+      setActive(callIntegrated);
       pictureInPicture.call = call;
 
       return callIntegrated;
@@ -61,32 +67,13 @@ export function useCallManager({ wavoip, devices }: Props) {
     [onCallEnd, setScreen],
   );
 
-  const startRingtone = useCallback(() => {
-    ringtone_sound.currentTime = 0;
-    ringtone_sound.loop = true;
-    ringtone_sound.volume = 0.25;
-    ringtone_sound.play();
-
-    vibration_sound.loop = true;
-    vibration_sound.currentTime = 0;
-    vibration_sound.volume = 0.25;
-    vibration_sound.play();
-  }, []);
-
-  const stopRingtone = useCallback(() => {
-    if (!offers.length) {
-      ringtone_sound.pause();
-      vibration_sound.pause();
-    }
-  }, [offers]);
-
   const onOffer = useCallback(
     (offer: CallOffer) => {
-      if (callActive) return;
+      if (active) return;
 
       function onOfferEnd() {
         setOffers((prev) => prev.filter(({ id }) => id !== offer.id));
-        stopRingtone();
+        stopRingtone(offers);
 
         setTimeout(() => {
           toast.dismiss(offer.id);
@@ -120,30 +107,24 @@ export function useCallManager({ wavoip, devices }: Props) {
           });
         },
         async accept() {
-          return offer.accept().then(({ call, err }) => {
-            ringtone_sound.pause();
-            vibration_sound.pause();
+          const { call, err } = await offer.accept();
 
-            if (!call) return { call, err };
+          if (!call) return { call, err };
 
-            enableConfirmClose();
-            enablePiP();
-            setOffers([]);
-            const callIntegrated = onCallAccept(call);
-            openWidget();
+          setOffers([]);
+          stopRingtone(offers);
+          enablePiP();
+          openWidget();
+          widgetStatusCache = widgetIsClosed;
 
-            return { call: callIntegrated, err };
-          });
+          return { call: onCallAccept(call), err };
         },
         async reject() {
-          return offer.reject().then(({ err }) => {
-            ringtone_sound.pause();
-            vibration_sound.pause();
+          const { err } = await offer.reject();
 
-            enableConfirmClose();
+          if (!err) stopRingtone(offers);
 
-            return { err };
-          });
+          return { err };
         },
       };
 
@@ -153,14 +134,14 @@ export function useCallManager({ wavoip, devices }: Props) {
 
       toast(<OfferNotification offer={offerIntegrated} />, {
         id: offer.id,
-        duration: 100000,
+        duration: 100_000,
         className: "wv:max-w-[400px] wv:!w-full",
       });
     },
-    [callActive, onCallAccept, openWidget, startRingtone, stopRingtone],
+    [widgetIsClosed, active, onCallAccept, openWidget, offers],
   );
 
-  const startCall = useCallback(
+  const start = useCallback(
     async (to: string, fromTokens: string[] | null) => {
       const { call, err } = await wavoip.startCall({
         fromTokens: fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
@@ -173,8 +154,10 @@ export function useCallManager({ wavoip, devices }: Props) {
 
       call.onPeerAccept((activeCall) => {
         onCallAccept(activeCall);
-        setCallOutgoing(undefined);
+        setOutgoing(undefined);
       });
+
+      call.onUnanswered(() => onCallEnd());
 
       call.onEnd(() => onCallEnd());
 
@@ -184,7 +167,7 @@ export function useCallManager({ wavoip, devices }: Props) {
         onPeerAccept: (cb) => {
           call.onPeerAccept((activeCall) => {
             const callIntegrated = onCallAccept(activeCall);
-            setCallOutgoing(undefined);
+            setOutgoing(undefined);
             cb(callIntegrated);
           });
         },
@@ -194,9 +177,17 @@ export function useCallManager({ wavoip, devices }: Props) {
             onCallEnd();
           });
         },
+        onUnanswered: (cb) => {
+          call.onUnanswered(() => {
+            cb();
+            onCallEnd();
+          });
+        },
       };
 
-      setCallOutgoing(callOutgoinIntegrated);
+      widgetStatusCache = widgetIsClosed;
+      openWidget();
+      setOutgoing(callOutgoinIntegrated);
       setScreen("outgoing");
       enableConfirmClose();
       enablePiP();
@@ -204,12 +195,18 @@ export function useCallManager({ wavoip, devices }: Props) {
 
       return { err: null };
     },
-    [devices, onCallAccept, onCallEnd, setScreen, wavoip.startCall],
+    [devices, onCallAccept, onCallEnd, setScreen, wavoip.startCall, openWidget, widgetIsClosed],
   );
 
   wavoip.onOffer((offer) => onOffer(offer));
 
-  return { offers, callOutgoing, callActive, startCall };
+  return { offers, outgoing, active, start };
+}
+
+function handleBeforeUnload(e: BeforeUnloadEvent) {
+  e.preventDefault();
+  e.returnValue = "";
+  return "";
 }
 
 function enableConfirmClose() {
@@ -220,6 +217,21 @@ function disableConfirmClose() {
   window.removeEventListener("beforeunload", handleBeforeUnload);
 }
 
-function handleBeforeUnload(e: BeforeUnloadEvent) {
-  e.preventDefault();
+function startRingtone() {
+  ringtone_sound.currentTime = 0;
+  ringtone_sound.loop = true;
+  ringtone_sound.volume = 0.25;
+  ringtone_sound.play();
+
+  vibration_sound.loop = true;
+  vibration_sound.currentTime = 0;
+  vibration_sound.volume = 0.25;
+  vibration_sound.play();
+}
+
+function stopRingtone(offers: CallOffer[]) {
+  if (!offers.length) {
+    ringtone_sound.pause();
+    vibration_sound.pause();
+  }
 }

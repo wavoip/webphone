@@ -37,47 +37,52 @@ interface WavoipProviderProps {
 }
 
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
-  const { devices, addDevice, removeDevice, disableDevice, enableDevice } = useDeviceManager({
-    wavoip: wavoip,
-  });
+  const {
+    devices,
+    add: addDevice,
+    remove: removeDevice,
+    disable: disableDevice,
+    enable: enableDevice,
+  } = useDeviceManager({ wavoip: wavoip });
 
-  const { offers, callOutgoing, callActive, startCall } = useCallManager({ wavoip, devices });
+  const { offers, outgoing: callOutgoing, active: callActive, start: startCall } = useCallManager({ wavoip, devices });
 
   const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
 
-  wavoip.onMultimediaError((err) => {
-    setMultimediaError(err);
-  });
-
   useEffect(() => {
-    // Caso tenha call ativa, dá um aviso prévio caso o usuário tente navegar ou fechar essa página
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (callActive) {
-        event.preventDefault();
-        event.returnValue = "";
-        return "";
-      }
-    };
+    wavoip.onMultimediaError((err) => {
+      setMultimediaError(err);
+    });
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [callActive]);
-
-  useEffect(() => {
     return () => {
       delete window.wavoip;
     };
-  }, []);
+  }, [wavoip]);
 
   buildAPI({
     call: {
       startCall: startCall,
-      getCallActive: () => callActive,
-      getCallOutgoing: () => callOutgoing,
-      getOffers: () => offers,
+      getCallActive: () => {
+        if (!callActive) return undefined;
+        const { id, type, status, device_token, direction, peer, muted } = callActive;
+        return { id, type, status, device_token, direction, peer, muted };
+      },
+      getCallOutgoing: () => {
+        if (!callOutgoing) return undefined;
+        const { id, type, status, device_token, direction, peer, muted } = callOutgoing;
+        return { id, type, status, device_token, direction, peer, muted };
+      },
+      getOffers: () => {
+        return offers.map(({ id, type, status, device_token, direction, peer, muted }) => ({
+          id,
+          type,
+          status,
+          device_token,
+          direction,
+          peer,
+          muted,
+        }));
+      },
     },
     device: {
       getDevices: wavoip.getDevices,

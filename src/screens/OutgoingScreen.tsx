@@ -1,7 +1,6 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import Calling from "@/assets/sounds/calling.mp3";
-import Hangup from "@/assets/sounds/hangup.mp3";
 import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
@@ -10,7 +9,6 @@ import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const calling_sound = new Audio(Calling);
-const hangup_sound = new Audio(Hangup);
 const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
@@ -22,24 +20,28 @@ export default function OutgoingScreen() {
     callOutgoing?.onStatus((status) => {
       if (status === "CALLING") {
         setStatus("Ligando...");
+        return;
       }
 
       if (status === "RINGING") {
         calling_sound.currentTime = 0;
-        calling_sound.play();
+        calling_sound.volume = 0.25;
         calling_sound.loop = true;
+        calling_sound.play();
         setStatus("Chamando...");
+        return;
       }
 
       if (status === "FAILED") {
         postalcode_sound.currentTime = 0;
+        postalcode_sound.volume = 0.25;
         postalcode_sound.play();
         setStatus("A ligação falhou");
+        return;
       }
 
-      if (status !== "CALLING" && status !== "RINGING") {
-        calling_sound.pause();
-      }
+      calling_sound.pause();
+      postalcode_sound.pause();
     });
 
     callOutgoing?.onPeerReject(() => {
@@ -49,14 +51,9 @@ export default function OutgoingScreen() {
     callOutgoing?.onUnanswered(() => {
       setStatus("Chamada não atendida");
       postalcode_sound.currentTime = 0;
+      postalcode_sound.volume = 0.25;
       postalcode_sound.play();
     });
-
-    callOutgoing?.onEnd(() => {
-      setStatus("Chamada encerrada");
-      hangup_sound.currentTime = 0;
-      hangup_sound.play();
-    })
   }, [callOutgoing]);
 
   return (

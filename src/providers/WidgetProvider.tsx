@@ -12,8 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { buildAPI } from "@/lib/webphone-api";
-import { useTheme } from "@/providers/ThemeProvider";
 import { useSettings } from "@/providers/SettingsProvider";
+import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
 
@@ -24,6 +24,7 @@ interface WidgetContextType {
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
   closed: boolean;
+  setClosed: React.Dispatch<React.SetStateAction<boolean>>;
   close: () => void;
   open: () => void;
   toggle: () => void;
@@ -130,6 +131,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
         stopDrag,
         isDragging,
         closed,
+        setClosed,
         close: () => {
           if (!closed) setClosed(true);
         },

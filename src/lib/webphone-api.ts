@@ -2,6 +2,10 @@ import type { CallActive, CallOffer, CallOutgoing, Wavoip } from "@wavoip/wavoip
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme } from "@/providers/ThemeProvider";
 
+type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
+type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
+type CallOfferProps = Pick<CallOffer, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
+
 export type WebphoneAPI = {
   call?: {
     startCall?: (
@@ -21,9 +25,9 @@ export type WebphoneAPI = {
           err: null;
         }
     >;
-    getCallActive?: () => CallActive | undefined;
-    getCallOutgoing?: () => CallOutgoing | undefined;
-    getOffers?: () => CallOffer[];
+    getCallActive?: () => CallActiveProps | undefined;
+    getCallOutgoing?: () => CallOutgoingProps | undefined;
+    getOffers?: () => CallOfferProps[];
     setInput?: () => void;
   };
   device?: {
@@ -76,34 +80,21 @@ window.wavoip = webphoneAPI;
 
 export function buildAPI(api: WebphoneAPI) {
   if (api.call) {
-    webphoneAPI.call = {
-      ...api.call,
-    };
+    webphoneAPI.call = api.call;
   }
   if (api.notifications) {
-    webphoneAPI.notifications = {
-      ...api.notifications,
-    };
+    webphoneAPI.notifications = api.notifications;
   }
   if (api.widget) {
-    webphoneAPI.widget = {
-      ...api.widget,
-    };
+    webphoneAPI.widget = api.widget;
   }
   if (api.theme) {
-    webphoneAPI.theme = {
-      ...api.theme,
-    };
+    webphoneAPI.theme = api.theme;
   }
   if (api.settings) {
-    webphoneAPI.settings = {
-      ...api.settings,
-    };
+    webphoneAPI.settings = api.settings;
   }
-
   if (api.device) {
-    webphoneAPI.device = {
-      ...api.device,
-    };
+    webphoneAPI.device = api.device;
   }
 }

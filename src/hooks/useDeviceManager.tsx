@@ -18,7 +18,7 @@ export function useDeviceManager({ wavoip }: Props) {
     })),
   );
 
-  const addDevice = useCallback(
+  const add = useCallback(
     (token: string) => {
       const [device] = wavoip.addDevices([token]);
 
@@ -37,7 +37,7 @@ export function useDeviceManager({ wavoip }: Props) {
     [wavoip.addDevices],
   );
 
-  const removeDevice = useCallback(
+  const remove = useCallback(
     (token: string) => {
       wavoip.removeDevices([token]);
       setDevices((prev) => prev.filter((device) => device.token !== token));
@@ -45,11 +45,11 @@ export function useDeviceManager({ wavoip }: Props) {
     [wavoip.removeDevices],
   );
 
-  const enableDevice = useCallback((token: string) => {
+  const enable = useCallback((token: string) => {
     setDevices((prev) => prev.map((device) => (device.token === token ? { ...device, enable: true } : device)));
   }, []);
 
-  const disableDevice = useCallback((token: string) => {
+  const disable = useCallback((token: string) => {
     setDevices((prev) => prev.map((device) => (device.token === token ? { ...device, enable: false } : device)));
   }, []);
 
@@ -72,5 +72,5 @@ export function useDeviceManager({ wavoip }: Props) {
     saveSettings(_devices);
   }, [_devices]);
 
-  return { devices: _devices, addDevice, removeDevice, enableDevice, disableDevice };
+  return { devices: _devices, add, remove, enable, disable };
 }
