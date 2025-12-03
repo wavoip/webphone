@@ -15,7 +15,6 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { handleMultimediaError } from "@/lib/utils";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -90,7 +89,7 @@ export default function KeyboardScreen() {
   const [error, setError] = useState("");
   const [callIsLoading, setCallIsLoading] = useState(false);
 
-  const { multimediaError, startCall, devices } = useWavoip();
+  const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
 
   const handleCall = async (devices: string[]) => {
@@ -157,10 +156,6 @@ export default function KeyboardScreen() {
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
     >
-      {!!multimediaError && (
-        <p className="wv:flex wv:justify-center wv:items-center">{handleMultimediaError(multimediaError)}</p>
-      )}
-
       <div className="wv:text-center">
         <Input
           placeholder="Digite..."
@@ -252,7 +247,7 @@ export default function KeyboardScreen() {
             size={"icon"}
             // className="wv:text-background wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[56px]"
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
-            disabled={!!multimediaError || callIsLoading}
+            disabled={callIsLoading}
           >
             <PhoneIcon className="wv:size-7" weight="fill" />
           </Button>

@@ -1,5 +1,5 @@
-import type { CallActive, CallOffer, CallOutgoing, Device, MultimediaError, Wavoip } from "@wavoip/wavoip-api";
-import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
+import type { CallActive, CallOffer, CallOutgoing, Device, Wavoip } from "@wavoip/wavoip-api";
+import React, { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
 import { buildAPI } from "@/lib/webphone-api";
@@ -10,7 +10,6 @@ interface WavoipContextProps {
   offers: CallOffer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
-  multimediaError?: MultimediaError;
   addDevice: (token: string) => void;
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
@@ -47,17 +46,11 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
 
   const { offers, outgoing: callOutgoing, active: callActive, start: startCall } = useCallManager({ wavoip, devices });
 
-  const [multimediaError, setMultimediaError] = useState<MultimediaError | undefined>(undefined);
-
   useEffect(() => {
-    wavoip.onMultimediaError((err) => {
-      setMultimediaError(err);
-    });
-
     return () => {
       delete window.wavoip;
     };
-  }, [wavoip]);
+  }, []);
 
   buildAPI({
     call: {
@@ -101,7 +94,6 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
         offers,
         callOutgoing,
         callActive,
-        multimediaError,
         startCall,
         addDevice,
         removeDevice,
