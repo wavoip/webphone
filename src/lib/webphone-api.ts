@@ -55,7 +55,7 @@ export type WebphoneAPI = {
   settings?: {
     showNotifications: boolean;
     showSettings: boolean;
-    showAudio: boolean;
+    // showAudio: boolean;
     showDevices: boolean;
     showAddDevices: boolean;
     showEnableDevices: boolean;
@@ -64,7 +64,7 @@ export type WebphoneAPI = {
     showWidgetButton: boolean;
     setShowNotifications: React.Dispatch<React.SetStateAction<boolean>>;
     setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
+    // setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
     setShowDevices: React.Dispatch<React.SetStateAction<boolean>>;
     setShowAddDevices: React.Dispatch<React.SetStateAction<boolean>>;
     setShowEnableDevices: React.Dispatch<React.SetStateAction<boolean>>;

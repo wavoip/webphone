@@ -17,8 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSettings } from "@/providers/SettingsProvider";
-import { useWavoip } from "@/providers/WavoipProvider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
   devices: (Device & { enable: boolean })[];
@@ -52,7 +52,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:max-sm:p-2 wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2">
+      <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2">
         <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
       <DialogContent
