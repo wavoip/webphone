@@ -13,7 +13,6 @@ type SettingsProviderState = {
   showAddDevices: boolean;
   showEnableDevices: boolean;
   showRemoveDevices: boolean;
-  showKeyboardScreen: boolean;
   showWidgetButton: boolean;
   setShowNotifications: React.Dispatch<React.SetStateAction<boolean>>;
   setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,7 +21,6 @@ type SettingsProviderState = {
   setShowAddDevices: React.Dispatch<React.SetStateAction<boolean>>;
   setShowEnableDevices: React.Dispatch<React.SetStateAction<boolean>>;
   setShowRemoveDevices: React.Dispatch<React.SetStateAction<boolean>>;
-  setShowKeyboardScreen: React.Dispatch<React.SetStateAction<boolean>>;
   setShowWidgetButton: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
@@ -36,7 +34,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [showAddDevices, setShowAddDevices] = useState<boolean>(true);
   const [showEnableDevices, setShowEnableDevices] = useState<boolean>(true);
   const [showRemoveDevices, setShowRemoveDevices] = useState<boolean>(true);
-  const [showKeyboardScreen, setShowKeyboardScreen] = useState<boolean>(true);
   const [showWidgetButton, setShowWidgetButton] = useState<boolean>(true);
 
   buildAPI({
@@ -48,7 +45,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       showAddDevices,
       showEnableDevices,
       showRemoveDevices,
-      showKeyboardScreen,
       showWidgetButton,
       setShowNotifications,
       setShowSettings,
@@ -57,7 +53,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
       setShowAddDevices,
       setShowEnableDevices,
       setShowRemoveDevices,
-      setShowKeyboardScreen,
       setShowWidgetButton,
     },
   });
@@ -72,7 +67,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         showAddDevices,
         showEnableDevices,
         showRemoveDevices,
-        showKeyboardScreen,
         showWidgetButton,
         setShowWidgetButton,
         setShowNotifications,
@@ -82,7 +76,6 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
         setShowAddDevices,
         setShowEnableDevices,
         setShowRemoveDevices,
-        setShowKeyboardScreen,
       }}
     >
       {children}

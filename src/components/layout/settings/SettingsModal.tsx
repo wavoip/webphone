@@ -58,7 +58,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
       <DialogContent
         container={shadowRoot}
         onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:h-1/2 wv:z-[999999999999]"
+        className="wv:flex wv:flex-col wv:h-1/2"
       >
         <DialogTitle className="wv:sr-only">Configurações</DialogTitle>
         <DialogDescription className="wv:sr-only">Aqui você pode configurar todo webphone</DialogDescription>

@@ -5,7 +5,7 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -35,36 +35,30 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 export function WidgetProvider({ children }: { children: ReactNode }) {
   const { theme } = useTheme();
   const { showWidgetButton } = useSettings();
-
-  const [position, setPosition] = useState<Position>({
-    x: document.body.clientWidth / 3,
-    y: document.body.clientHeight / 3,
-  });
-  const [isDragging, setIsDragging] = useState(false);
-  const [closed, setClosed] = useState(true);
+  const divRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
+  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [closed, setClosed] = useState(true);
+
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
+    if (!divRef.current) return;
     let x = e.clientX - offsetRef.current.x;
     let y = e.clientY - offsetRef.current.y;
 
-    if (x < 0) {
-      x = 0;
-    }
-    if (y < 0) {
-      y = 0;
-    }
-    if (x > document.body.clientWidth - 280) {
-      x = document.body.clientWidth - 280;
-    }
-    if (y > document.body.clientHeight - 480) {
-      y = document.body.clientHeight - 480;
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+
+    if (x > window.innerWidth - divRef.current.getBoundingClientRect().width) {
+      x = window.innerWidth - divRef.current.getBoundingClientRect().width;
     }
 
-    setPosition({
-      x: x,
-      y: y,
-    });
+    if (y > document.body.clientHeight - divRef.current.getBoundingClientRect().height) {
+      y = document.body.clientHeight - divRef.current.getBoundingClientRect().height;
+    }
+
+    setPosition({ x, y });
   }, []);
 
   const startDrag = useCallback(
@@ -95,24 +89,54 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     setClosed((prev) => !prev);
   }, []);
 
-  useEffect(() => {
-    function handleResize() {
-      setPosition({
-        x: document.body.clientWidth / 3,
-        y: document.body.clientHeight / 3,
-      });
-    }
+  useLayoutEffect(() => {
+    if (!open || !divRef.current) return;
 
-    document.addEventListener("mouseleave", () => {
-      stopDrag(); // encerra o drag
-    });
+    const rect = divRef.current.getBoundingClientRect();
+
+    let x = window.innerWidth - rect.width - 24;
+    let y = window.innerHeight - rect.height - 24;
+
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+
+    setPosition({ x, y });
+
+    document.addEventListener("mouseleave", stopDrag);
+
+    return () => {
+      document.removeEventListener("mouseleave", stopDrag);
+    };
+  }, [open, stopDrag]);
+
+  useLayoutEffect(() => {
+    function handleResize() {
+      if (!divRef.current) return;
+
+      const div = divRef.current.getBoundingClientRect();
+      let x = null;
+      let y = null;
+
+      if (div.x + div.width > window.innerWidth) {
+        x = window.innerWidth - divRef.current.getBoundingClientRect().width;
+      }
+
+      if (div.y + div.height > window.innerHeight) {
+        y = window.innerHeight - divRef.current.getBoundingClientRect().height;
+        if (y < 0) y = 0;
+      }
+
+      if (x || y) {
+        setPosition((position) => ({ x: x || position.x, y: y || position.y }));
+      }
+    }
 
     window.addEventListener("resize", handleResize);
 
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [stopDrag]);
+  }, []);
 
   buildAPI({
     widget: {
@@ -149,12 +173,11 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
           onClick={() => setClosed(false)}
           size={"icon"}
           data-closed={closed}
-          className="wv:data-[closed=false]:hidden wv: wv:absolute sm:wv:fixed wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+          className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
           style={{
             position: "fixed",
             bottom: "20px",
             right: "20px",
-            zIndex: 9999,
           }}
         >
           <PhoneIcon className="wv:size-8" />
@@ -171,9 +194,11 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
       />
 
       <div
+        ref={divRef}
         data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:absolute wv:flex wv:flex-col  wv:w-70 wv:h-120 wv:rounded-2xl  wv:max-sm:fixed  wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation wv:z-[2147483647]"
+        className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
+          position: "fixed",
           left: position.x,
           top: position.y,
         }}

@@ -1,14 +1,15 @@
 import ReactDOM from "react-dom/client";
+import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
-import sonnerStyles from "sonner/dist/styles.css?inline";
+import { type WebphoneAPI, webphoneAPIPromise } from "@/lib/webphone-api";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  render() {
-    if (this.root) return;
+  async render() {
+    if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");
     this.container.id = "webphone";
@@ -29,6 +30,10 @@ class WebPhoneComponent {
 
     this.root = ReactDOM.createRoot(shadowContainer);
     this.root.render(<App shadowRoot={shadowRoot} />);
+
+    const webphoneAPI = await webphoneAPIPromise;
+    window.wavoip = webphoneAPI;
+    return webphoneAPI;
   }
 
   destroy() {
@@ -41,6 +46,8 @@ class WebPhoneComponent {
 
     this.root = null;
     this.container = null;
+
+    window.wavoip = undefined;
   }
 }
 

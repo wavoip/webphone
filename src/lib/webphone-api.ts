@@ -7,94 +7,89 @@ type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "di
 type CallOfferProps = Pick<CallOffer, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
 
 export type WebphoneAPI = {
-  call?: {
-    startCall?: (
+  call: {
+    startCall: (
       to: string,
       fromTokens: string[] | null,
-    ) => Promise<
-      | {
-          err: {
-            message: string;
-            devices: {
-              token: string;
-              reason: string;
-            }[];
-          };
-        }
-      | {
-          err: null;
-        }
-    >;
-    getCallActive?: () => CallActiveProps | undefined;
-    getCallOutgoing?: () => CallOutgoingProps | undefined;
-    getOffers?: () => CallOfferProps[];
-    setInput?: () => void;
+    ) => Promise<{ err: { message: string; devices: { token: string; reason: string }[] } } | { err: null }>;
+    getCallActive: () => CallActiveProps | undefined;
+    getCallOutgoing: () => CallOutgoingProps | undefined;
+    getOffers: () => CallOfferProps[];
+    setInput: () => void;
   };
-  device?: {
+  device: {
     getDevices: Wavoip["getDevices"];
     addDevice: (token: string) => void;
     removeDevice: (token: string) => void;
     enableDevice: (token: string) => void;
     disableDevice: (token: string) => void;
   };
-  notifications?: {
+  notifications: {
     getNotifications: () => NotificationsType[];
     addNotification: (notification: NotificationsType) => void;
     removeNotification: (id: Date) => void;
     clearNotifications: () => void;
     readNotifications: () => void;
   };
-  widget?: {
+  widget: {
     open: () => void;
     close: () => void;
     toggle: () => void;
   };
-  theme?: {
+  theme: {
     setTheme: (theme: Theme) => void;
   };
-  settings?: {
+  settings: {
     showNotifications: boolean;
     showSettings: boolean;
-    // showAudio: boolean;
     showDevices: boolean;
     showAddDevices: boolean;
     showEnableDevices: boolean;
     showRemoveDevices: boolean;
-    showKeyboardScreen: boolean;
     showWidgetButton: boolean;
     setShowNotifications: React.Dispatch<React.SetStateAction<boolean>>;
     setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
-    // setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
     setShowDevices: React.Dispatch<React.SetStateAction<boolean>>;
     setShowAddDevices: React.Dispatch<React.SetStateAction<boolean>>;
     setShowEnableDevices: React.Dispatch<React.SetStateAction<boolean>>;
     setShowRemoveDevices: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowKeyboardScreen: React.Dispatch<React.SetStateAction<boolean>>;
     setShowWidgetButton: React.Dispatch<React.SetStateAction<boolean>>;
   };
 };
 
-export const webphoneAPI: WebphoneAPI = {};
+let resolveApi: ((api: PromiseLike<WebphoneAPI> | WebphoneAPI) => void) | null = null;
 
-window.wavoip = webphoneAPI;
+export const webphoneAPIPromise = new Promise<WebphoneAPI>((resolve) => {
+  resolveApi = resolve;
+});
 
-export function buildAPI(api: WebphoneAPI) {
+export const apiAggregator: Partial<WebphoneAPI> = {};
+
+export function buildAPI(api: Partial<WebphoneAPI>) {
   if (api.call) {
-    webphoneAPI.call = api.call;
+    apiAggregator.call = api.call;
   }
   if (api.notifications) {
-    webphoneAPI.notifications = api.notifications;
+    apiAggregator.notifications = api.notifications;
   }
   if (api.widget) {
-    webphoneAPI.widget = api.widget;
+    apiAggregator.widget = api.widget;
   }
   if (api.theme) {
-    webphoneAPI.theme = api.theme;
+    apiAggregator.theme = api.theme;
   }
   if (api.settings) {
-    webphoneAPI.settings = api.settings;
+    apiAggregator.settings = api.settings;
   }
   if (api.device) {
-    webphoneAPI.device = api.device;
+    apiAggregator.device = api.device;
+  }
+
+  validateAPI(apiAggregator);
+}
+
+function validateAPI(api: Partial<WebphoneAPI>) {
+  if (api.call && api.notifications && api.widget && api.theme && api.settings && api.device) {
+    resolveApi?.(api as WebphoneAPI);
   }
 }
