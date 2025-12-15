@@ -8,14 +8,14 @@ type CallOfferProps = Pick<CallOffer, "id" | "type" | "device_token" | "directio
 
 export type WebphoneAPI = {
   call: {
-    startCall: (
+    startCall?: (
       to: string,
       fromTokens: string[] | null,
     ) => Promise<{ err: { message: string; devices: { token: string; reason: string }[] } } | { err: null }>;
-    getCallActive: () => CallActiveProps | undefined;
-    getCallOutgoing: () => CallOutgoingProps | undefined;
-    getOffers: () => CallOfferProps[];
-    setInput: () => void;
+    getCallActive?: () => CallActiveProps | undefined;
+    getCallOutgoing?: () => CallOutgoingProps | undefined;
+    getOffers?: () => CallOfferProps[];
+    setInput?: () => void;
   };
   device: {
     getDevices: Wavoip["getDevices"];
