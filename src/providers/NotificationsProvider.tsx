@@ -118,6 +118,6 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
 export function useNotificationManager() {
   const ctx = useContext(NotificationsContext);
-  if (!ctx) throw new Error("useScreen deve ser usado dentro de <NotificationsProvider>");
+  if (!ctx) throw new Error("useNotificationManager deve ser usado dentro de <NotificationsProvider>");
   return ctx;
 }
