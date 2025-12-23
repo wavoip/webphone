@@ -78,7 +78,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
       },
     },
     device: {
-      getDevices: wavoip.getDevices,
+      getDevices: () => wavoip.getDevices(),
       addDevice: addDevice,
       removeDevice: removeDevice,
       enableDevice: enableDevice,
