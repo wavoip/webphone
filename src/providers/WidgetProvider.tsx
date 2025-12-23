@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { buildAPI } from "@/lib/webphone-api";
-import { useSettings } from "@/providers/SettingsProvider";
+import { useSettings, type AppConfig } from "@/providers/SettingsProvider";
 import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
@@ -32,7 +32,12 @@ interface WidgetContextType {
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-export function WidgetProvider({ children }: { children: ReactNode }) {
+type Props = {
+  children: ReactNode;
+  config: AppConfig;
+};
+
+export function WidgetProvider({ children, config }: Props) {
   const { theme } = useTheme();
   const { showWidgetButton } = useSettings();
   const divRef = useRef<HTMLDivElement>(null);
@@ -40,7 +45,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [closed, setClosed] = useState(true);
+  const [closed, setClosed] = useState<boolean>(config.widget?.startOpen || true);
 
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     if (!divRef.current) return;
@@ -140,9 +145,9 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   buildAPI({
     widget: {
-      open: open,
-      close: close,
-      toggle: toggle,
+      open: () => open(),
+      close: () => close(),
+      toggle: () => toggle(),
     },
   });
 

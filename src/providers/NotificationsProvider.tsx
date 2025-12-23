@@ -30,6 +30,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   const getNotifications = useCallback(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
+    console.log({ stored });
     return stored ? (JSON.parse(stored) as NotificationsType[]) : [];
   }, []);
 
@@ -92,11 +93,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   buildAPI({
     notifications: {
-      getNotifications: getNotifications,
-      clearNotifications: clearNotifications,
-      addNotification: addNotification,
-      removeNotification: removeNotification,
-      readNotifications: readNotifications,
+      getNotifications: () => getNotifications(),
+      clearNotifications: () => clearNotifications(),
+      addNotification: (...args) => addNotification(...args),
+      removeNotification: (...args) => removeNotification(...args),
+      readNotifications: () => readNotifications(),
     },
   });
 

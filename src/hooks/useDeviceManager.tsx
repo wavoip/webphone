@@ -1,6 +1,7 @@
 import type { Device, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useEffect, useState } from "react";
 import { getSettings, saveSettings } from "@/lib/device-settings";
+import { useSettings } from "@/providers/SettingsProvider";
 
 export type DeviceState = Device & { enable: boolean };
 
@@ -11,6 +12,10 @@ type Props = {
 const deviceSettings = getSettings();
 
 export function useDeviceManager({ wavoip }: Props) {
+  const {
+    init: { persistTokens },
+  } = useSettings();
+
   const [_devices, setDevices] = useState<DeviceState[]>(() =>
     wavoip.getDevices().map((device) => ({ ...device, enable: !!deviceSettings.get(device.token)?.enable })),
   );
@@ -58,8 +63,10 @@ export function useDeviceManager({ wavoip }: Props) {
       bindDeviceEvents(device);
     }
 
-    saveSettings(_devices);
-  }, [bindDeviceEvents, _devices]);
+    if (persistTokens) {
+      saveSettings(_devices);
+    }
+  }, [persistTokens, bindDeviceEvents, _devices]);
 
   return { devices: _devices, add, remove, enable, disable };
 }

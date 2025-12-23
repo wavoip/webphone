@@ -10,7 +10,7 @@ interface WavoipContextProps {
   offers: CallOffer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
-  addDevice: (token: string) => void;
+  addDevice: (token: string, persist: boolean) => void;
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;
@@ -54,7 +54,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
 
   buildAPI({
     call: {
-      startCall: startCall,
+      startCall: (...args) => startCall(...args),
       getCallActive: () => {
         if (!callActive) return undefined;
         const { id, type, status, device_token, direction, peer, muted } = callActive;
@@ -78,11 +78,11 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
       },
     },
     device: {
-      getDevices: () => wavoip.getDevices(),
-      addDevice: addDevice,
-      removeDevice: removeDevice,
-      enableDevice: enableDevice,
-      disableDevice: disableDevice,
+      getDevices: () => devices,
+      addDevice: (...args) => addDevice(...args),
+      removeDevice: (...args) => removeDevice(...args),
+      enableDevice: (...args) => enableDevice(...args),
+      disableDevice: (...args) => disableDevice(...args),
     },
   });
 

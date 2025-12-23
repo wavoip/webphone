@@ -4,7 +4,7 @@ import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
-import { SettingsProvider } from "@/providers/SettingsProvider";
+import { type AppConfig, SettingsProvider } from "@/providers/SettingsProvider";
 import { ShadowRootContext } from "@/providers/ShadowRootProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
@@ -12,16 +12,17 @@ import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type Props = {
   shadowRoot: ShadowRoot;
+  config: AppConfig;
 };
 
-export function App({ shadowRoot }: Props) {
+export function App({ shadowRoot, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()] }));
 
   return (
     <ShadowRootContext.Provider value={shadowRoot}>
-      <SettingsProvider>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <WidgetProvider>
+      <SettingsProvider config={config}>
+        <ThemeProvider defaultTheme={config.theme} storageKey="webphone-ui-theme">
+          <WidgetProvider config={config}>
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
