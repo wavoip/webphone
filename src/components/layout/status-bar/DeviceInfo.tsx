@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useWavoip } from "@/providers/WavoipProvider";
+import { useSettings } from "@/providers/SettingsProvider";
 
 type Props = {
   device: Device & { enable: boolean };
@@ -14,6 +15,7 @@ type Props = {
 
 export function DeviceInfo({ device, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const { showEnableDevices, showRemoveDevices } = useSettings();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
@@ -78,68 +80,22 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
                 </p>
               </div>
             )}
-            {/* {["UP"].includes(device.status) && (
-              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <Phone size={18} color="green" />
-                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  Disponível
-                </p>
-              </div>
-            )} */}
           </>
         )}
 
         <p data-enable={device.enable} className="wv:text-[12px] wv:text-foreground">
           {device.token}
         </p>
-        {/* <div className="wv:flex wv:items-center wv:gap-2">
-          {device.status && (
-            <>
-              <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>
-              {["disconnected", "hibernating"].includes(device.status) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                      onClick={() => device.powerOn()}
-                    >
-                      <PowerIcon />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Ligar Dispositivo</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </>
-          )}
-
-          {device.qrcode && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                  onClick={() => setShowQRCode(device.qrcode)}
-                >
-                  <QrCodeIcon className="size-6" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Mostrar QRCode</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div> */}
       </div>
       <div className="wv:flex wv:gap-2 wv:items-center">
-        <Switch
-          className="wv:hover:cursor-pointer"
-          checked={device.enable}
-          onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
-          disabled={!["open", "CONNECTED"].includes(device.status as string)}
-        />
+        {showEnableDevices && (
+          <Switch
+            className="wv:hover:cursor-pointer"
+            checked={device.enable}
+            onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
+            disabled={!["open", "CONNECTED"].includes(device.status as string)}
+          />
+        )}
 
         {device.qrcode && (
           <Tooltip>
@@ -158,15 +114,17 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           </Tooltip>
         )}
 
-        <Button
-          variant={"destructive"}
-          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
-          onClick={() => {
-            setConfirmDelete(true);
-          }}
-        >
-          <TrashIcon />
-        </Button>
+        {showRemoveDevices && (
+          <Button
+            variant={"destructive"}
+            className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
+            onClick={() => {
+              setConfirmDelete(true);
+            }}
+          >
+            <TrashIcon />
+          </Button>
+        )}
       </div>
 
       {confirmDelete && (

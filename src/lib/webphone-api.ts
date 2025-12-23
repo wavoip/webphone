@@ -1,4 +1,5 @@
-import type { CallActive, CallOffer, CallOutgoing, Wavoip } from "@wavoip/wavoip-api";
+import type { CallActive, CallOffer, CallOutgoing } from "@wavoip/wavoip-api";
+import type { DeviceState } from "@/hooks/useDeviceManager";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme } from "@/providers/ThemeProvider";
 
@@ -18,8 +19,8 @@ export type WebphoneAPI = {
     setInput?: () => void;
   };
   device: {
-    getDevices: Wavoip["getDevices"];
-    addDevice: (token: string) => void;
+    getDevices: () => DeviceState[];
+    addDevice: (token: string, persist: boolean) => void;
     removeDevice: (token: string) => void;
     enableDevice: (token: string) => void;
     disableDevice: (token: string) => void;

@@ -32,7 +32,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
   const [qrcode, setQrcode] = useState<null | string>(null);
   const { wavoip } = useWavoip();
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
-  const shadowRoot = useShadowRoot();
+  const { root } = useShadowRoot();
 
   useEffect(() => {
     if (wavoip && open) {
@@ -55,11 +55,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
       <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2">
         <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
-      <DialogContent
-        container={shadowRoot}
-        onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:h-1/2"
-      >
+      <DialogContent container={root} onClick={(e) => e.stopPropagation()} className="wv:flex wv:flex-col wv:h-1/2">
         <DialogTitle className="wv:sr-only">Configurações</DialogTitle>
         <DialogDescription className="wv:sr-only">Aqui você pode configurar todo webphone</DialogDescription>
         <div className="wv:flex wv:w-full wv:flex-col wv:gap-6 wv:overflow-hidden">

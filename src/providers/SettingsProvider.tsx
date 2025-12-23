@@ -3,11 +3,9 @@ import { buildAPI } from "@/lib/webphone-api";
 
 export type AppConfig = {
   theme?: "dark" | "light" | "system";
-  persistTokens?: boolean;
   statusBar?: {
     showNotificationsIcon?: boolean;
     showSettingsIcon?: boolean;
-    showDevicesIcon?: boolean;
   };
   settingsMenu?: {
     deviceMenu?: {
@@ -29,9 +27,6 @@ type SettingsProviderProps = {
 };
 
 type SettingsProviderState = {
-  init: {
-    persistTokens: boolean;
-  };
   showNotifications: boolean;
   showSettings: boolean;
   showAudio: boolean;
@@ -53,18 +48,35 @@ type SettingsProviderState = {
 const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
 
 export function SettingsProvider({ children, config }: SettingsProviderProps) {
-  const [showNotifications, setShowNotifications] = useState<boolean>(config.statusBar?.showNotificationsIcon || true);
-  const [showSettings, setShowSettings] = useState<boolean>(config.statusBar?.showSettingsIcon || true);
+  console.log({ config });
+  const { statusBar, settingsMenu, widget } = config;
+
+  const [showNotifications, setShowNotifications] = useState<boolean>(
+    statusBar?.showNotificationsIcon !== undefined ? statusBar.showNotificationsIcon : true,
+  );
+  const [showSettings, setShowSettings] = useState<boolean>(
+    statusBar?.showSettingsIcon !== undefined ? statusBar.showSettingsIcon : true,
+  );
   const [showAudio, setShowAudio] = useState<boolean>(false);
-  const [showDevices, setShowDevices] = useState<boolean>(config.statusBar?.showDevicesIcon || true);
-  const [showAddDevices, setShowAddDevices] = useState<boolean>(config.settingsMenu?.deviceMenu?.show || true);
+  const [showDevices, setShowDevices] = useState<boolean>(
+    settingsMenu?.deviceMenu?.show !== undefined ? settingsMenu.deviceMenu.show : true,
+  );
+  const [showAddDevices, setShowAddDevices] = useState<boolean>(
+    settingsMenu?.deviceMenu?.showAddDevices !== undefined ? settingsMenu.deviceMenu.showAddDevices : true,
+  );
   const [showEnableDevices, setShowEnableDevices] = useState<boolean>(
-    config.settingsMenu?.deviceMenu?.showEnableDevicesButton || true,
+    settingsMenu?.deviceMenu?.showEnableDevicesButton !== undefined
+      ? settingsMenu?.deviceMenu.showEnableDevicesButton
+      : true,
   );
   const [showRemoveDevices, setShowRemoveDevices] = useState<boolean>(
-    config.settingsMenu?.deviceMenu?.showRemoveDevicesButton || true,
+    settingsMenu?.deviceMenu?.showRemoveDevicesButton !== undefined
+      ? settingsMenu?.deviceMenu.showRemoveDevicesButton
+      : true,
   );
-  const [showWidgetButton, setShowWidgetButton] = useState<boolean>(config.widget?.showWidgetButton || true);
+  const [showWidgetButton, setShowWidgetButton] = useState<boolean>(
+    widget?.showWidgetButton ? widget.showWidgetButton !== undefined : true,
+  );
 
   buildAPI({
     settings: {
@@ -90,7 +102,6 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
   return (
     <SettingsProviderContext.Provider
       value={{
-        init: { persistTokens: config.persistTokens || false },
         showNotifications,
         showSettings,
         showAudio,

@@ -33,12 +33,16 @@ class WebPhoneComponent {
     `;
     shadowRoot.appendChild(style);
 
-    const shadowContainer = document.createElement("div");
-    shadowContainer.id = "root";
-    shadowRoot.appendChild(shadowContainer);
+    const root = document.createElement("div");
+    root.id = "root";
+    shadowRoot.appendChild(root);
 
-    this.root = ReactDOM.createRoot(shadowContainer);
-    this.root.render(<App shadowRoot={shadowRoot} config={config || {}} />);
+    const container = document.createElement("div");
+    container.id = "container";
+    root.appendChild(container);
+
+    this.root = ReactDOM.createRoot(container);
+    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} />);
 
     const webphoneAPI = await webphoneAPIPromise;
     window.wavoip = webphoneAPI;

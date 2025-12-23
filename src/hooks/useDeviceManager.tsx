@@ -1,9 +1,8 @@
 import type { Device, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useEffect, useState } from "react";
 import { getSettings, saveSettings } from "@/lib/device-settings";
-import { useSettings } from "@/providers/SettingsProvider";
 
-export type DeviceState = Device & { enable: boolean };
+export type DeviceState = Device & { enable: boolean; persist: boolean };
 
 type Props = {
   wavoip: Wavoip;
@@ -12,19 +11,23 @@ type Props = {
 const deviceSettings = getSettings();
 
 export function useDeviceManager({ wavoip }: Props) {
-  const {
-    init: { persistTokens },
-  } = useSettings();
-
   const [_devices, setDevices] = useState<DeviceState[]>(() =>
-    wavoip.getDevices().map((device) => ({ ...device, enable: !!deviceSettings.get(device.token)?.enable })),
+    wavoip.getDevices().map((device) => {
+      const settings = deviceSettings.get(device.token);
+
+      return {
+        ...device,
+        enable: !!settings?.enable,
+        persist: !!settings?.persist,
+      };
+    }),
   );
 
   const add = useCallback(
-    (token: string) => {
+    (token: string, persist?: boolean) => {
       const [device] = wavoip.addDevices([token]);
       if (!device) return;
-      setDevices((prev) => [...prev, { ...device, enable: device.status === "open" }]);
+      setDevices((prev) => [...prev, { ...device, enable: device.status === "open", persist: persist || false }]);
     },
     [wavoip.addDevices],
   );
@@ -63,10 +66,8 @@ export function useDeviceManager({ wavoip }: Props) {
       bindDeviceEvents(device);
     }
 
-    if (persistTokens) {
-      saveSettings(_devices);
-    }
-  }, [persistTokens, bindDeviceEvents, _devices]);
+    saveSettings(_devices);
+  }, [bindDeviceEvents, _devices]);
 
   return { devices: _devices, add, remove, enable, disable };
 }

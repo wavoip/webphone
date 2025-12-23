@@ -18,11 +18,17 @@ export function Notifications() {
     setItems(items + 5);
   };
 
-  const hasNotification = notifications.filter((notification) => !notification.isHidden).length > 0;
+  const notificationsVisible = useMemo(
+    () => notifications.filter((n) => !n.isHidden).sort((a) => (!a.isRead ? -1 : 1)),
+    [notifications],
+  );
 
-  const notificationsToRead = useMemo(() => {
-    return notifications.filter((notification) => !notification.isRead).length;
-  }, [notifications]);
+  const hasNotification = !!notificationsVisible.length;
+
+  const notificationsToRead = useMemo(
+    () => notificationsVisible.filter((notification) => !notification.isRead).length,
+    [notificationsVisible],
+  );
 
   return (
     <Popover>
@@ -45,7 +51,7 @@ export function Notifications() {
       <PopoverContent className="wv:flex wv:flex-col wv:max-h-[200px] wv:w-[400px] wv:overflow-y-scroll wv:p-2">
         <div className="wv:flex wv:flex-col">
           {hasNotification &&
-            notifications.slice(0, items).map((notification) => (
+            notificationsVisible.slice(0, items).map((notification) => (
               <div
                 className={`wv:bg-background  ${notification.isHidden ? " notification exit" : "wv:flex notification"}  wv:flex-col wv:p-1 wv:gap-2`}
                 key={`notification_${notification.id}`}
@@ -100,26 +106,30 @@ export function Notifications() {
               </div>
             ))}
 
-          {!hasNotification && <p className="wv:text-center wv:pt-2">Nenhuma notificação</p>}
+          {!hasNotification && <p className="wv:text-center wv:p-2 wv:font-bold wv:text-sm">Nenhuma notificação</p>}
 
           <div className="wv:flex wv:gap-2 wv:justify-center wv:items-center">
-            <Button
-              variant="link"
-              onClick={handleSeeMore}
-              className="wv:text-[blue] wv:text-[12px] wv:select-none wv:p-1 wv:cursor-pointer"
-              disabled={items >= notifications.length}
-            >
-              <p>Ver mais</p>
-            </Button>
+            {items < notifications.length && (
+              <Button
+                variant="link"
+                onClick={handleSeeMore}
+                className="wv:text-xs wv:select-none wv:p-1"
+                disabled={items >= notifications.length}
+              >
+                <p>Ver mais</p>
+              </Button>
+            )}
 
-            <Button
-              variant="link"
-              onClick={clearNotifications}
-              className="wv:text-[blue] wv:text-[12px] wv:select-none wv:p-1"
-              disabled={!hasNotification}
-            >
-              <p>Limpar</p>
-            </Button>
+            {hasNotification && (
+              <Button
+                variant="link"
+                onClick={clearNotifications}
+                className="wv:text-xs wv:select-none wv:p-1"
+                disabled={!hasNotification}
+              >
+                <p>Limpar</p>
+              </Button>
+            )}
           </div>
         </div>
       </PopoverContent>

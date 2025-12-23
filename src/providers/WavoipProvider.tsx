@@ -10,7 +10,7 @@ interface WavoipContextProps {
   offers: CallOffer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
-  addDevice: (token: string, persist: boolean) => void;
+  addDevice: (token: string, persist?: boolean) => void;
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;

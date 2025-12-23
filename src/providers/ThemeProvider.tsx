@@ -5,6 +5,7 @@ export type Theme = "dark" | "light" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
+  root: HTMLDivElement;
   defaultTheme?: Theme;
   storageKey?: string;
 };
@@ -23,16 +24,14 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
+  root,
   defaultTheme = "system",
   storageKey = "wavoip-webphone-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  console.log({ defaultTheme });
   const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem(storageKey) as Theme) || defaultTheme);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-
     root.classList.remove("light", "dark");
 
     if (theme === "system") {
@@ -43,7 +42,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
-  }, [theme]);
+  }, [theme, root]);
 
   const handleSetTheme = (theme: Theme) => {
     localStorage.setItem(storageKey, theme);

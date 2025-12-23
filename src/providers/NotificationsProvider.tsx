@@ -30,7 +30,6 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 
   const getNotifications = useCallback(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    console.log({ stored });
     return stored ? (JSON.parse(stored) as NotificationsType[]) : [];
   }, []);
 
