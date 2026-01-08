@@ -48,7 +48,6 @@ type SettingsProviderState = {
 const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
 
 export function SettingsProvider({ children, config }: SettingsProviderProps) {
-  console.log({ config });
   const { statusBar, settingsMenu, widget } = config;
 
   const [showNotifications, setShowNotifications] = useState<boolean>(
