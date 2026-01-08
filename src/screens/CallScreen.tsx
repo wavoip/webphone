@@ -15,13 +15,14 @@ export default function CallScreen() {
 
   const [peerMuted, setPeerMuted] = useState(callActive?.peer.muted || false);
   const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
 
   useEffect(() => {
     callActive?.onPeerMute(() => setPeerMuted(true));
     callActive?.onPeerUnmute(() => setPeerMuted(false));
-    callActive?.onError((err) => setStatus(err));
+    callActive?.onError((err) => setError(err));
     callActive?.onEnd(() => {
       setStatus("Chamada encerrada");
       hang_up_sound.pause();
@@ -68,6 +69,8 @@ export default function CallScreen() {
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
                 {callActive?.peer.displayName || callActive?.peer.phone}
               </p>
+
+              {error && <p className="wv:text-destructive wv:opacity-75 wv:text-xs">{error}</p>}
             </div>
           </div>
         </div>

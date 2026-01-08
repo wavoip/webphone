@@ -8,6 +8,7 @@ import type { DeviceState } from "@/hooks/useDeviceManager";
 import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
+import { useNotificationManager } from "@/providers/NotificationsProvider";
 
 type Props = {
   wavoip: Wavoip;
@@ -21,6 +22,7 @@ let widgetStatusCache: null | boolean = null;
 export function useCallManager({ wavoip, devices }: Props) {
   const { setScreen } = useScreen();
   const { closed: widgetIsClosed, setClosed: setWidgetClosed, open: openWidget } = useWidget();
+  const { addNotification } = useNotificationManager();
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
   const [outgoing, setOutgoing] = useState<CallOutgoing | undefined>(undefined);
@@ -43,6 +45,22 @@ export function useCallManager({ wavoip, devices }: Props) {
     }, 3000);
   }, [setScreen, setWidgetClosed]);
 
+  const onCallError = useCallback(
+    (callId: string, deviceToken: string, error: string) => {
+      addNotification({
+        id: new Date(),
+        type: "CALL_FAILED",
+        created_at: new Date(),
+        message: error,
+        detail: `Chamada: ${callId}`,
+        isHidden: false,
+        isRead: false,
+        token: deviceToken,
+      });
+    },
+    [addNotification],
+  );
+
   const onCallAccept = useCallback(
     (call: CallActive) => {
       call.onEnd(() => onCallEnd());
@@ -56,6 +74,12 @@ export function useCallManager({ wavoip, devices }: Props) {
             cb();
           });
         },
+        onError: (cb) => {
+          call.onError((error) => {
+            onCallError(call.id, call.device_token, error);
+            cb(error);
+          });
+        },
       };
 
       setScreen("call");
@@ -64,7 +88,7 @@ export function useCallManager({ wavoip, devices }: Props) {
 
       return callIntegrated;
     },
-    [onCallEnd, setScreen],
+    [onCallEnd, setScreen, onCallError],
   );
 
   const onOffer = useCallback(
