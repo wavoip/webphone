@@ -92,13 +92,17 @@ export let apiAggregator: DeepPartial<WebphoneAPI> = {};
 export function mergeToAPI(api: DeepPartial<WebphoneAPI>) {
   apiAggregator = mergeObjects(apiAggregator, api);
   validateAPI(apiAggregator);
-
-  console.log({ apiAggregator });
 }
 
 function mergeObjects<T extends Record<string, unknown>, E extends DeepPartial<T>>(obj1: T, obj2: E): T {
   const obj1Clean = removeNullishValuesFromObject(obj1);
   const obj2Clean = removeNullishValuesFromObject(obj2);
+
+  for (const key in obj2Clean) {
+    if (typeof obj2Clean[key] === "object") {
+      obj2Clean[key] = mergeObjects(obj1Clean[key] || Object(), obj2Clean[key]);
+    }
+  }
 
   return Object.assign(obj1Clean, obj2Clean);
 }
