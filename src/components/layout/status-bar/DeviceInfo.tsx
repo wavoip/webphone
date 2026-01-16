@@ -1,37 +1,25 @@
 import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Device } from "@wavoip/wavoip-api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { mergeToAPI } from "@/lib/webphone-api";
-import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
+  settings: {
+    showEnable: boolean;
+    showRemove: boolean;
+  };
   device: Device & { enable: boolean };
   setShowQRCode: React.Dispatch<React.SetStateAction<null | string>>;
 };
 
-export function DeviceInfo({ device, setShowQRCode }: Props) {
+export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
-  const { devices: devicesMenuSettings } = useSettings();
+  const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
-
-  const [showEnable, setShowEnable] = useState(devicesMenuSettings.enableShow);
-  const [showRemove, setShowRemove] = useState(devicesMenuSettings.removeShow);
-
-  useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showEnableDevices: showEnable,
-        setShowEnableDevices: (...args) => setShowEnable(...args),
-        showRemoveDevices: showRemove,
-        setShowRemoveDevices: (...args) => setShowRemove(...args),
-      },
-    });
-  }, [showEnable, showRemove]);
 
   return (
     <div

@@ -33,6 +33,8 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
   const [showAudio] = useState(audioMenuSettings.show);
   const [showDevices, setShowDevices] = useState(devicesMenuSettings.show);
   const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
+  const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
+  const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
 
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
@@ -46,9 +48,13 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
         setShowDevices: (...args) => setShowDevices(...args),
         showAddDevices: showAddDevice,
         setShowAddDevices: (...args) => setShowAddDevice(...args),
+        showEnableDevices: showEnableDevice,
+        setShowEnableDevices: (...args) => setShowEnableDevice(...args),
+        showRemoveDevices: showRemoveDevice,
+        setShowRemoveDevices: (...args) => setShowRemoveDevice(...args),
       },
     });
-  }, [showDevices, showAddDevice]);
+  }, [showDevices, showAddDevice, showEnableDevice, showRemoveDevice]);
 
   useEffect(() => {
     if (wavoip && open) {
@@ -124,7 +130,12 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
 
                   <div className="wv:overflow-auto wv:flex wv:flex-col wv:gap-2">
                     {devicesSorted.map((device) => (
-                      <DeviceInfo key={device.token} device={device} setShowQRCode={setQrcode} />
+                      <DeviceInfo
+                        key={device.token}
+                        settings={{ showEnable: showEnableDevice, showRemove: showRemoveDevice }}
+                        device={device}
+                        setShowQRCode={setQrcode}
+                      />
                     ))}
                   </div>
                 </TabsContent>

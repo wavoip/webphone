@@ -19,7 +19,6 @@ export default function StatusBar() {
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
 
   useEffect(() => {
-    console.log("setting status bar settings");
     mergeToAPI({
       settings: {
         showNotifications,
