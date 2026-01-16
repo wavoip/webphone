@@ -188,7 +188,7 @@ export function WidgetProvider({ children }: Props) {
         },
       }}
     >
-      {widget.show && (
+      {showWidget && (
         <Button
           type="button"
           onClick={() => setIsClosed(false)}

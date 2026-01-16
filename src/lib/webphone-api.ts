@@ -90,9 +90,7 @@ type DeepPartial<T> = T extends object
 export let apiAggregator: DeepPartial<WebphoneAPI> = {};
 
 export function mergeToAPI(api: DeepPartial<WebphoneAPI>) {
-  console.log({ api });
   apiAggregator = mergeObjects(apiAggregator, api);
-  console.log({ apiAggregator });
   validateAPI(apiAggregator);
 }
 
