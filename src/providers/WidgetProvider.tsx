@@ -3,16 +3,19 @@ import {
   createContext,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { buildAPI } from "@/lib/webphone-api";
-import { useSettings, type AppConfig } from "@/providers/SettingsProvider";
+import { mergeToAPI } from "@/lib/webphone-api";
+import { useSettings } from "@/providers/settings/Provider";
+import type { WebphonePosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
@@ -23,8 +26,8 @@ interface WidgetContextType {
   setPosition: (pos: Position) => void;
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
-  closed: boolean;
-  setClosed: React.Dispatch<React.SetStateAction<boolean>>;
+  isClosed: boolean;
+  setIsClosed: React.Dispatch<React.SetStateAction<boolean>>;
   close: () => void;
   open: () => void;
   toggle: () => void;
@@ -34,18 +37,20 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 type Props = {
   children: ReactNode;
-  config: AppConfig;
 };
 
-export function WidgetProvider({ children, config }: Props) {
+export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
-  const { showWidgetButton } = useSettings();
-  const divRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef<Position>({ x: 0, y: 0 });
+  const { widget, position: positionInitial } = useSettings();
+
+  const [showWidget, setShowWidget] = useState(widget.show);
 
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [closed, setClosed] = useState<boolean>(config.widget?.startOpen || true);
+  const [isClosed, setIsClosed] = useState<boolean>(!widget.startOpen);
+
+  const divRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     if (!divRef.current) return;
@@ -83,15 +88,15 @@ export function WidgetProvider({ children, config }: Props) {
   }, [handleMouseMove]);
 
   const open = useCallback(() => {
-    if (closed) setClosed(false);
-  }, [closed]);
+    if (isClosed) setIsClosed(false);
+  }, [isClosed]);
 
   const close = useCallback(() => {
-    if (!closed) setClosed(true);
-  }, [closed]);
+    if (!isClosed) setIsClosed(true);
+  }, [isClosed]);
 
   const toggle = useCallback(() => {
-    setClosed((prev) => !prev);
+    setIsClosed((prev) => !prev);
   }, []);
 
   useLayoutEffect(() => {
@@ -105,14 +110,14 @@ export function WidgetProvider({ children, config }: Props) {
     if (x < 0) x = 0;
     if (y < 0) y = 0;
 
-    setPosition({ x, y });
+    setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
 
     document.addEventListener("mouseleave", stopDrag);
 
     return () => {
       document.removeEventListener("mouseleave", stopDrag);
     };
-  }, [open, stopDrag]);
+  }, [open, stopDrag, positionInitial]);
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -143,13 +148,24 @@ export function WidgetProvider({ children, config }: Props) {
     };
   }, []);
 
-  buildAPI({
-    widget: {
-      open: () => open(),
-      close: () => close(),
-      toggle: () => toggle(),
-    },
-  });
+  useEffect(() => {
+    mergeToAPI({
+      widget: {
+        isOpen: !isClosed,
+        open: () => open(),
+        close: () => close(),
+        toggle: () => toggle(),
+      },
+      settings: {
+        showWidgetButton: showWidget,
+        setShowWidgetButton: (...args) => setShowWidget(...args),
+      },
+      position: {
+        value: position,
+        set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
+      },
+    });
+  }, [open, close, toggle, showWidget, position, isClosed]);
 
   return (
     <WidgetContext.Provider
@@ -159,25 +175,25 @@ export function WidgetProvider({ children, config }: Props) {
         startDrag,
         stopDrag,
         isDragging,
-        closed,
-        setClosed,
+        isClosed: isClosed,
+        setIsClosed: setIsClosed,
         close: () => {
-          if (!closed) setClosed(true);
+          if (!isClosed) setIsClosed(true);
         },
         open: () => {
-          if (closed) setClosed(false);
+          if (isClosed) setIsClosed(false);
         },
         toggle: () => {
-          setClosed((prev) => !prev);
+          setIsClosed((prev) => !prev);
         },
       }}
     >
-      {showWidgetButton && (
+      {widget.show && (
         <Button
           type="button"
-          onClick={() => setClosed(false)}
+          onClick={() => setIsClosed(false)}
           size={"icon"}
-          data-closed={closed}
+          data-closed={isClosed}
           className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
           style={{
             position: "fixed",
@@ -200,7 +216,7 @@ export function WidgetProvider({ children, config }: Props) {
 
       <div
         ref={divRef}
-        data-closed={closed}
+        data-closed={isClosed}
         className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
           position: "fixed",
@@ -218,4 +234,32 @@ export function useWidget() {
   const ctx = useContext(WidgetContext);
   if (!ctx) throw new Error("useWidget deve ser usado dentro de <WidgetProvider>");
   return ctx;
+}
+
+function handlePositionInitialSettings(
+  position: WebphonePosition,
+  divRef: RefObject<HTMLDivElement>,
+): { x: number; y: number } {
+  const MARGIN = 24;
+
+  if (typeof position === "object") {
+    return position;
+  }
+
+  const rect = divRef.current.getBoundingClientRect();
+  const middleY = window.innerHeight / 2 - rect.height / 2;
+  const bottomY = window.innerHeight - MARGIN - rect.height;
+  const middleX = window.innerWidth / 2 - rect.width / 2;
+  const endX = window.innerWidth - MARGIN - rect.width;
+
+  if (position === "top") return { x: middleX, y: MARGIN };
+  if (position === "bottom") return { x: middleX, y: bottomY };
+  if (position === "left") return { x: MARGIN, y: middleY };
+  if (position === "right") return { x: endX, y: middleY };
+  if (position === "top-left") return { x: MARGIN, y: MARGIN };
+  if (position === "top-right") return { x: endX, y: MARGIN };
+  if (position === "bottom-left") return { x: MARGIN, y: bottomY };
+  if (position === "bottom-right") return { x: endX, y: bottomY };
+
+  throw new Error("Initial position invalid");
 }

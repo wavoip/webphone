@@ -1,7 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { buildAPI } from "@/lib/webphone-api";
-
-export type Theme = "dark" | "light" | "system";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { mergeToAPI } from "@/lib/webphone-api";
+import type { Theme } from "@/providers/settings/settings";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -44,16 +43,23 @@ export function ThemeProvider({
     root.classList.add(theme);
   }, [theme, root]);
 
-  const handleSetTheme = (theme: Theme) => {
-    localStorage.setItem(storageKey, theme);
-    setTheme(theme);
-  };
-
-  buildAPI({
-    theme: {
-      setTheme: (...args) => handleSetTheme(...args),
+  const handleSetTheme = useCallback(
+    (theme: Theme) => {
+      localStorage.setItem(storageKey, theme);
+      setTheme(theme);
     },
-  });
+    [storageKey],
+  );
+
+  useEffect(() => {
+    mergeToAPI({
+      theme: {
+        setTheme: (...args) => handleSetTheme(...args),
+        value: theme,
+        set: (...args) => handleSetTheme(...args),
+      },
+    });
+  }, [theme, handleSetTheme]);
 
   return (
     <ThemeProviderContext.Provider

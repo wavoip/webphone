@@ -13,5 +13,9 @@ await webphone.render({
       showRemoveDevicesButton: true,
     },
   },
+  widget: {
+    startOpen: true,
+  },
+  position: { x: 1400, y: 200 },
 });
 console.log("API ready");

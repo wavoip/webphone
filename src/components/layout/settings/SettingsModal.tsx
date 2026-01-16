@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettings } from "@/providers/SettingsProvider";
+import { mergeToAPI } from "@/lib/webphone-api";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -25,14 +26,29 @@ type Props = {
 };
 
 export const SettingsModal = forwardRef(({ devices }: Props) => {
-  const { addDevice } = useWavoip();
-  const { showAudio, showDevices, showAddDevices } = useSettings();
+  const { wavoip, addDevice } = useWavoip();
+  const { root } = useShadowRoot();
+  const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
+
+  const [showAudio] = useState(audioMenuSettings.show);
+  const [showDevices, setShowDevices] = useState(devicesMenuSettings.show);
+  const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
+
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
-  const { wavoip } = useWavoip();
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
-  const { root } = useShadowRoot();
+
+  useEffect(() => {
+    mergeToAPI({
+      settings: {
+        showDevices,
+        setShowDevices: (...args) => setShowDevices(...args),
+        showAddDevices: showAddDevice,
+        setShowAddDevices: (...args) => setShowAddDevice(...args),
+      },
+    });
+  }, [showDevices, showAddDevice]);
 
   useEffect(() => {
     if (wavoip && open) {
@@ -85,7 +101,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
                     <DialogTitle></DialogTitle>
                   </DialogHeader>
                   <DialogDescription />
-                  {showAddDevices && (
+                  {showAddDevice && (
                     <div className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:py-4">
                       <Input
                         placeholder="Token"

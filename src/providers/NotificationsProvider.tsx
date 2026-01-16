@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { buildAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api";
 
 export type NotificationsType = {
   id: Date;
@@ -90,15 +90,22 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     setNotifications(notifications);
   }, [getNotifications]);
 
-  buildAPI({
-    notifications: {
-      getNotifications: () => getNotifications(),
-      clearNotifications: () => clearNotifications(),
-      addNotification: (...args) => addNotification(...args),
-      removeNotification: (...args) => removeNotification(...args),
-      readNotifications: () => readNotifications(),
-    },
-  });
+  useEffect(() => {
+    mergeToAPI({
+      notifications: {
+        getNotifications: () => getNotifications(),
+        get: () => getNotifications(),
+        clearNotifications: () => clearNotifications(),
+        clear: () => clearNotifications(),
+        addNotification: (...args) => addNotification(...args),
+        add: (...args) => addNotification(...args),
+        removeNotification: (...args) => removeNotification(...args),
+        remove: (...args) => removeNotification(...args),
+        readNotifications: () => readNotifications(),
+        read: () => readNotifications(),
+      },
+    });
+  }, [readNotifications, removeNotification, getNotifications, clearNotifications, addNotification]);
 
   return (
     <NotificationsContext.Provider

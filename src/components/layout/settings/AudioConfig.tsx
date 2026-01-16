@@ -6,6 +6,7 @@ import { useWavoip } from "@/providers/WavoipProvider";
 
 export function AudioConfig() {
   const { wavoip } = useWavoip();
+
   const [microphones, setMicrophones] = useState<MultimediaDevice[]>([]);
   const [speakers, setSpeakers] = useState<MultimediaDevice[]>([]);
 

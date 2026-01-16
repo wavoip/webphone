@@ -2,7 +2,7 @@ import type { CallActive, CallOffer, CallOutgoing, Device, Wavoip } from "@wavoi
 import React, { createContext, type ReactNode, useContext, useEffect } from "react";
 import { useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
-import { buildAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api";
 
 interface WavoipContextProps {
   wavoip: Wavoip;
@@ -52,39 +52,46 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     };
   }, []);
 
-  buildAPI({
-    call: {
-      startCall: (...args) => startCall(...args),
-      getCallActive: () => {
-        if (!callActive) return undefined;
-        const { id, type, status, device_token, direction, peer, muted } = callActive;
-        return { id, type, status, device_token, direction, peer, muted };
+  useEffect(() => {
+    mergeToAPI({
+      call: {
+        startCall: (...args) => startCall(...args),
+        getCallActive: () => {
+          if (!callActive) return undefined;
+          const { id, type, status, device_token, direction, peer, muted } = callActive;
+          return { id, type, status, device_token, direction, peer, muted };
+        },
+        getCallOutgoing: () => {
+          if (!callOutgoing) return undefined;
+          const { id, type, status, device_token, direction, peer, muted } = callOutgoing;
+          return { id, type, status, device_token, direction, peer, muted };
+        },
+        getOffers: () => {
+          return offers.map(({ id, type, status, device_token, direction, peer, muted }) => ({
+            id,
+            type,
+            status,
+            device_token,
+            direction,
+            peer,
+            muted,
+          }));
+        },
       },
-      getCallOutgoing: () => {
-        if (!callOutgoing) return undefined;
-        const { id, type, status, device_token, direction, peer, muted } = callOutgoing;
-        return { id, type, status, device_token, direction, peer, muted };
+      device: {
+        getDevices: () => devices,
+        get: () => devices,
+        addDevice: (...args) => addDevice(...args),
+        add: (...args) => addDevice(...args),
+        removeDevice: (...args) => removeDevice(...args),
+        remove: (...args) => removeDevice(...args),
+        enableDevice: (...args) => enableDevice(...args),
+        enable: (...args) => enableDevice(...args),
+        disableDevice: (...args) => disableDevice(...args),
+        disable: (...args) => disableDevice(...args),
       },
-      getOffers: () => {
-        return offers.map(({ id, type, status, device_token, direction, peer, muted }) => ({
-          id,
-          type,
-          status,
-          device_token,
-          direction,
-          peer,
-          muted,
-        }));
-      },
-    },
-    device: {
-      getDevices: () => devices,
-      addDevice: (...args) => addDevice(...args),
-      removeDevice: (...args) => removeDevice(...args),
-      enableDevice: (...args) => enableDevice(...args),
-      disableDevice: (...args) => disableDevice(...args),
-    },
-  });
+    });
+  }, [devices, disableDevice, enableDevice, removeDevice, addDevice, startCall, offers, callOutgoing, callActive]);
 
   return (
     <WavoipContext.Provider

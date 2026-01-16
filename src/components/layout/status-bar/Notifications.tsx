@@ -10,9 +10,9 @@ import "moment/dist/locale/pt-br";
 import moment from "moment";
 
 export function Notifications() {
-  const [items, setItems] = useState(3);
-
   const { notifications, readNotifications, clearNotifications, removeNotification } = useNotificationManager();
+
+  const [items, setItems] = useState(3);
 
   const handleSeeMore = () => {
     setItems(items + 5);

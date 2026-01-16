@@ -3,21 +3,13 @@ import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
 import { type WebphoneAPI, webphoneAPIPromise } from "@/lib/webphone-api";
-import type { AppConfig } from "@/providers/SettingsProvider";
-
-type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>;
-    }
-  : T;
-
-export type WebphoneConfig = DeepPartial<AppConfig>;
+import type { WebphoneSettings } from "@/providers/settings/settings";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render(config?: WebphoneConfig) {
+  async render(config?: WebphoneSettings) {
     if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");

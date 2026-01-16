@@ -1,12 +1,13 @@
 import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import type { Device } from "@wavoip/wavoip-api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { mergeToAPI } from "@/lib/webphone-api";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
-import { useSettings } from "@/providers/SettingsProvider";
 
 type Props = {
   device: Device & { enable: boolean };
@@ -15,8 +16,22 @@ type Props = {
 
 export function DeviceInfo({ device, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
-  const { showEnableDevices, showRemoveDevices } = useSettings();
+  const { devices: devicesMenuSettings } = useSettings();
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const [showEnable, setShowEnable] = useState(devicesMenuSettings.enableShow);
+  const [showRemove, setShowRemove] = useState(devicesMenuSettings.removeShow);
+
+  useEffect(() => {
+    mergeToAPI({
+      settings: {
+        showEnableDevices: showEnable,
+        setShowEnableDevices: (...args) => setShowEnable(...args),
+        showRemoveDevices: showRemove,
+        setShowRemoveDevices: (...args) => setShowRemove(...args),
+      },
+    });
+  }, [showEnable, showRemove]);
 
   return (
     <div
@@ -88,7 +103,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         </p>
       </div>
       <div className="wv:flex wv:gap-2 wv:items-center">
-        {showEnableDevices && (
+        {showEnable && (
           <Switch
             className="wv:hover:cursor-pointer"
             checked={device.enable}
@@ -114,7 +129,7 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           </Tooltip>
         )}
 
-        {showRemoveDevices && (
+        {showRemove && (
           <Button
             variant={"destructive"}
             className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"

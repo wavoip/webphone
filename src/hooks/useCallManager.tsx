@@ -6,9 +6,9 @@ import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
 import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
-import { useNotificationManager } from "@/providers/NotificationsProvider";
 
 type Props = {
   wavoip: Wavoip;
@@ -21,7 +21,7 @@ let widgetStatusCache: null | boolean = null;
 
 export function useCallManager({ wavoip, devices }: Props) {
   const { setScreen } = useScreen();
-  const { closed: widgetIsClosed, setClosed: setWidgetClosed, open: openWidget } = useWidget();
+  const { isClosed: widgetIsClosed, setIsClosed: setWidgetClosed, open: openWidget } = useWidget();
   const { addNotification } = useNotificationManager();
 
   const [offers, setOffers] = useState<CallOffer[]>([]);

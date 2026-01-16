@@ -4,8 +4,9 @@ import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
-import { type AppConfig, SettingsProvider } from "@/providers/SettingsProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
+import { SettingsProvider } from "@/providers/settings/Provider";
+import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
@@ -13,7 +14,7 @@ import { WidgetProvider } from "@/providers/WidgetProvider";
 type Props = {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
-  config: AppConfig;
+  config: WebphoneSettings;
 };
 
 export function App({ shadowRoot, root, config }: Props) {
@@ -23,7 +24,7 @@ export function App({ shadowRoot, root, config }: Props) {
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
         <ThemeProvider root={root} defaultTheme={config.theme} storageKey="webphone-ui-theme">
-          <WidgetProvider config={config}>
+          <WidgetProvider>
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
