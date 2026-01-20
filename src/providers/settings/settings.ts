@@ -29,6 +29,14 @@ export type WidgetSettings = {
   startOpen?: boolean;
 };
 
+export type WidgetButtonPosition =
+  | "bottom-left"
+  | "bottom-right"
+  | {
+      x: number;
+      y: number;
+    };
+
 export type WebphonePosition =
   | "top"
   | "bottom"
@@ -50,4 +58,5 @@ export type WebphoneSettings = {
   settingsMenu?: Partial<SettingsMenuSettings>;
   widget?: Partial<WidgetSettings>;
   position?: WebphonePosition;
+  buttonPosition?: WidgetButtonPosition;
 };

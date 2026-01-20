@@ -1,7 +1,7 @@
 import type { CallActive, CallOffer, CallOutgoing } from "@wavoip/wavoip-api";
 import type { DeviceState } from "@/hooks/useDeviceManager";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
-import type { Theme, WebphonePosition } from "@/providers/settings/settings";
+import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
 type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
 type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
@@ -72,6 +72,10 @@ export type WebphoneAPI = {
   position: {
     value: { x: number; y: number };
     set: (position: WebphonePosition) => void;
+  };
+  buttonPosition: {
+    value: { x: number; y: number };
+    set: (position: WidgetButtonPosition) => void;
   };
 };
 

@@ -1,6 +1,6 @@
 import type React from "react";
 import { createContext, useContext } from "react";
-import type { WebphonePosition, WebphoneSettings } from "@/providers/settings/settings";
+import type { WebphonePosition, WebphoneSettings, WidgetButtonPosition } from "@/providers/settings/settings";
 
 type SettingsProviderProps = {
   children: React.ReactNode;
@@ -16,6 +16,7 @@ type SettingsProviderState = {
   devices: { show: State<boolean>; showAdd: State<boolean>; enableShow: State<boolean>; removeShow: State<boolean> };
   widget: { startOpen: boolean; show: State<boolean> };
   position: WebphonePosition;
+  buttonPosition: WidgetButtonPosition;
 };
 
 const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
@@ -37,6 +38,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
   const showWidgetButton = widget?.showWidgetButton ?? true;
   const startOpen = widget?.startOpen ?? false;
   const position: WebphonePosition = config.position ?? "bottom-left";
+  const buttonPosition: WidgetButtonPosition = config.buttonPosition ?? "bottom-left";
 
   return (
     <SettingsProviderContext.Provider
@@ -55,6 +57,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
           removeShow: showRemoveDevices,
         },
         position,
+        buttonPosition,
       }}
     >
       {children}
