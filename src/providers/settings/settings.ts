@@ -30,6 +30,8 @@ export type WidgetSettings = {
 };
 
 export type WidgetButtonPosition =
+  | "top-left"
+  | "top-right"
   | "bottom-left"
   | "bottom-right"
   | {

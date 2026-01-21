@@ -14,5 +14,6 @@ await webphone.render({
     },
   },
   position: { x: 1400, y: 200 },
+  buttonPosition: "bottom-left",
 });
 console.log("API ready");

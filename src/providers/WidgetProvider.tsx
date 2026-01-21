@@ -205,8 +205,8 @@ export function WidgetProvider({ children }: Props) {
           className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
           style={{
             position: "fixed",
-            bottom: buttonPosition.y || "20px",
-            right: buttonPosition.x || "20px",
+            top: buttonPosition.y,
+            left: buttonPosition.x,
           }}
         >
           <PhoneIcon className="wv:size-8" />
@@ -275,12 +275,19 @@ function handlePositionInitialSettings(
 function handleButtonPositionInitialSettings(
   position: WidgetButtonPosition,
 ): { x: number; y: number } {
+  const MARGIN = 20;
+  const button = { width: 56, height: 56 };
+
   if (typeof position === "object") {
     return position;
   }
+  const endX = window.innerWidth - MARGIN - button.width;
+  const endY = window.innerHeight - MARGIN - button.height;
 
-  if (position === "bottom-right") return { x: 20, y: 20 };
-  if (position === "bottom-left") return { x: window.innerWidth - 76, y: 20 };
+  if (position === "top-left") return { x: endX, y: MARGIN };
+  if (position === "top-right") return { x: MARGIN, y: MARGIN };
+  if (position === "bottom-right") return { x: MARGIN, y: endY };
+  if (position === "bottom-left") return { x: endX, y: endY };
 
   throw new Error("Initial button position invalid");
 }
