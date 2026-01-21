@@ -15,13 +15,14 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { mergeToAPI } from "@/lib/webphone-api";
 import { useSettings } from "@/providers/settings/Provider";
-import type { WebphonePosition } from "@/providers/settings/settings";
+import type { WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
 
 interface WidgetContextType {
   position: Position;
+  buttonPosition: Position;
   isDragging: boolean;
   setPosition: (pos: Position) => void;
   startDrag: (e: MouseEvent) => void;
@@ -41,11 +42,12 @@ type Props = {
 
 export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
-  const { widget, position: positionInitial } = useSettings();
+  const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
   const [showWidget, setShowWidget] = useState(widget.show);
 
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [buttonPosition, setButtonPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [isClosed, setIsClosed] = useState<boolean>(!widget.startOpen);
 
@@ -111,13 +113,14 @@ export function WidgetProvider({ children }: Props) {
     if (y < 0) y = 0;
 
     setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
+    setButtonPosition(handleButtonPositionInitialSettings(buttonPositionInitial));
 
     document.addEventListener("mouseleave", stopDrag);
 
     return () => {
       document.removeEventListener("mouseleave", stopDrag);
     };
-  }, [open, stopDrag, positionInitial]);
+  }, [open, stopDrag, positionInitial, buttonPositionInitial]);
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -155,6 +158,10 @@ export function WidgetProvider({ children }: Props) {
         open: () => open(),
         close: () => close(),
         toggle: () => toggle(),
+        buttonPosition: {
+          value: buttonPosition,
+          set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
+        },
       },
       settings: {
         showWidgetButton: showWidget,
@@ -164,13 +171,15 @@ export function WidgetProvider({ children }: Props) {
         value: position,
         set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
       },
+
     });
-  }, [open, close, toggle, showWidget, position, isClosed]);
+  }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
 
   return (
     <WidgetContext.Provider
       value={{
         position,
+        buttonPosition,
         setPosition,
         startDrag,
         stopDrag,
@@ -197,8 +206,8 @@ export function WidgetProvider({ children }: Props) {
           className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
           style={{
             position: "fixed",
-            bottom: "20px",
-            right: "20px",
+            top: buttonPosition.y,
+            left: buttonPosition.x,
           }}
         >
           <PhoneIcon className="wv:size-8" />
@@ -262,4 +271,24 @@ function handlePositionInitialSettings(
   if (position === "bottom-right") return { x: endX, y: bottomY };
 
   throw new Error("Initial position invalid");
+}
+
+function handleButtonPositionInitialSettings(
+  position: WidgetButtonPosition,
+): { x: number; y: number } {
+  const MARGIN = 20;
+  const button = { width: 56, height: 56 };
+
+  if (typeof position === "object") {
+    return position;
+  }
+  const endX = window.innerWidth - MARGIN - button.width;
+  const endY = window.innerHeight - MARGIN - button.height;
+
+  if (position === "top-right") return { x: endX, y: MARGIN };
+  if (position === "top-left") return { x: MARGIN, y: MARGIN };
+  if (position === "bottom-left") return { x: MARGIN, y: endY };
+  if (position === "bottom-right") return { x: endX, y: endY };
+
+  throw new Error("Initial button position invalid");
 }
