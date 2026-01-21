@@ -203,7 +203,7 @@ export function WidgetProvider({ children }: Props) {
           onClick={() => setIsClosed(false)}
           size={"icon"}
           data-closed={isClosed}
-          className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+          className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
           style={{
             position: "fixed",
             top: buttonPosition.y,
