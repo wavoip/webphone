@@ -47,6 +47,10 @@ export type WebphoneAPI = {
     open: () => void;
     close: () => void;
     toggle: () => void;
+    buttonPosition: {
+      value: { x: number; y: number };
+      set: (position: WidgetButtonPosition) => void;
+    };
   };
   theme: {
     value: Theme;
@@ -72,10 +76,6 @@ export type WebphoneAPI = {
   position: {
     value: { x: number; y: number };
     set: (position: WebphonePosition) => void;
-  };
-  buttonPosition: {
-    value: { x: number; y: number };
-    set: (position: WidgetButtonPosition) => void;
   };
 };
 

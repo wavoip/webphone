@@ -158,6 +158,10 @@ export function WidgetProvider({ children }: Props) {
         open: () => open(),
         close: () => close(),
         toggle: () => toggle(),
+        buttonPosition: {
+          value: buttonPosition,
+          set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
+        },
       },
       settings: {
         showWidgetButton: showWidget,
@@ -167,10 +171,7 @@ export function WidgetProvider({ children }: Props) {
         value: position,
         set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
       },
-      buttonPosition: {
-        value: buttonPosition,
-        set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
-      },
+
     });
   }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
 
@@ -284,10 +285,10 @@ function handleButtonPositionInitialSettings(
   const endX = window.innerWidth - MARGIN - button.width;
   const endY = window.innerHeight - MARGIN - button.height;
 
-  if (position === "top-left") return { x: endX, y: MARGIN };
-  if (position === "top-right") return { x: MARGIN, y: MARGIN };
-  if (position === "bottom-right") return { x: MARGIN, y: endY };
-  if (position === "bottom-left") return { x: endX, y: endY };
+  if (position === "top-right") return { x: endX, y: MARGIN };
+  if (position === "top-left") return { x: MARGIN, y: MARGIN };
+  if (position === "bottom-left") return { x: MARGIN, y: endY };
+  if (position === "bottom-right") return { x: endX, y: endY };
 
   throw new Error("Initial button position invalid");
 }
