@@ -37,7 +37,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
 
   const showWidgetButton = widget?.showWidgetButton ?? true;
   const startOpen = widget?.startOpen ?? false;
-  const position: WebphonePosition = config.position ?? "bottom-left";
+  const position: WebphonePosition = config.position ?? "bottom-right";
   const buttonPosition: WidgetButtonPosition = config.buttonPosition ?? "bottom-right";
 
   return (

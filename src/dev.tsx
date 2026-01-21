@@ -13,7 +13,6 @@ await webphone.render({
       showRemoveDevicesButton: true,
     },
   },
-  position: { x: 1400, y: 200 },
   buttonPosition: "bottom-right",
 });
 console.log("API ready");

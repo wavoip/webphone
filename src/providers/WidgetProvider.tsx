@@ -171,7 +171,6 @@ export function WidgetProvider({ children }: Props) {
         value: position,
         set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
       },
-
     });
   }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
 
@@ -262,20 +261,18 @@ function handlePositionInitialSettings(
   const endX = window.innerWidth - MARGIN - rect.width;
 
   if (position === "top") return { x: middleX, y: MARGIN };
-  if (position === "bottom") return { x: middleX, y: bottomY };
+  if (position === "bottom") return { x: middleX, y: bottomY < 0 ? 0 : bottomY };
   if (position === "left") return { x: MARGIN, y: middleY };
   if (position === "right") return { x: endX, y: middleY };
   if (position === "top-left") return { x: MARGIN, y: MARGIN };
   if (position === "top-right") return { x: endX, y: MARGIN };
-  if (position === "bottom-left") return { x: MARGIN, y: bottomY };
-  if (position === "bottom-right") return { x: endX, y: bottomY };
+  if (position === "bottom-left") return { x: MARGIN, y: bottomY < 0 ? 0 : bottomY };
+  if (position === "bottom-right") return { x: endX, y: bottomY < 0 ? 0 : bottomY };
 
   throw new Error("Initial position invalid");
 }
 
-function handleButtonPositionInitialSettings(
-  position: WidgetButtonPosition,
-): { x: number; y: number } {
+function handleButtonPositionInitialSettings(position: WidgetButtonPosition): { x: number; y: number } {
   const MARGIN = 20;
   const button = { width: 56, height: 56 };
 
@@ -287,8 +284,8 @@ function handleButtonPositionInitialSettings(
 
   if (position === "top-right") return { x: endX, y: MARGIN };
   if (position === "top-left") return { x: MARGIN, y: MARGIN };
-  if (position === "bottom-left") return { x: MARGIN, y: endY };
-  if (position === "bottom-right") return { x: endX, y: endY };
+  if (position === "bottom-left") return { x: MARGIN, y: endY < 0 ? 0 : endY };
+  if (position === "bottom-right") return { x: endX, y: endY < 0 ? 0 : endY };
 
   throw new Error("Initial button position invalid");
 }
