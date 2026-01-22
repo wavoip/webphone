@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mergeToAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";

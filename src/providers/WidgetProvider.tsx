@@ -13,7 +13,7 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { mergeToAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useSettings } from "@/providers/settings/Provider";
 import type { WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";

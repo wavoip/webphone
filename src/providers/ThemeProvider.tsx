@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import type { Theme } from "@/providers/settings/settings";
 
 type ThemeProviderProps = {

@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 
 export type NotificationsType = {
   id: Date;

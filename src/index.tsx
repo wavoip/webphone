@@ -2,8 +2,9 @@ import ReactDOM from "react-dom/client";
 import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
-import { type WebphoneAPI, webphoneAPIPromise } from "@/lib/webphone-api";
+import { webphoneAPIPromise } from "@/lib/webphone-api/api";
 import type { WebphoneSettings } from "@/providers/settings/settings";
+import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;

@@ -15,6 +15,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -145,6 +146,12 @@ export default function KeyboardScreen() {
       }
     });
   };
+
+  mergeToAPI({
+    call: {
+      setInput: (number) => setNumber(number),
+    },
+  });
 
   return (
     <form
