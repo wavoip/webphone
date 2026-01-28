@@ -9,6 +9,13 @@ type CallOfferProps = Pick<CallOffer, "id" | "type" | "device_token" | "directio
 
 export type WebphoneAPI = {
   call: {
+    start: (
+      to: string,
+      config?: {
+        fromTokens?: string[];
+        displayName?: string;
+      },
+    ) => Promise<{ err: { message: string; devices: { token: string; reason: string }[] } } | { err: null }>;
     startCall: (
       to: string,
       fromTokens: string[] | null,

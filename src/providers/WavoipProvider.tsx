@@ -14,18 +14,7 @@ interface WavoipContextProps {
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;
-  startCall: (
-    to: string,
-    fromTokens: string[],
-  ) => Promise<{
-    err: {
-      message: string;
-      devices: {
-        token: string;
-        reason: string;
-      }[];
-    } | null;
-  }>;
+  startCall: ReturnType<typeof useCallManager>["start"];
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
@@ -55,7 +44,8 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
   useEffect(() => {
     mergeToAPI({
       call: {
-        startCall: (...args) => startCall(...args),
+        start: (...args) => startCall(...args),
+        startCall: (to, fromTokens) => startCall(to, fromTokens ? { fromTokens } : {}), // Deprecated
         getCallActive: () => {
           if (!callActive) return undefined;
           const { id, type, status, device_token, direction, peer, muted } = callActive;

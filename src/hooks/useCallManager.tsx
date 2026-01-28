@@ -166,14 +166,19 @@ export function useCallManager({ wavoip, devices }: Props) {
   );
 
   const start = useCallback(
-    async (to: string, fromTokens: string[] | null) => {
+    async (to: string, config: { fromTokens?: string[]; displayName?: string } = {}) => {
       const { call, err } = await wavoip.startCall({
-        fromTokens: fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
+        fromTokens: config.fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
         to,
       });
 
       if (err) {
         return { err };
+      }
+
+      if (config.displayName) {
+        call.peer.displayName = config.displayName;
+        call.peer.phone = config.displayName;
       }
 
       call.onPeerAccept((activeCall) => {

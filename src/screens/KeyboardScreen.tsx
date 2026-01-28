@@ -101,7 +101,7 @@ export default function KeyboardScreen() {
     setError("");
     setStatus(`Ligando de ${device}`);
 
-    await startCall(number, [device]).then(({ err }) => {
+    await startCall(number, { fromTokens: [device] }).then(({ err }) => {
       if (!err) {
         setStatus("Ok");
         setCallIsLoading(false);

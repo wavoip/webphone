@@ -70,7 +70,7 @@ export default function OutgoingScreen() {
             <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
-            <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+            <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
               {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
             </MarqueeText>
           </div>
@@ -81,12 +81,12 @@ export default function OutgoingScreen() {
 
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
               <div className="wv:hidden  wv:group-hover/title:block">
-                <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+                <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
                   {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
                 </MarqueeText>
               </div>
 
-              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+              <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
                 {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
               </p>
             </div>

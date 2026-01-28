@@ -11,6 +11,8 @@ let apiAggregator: WebphoneAPIPartial = {};
 
 const APIProxy: WebphoneAPI = {
   call: {
+    start: (...args) =>
+      apiAggregator.call?.start?.(...args) ?? Promise.resolve({ err: { message: "API not ready yet", devices: [] } }),
     startCall: (...args) =>
       apiAggregator.call?.startCall?.(...args) ??
       Promise.resolve({ err: { message: "API not ready yet", devices: [] } }),
