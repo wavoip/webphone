@@ -8,12 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-const calling_sound = new Audio(Calling);
-const postalcode_sound = new Audio(PostalCode);
+
 
 export default function OutgoingScreen() {
   const { callOutgoing } = useWavoip();
-
+  const calling_sound = new Audio(Calling);
+  calling_sound.preload = "auto";
+  const postalcode_sound = new Audio(PostalCode);
   const [status, setStatus] = useState<null | string>("Ligando...");
 
   useEffect(() => {
@@ -41,7 +42,10 @@ export default function OutgoingScreen() {
       }
 
       calling_sound.pause();
+      calling_sound.currentTime = 0;
+      calling_sound.src = "";
       postalcode_sound.pause();
+      postalcode_sound.currentTime = 0;
     });
 
     callOutgoing?.onPeerReject(() => {
