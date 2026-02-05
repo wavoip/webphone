@@ -1,6 +1,7 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
+import Reconnecting from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +10,7 @@ import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
+const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
   const { callActive } = useWavoip();
@@ -28,6 +30,26 @@ export default function CallScreen() {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
+    });
+    callActive?.onStatus((status) => {
+      if (status === "DISCONNECTED") {
+        setStatus("Reconectando");
+        reconnecting_sound.pause();
+        reconnecting_sound.currentTime = 0;
+        reconnecting_sound.onended = () => {
+          setTimeout(() => {
+            reconnecting_sound.currentTime = 0;
+            reconnecting_sound.play();
+          }, 3000);
+        }
+        reconnecting_sound.play();
+      }
+      else {
+        setStatus(null);
+        reconnecting_sound.onended = null;
+        reconnecting_sound.pause();
+        reconnecting_sound.currentTime = 0;
+      }
     });
 
     durationRef.current = setInterval(() => {
