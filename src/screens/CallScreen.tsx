@@ -1,7 +1,7 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
-import Reconnecting from "@/assets/sounds/postalcode.mp3";
+import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
