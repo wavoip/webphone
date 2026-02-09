@@ -5,7 +5,7 @@ import type * as React from "react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "wv:inline-flex wv:items-center wv:justify-center wv:gap-2 wv:whitespace-nowrap wv:rounded-md wv:text-sm wv:font-medium wv:transition wv:disabled:pointer-events-none wv:disabled:opacity-50 wv:[&_svg]:pointer-events-none wv:[&_svg:not([class*=size-])]:size-4 wv:shrink-0 wv:[&_svg]:shrink-0 wv:outline-none wv:focus-visible:border-ring wv:focus-visible:ring-ring/50 wv:focus-visible:ring-[3px] wv:aria-invalid:ring-destructive/20 wv:dark:aria-invalid:ring-destructive/40 wv:aria-invalid:border-destructive",
+  "wv:inline-flex wv:items-center wv:justify-center wv:gap-2 wv:whitespace-nowrap wv:rounded-md wv:text-sm wv:font-medium wv:transition-all wv:disabled:pointer-events-none wv:disabled:opacity-50 wv:[&_svg]:pointer-events-none wv:[&_svg:not([class*=size-])]:size-4 wv:shrink-0 wv:[&_svg]:shrink-0 wv:outline-none wv:focus-visible:border-ring wv:focus-visible:ring-ring/50 wv:focus-visible:ring-[3px] wv:aria-invalid:ring-destructive/20 wv:dark:aria-invalid:ring-destructive/40 wv:aria-invalid:border-destructive",
   {
     variants: {
       variant: {
