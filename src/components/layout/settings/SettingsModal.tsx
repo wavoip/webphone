@@ -35,6 +35,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
   const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
   const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
   const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
+  const [error, setError] = useState("");
 
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
@@ -110,14 +111,21 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
                   {showAddDevice && (
                     <div className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:py-4">
                       <Input
-                        placeholder="Token"
+                        placeholder={error ? error : "Token"}
                         value={token}
-                        onChange={(e) => setToken(e.target.value)}
-                        className="wv:focus-visible:ring-0 wv:flex-1"
+                        onChange={(e) => {
+                          setToken(e.target.value);
+                          if (error) setError("");
+                        }}
+                        className={`wv:focus-visible:ring-0 wv:flex-1 ${error ? "wv:border-red-500" : ""}`}
                       />
                       <Button
                         type="button"
                         onClick={() => {
+                          if (!token.trim()) {
+                            setError("Informe o Token");
+                            return;
+                          }
                           addDevice(token);
                           setToken("");
                         }}
