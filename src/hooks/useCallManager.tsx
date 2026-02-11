@@ -6,6 +6,7 @@ import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
 import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
@@ -13,13 +14,14 @@ import { useWidget } from "@/providers/WidgetProvider";
 type Props = {
   wavoip: Wavoip;
   devices: DeviceState[];
+  onOffer: (offer: CallOfferProps) => void;
 };
 
 const ringtone_sound = new Audio(Ringtone);
 const vibration_sound = new Audio(Vibration);
 let widgetStatusCache: null | boolean = null;
 
-export function useCallManager({ wavoip, devices }: Props) {
+export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Props) {
   const { setScreen } = useScreen();
   const { isClosed: widgetIsClosed, setIsClosed: setWidgetClosed, open: openWidget } = useWidget();
   const { addNotification } = useNotificationManager();
@@ -153,6 +155,15 @@ export function useCallManager({ wavoip, devices }: Props) {
       };
 
       setOffers((prev) => [...prev, offerIntegrated]);
+      onOfferExternal({
+        id: offer.id,
+        type: offer.type,
+        status: offer.status,
+        device_token: offer.device_token,
+        direction: offer.direction,
+        peer: offer.peer,
+        muted: offer.muted,
+      });
 
       startRingtone();
 
@@ -162,7 +173,7 @@ export function useCallManager({ wavoip, devices }: Props) {
         className: "wv:max-w-[400px] wv:!w-full",
       });
     },
-    [widgetIsClosed, active, onCallAccept, openWidget, offers],
+    [widgetIsClosed, active, onCallAccept, openWidget, offers, onOfferExternal],
   );
 
   const start = useCallback(

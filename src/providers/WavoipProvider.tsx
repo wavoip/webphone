@@ -1,8 +1,9 @@
 import type { CallActive, CallOffer, CallOutgoing, Device, Wavoip } from "@wavoip/wavoip-api";
-import React, { createContext, type ReactNode, useContext, useEffect } from "react";
+import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
 import { mergeToAPI } from "@/lib/webphone-api/api";
+import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 
 interface WavoipContextProps {
   wavoip: Wavoip;
@@ -33,7 +34,14 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     enable: enableDevice,
   } = useDeviceManager({ wavoip: wavoip });
 
-  const { offers, outgoing: callOutgoing, active: callActive, start: startCall } = useCallManager({ wavoip, devices });
+  const [onOffer, setOnOffer] = useState<(offer: CallOfferProps) => void>(() => () => {});
+
+  const {
+    offers,
+    outgoing: callOutgoing,
+    active: callActive,
+    start: startCall,
+  } = useCallManager({ wavoip, devices, onOffer });
 
   useEffect(() => {
     return () => {
@@ -66,6 +74,9 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
             peer,
             muted,
           }));
+        },
+        onOffer: (cb) => {
+          setOnOffer(() => cb);
         },
       },
       device: {

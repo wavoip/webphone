@@ -1,11 +1,7 @@
 import type { WebphoneAPI, WebphoneAPIPartial } from "@/lib/webphone-api/WebphoneAPI";
 
 let resolved = false;
-let resolveApi: ((api: PromiseLike<WebphoneAPI> | WebphoneAPI) => void) | null = null;
-
-export const webphoneAPIPromise = new Promise<WebphoneAPI>((resolve) => {
-  resolveApi = resolve;
-});
+const { promise: webphoneAPIPromise, resolve } = Promise.withResolvers<WebphoneAPI>();
 
 let apiAggregator: WebphoneAPIPartial = {};
 
@@ -20,6 +16,7 @@ const APIProxy: WebphoneAPI = {
     getCallOutgoing: () => apiAggregator.call?.getCallOutgoing?.(),
     getOffers: () => apiAggregator.call?.getOffers?.() ?? [],
     setInput: (...args) => apiAggregator.call?.setInput?.(...args),
+    onOffer: (cb) => apiAggregator.call?.onOffer?.(cb),
   },
   device: {
     getDevices: () => apiAggregator.device?.getDevices?.() ?? [],
@@ -123,6 +120,8 @@ function removeNullishValuesFromObject<T extends Record<string, unknown>>(obj: T
 function validateAPI(api: WebphoneAPIPartial) {
   if (api.call && api.notifications && api.widget && api.theme && api.settings && api.device) {
     resolved = true;
-    resolveApi?.(APIProxy);
+    return resolve(APIProxy);
   }
 }
+
+export { webphoneAPIPromise };

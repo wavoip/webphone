@@ -1,7 +1,7 @@
 import webphone from "@/index.tsx";
 
 console.log("Rendering");
-const api = await webphone.render({
+await webphone.render({
   statusBar: {
     showNotificationsIcon: true,
     showSettingsIcon: true,
@@ -14,7 +14,9 @@ const api = await webphone.render({
     },
   },
   buttonPosition: "bottom-right",
+  widget: {
+    startOpen: true,
+  },
 });
-console.log("API ready");
 
-api.widget.open();
+console.log("API ready");
