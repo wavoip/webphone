@@ -9,7 +9,6 @@ import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
-import pkg from "../../../../package.json";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
@@ -41,9 +40,6 @@ export default function StatusBar() {
         startDrag(e);
       }}
       className="wv:w-full wv:h-9 wv:bg-background wv:flex wv:justify-between wv:items-center wv:px-2 wv:rounded-2xl wv:rounded-bl-none wv:rounded-br-none wv:hover:cursor-pointer wv:shadow-[0_-10px_15px_rgba(0,0,0,0.1)] wv:max-sm:pt-5">
-      <p className="wv:text-neutral-500 pointer-events-none wv:mt-[890px] wv:fixed wv:select-none" aria-hidden="true">
-        v {pkg.version}
-      </p>
       <div className="wv:flex wv:gap-2">{callActive && <Ping call={callActive} />}</div>
       <div className="wv:flex wv:items-center wv:gap-2">
         {showNotifications && <Notifications />}

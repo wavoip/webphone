@@ -5,6 +5,7 @@ import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
+import pkg from "../../package.json";
 
 export function WebPhone() {
   const { screen } = useScreen();
@@ -35,6 +36,9 @@ export function WebPhone() {
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}
+        <p className="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50" aria-hidden="true">
+          v {pkg.version}
+        </p>
       </div>
     </>
   );
