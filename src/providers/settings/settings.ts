@@ -54,6 +54,11 @@ export type WebphonePosition =
       y: number;
     };
 
+export type CallSettings = {
+  showNumber?: boolean;
+  showName?: boolean;
+};
+
 export type WebphoneSettings = {
   theme?: Theme;
   statusBar?: Partial<StatusBarSettings>;
@@ -61,4 +66,5 @@ export type WebphoneSettings = {
   widget?: Partial<WidgetSettings>;
   position?: WebphonePosition;
   buttonPosition?: WidgetButtonPosition;
+  callSettings?: CallSettings;
 };

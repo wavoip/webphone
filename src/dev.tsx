@@ -13,6 +13,10 @@ const api = await webphone.render({
       showRemoveDevicesButton: true,
     },
   },
+  callSettings: {
+    showName: false,
+    showNumber: false
+  },
   buttonPosition: "bottom-right",
 });
 console.log("API ready");
