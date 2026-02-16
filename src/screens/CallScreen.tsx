@@ -7,6 +7,7 @@ import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
 import { getFullnameLetters } from "@/lib/utils";
+import { showNameOrNumber, useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
@@ -14,6 +15,7 @@ const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
   const { callActive } = useWavoip();
+  const { calls } = useSettings();
 
   const [peerMuted, setPeerMuted] = useState(callActive?.peer.muted || false);
   const [status, setStatus] = useState<string | null>(null);
@@ -41,10 +43,9 @@ export default function CallScreen() {
             reconnecting_sound.currentTime = 0;
             reconnecting_sound.play();
           }, 3000);
-        }
+        };
         reconnecting_sound.play();
-      }
-      else {
+      } else {
         setStatus(null);
         reconnecting_sound.onended = null;
         reconnecting_sound.pause();
@@ -74,7 +75,7 @@ export default function CallScreen() {
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
             <AvatarImage src={callActive?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callActive?.peer?.displayName)}</AvatarFallback>
+            <AvatarFallback>{(calls.showName) ? getFullnameLetters(callActive?.peer?.displayName) : "Oculto"}</AvatarFallback>
           </Avatar>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start wv:overflow-hidden">
             <p className="wv:text-foreground wv:opacity-75 wv:text-[14px]">
@@ -84,12 +85,12 @@ export default function CallScreen() {
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:font-normal wv:w-full">
               <div className="wv:hidden  wv:group-hover/title:block ">
                 <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callActive?.peer.displayName || callActive?.peer.phone}
+                  {showNameOrNumber(calls, callActive)}
                 </MarqueeText>
               </div>
 
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-                {callActive?.peer.displayName || callActive?.peer.phone}
+                {showNameOrNumber(calls, callActive)}
               </p>
 
               {error && <p className="wv:text-destructive wv:opacity-75 wv:text-xs">{error}</p>}

@@ -13,6 +13,10 @@ await webphone.render({
       showRemoveDevicesButton: true,
     },
   },
+  callSettings: {
+    showName: false,
+    showNumber: false
+  },
   buttonPosition: "bottom-right",
   widget: {
     startOpen: true,

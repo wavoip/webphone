@@ -6,12 +6,12 @@ import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
+import { showNameOrNumber, useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
-
-
 
 export default function OutgoingScreen() {
   const { callOutgoing } = useWavoip();
+  const { calls } = useSettings();
   const calling_sound = new Audio(Calling);
   calling_sound.preload = "auto";
   const postalcode_sound = new Audio(PostalCode);
@@ -71,11 +71,13 @@ export default function OutgoingScreen() {
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
             <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
+            <AvatarFallback>
+              {calls.showName ? getFullnameLetters(callOutgoing?.peer?.displayName) : "Oculto"}
+            </AvatarFallback>
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-              {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+              {showNameOrNumber(calls, callOutgoing)}
             </MarqueeText>
           </div>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start">
@@ -86,12 +88,12 @@ export default function OutgoingScreen() {
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
               <div className="wv:hidden  wv:group-hover/title:block">
                 <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                  {showNameOrNumber(calls, callOutgoing)}
                 </MarqueeText>
               </div>
 
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-                {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                {showNameOrNumber(calls, callOutgoing)}
               </p>
             </div>
           </div>
