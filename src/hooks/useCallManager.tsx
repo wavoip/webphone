@@ -9,6 +9,7 @@ import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-pictur
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
+import { useSettings } from "@/providers/settings/Provider";
 
 type Props = {
   wavoip: Wavoip;
@@ -23,6 +24,7 @@ export function useCallManager({ wavoip, devices }: Props) {
   const { setScreen } = useScreen();
   const { isClosed: widgetIsClosed, setIsClosed: setWidgetClosed, open: openWidget } = useWidget();
   const { addNotification } = useNotificationManager();
+  const { callSettings } = useSettings();
 
   const [offers, setOffers] = useState<CallOffer[]>([]);
   const [outgoing, setOutgoing] = useState<CallOutgoing | undefined>(undefined);
@@ -95,6 +97,11 @@ export function useCallManager({ wavoip, devices }: Props) {
     (offer: CallOffer) => {
       if (active) return;
 
+      if (callSettings?.displayName) {
+        offer.peer.displayName = callSettings.displayName;
+        offer.peer.phone = callSettings.displayName;
+      }
+
       function onOfferEnd() {
         setOffers((prev) => prev.filter(({ id }) => id !== offer.id));
         stopRingtone(offers);
@@ -166,7 +173,7 @@ export function useCallManager({ wavoip, devices }: Props) {
   );
 
   const start = useCallback(
-    async (to: string, config: { fromTokens?: string[]; displayName?: string } = {}) => {
+    async (to: string, config: { fromTokens?: string[] } = {}) => {
       const { call, err } = await wavoip.startCall({
         fromTokens: config.fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
         to,
@@ -176,9 +183,9 @@ export function useCallManager({ wavoip, devices }: Props) {
         return { err };
       }
 
-      if (config.displayName) {
-        call.peer.displayName = config.displayName;
-        call.peer.phone = config.displayName;
+      if (callSettings?.displayName) {
+        call.peer.displayName = callSettings.displayName;
+        call.peer.phone = callSettings.displayName;
       }
 
       call.onPeerAccept((activeCall) => {

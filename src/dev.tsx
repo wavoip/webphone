@@ -14,8 +14,7 @@ const api = await webphone.render({
     },
   },
   callSettings: {
-    showName: false,
-    showNumber: false
+    displayName: "Nome padrão",
   },
   buttonPosition: "bottom-right",
 });

@@ -55,8 +55,7 @@ export type WebphonePosition =
     };
 
 export type CallSettings = {
-  showNumber?: boolean;
-  showName?: boolean;
+  displayName?: string;
 };
 
 export type WebphoneSettings = {

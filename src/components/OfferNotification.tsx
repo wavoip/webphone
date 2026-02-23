@@ -6,14 +6,12 @@ import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getFullnameLetters } from "@/lib/utils";
-import { showNameOrNumber, useSettings } from "@/providers/settings/Provider";
 
 type Props = {
   offer: CallOffer;
 };
 
 export function OfferNotification({ offer }: Props) {
-  const { calls } = useSettings();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -56,7 +54,7 @@ export function OfferNotification({ offer }: Props) {
       <div className="wv:flex wv:gap-3">
         <Avatar className="wv:size-[50px] wv:rounded-xl">
           <AvatarImage src={offer.peer?.profilePicture ?? ""} />
-          <AvatarFallback>{getFullnameLetters(calls.showName ? offer.peer?.displayName : "Oculto")}</AvatarFallback>
+          <AvatarFallback>{getFullnameLetters(offer.peer?.displayName)}</AvatarFallback>
         </Avatar>
 
         <div className="wv:flex-grow wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
@@ -66,16 +64,16 @@ export function OfferNotification({ offer }: Props) {
               {status && <p className="wv:text-foreground wv:opacity-40 wv:text-[14px] wv:select-none">{status}</p>}
             </>
           ) : (
-            <p className="wv:text-foreground wv:opacity-40 wv:text-[14px] wv:select-none">{calls.showNumber ? offer.peer?.phone : "Oculto"}</p>
+            <p className="wv:text-foreground wv:opacity-40 wv:text-[14px] wv:select-none">{offer.peer?.phone}</p>
           )}
           <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:font-normal wv:select-none">
-              {showNameOrNumber(calls, offer)}
+              {offer.peer?.displayName || offer.peer?.phone}
             </MarqueeText>
           </div>
 
           <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-            {showNameOrNumber(calls, offer)}
+            {offer.peer?.displayName || offer.peer?.phone}
           </p>
         </div>
         <div className="wv:flex wv:flex-row wv:gap-2">
