@@ -80,7 +80,7 @@ export function OfferNotification({ offer }: Props) {
           <Button
             type="submit"
             size={"icon"}
-            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[40px] wv:w-[40px]"
+            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
@@ -99,7 +99,7 @@ export function OfferNotification({ offer }: Props) {
           <Button
             type="submit"
             size={"icon"}
-            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[40px] wv:w-[40px]"
+            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
