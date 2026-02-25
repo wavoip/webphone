@@ -66,4 +66,5 @@ export type WebphoneSettings = {
   position?: WebphonePosition;
   buttonPosition?: WidgetButtonPosition;
   callSettings?: CallSettings;
+  platform?: string;
 };

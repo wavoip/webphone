@@ -17,6 +17,10 @@
       "require": "./dist/index.umd.js"
     }
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wavoip/wavoip-api.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

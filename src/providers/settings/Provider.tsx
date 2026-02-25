@@ -18,6 +18,7 @@ type SettingsProviderState = {
   callSettings: { displayName?: string };
   position: WebphonePosition;
   buttonPosition: WidgetButtonPosition;
+  platform?: string;
 };
 
 const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
@@ -42,6 +43,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
   const startOpen = widget?.startOpen ?? false;
   const position: WebphonePosition = config.position ?? "bottom-right";
   const buttonPosition: WidgetButtonPosition = config.buttonPosition ?? "bottom-right";
+  const platform = config.platform;
 
   return (
     <SettingsProviderContext.Provider
@@ -64,6 +66,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
         },
         position,
         buttonPosition,
+        platform: platform || undefined,
       }}
     >
       {children}

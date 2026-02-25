@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function App({ shadowRoot, root, config }: Props) {
-  const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()] }));
+  const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
 
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
