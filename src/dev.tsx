@@ -13,6 +13,9 @@ await webphone.render({
       showRemoveDevicesButton: true,
     },
   },
+  callSettings: {
+    displayName: "Nome padrão",
+  },
   buttonPosition: "bottom-right",
   widget: {
     startOpen: true,

@@ -15,6 +15,7 @@ type SettingsProviderState = {
   audio: { show: State<boolean> };
   devices: { show: State<boolean>; showAdd: State<boolean>; enableShow: State<boolean>; removeShow: State<boolean> };
   widget: { startOpen: boolean; show: State<boolean> };
+  callSettings: { displayName?: string };
   position: WebphonePosition;
   buttonPosition: WidgetButtonPosition;
 };
@@ -34,6 +35,8 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
   const showAddDevices = deviceMenu?.showAddDevices ?? true;
   const showEnableDevices = deviceMenu?.showEnableDevicesButton ?? true;
   const showRemoveDevices = deviceMenu?.showRemoveDevicesButton ?? true;
+
+  const displayName = config.callSettings?.displayName;
 
   const showWidgetButton = widget?.showWidgetButton ?? true;
   const startOpen = widget?.startOpen ?? false;
@@ -55,6 +58,9 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
           showAdd: showAddDevices,
           enableShow: showEnableDevices,
           removeShow: showRemoveDevices,
+        },
+        callSettings: {
+          displayName: displayName,
         },
         position,
         buttonPosition,

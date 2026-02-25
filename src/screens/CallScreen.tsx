@@ -41,10 +41,9 @@ export default function CallScreen() {
             reconnecting_sound.currentTime = 0;
             reconnecting_sound.play();
           }, 3000);
-        }
+        };
         reconnecting_sound.play();
-      }
-      else {
+      } else {
         setStatus(null);
         reconnecting_sound.onended = null;
         reconnecting_sound.pause();

@@ -8,8 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-
-
 export default function OutgoingScreen() {
   const { callOutgoing } = useWavoip();
   const calling_sound = new Audio(Calling);
@@ -71,7 +69,9 @@ export default function OutgoingScreen() {
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
             <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
+            <AvatarFallback>
+              {getFullnameLetters(callOutgoing?.peer?.displayName)}
+            </AvatarFallback>
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
