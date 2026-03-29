@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { buildAPI } from "@/lib/webphone-api";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 export type Theme = "dark" | "light" | "system";
 
@@ -27,12 +28,17 @@ export function ThemeProvider({
     storageKey = "vite-ui-theme",
     ...props
 }: ThemeProviderProps) {
+    const shadowRoot = useShadowRoot();
     const [theme, setTheme] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
     );
 
     useEffect(() => {
-        const root = window.document.documentElement;
+        if (!shadowRoot) return;
+
+        const root = shadowRoot.querySelector("#root");
+
+        if (!root) return;
 
         root.classList.remove("light", "dark");
 
@@ -44,7 +50,7 @@ export function ThemeProvider({
         }
 
         root.classList.add(theme);
-    }, [theme]);
+    }, [theme, shadowRoot]);
 
     const handleSetTheme = (theme: Theme) => {
         localStorage.setItem(storageKey, theme);

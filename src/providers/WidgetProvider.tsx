@@ -40,7 +40,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [closed, setClosed] = useState(true);
+  const [closed, setClosed] = useState(false);
 
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     if (!divRef.current) return;
@@ -196,9 +196,8 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
       <div
         ref={divRef}
         data-closed={closed}
-        className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
+        className="wv:fixed wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-125 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:desktop:w-dvw wv:desktop:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-surface wv:shadow-lg wv:touch-manipulation wv:desktop:absolute wv:desktop:!top-0 wv:desktop:!left-0"
         style={{
-          position: "fixed",
           left: position.x,
           top: position.y,
         }}

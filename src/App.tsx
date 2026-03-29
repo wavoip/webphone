@@ -1,6 +1,8 @@
 import { Wavoip } from "@wavoip/wavoip-api";
 import { useState } from "react";
-import { WebPhone } from "@/components/WebPhone";
+// import { AppSidebar } from "@/components/layout/sidebar/Sidebar";
+// import { SidebarProvider } from "@/components/ui/sidebar";
+import TabBar from "@/layout/TabBar";
 import { getSettings } from "@/lib/device-settings";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
@@ -9,6 +11,7 @@ import { ShadowRootContext } from "@/providers/ShadowRootProvider";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
+import { LoginScreen } from "@/screens/LoginScreen";
 
 type Props = {
   shadowRoot: ShadowRoot;
@@ -25,7 +28,14 @@ export function App({ shadowRoot }: Props) {
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
-                  <WebPhone />
+                  {/* <SidebarProvider>
+                    <AppSidebar />
+                  </SidebarProvider> */}
+                  {true ? (
+                    <LoginScreen />
+                  ) : (
+                    <TabBar />
+                  )}
                 </WavoipProvider>
               </ScreenProvider>
             </NotificationsProvider>

@@ -8,12 +8,12 @@ class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render() {
+  async render(container?: HTMLElement) {
     if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");
     this.container.id = "webphone";
-    document.body.appendChild(this.container);
+    (container ?? document.body).appendChild(this.container);
 
     const shadowRoot = this.container.attachShadow({ mode: "closed" });
 

@@ -1,5 +1,6 @@
 import type { CallActive, CallOffer, CallOutgoing, Wavoip } from "@wavoip/wavoip-api";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
+import type { SettingsProviderState } from "@/providers/SettingsProvider";
 import type { Theme } from "@/providers/ThemeProvider";
 
 type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted">;
@@ -39,22 +40,7 @@ export type WebphoneAPI = {
   theme: {
     setTheme: (theme: Theme) => void;
   };
-  settings: {
-    showNotifications: boolean;
-    showSettings: boolean;
-    showDevices: boolean;
-    showAddDevices: boolean;
-    showEnableDevices: boolean;
-    showRemoveDevices: boolean;
-    showWidgetButton: boolean;
-    setShowNotifications: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowDevices: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowAddDevices: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowEnableDevices: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowRemoveDevices: React.Dispatch<React.SetStateAction<boolean>>;
-    setShowWidgetButton: React.Dispatch<React.SetStateAction<boolean>>;
-  };
+  settings: SettingsProviderState;
 };
 
 let resolveApi: ((api: PromiseLike<WebphoneAPI> | WebphoneAPI) => void) | null = null;

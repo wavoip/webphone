@@ -21,6 +21,20 @@ export default {
       "max-2xl": { max: "1535px" },
     },
   },
+  colors: {
+    muted: {
+      50: "rgb(15 23 42)",
+      100: "rgb(15 23 42)",
+      200: "rgb(15 23 42)",
+      300: "rgb(15 23 42)",
+      400: "rgb(15 23 42)",
+      500: "rgb(15 23 42)",
+      600: "rgb(15 23 42)",
+      700: "rgb(15 23 42)",
+      800: "rgb(15 23 42)",
+      900: "rgb(15 23 42)",
+    },
+  },
   plugins: [],
   css: {
     allowedExternalDependencies: ["sooner"],

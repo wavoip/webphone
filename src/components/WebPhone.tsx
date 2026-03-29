@@ -26,7 +26,7 @@ export function WebPhone() {
   return (
     <>
       <StatusBar />
-      <div role="application" className="wv:flex wv:flex-1 wv:relative wv:px-7" onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
+      <div role="application" className="wv:flex wv:flex-1 wv:relative wv:size-full wv:px-4" onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}

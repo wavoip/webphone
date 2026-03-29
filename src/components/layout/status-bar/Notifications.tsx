@@ -32,7 +32,7 @@ export function Notifications() {
           readNotifications();
         }}
       >
-        <Bell className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none " />
+        <Bell className="wv:max-sm:size-6 wv:desktop:size-4 wv:max-sm:text-blue wv:pointer-events-none " />
         {notificationsToRead > 0 && (
           <Badge
             className="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
