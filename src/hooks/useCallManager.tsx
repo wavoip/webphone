@@ -1,4 +1,4 @@
-import type { CallActive, CallOffer, CallOutgoing, Wavoip } from "@wavoip/wavoip-api";
+import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
@@ -9,8 +9,8 @@ import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-pictur
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
-import { useWidget } from "@/providers/WidgetProvider";
 import { useSettings } from "@/providers/settings/Provider";
+import { useWidget } from "@/providers/WidgetProvider";
 
 type Props = {
   wavoip: Wavoip;
@@ -28,7 +28,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
   const { addNotification } = useNotificationManager();
   const { callSettings } = useSettings();
 
-  const [offers, setOffers] = useState<CallOffer[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [outgoing, setOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [active, setActive] = useState<CallActive | undefined>(undefined);
 
@@ -96,7 +96,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
   );
 
   const onOffer = useCallback(
-    (offer: CallOffer) => {
+    (offer: Offer) => {
       if (active) return;
 
       if (callSettings?.displayName) {
@@ -113,7 +113,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
         }, 2000);
       }
 
-      const offerIntegrated: CallOffer = {
+      const offerIntegrated: Offer = {
         ...offer,
         onEnd(cb) {
           offer.onEnd(() => {
@@ -276,7 +276,7 @@ function startRingtone() {
   vibration_sound.play();
 }
 
-function stopRingtone(offers: CallOffer[]) {
+function stopRingtone(offers: Offer[]) {
   if (!offers.length) {
     ringtone_sound.pause();
     vibration_sound.pause();
