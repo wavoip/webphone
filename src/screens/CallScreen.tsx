@@ -31,13 +31,17 @@ export default function CallScreen() {
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
     });
-    callActive?.onStatus((status) => {
-      if (status === "DISCONNECTED") {
+    callActive?.onStatus((callStatus) => {
+      if (callStatus === "DISCONNECTED") {
         setStatus("Reconectando");
         reconnecting_sound.pause();
         reconnecting_sound.currentTime = 0;
         reconnecting_sound.onended = () => {
           setTimeout(() => {
+            if (!callActive || status !== "Reconectando") {
+              return;
+            }
+
             reconnecting_sound.currentTime = 0;
             reconnecting_sound.play();
           }, 3000);
@@ -60,7 +64,7 @@ export default function CallScreen() {
         clearInterval(durationRef.current);
       }
     };
-  }, [callActive]);
+  }, [callActive, status]);
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">

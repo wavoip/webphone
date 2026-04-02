@@ -36,7 +36,7 @@ export function WebPhone() {
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}
-        <p className="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50" aria-hidden="true">
+        <p className="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]" aria-hidden="true">
           v {pkg.version}
         </p>
       </div>
