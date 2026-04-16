@@ -1,5 +1,3 @@
-import type { Device } from "@wavoip/wavoip-api";
-
 const key = "wavoip:tokens";
 
 export type DeviceSettings = {
@@ -21,7 +19,7 @@ export function getSettings() {
   return new Map<string, DeviceSettings>(deviceSettings.map((settings) => [settings.token, settings]));
 }
 
-export function saveSettings(devices: (Device & DeviceSettings)[]) {
+export function saveSettings(devices: DeviceSettings[]) {
   const storageItem = devices
     .filter((device) => device.persist)
     .map((device) => `${device.token}:${device.enable}:${device.persist}`)

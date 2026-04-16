@@ -1,5 +1,5 @@
 import { PhoneIcon, PhoneSlash, WhatsappLogo } from "@phosphor-icons/react";
-import type { CallOffer } from "@wavoip/wavoip-api";
+import type { Offer } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import MarqueeText from "@/components/MarqueeText";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getFullnameLetters } from "@/lib/utils";
 
 type Props = {
-  offer: CallOffer;
+  offer: Offer;
 };
 
 export function OfferNotification({ offer }: Props) {
@@ -84,7 +84,7 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              offer.reject().then(({ err }) => {
+              offer.reject().then(({ err }: { err: string | null }) => {
                 if (err) {
                   setError(err);
                   setActionMade(false);
@@ -103,9 +103,9 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              offer.accept().then(({ err }) => {
-                if (err) {
-                  setError(err);
+              offer.accept().then((result) => {
+                if (result.err) {
+                  setError(result.err);
                   setActionMade(false);
                   return;
                 }

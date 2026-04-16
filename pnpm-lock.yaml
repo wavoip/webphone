@@ -1493,7 +1493,7 @@ packages:
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
   '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.1.13.tgz':
-    resolution: {integrity: sha512-yyzml86atpMuG+qK1pImN7a8mW4eOF33ovsdf3sbKYfrLIDiF/lqdDfaqVWRGruj5PSClPLd1IYT9wiSf5RyNQ==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.1.13.tgz}
+    resolution: {integrity: sha512-3QrmcaMbkczcWuQZIVizfKmhH8gcqw149ECU6KppDjuqVzcbCZ7FLjCuTrm3CDxx51zMDdquGF9W+K0qzpc0og==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.1.13.tgz}
     version: 2.1.13
 
   acorn-jsx@5.3.2:
@@ -1555,8 +1555,13 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
+<<<<<<< HEAD
   axios@1.14.0:
     resolution: {integrity: sha512-3Y8yrqLSwjuzpXuZ0oIYZ/XGgLwUIBU3uLvbcpb0pidD9ctpShJd43KSlEEkVQg6DS0G9NKyzOvBfUtDKEyHvQ==}
+=======
+  axios@1.15.0:
+    resolution: {integrity: sha512-wWyJDlAatxk30ZJer+GeCWS209sA42X+N5jU2jy6oHTp7ufw8uzUTVFBX9+wTfAlhiJXGS0Bq7X6efruWjuK9Q==}
+>>>>>>> c2b33ba (fix: stop offer ringtone when no offer available)
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1817,8 +1822,8 @@ packages:
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
 
-  follow-redirects@1.15.11:
-    resolution: {integrity: sha512-deG2P0JfjrTxl50XGCDyfI97ZGVCxIpfKYmfyrQ54n5FO/0gfIES8C/Psl6kWVDolizcaaxZJnTS0QSMxvnsBQ==}
+  follow-redirects@1.16.0:
+    resolution: {integrity: sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -3926,7 +3931,11 @@ snapshots:
   '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.1.13.tgz':
     dependencies:
       '@alexanderolsen/libsamplerate-js': 2.1.2
+<<<<<<< HEAD
       axios: 1.14.0
+=======
+      axios: 1.15.0
+>>>>>>> c2b33ba (fix: stop offer ringtone when no offer available)
       socket.io-client: 4.8.3
     transitivePeerDependencies:
       - bufferutil
@@ -3992,9 +4001,13 @@ snapshots:
 
   asynckit@0.4.0: {}
 
+<<<<<<< HEAD
   axios@1.14.0:
+=======
+  axios@1.15.0:
+>>>>>>> c2b33ba (fix: stop offer ringtone when no offer available)
     dependencies:
-      follow-redirects: 1.15.11
+      follow-redirects: 1.16.0
       form-data: 4.0.5
       proxy-from-env: 2.1.0
     transitivePeerDependencies:
@@ -4294,7 +4307,7 @@ snapshots:
 
   flatted@3.3.3: {}
 
-  follow-redirects@1.15.11: {}
+  follow-redirects@1.16.0: {}
 
   form-data@4.0.5:
     dependencies:
