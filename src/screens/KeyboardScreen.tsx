@@ -1,5 +1,6 @@
-import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { BackspaceIcon, ExclamationMarkIcon, PhoneIcon, WarningCircleIcon } from "@phosphor-icons/react";
+import { parsePhoneNumber } from "libphonenumber-js";
+import { useEffect, useRef, useState } from "react";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import SoundDTMF0 from "@/assets/sounds/dtmf-0.mp3";
 import SoundDTMF1 from "@/assets/sounds/dtmf-1.mp3";
@@ -13,9 +14,14 @@ import SoundDTMF8 from "@/assets/sounds/dtmf-8.mp3";
 import SoundDTMF9 from "@/assets/sounds/dtmf-9.mp3";
 import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
+import { AudioInputPopover, AudioOutputPopover } from "@/components/AudioPopover";
 import { KeyboardInput } from "@/components/KeyboardInput";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
+import { useSelectedDevice } from "@/providers/SelectedDeviceProvider";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [
@@ -83,14 +89,77 @@ const buttons = [
 
 const backspace_audio = new Audio(SoundBackspace);
 
+function getDeviceByToken(token: string | null, devices: ReturnType<typeof useWavoip>["devices"]) {
+  return token ? devices.find((d) => d.token === token) : devices.find((d) => d.enable);
+}
+
+function getCountryCode(token: string | null, devices: ReturnType<typeof useWavoip>["devices"]): string | null {
+  const device = getDeviceByToken(token, devices);
+  if (!device) return null;
+  const raw = device.contact?.official?.phone ?? device.contact?.unofficial?.phone ?? null;
+  if (!raw) return null;
+  try {
+    const phone = parsePhoneNumber(`+${raw.replace(/\D/g, "")}`);
+    return phone.country ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function getCountryName(countryCode: string | null): string | null {
+  if (!countryCode) return null;
+  return new Intl.DisplayNames(["pt-BR"], { type: "region" }).of(countryCode) ?? null;
+}
+
 export default function KeyboardScreen() {
   const [number, setNumber] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [callIsLoading, setCallIsLoading] = useState(false);
+  const [countryName, setCountryName] = useState<string | null>(null);
+  const [showCountry, setShowCountry] = useState(false);
+  const [countryCode, setCountryCode] = useState<string | null>(null);
+  const countryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
+  const { selectedToken } = useSelectedDevice();
+  const shadowRoot = useShadowRoot();
+
+  const hasDevices = devices.some((d) => d.enable);
+  const selectedDevice = selectedToken
+    ? devices.find((d) => d.token === selectedToken)
+    : devices.find((d) => d.enable);
+  const isDeviceDisconnected = hasDevices && (selectedDevice ? selectedDevice.status !== "open" : false);
+
+  const callDisabled = callIsLoading || isDeviceDisconnected || !hasDevices;
+  const callTooltip = !hasDevices
+    ? "Nenhum número de Whatsapp configurado"
+    : isDeviceDisconnected
+      ? "Seu número de Whatsapp está desconectado, conecte para continuar"
+      : null;
+
+  useEffect(() => {
+    if (countryTimerRef.current) clearTimeout(countryTimerRef.current);
+    setShowCountry(false);
+
+    const code = getCountryCode(selectedToken, devices);
+    setCountryCode(code);
+    const name = getCountryName(code);
+    if (!name) {
+      setCountryName(null);
+      return;
+    }
+
+    setCountryName(name);
+    countryTimerRef.current = setTimeout(() => {
+      setShowCountry(true);
+    }, 250);
+
+    return () => {
+      if (countryTimerRef.current) clearTimeout(countryTimerRef.current);
+    };
+  }, [selectedToken, devices]);
 
   const handleCall = async (devices: string[]) => {
     const isLast = devices.length <= 1;
@@ -157,7 +226,6 @@ export default function KeyboardScreen() {
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-around wv:desktop:justify-evenly wv:px-2 wv:pb-4"
     >
       <div className="">
-
         <div className="wv:text-center">
           {/* <Input
           placeholder="Digite..."
@@ -171,33 +239,55 @@ export default function KeyboardScreen() {
           <div className="wv:overflow-hidden">
             <KeyboardInput
               value={number}
+              callIsLoading={callIsLoading}
+              country={countryCode}
               onChange={(e: any) => {
-                // const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
-                setNumber(e.target.value);
+                const digits = e.target.value.replace(/[^\d*#+]/g, "");
+                setNumber(digits);
               }}
             />
           </div>
 
-          <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">Brasil</p>
+          {error ? (
+            <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em] wv:text-center">
+              <WarningCircleIcon size={12} color="red" className="wv:inline wv:align-middle wv:mr-1" />
+              {error}
+            </p>
+          ) : !hasDevices ? (
+            <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em] wv:text-center">
+              <WarningCircleIcon size={12} color="red" className="wv:inline wv:align-middle wv:mr-1" />
+              Nenhum número de Whatsapp configurado
+            </p>
+          ) : isDeviceDisconnected ? (
+            <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em] wv:text-center">
+              <WarningCircleIcon size={12} color="red" className="wv:inline wv:align-middle wv:mr-1" />
+              Whatsapp desconectado
+            </p>
+          ) : showCountry && countryName ? (
+            <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em] wv:animate-[fade-slide-up_0.6s_ease-out_forwards]">
+              {countryName}
+            </p>
+          ) : null}
 
           {status && (
             <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
               {callIsLoading && (
-                <div className="wv:flex  ">
-                  <div className="wv:h-3 wv:w-3 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent"></div>
+                <div className="wv:flex">
+                  <div className="wv:h-3 wv:w-3 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[black] wv:border-t-transparent"></div>
                 </div>
               )}
-
               <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
             </div>
           )}
-
-          {error && <p className="wv:text-[10px] wv:font-light wv:text-[red] wv:tracking-[.15em]">{error}</p>}
         </div>
       </div>
 
       <div className="wv:flex wv:flex-col wv:gap-3">
-        <div className="wv:flex wv:max-w-[300px] wv:w-full">
+        <div className="wv:relative wv:flex wv:max-w-[300px] wv:w-full wv:gap-3">
+          <div className="wv:absolute wv:-top-[30px] wv:right-2 wv:z-10 wv:flex wv:items-center wv:gap-1">
+            <AudioInputPopover />
+            <AudioOutputPopover />
+          </div>
           <div className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center">
             {Object.entries(buttons).map(([key, { digit, letters, audio }]) => (
               <Button
@@ -240,15 +330,25 @@ export default function KeyboardScreen() {
               <BackspaceIcon className="wv:size-5 wv:max-sm:size-8 wv:desktop:size-5" weight="fill" />
             </Button>
 
-            <Button
-              type="submit"
-              size={"icon"}
-              // className="wv:text-background wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[56px]"
-              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
-              disabled={callIsLoading}
-            >
-              <PhoneIcon className="wv:size-7" weight="fill" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="wv:aspect-square wv:size-full wv:max-w-[80px] wv:max-h-[80px]">
+                  <Button
+                    type="submit"
+                    size={"icon"}
+                    className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+                    disabled={callDisabled}
+                  >
+                    <PhoneIcon className="wv:size-7" weight="fill" />
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {callTooltip && (
+                <TooltipContent side="right" container={shadowRoot} className="wv:max-w-[180px] wv:text-center wv:[&_svg]:hidden wv:bg-surface wv:text-foreground">
+                  {callTooltip}
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
         </div>
       </div>

@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 import { LoginScreen } from "@/screens/LoginScreen";
+import { WebPhone } from "./components/WebPhone";
 
 type Props = {
   shadowRoot: ShadowRoot;
@@ -31,11 +32,12 @@ export function App({ shadowRoot }: Props) {
                   {/* <SidebarProvider>
                     <AppSidebar />
                   </SidebarProvider> */}
-                  {true ? (
+                  {/* {false ? (
                     <LoginScreen />
                   ) : (
                     <TabBar />
-                  )}
+                  )} */}
+                  <WebPhone />
                 </WavoipProvider>
               </ScreenProvider>
             </NotificationsProvider>

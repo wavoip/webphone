@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
+import { SelectedDeviceProvider } from "@/providers/SelectedDeviceProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
@@ -24,13 +25,13 @@ export function WebPhone() {
   );
 
   return (
-    <>
+    <SelectedDeviceProvider>
       <StatusBar />
       <div role="application" className="wv:flex wv:flex-1 wv:relative wv:size-full wv:px-4" onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
         {screen === "keyboard" && <KeyboardScreen />}
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}
       </div>
-    </>
+    </SelectedDeviceProvider>
   );
 }
