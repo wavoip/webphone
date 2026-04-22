@@ -84,7 +84,7 @@ const buttons = [
 
 const backspace_audio = new Audio(SoundBackspace);
 
-export default function KeyboardScreen() {
+export default function KeyboardScreen({ onPipClick }: { onPipClick?: () => void }) {
   const [number, setNumber] = useState("");
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
@@ -255,6 +255,12 @@ export default function KeyboardScreen() {
             // className="wv:text-background wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[56px]"
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             disabled={callIsLoading}
+
+            onClick={() => {
+              console.log("Clique no botão verde detectado!");
+              console.log("A função onPipClick existe?", !!onPipClick);
+              onPipClick?.();
+            }}
           >
             <PhoneIcon className="wv:size-7" weight="fill" />
           </Button>

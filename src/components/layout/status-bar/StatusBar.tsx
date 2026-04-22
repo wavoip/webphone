@@ -1,4 +1,4 @@
-import { XIcon } from "@phosphor-icons/react";
+import { XIcon, AppWindow } from "@phosphor-icons/react"; // Adicionei o AppWindow
 import { useEffect, useState } from "react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
@@ -10,7 +10,12 @@ import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
-export default function StatusBar() {
+// 1. Adicionamos a interface para receber a função de PiP
+interface StatusBarProps {
+  onPipClick?: () => void;
+}
+
+export default function StatusBar({ onPipClick }: StatusBarProps) {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
   const { callActive, devices } = useWavoip();
@@ -19,16 +24,10 @@ export default function StatusBar() {
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
 
   useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showNotifications,
-        setShowNotifications: (...args) => setShowNotifications(...args),
-        showSettings,
-        setShowSettings: (...args) => setShowSettings(...args),
-      },
-    });
-  }, [showSettings, showNotifications]);
-
+    if (callActive) {
+      onPipClick();
+    }
+  }, [callActive]);
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
@@ -45,6 +44,19 @@ export default function StatusBar() {
         {showNotifications && <Notifications />}
         {showSettings && <SettingsModal devices={devices} />}
         <DevicesAlert devices={devices} />
+
+        {/* --- NOVO BOTÃO DE PiP --- */}
+        <Button
+          type="button"
+          variant={"ghost"}
+          className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
+          onClick={onPipClick}
+          title="Flutuar Webphone"
+        >
+          <AppWindow size={20} className="wv:max-sm:size-6 wv:pointer-events-none" />
+        </Button>
+        {/* ------------------------ */}
+
         <Button
           type="button"
           variant={"ghost"}
