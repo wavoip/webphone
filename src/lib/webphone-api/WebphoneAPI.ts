@@ -1,19 +1,19 @@
-import type { CallActive, CallOffer, CallOutgoing } from "@wavoip/wavoip-api";
+import type { CallActive, Offer, CallOutgoing } from "@wavoip/wavoip-api";
 import type { DeviceState } from "@/hooks/useDeviceManager";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
 export type CallActiveProps = Pick<
   CallActive,
-  "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted"
+  "id" | "type" | "device_token" | "direction" | "status" | "peer"
 >;
 export type CallOutgoingProps = Pick<
   CallOutgoing,
-  "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted"
+  "id" | "type" | "device_token" | "direction" | "status" | "peer"
 >;
 export type CallOfferProps = Pick<
-  CallOffer,
-  "id" | "type" | "device_token" | "direction" | "status" | "peer" | "muted"
+  Offer,
+  "id" | "type" | "device_token" | "direction" | "status" | "peer"
 >;
 
 export type CallAPI = {

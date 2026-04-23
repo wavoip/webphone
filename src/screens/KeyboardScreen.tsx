@@ -197,23 +197,7 @@ export default function KeyboardScreen() {
               key={`webphone-keyboard-${key}`}
               type="button"
               variant={"secondary"}
-              className="wv:aspect-square wv:size-full wv:rounded-full 
-
-              
-              wv:hover:cursor-pointer 
-
-              wv:text-foreground 
-             wv:bg-muted
-              wv:hover:bg-accent
-              wv:active:bg-accent/60
-
-               wv:flex wv:flex-col 
-               wv:justify-center
-                wv:items-center wv:gap-0 
-
-              wv:transition-colors 
-              wv:duration-200 
-              wv:touch-manipulation"
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
               onClick={() => {
                 setNumber((prev) => prev + digit);
                 audio.pause();

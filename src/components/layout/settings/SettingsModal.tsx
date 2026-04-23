@@ -1,5 +1,4 @@
 import { GearIcon } from "@phosphor-icons/react";
-import type { Device } from "@wavoip/wavoip-api";
 import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
@@ -21,12 +20,8 @@ import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-type Props = {
-  devices: (Device & { enable: boolean })[];
-};
-
-export const SettingsModal = forwardRef(({ devices }: Props) => {
-  const { wavoip, addDevice } = useWavoip();
+export const SettingsModal = forwardRef(() => {
+  const { wavoip, addDevice, devices } = useWavoip();
   const { root } = useShadowRoot();
   const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
 

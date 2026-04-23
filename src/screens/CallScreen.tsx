@@ -13,48 +13,40 @@ const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
-  const { callActive } = useWavoip();
+  const { callActive, callStatus, peerMuted } = useWavoip();
 
-  const [peerMuted, setPeerMuted] = useState(callActive?.peer.muted || false);
-  const [status, setStatus] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
 
+  const status = callStatus === "ended" ? "Chamada encerrada" : callStatus === "reconnecting" ? "Reconectando" : null;
+
   useEffect(() => {
-    callActive?.onPeerMute(() => setPeerMuted(true));
-    callActive?.onPeerUnmute(() => setPeerMuted(false));
-    callActive?.onError((err) => setError(err));
-    callActive?.onEnd(() => {
-      setStatus("Chamada encerrada");
+    if (callStatus === "ended") {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
-    });
-    callActive?.onStatus((callStatus) => {
-      if (callStatus === "DISCONNECTED") {
-        setStatus("Reconectando");
-        reconnecting_sound.pause();
-        reconnecting_sound.currentTime = 0;
-        reconnecting_sound.onended = () => {
-          setTimeout(() => {
-            if (!callActive || status !== "Reconectando") {
-              return;
-            }
+      reconnecting_sound.onended = null;
+      reconnecting_sound.pause();
+      reconnecting_sound.currentTime = 0;
+      if (durationRef.current) clearInterval(durationRef.current);
+    } else if (callStatus === "reconnecting") {
+      reconnecting_sound.pause();
+      reconnecting_sound.currentTime = 0;
+      reconnecting_sound.onended = () => {
+        setTimeout(() => {
+          reconnecting_sound.currentTime = 0;
+          reconnecting_sound.play();
+        }, 3000);
+      };
+      reconnecting_sound.play();
+    } else if (callStatus === "active") {
+      reconnecting_sound.onended = null;
+      reconnecting_sound.pause();
+      reconnecting_sound.currentTime = 0;
+    }
+  }, [callStatus]);
 
-            reconnecting_sound.currentTime = 0;
-            reconnecting_sound.play();
-          }, 3000);
-        };
-        reconnecting_sound.play();
-      } else {
-        setStatus(null);
-        reconnecting_sound.onended = null;
-        reconnecting_sound.pause();
-        reconnecting_sound.currentTime = 0;
-      }
-    });
-
+  useEffect(() => {
     durationRef.current = setInterval(() => {
       setDurationSeconds((prev) => prev + 1);
     }, 1000) as unknown as number;
@@ -64,7 +56,7 @@ export default function CallScreen() {
         clearInterval(durationRef.current);
       }
     };
-  }, [callActive, status]);
+  }, []);
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
@@ -94,8 +86,6 @@ export default function CallScreen() {
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
                 {callActive?.peer.displayName || callActive?.peer.phone}
               </p>
-
-              {error && <p className="wv:text-destructive wv:opacity-75 wv:text-xs">{error}</p>}
             </div>
           </div>
         </div>
