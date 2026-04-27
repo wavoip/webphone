@@ -7,12 +7,13 @@ import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
 import pkg from "../../package.json";
 
-// Adicionamos a tipagem para receber a função do App.tsx
+
 interface WebPhoneProps {
   onPipClick?: () => void;
+  isPip?: boolean;
 }
 
-export function WebPhone({ onPipClick }: WebPhoneProps) {
+export function WebPhone({ onPipClick, isPip }: WebPhoneProps) {
   const { screen } = useScreen();
   const { startDrag, stopDrag } = useWidget();
 
@@ -31,8 +32,8 @@ export function WebPhone({ onPipClick }: WebPhoneProps) {
 
   return (
     <>
-      {/* Repassamos a função para o StatusBar onde está o ícone */}
-      <StatusBar onPipClick={onPipClick} />
+
+      <StatusBar onPipClick={onPipClick} isPip={isPip} />
 
       <div
         role="application"
