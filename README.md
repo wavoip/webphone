@@ -1,16 +1,71 @@
-# Wavoip Webphone
+---
+icon: circle-info
+metaLinks:
+  alternates:
+    - https://app.gitbook.com/s/ChVqWq7WmaNAVFRJHIhR/webphone
+---
 
-Essa biblioteca foi feita com o intuito de facilitar a realização de ligações por dispositivos da Wavoip. Ela disponibiliza uma interface customizável e isolada do projeto onde está instalada. Esse webphone usa o [Wavoip API](https://github.com/wavoip/wavoip-api) por debaixo dos panos.
+# Introdução
 
-[Documentação disponível aqui](https://wavoip.gitbook.io/api/webphone)
+## Introdução
 
-# Alterando as cores do Webphone
-As cores do webphone podem ser alteradas manualmente.
+Essa biblioteca foi feita com o intuito de facilitar a realização de ligações por dispositivos da Wavoip. Ela disponibiliza uma interface customizável e isolada do projeto onde está instalada. Esse webphone usa o [Wavoip API](https://app.gitbook.com/o/Pjg7DisYvBC4236LvBOn/s/yP0muqGlwZafxEaUwSvS/ "mention")  por debaixo dos panos
 
+## Instalação
 
-O arquivo a ser editado para customização das cores está em src/assets/index.css.
-<img width="452" height="258" alt="image" src="https://github.com/user-attachments/assets/16012193-65ed-44e7-9fd0-102cb0008403" />    
-Variáveis separadas para tema claro e escuro.
+Instale a biblioteca utilizando seu gerenciador de dependências favorito
 
+{% tabs %}
+{% tab title="PNPM" %}
+```bash
+pnpm add @wavoip/wavoip-webphone
+```
+{% endtab %}
 
-Cada variável altera uma série de componentes, como a variável “--background” que altera o plano de fundo de todo o webphone e “--foreground” que altera a cor do texto em cima deste fundo.
+{% tab title="NPM" %}
+```bash
+npm install @wavoip/wavoip-webphone
+```
+{% endtab %}
+
+{% tab title="CDN" %}
+```html
+<script src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest/dist/index.umd.min.js"></script>
+```
+{% endtab %}
+{% endtabs %}
+
+## Primeiros Passos
+
+### Biblioteca instalada
+
+Importe o objeto do webphone e chame a função **render()**
+
+{% code lineNumbers="true" %}
+```typescript
+import WavoipWebphone from "@wavoip/wavoip-webphone"
+
+WavoipWebphone.render()
+```
+{% endcode %}
+
+Simples assim, a interface será renderizada na tela.
+
+Para remover a interface, basta chamar a função **destroy()**
+
+{% code lineNumbers="true" %}
+```typescript
+WavoipWebphone.destroy()
+```
+{% endcode %}
+
+### CDN
+
+Use a variável **wavoipWebphone** que se encontra dentro da variável _window_
+
+{% code lineNumbers="true" %}
+```typescript
+window.wavoipWebphone.render()
+window.wavoipWebphone.destroy()
+```
+{% endcode %}
