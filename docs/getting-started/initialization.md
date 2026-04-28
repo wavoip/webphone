@@ -1,13 +1,13 @@
 ---
-description: Mount and configure the webphone widget, then access the programmatic API.
+description: Monte e configure o widget do webphone, em seguida acesse a API programática.
 icon: rocket
 ---
 
-# Initialization
+# Inicialização
 
 ## `render(config?)`
 
-Mounts the webphone widget into the page. Returns a promise that resolves to the `WebphoneAPI` object once the widget is fully initialised.
+Monta o widget do webphone na página. Retorna uma promise que resolve para o objeto `WebphoneAPI` assim que o widget estiver totalmente inicializado.
 
 ```typescript
 import webphone from "@wavoip/wavoip-webphone"
@@ -19,15 +19,15 @@ const api = await webphone.render({
 })
 ```
 
-Calling `render()` more than once is safe — the second call returns the existing API without re-mounting.
+Chamar `render()` mais de uma vez é seguro — a segunda chamada retorna a API existente sem remontar o widget.
 
-After `render()` resolves, `window.wavoip` is also set to the same API object, making it accessible from non-module scripts.
+Após `render()` resolver, `window.wavoip` também é definido com o mesmo objeto de API, tornando-o acessível a partir de scripts que não utilizam módulos.
 
 ---
 
 ## `destroy()`
 
-Unmounts the widget and clears `window.wavoip`.
+Desmonta o widget e limpa `window.wavoip`.
 
 ```typescript
 webphone.destroy()
@@ -35,46 +35,46 @@ webphone.destroy()
 
 ---
 
-## Configuration (`WebphoneSettings`)
+## Configuração (`WebphoneSettings`)
 
-All fields are optional.
+Todos os campos são opcionais.
 
 ### `theme`
 
 ```typescript
-theme?: "dark" | "light" | "system"  // default: "system"
+theme?: "dark" | "light" | "system"  // padrão: "system"
 ```
 
-Controls the colour scheme. `"system"` follows the OS preference.
+Controla o esquema de cores. `"system"` segue a preferência do sistema operacional.
 
 ---
 
 ### `position`
 
-Sets where the webphone panel appears on screen.
+Define onde o painel do webphone aparece na tela.
 
 ```typescript
 position?: WebphonePosition
 ```
 
-| Value           | Description                    |
-| --------------- | ------------------------------ |
-| `"top"`         | Top-center                     |
-| `"bottom"`      | Bottom-center                  |
-| `"left"`        | Left-center                    |
-| `"right"`       | Right-center                   |
-| `"top-left"`    | Top-left corner                |
-| `"top-right"`   | Top-right corner               |
-| `"bottom-left"` | Bottom-left corner             |
-| `"bottom-right"`| Bottom-right corner            |
-| `"center"`      | Centered on screen             |
-| `{ x, y }`      | Exact pixel coordinates        |
+| Valor            | Descrição                        |
+| ---------------- | -------------------------------- |
+| `"top"`          | Centro superior                  |
+| `"bottom"`       | Centro inferior                  |
+| `"left"`         | Centro esquerdo                  |
+| `"right"`        | Centro direito                   |
+| `"top-left"`     | Canto superior esquerdo          |
+| `"top-right"`    | Canto superior direito           |
+| `"bottom-left"`  | Canto inferior esquerdo          |
+| `"bottom-right"` | Canto inferior direito           |
+| `"center"`       | Centralizado na tela             |
+| `{ x, y }`       | Coordenadas exatas em pixels     |
 
 ---
 
 ### `buttonPosition`
 
-Sets where the floating toggle button appears.
+Define onde o botão flutuante de alternância aparece.
 
 ```typescript
 buttonPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | { x: number; y: number }
@@ -86,8 +86,8 @@ buttonPosition?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | { x
 
 ```typescript
 widget?: {
-    showWidgetButton?: boolean   // Show the floating button. Default: true
-    startOpen?: boolean          // Open the webphone on first render. Default: false
+    showWidgetButton?: boolean   // Exibe o botão flutuante. Padrão: true
+    startOpen?: boolean          // Abre o webphone na primeira renderização. Padrão: false
 }
 ```
 
@@ -95,12 +95,12 @@ widget?: {
 
 ### `statusBar`
 
-Controls icons in the top status bar.
+Controla os ícones na barra de status superior.
 
 ```typescript
 statusBar?: {
-    showNotificationsIcon?: boolean  // Default: true
-    showSettingsIcon?: boolean       // Default: true
+    showNotificationsIcon?: boolean  // Padrão: true
+    showSettingsIcon?: boolean       // Padrão: true
 }
 ```
 
@@ -108,15 +108,15 @@ statusBar?: {
 
 ### `settingsMenu`
 
-Controls which options appear in the settings menu.
+Controla quais opções aparecem no menu de configurações.
 
 ```typescript
 settingsMenu?: {
     deviceMenu?: {
-        show?: boolean                  // Show the device management section. Default: true
-        showAddDevices?: boolean        // Show the "Add device" button. Default: true
-        showEnableDevicesButton?: boolean   // Show enable/disable toggle. Default: true
-        showRemoveDevicesButton?: boolean   // Show "Remove" button. Default: true
+        show?: boolean                      // Exibe a seção de gerenciamento de dispositivos. Padrão: true
+        showAddDevices?: boolean            // Exibe o botão "Adicionar dispositivo". Padrão: true
+        showEnableDevicesButton?: boolean   // Exibe o toggle ativar/desativar. Padrão: true
+        showRemoveDevicesButton?: boolean   // Exibe o botão "Remover". Padrão: true
     }
 }
 ```
@@ -127,7 +127,7 @@ settingsMenu?: {
 
 ```typescript
 callSettings?: {
-    displayName?: string  // Display name shown to the called party
+    displayName?: string  // Nome exibido para a parte chamada
 }
 ```
 
@@ -136,12 +136,12 @@ callSettings?: {
 ### `platform`
 
 ```typescript
-platform?: string  // Identifies the client platform — forwarded to the Wavoip server on connection
+platform?: string  // Identifica a plataforma do cliente — enviado ao servidor Wavoip na conexão
 ```
 
 ---
 
-## Full configuration example
+## Exemplo de configuração completa
 
 ```typescript
 const api = await webphone.render({
@@ -159,17 +159,17 @@ const api = await webphone.render({
     settingsMenu: {
         deviceMenu: {
             show: true,
-            showAddDevices: false,        // Hide "Add device" — manage devices programmatically
+            showAddDevices: false,        // Oculta "Adicionar dispositivo" — gerencie dispositivos programaticamente
             showEnableDevicesButton: true,
             showRemoveDevicesButton: false,
         },
     },
     callSettings: {
-        displayName: "Support Team",
+        displayName: "Equipe de Suporte",
     },
-    platform: "my-crm-v2",
+    platform: "meu-crm-v2",
 })
 
-// Add the first device after render
-api.device.add("your-device-token", true)
+// Adiciona o primeiro dispositivo após o render
+api.device.add("seu-token-de-dispositivo", true)
 ```

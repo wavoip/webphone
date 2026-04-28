@@ -1,22 +1,22 @@
 ---
-description: Complete reference for the window.wavoip programmatic API available after render().
+description: Referência completa da API programática window.wavoip disponível após render().
 icon: brackets-curly
 ---
 
-# JavaScript API
+# API JavaScript
 
-After `webphone.render()` resolves, the returned object (also available as `window.wavoip`) exposes the following namespaces:
+Após `webphone.render()` resolver, o objeto retornado (também disponível como `window.wavoip`) expõe os seguintes namespaces:
 
 ```typescript
 const api = await webphone.render()
 
-api.call          // Call management
-api.device        // Device management
-api.notifications // Notification management
-api.widget        // Widget open/close control
-api.theme         // Theme switching
-api.position      // Webphone position control
-api.settings      // UI visibility toggles
+api.call          // Gerenciamento de chamadas
+api.device        // Gerenciamento de dispositivos
+api.notifications // Gerenciamento de notificações
+api.widget        // Controle de abertura/fechamento do widget
+api.theme         // Alternância de tema
+api.position      // Controle de posição do webphone
+api.settings      // Toggles de visibilidade da interface
 ```
 
 ---
@@ -25,12 +25,12 @@ api.settings      // UI visibility toggles
 
 ### `call.start(to, config?)`
 
-Initiates an outgoing call. Tries each enabled device in sequence.
+Inicia uma chamada de saída. Tenta cada dispositivo ativado em sequência.
 
 ```typescript
 const result = await api.call.start("+5511999999999", {
-    fromTokens: ["token-1"],  // Optional: restrict to specific devices
-    displayName: "Support",   // Optional: display name shown to recipient
+    fromTokens: ["token-1"],  // Opcional: restringir a dispositivos específicos
+    displayName: "Suporte",   // Opcional: nome exibido para o destinatário
 })
 
 if (result.err) {
@@ -43,7 +43,7 @@ if (result.err) {
 
 ### `call.getCallActive()`
 
-Returns the current active call snapshot, or `undefined` if no call is active.
+Retorna o snapshot da chamada ativa atual, ou `undefined` se não houver chamada ativa.
 
 ```typescript
 const active = api.call.getCallActive()
@@ -54,7 +54,7 @@ const active = api.call.getCallActive()
 
 ### `call.getCallOutgoing()`
 
-Returns the current outgoing call snapshot (ringing, not yet answered), or `undefined`.
+Retorna o snapshot da chamada de saída atual (chamando, ainda não atendida), ou `undefined`.
 
 ```typescript
 const outgoing = api.call.getCallOutgoing()
@@ -64,7 +64,7 @@ const outgoing = api.call.getCallOutgoing()
 
 ### `call.getOffers()`
 
-Returns all pending incoming call offers.
+Retorna todas as ofertas de chamadas recebidas pendentes.
 
 ```typescript
 const offers = api.call.getOffers()
@@ -75,11 +75,11 @@ const offers = api.call.getOffers()
 
 ### `call.onOffer(callback)`
 
-Register a callback that fires whenever a new incoming call offer arrives.
+Registra um callback que é disparado sempre que uma nova oferta de chamada recebida chega.
 
 ```typescript
 api.call.onOffer((offer) => {
-    console.log("Incoming call from", offer.peer.phone)
+    console.log("Chamada recebida de", offer.peer.phone)
 })
 ```
 
@@ -87,7 +87,7 @@ api.call.onOffer((offer) => {
 
 ### `call.setInput(number)`
 
-Programmatically set the dial input field in the webphone UI.
+Define programaticamente o campo de discagem na interface do webphone.
 
 ```typescript
 api.call.setInput("+5511999999999")
@@ -97,14 +97,14 @@ api.call.setInput("+5511999999999")
 
 ## `api.device`
 
-Devices added here are managed by the webphone widget. Persistent devices survive page reloads (stored in `localStorage` under the key `wavoip:tokens`).
+Os dispositivos adicionados aqui são gerenciados pelo widget do webphone. Dispositivos persistentes sobrevivem a recarregamentos de página (armazenados no `localStorage` sob a chave `wavoip:tokens`).
 
 ### `device.add(token, persist)`
 
-Add a device. Pass `persist: true` to save it across reloads.
+Adiciona um dispositivo. Passe `persist: true` para salvar entre recarregamentos.
 
 ```typescript
-api.device.add("my-token", true)
+api.device.add("meu-token", true)
 // Alias: api.device.addDevice(token, persist)
 ```
 
@@ -112,10 +112,10 @@ api.device.add("my-token", true)
 
 ### `device.remove(token)`
 
-Remove a device and disconnect it.
+Remove um dispositivo e o desconecta.
 
 ```typescript
-api.device.remove("my-token")
+api.device.remove("meu-token")
 // Alias: api.device.removeDevice(token)
 ```
 
@@ -123,11 +123,11 @@ api.device.remove("my-token")
 
 ### `device.enable(token)` / `device.disable(token)`
 
-Enable or disable a device for outgoing calls without removing it.
+Ativa ou desativa um dispositivo para chamadas de saída sem removê-lo.
 
 ```typescript
-api.device.enable("my-token")
-api.device.disable("my-token")
+api.device.enable("meu-token")
+api.device.disable("meu-token")
 // Aliases: api.device.enableDevice / api.device.disableDevice
 ```
 
@@ -135,7 +135,7 @@ api.device.disable("my-token")
 
 ### `device.get()`
 
-Returns the current device list including their status and enabled state.
+Retorna a lista de dispositivos atual incluindo status e estado de ativação.
 
 ```typescript
 const devices = api.device.get()
@@ -149,7 +149,7 @@ const devices = api.device.get()
 
 ### `widget.open()` / `widget.close()` / `widget.toggle()`
 
-Control the widget panel visibility.
+Controla a visibilidade do painel do widget.
 
 ```typescript
 api.widget.open()
@@ -161,7 +161,7 @@ api.widget.toggle()
 
 ### `widget.isOpen`
 
-Boolean — whether the widget panel is currently open.
+Booleano — indica se o painel do widget está aberto no momento.
 
 ```typescript
 if (api.widget.isOpen) { ... }
@@ -171,7 +171,7 @@ if (api.widget.isOpen) { ... }
 
 ### `widget.buttonPosition.set(position)`
 
-Move the floating toggle button.
+Move o botão flutuante de alternância.
 
 ```typescript
 api.widget.buttonPosition.set("bottom-left")
@@ -184,7 +184,7 @@ api.widget.buttonPosition.set({ x: 20, y: 20 })
 
 ### `theme.set(theme)` / `theme.setTheme(theme)`
 
-Switch the colour scheme.
+Altera o esquema de cores.
 
 ```typescript
 api.theme.set("dark")    // "dark" | "light" | "system"
@@ -194,7 +194,7 @@ api.theme.set("dark")    // "dark" | "light" | "system"
 
 ### `theme.value`
 
-Current active theme string.
+String do tema ativo atual.
 
 ```typescript
 console.log(api.theme.value)  // "dark" | "light" | "system"
@@ -206,7 +206,7 @@ console.log(api.theme.value)  // "dark" | "light" | "system"
 
 ### `position.set(position)`
 
-Move the webphone panel.
+Move o painel do webphone.
 
 ```typescript
 api.position.set("top-right")
@@ -217,25 +217,25 @@ api.position.set({ x: 100, y: 200 })
 
 ### `position.value`
 
-Current panel position as `{ x: number; y: number }`.
+Posição atual do painel como `{ x: number; y: number }`.
 
 ---
 
 ## `api.notifications`
 
-Notifications are stored in `localStorage` under the key `webphone_notifications` and persist across reloads (up to 100 entries).
+As notificações são armazenadas no `localStorage` sob a chave `webphone_notifications` e persistem entre recarregamentos (até 100 entradas).
 
 ### `notifications.add(notification)`
 
-Add a notification to the history panel.
+Adiciona uma notificação ao painel de histórico.
 
 ```typescript
 api.notifications.add({
     id: new Date(),
     type: "INFO",              // "INFO" | "CALL_FAILED"
-    message: "Call ended",
-    detail: "Duration: 2m 14s",
-    token: "device-token",
+    message: "Chamada encerrada",
+    detail: "Duração: 2m 14s",
+    token: "token-do-dispositivo",
     isRead: false,
     isHidden: false,
     created_at: new Date(),
@@ -247,7 +247,7 @@ api.notifications.add({
 
 ### `notifications.get()`
 
-Returns all stored notifications.
+Retorna todas as notificações armazenadas.
 
 ```typescript
 const all = api.notifications.get()
@@ -258,7 +258,7 @@ const all = api.notifications.get()
 
 ### `notifications.remove(id)`
 
-Remove a specific notification by its `id` (a `Date` object).
+Remove uma notificação específica pelo seu `id` (um objeto `Date`).
 
 ```typescript
 api.notifications.remove(notification.id)
@@ -269,7 +269,7 @@ api.notifications.remove(notification.id)
 
 ### `notifications.clear()`
 
-Remove all notifications.
+Remove todas as notificações.
 
 ```typescript
 api.notifications.clear()
@@ -280,7 +280,7 @@ api.notifications.clear()
 
 ### `notifications.read()`
 
-Mark all notifications as read.
+Marca todas as notificações como lidas.
 
 ```typescript
 api.notifications.read()
@@ -291,21 +291,21 @@ api.notifications.read()
 
 ## `api.settings`
 
-Toggle UI control visibility at runtime.
+Alterna a visibilidade dos controles da interface em tempo de execução.
 
-| Setter | Default | Effect |
-|--------|---------|--------|
-| `setShowNotifications(bool)` | `true` | Show/hide the notifications icon |
-| `setShowSettings(bool)` | `true` | Show/hide the settings icon |
-| `setShowDevices(bool)` | `true` | Show/hide the devices section |
-| `setShowAddDevices(bool)` | `true` | Show/hide the "Add device" option |
-| `setShowEnableDevices(bool)` | `true` | Show/hide the enable/disable toggle |
-| `setShowRemoveDevices(bool)` | `true` | Show/hide the "Remove device" option |
-| `setShowWidgetButton(bool)` | `true` | Show/hide the floating toggle button |
+| Setter | Padrão | Efeito |
+|--------|--------|--------|
+| `setShowNotifications(bool)` | `true` | Exibe/oculta o ícone de notificações |
+| `setShowSettings(bool)` | `true` | Exibe/oculta o ícone de configurações |
+| `setShowDevices(bool)` | `true` | Exibe/oculta a seção de dispositivos |
+| `setShowAddDevices(bool)` | `true` | Exibe/oculta a opção "Adicionar dispositivo" |
+| `setShowEnableDevices(bool)` | `true` | Exibe/oculta o toggle ativar/desativar |
+| `setShowRemoveDevices(bool)` | `true` | Exibe/oculta a opção "Remover dispositivo" |
+| `setShowWidgetButton(bool)` | `true` | Exibe/oculta o botão flutuante de alternância |
 
 ```typescript
-api.settings.setShowAddDevices(false)   // Hide "Add device" from UI
-api.settings.setShowWidgetButton(false)  // Hide the floating button entirely
+api.settings.setShowAddDevices(false)   // Oculta "Adicionar dispositivo" da interface
+api.settings.setShowWidgetButton(false)  // Oculta o botão flutuante completamente
 ```
 
-Each setter has a corresponding read property (e.g. `api.settings.showAddDevices`).
+Cada setter tem uma propriedade de leitura correspondente (ex.: `api.settings.showAddDevices`).

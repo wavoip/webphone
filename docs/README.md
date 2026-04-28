@@ -1,5 +1,5 @@
 ---
-description: Drop-in webphone widget for Wavoip devices — renders in an isolated Shadow DOM with a full programmatic API.
+description: Widget de webphone pronto para uso em dispositivos Wavoip — renderiza em um Shadow DOM isolado com uma API programática completa.
 icon: phone
 layout:
   title:
@@ -16,39 +16,39 @@ layout:
 
 # wavoip-webphone
 
-`@wavoip/wavoip-webphone` is a pre-built, fully isolated phone widget that runs inside your web application. One function call renders a floating webphone that handles incoming and outgoing WhatsApp calls — no layout changes to your page.
+`@wavoip/wavoip-webphone` é um widget de telefone pré-construído e totalmente isolado que roda dentro da sua aplicação web. Uma única chamada de função renderiza um webphone flutuante que gerencia chamadas WhatsApp recebidas e realizadas — sem nenhuma alteração no layout da sua página.
 
 {% hint style="info" %}
-Version **1.3.2** — built on `@wavoip/wavoip-api` v2.x.
+Versão **1.3.2** — construído sobre `@wavoip/wavoip-api` v2.x.
 {% endhint %}
 
-## Features
+## Funcionalidades
 
-* Floating widget with draggable button — configurable position
-* Incoming call notifications with accept / reject
-* Outgoing call dialer with DTMF keypad
-* Device management UI (add, remove, enable, disable)
-* Dark / light / system theme
-* Fully isolated in Shadow DOM — zero style conflicts with your app
-* Programmatic `window.wavoip` API for automation from external scripts
+* Widget flutuante com botão arrastável — posição configurável
+* Notificações de chamada recebida com aceitar / rejeitar
+* Discador de chamadas com teclado DTMF
+* Interface de gerenciamento de dispositivos (adicionar, remover, ativar, desativar)
+* Tema escuro / claro / sistema
+* Totalmente isolado no Shadow DOM — zero conflitos de estilo com sua aplicação
+* API programática `window.wavoip` para automação via scripts externos
 
-## Quick start
+## Início rápido
 
 {% tabs %}
 {% tab title="ES Module" %}
 ```typescript
 import webphone from "@wavoip/wavoip-webphone"
 
-// Render the widget and get the API
+// Renderiza o widget e obtém a API
 const api = await webphone.render({
     theme: "system",
     position: "bottom-right",
 })
 
-// Add a device
-api.device.add("your-device-token", true)
+// Adiciona um dispositivo
+api.device.add("seu-token-de-dispositivo", true)
 
-// Tear down
+// Remove o widget
 webphone.destroy()
 ```
 {% endtab %}
@@ -58,38 +58,38 @@ webphone.destroy()
 <script src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest/dist/index.umd.min.js"></script>
 <script>
     window.wavoipWebphone.render({ theme: "system" }).then((api) => {
-        api.device.add("your-device-token", true)
+        api.device.add("seu-token-de-dispositivo", true)
     })
 </script>
 ```
 {% endtab %}
 {% endtabs %}
 
-## Explore the docs
+## Explore a documentação
 
 <table data-view="cards">
     <thead>
         <tr>
-            <th>Section</th>
+            <th>Seção</th>
             <th data-card-target data-type="content-ref">Link</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td>Install the package</td>
-            <td><a href="getting-started/installation.md">Installation</a></td>
+            <td>Instalar o pacote</td>
+            <td><a href="getting-started/installation.md">Instalação</a></td>
         </tr>
         <tr>
-            <td>Configure &amp; mount</td>
-            <td><a href="getting-started/initialization.md">Initialization</a></td>
+            <td>Configurar &amp; montar</td>
+            <td><a href="getting-started/initialization.md">Inicialização</a></td>
         </tr>
         <tr>
-            <td>JavaScript API reference</td>
-            <td><a href="api.md">JavaScript API</a></td>
+            <td>Referência da API JavaScript</td>
+            <td><a href="api.md">API JavaScript</a></td>
         </tr>
         <tr>
-            <td>Customize colors</td>
-            <td><a href="theming.md">Theming</a></td>
+            <td>Personalizar cores</td>
+            <td><a href="theming.md">Temas</a></td>
         </tr>
     </tbody>
 </table>

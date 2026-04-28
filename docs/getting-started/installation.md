@@ -1,16 +1,16 @@
 ---
-description: Add @wavoip/wavoip-webphone to your project.
+description: Adicione @wavoip/wavoip-webphone ao seu projeto.
 icon: download
 ---
 
-# Installation
+# Instalação
 
-## Requirements
+## Requisitos
 
-* A modern browser with WebRTC support (Chrome 80+, Firefox 75+, Safari 14.1+)
-* One or more Wavoip device tokens from the [Wavoip control panel](https://wavoip.com)
+* Um navegador moderno com suporte a WebRTC (Chrome 80+, Firefox 75+, Safari 14.1+)
+* Um ou mais tokens de dispositivo Wavoip obtidos no [painel de controle Wavoip](https://wavoip.com)
 
-## Install via package manager
+## Instalar via gerenciador de pacotes
 
 {% tabs %}
 {% tab title="pnpm" %}
@@ -32,25 +32,25 @@ yarn add @wavoip/wavoip-webphone
 {% endtab %}
 {% endtabs %}
 
-## Install via CDN
+## Instalar via CDN
 
-No build step required — include the UMD bundle directly in any HTML page.
+Sem etapa de build — inclua o bundle UMD diretamente em qualquer página HTML.
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest/dist/index.umd.min.js"></script>
 ```
 
-The widget is available as `window.wavoipWebphone` after the script loads.
+O widget estará disponível como `window.wavoipWebphone` após o carregamento do script.
 
 ```html
 <script>
     window.wavoipWebphone.render().then((api) => {
-        api.device.add("your-device-token", false)
+        api.device.add("seu-token-de-dispositivo", false)
     })
 </script>
 ```
 
 {% hint style="info" %}
-For production, pin to a specific version instead of `@latest` to avoid unexpected breaking changes:
+Em produção, fixe uma versão específica em vez de `@latest` para evitar mudanças inesperadas:
 `/npm/@wavoip/wavoip-webphone@1.3.2/dist/index.umd.min.js`
 {% endhint %}

@@ -95,3 +95,6 @@ docs/
 ## When to update docs
 Update `docs/` whenever `WebphoneSettings`, `WebphoneAPI`, CSS variables, or the render/destroy interface change.
 Keep `SUMMARY.md` in sync with the actual file structure.
+
+## Language
+All documentation in `docs/` must be written in **Portuguese (pt-BR)**.

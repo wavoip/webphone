@@ -1,32 +1,32 @@
 ---
-description: Customise the webphone's colours using CSS custom properties.
+description: Personalize as cores do webphone usando propriedades customizadas do CSS.
 icon: palette
 ---
 
-# Theming
+# Temas
 
-The webphone renders inside a Shadow DOM and uses CSS custom properties (variables) for all colours. You can override these variables to match your brand.
+O webphone renderiza dentro de um Shadow DOM e usa propriedades customizadas do CSS (variáveis) para todas as cores. Você pode sobrescrever essas variáveis para combinar com a sua marca.
 
 {% hint style="info" %}
-Because the widget lives in a Shadow DOM, standard CSS selectors from your page cannot reach its internals. Override variables on the `:host` element via a `<style>` tag injected into the shadow root — or modify `src/assets/index.css` if you are building from source.
+Como o widget vive em um Shadow DOM, seletores CSS padrão da sua página não conseguem acessar seus internos. Sobrescreva as variáveis no elemento `:host` via uma tag `<style>` injetada no shadow root — ou modifique `src/assets/index.css` se você está construindo a partir do código-fonte.
 {% endhint %}
 
-## Available CSS variables
+## Variáveis CSS disponíveis
 
-The widget ships with light and dark palettes. Override any variable in the `:host` or `.dark` scope.
+O widget vem com paletas clara e escura. Sobrescreva qualquer variável no escopo `:host` ou `.dark`.
 
-### Light theme (default)
+### Tema claro (padrão)
 
 ```css
 :host {
-  --background:            oklch(1 0 0);             /* Main panel background */
-  --foreground:            oklch(0.141 0.005 285.823); /* Primary text */
-  --card:                  oklch(1 0 0);             /* Card/surface background */
+  --background:            oklch(1 0 0);             /* Fundo do painel principal */
+  --foreground:            oklch(0.141 0.005 285.823); /* Texto principal */
+  --card:                  oklch(1 0 0);             /* Fundo de card/superfície */
   --card-foreground:       oklch(0.141 0.005 285.823);
-  --widget-background:     oklch(72.3% 0.219 149.579); /* Floating button background */
+  --widget-background:     oklch(72.3% 0.219 149.579); /* Fundo do botão flutuante */
   --widget-background-hover: oklch(62.7% 0.194 149.214);
-  --widget-text:           oklch(1 0 0);             /* Floating button icon colour */
-  --primary:               oklch(0.723 0.219 149.579); /* Accent / action colour */
+  --widget-text:           oklch(1 0 0);             /* Cor do ícone do botão flutuante */
+  --primary:               oklch(0.723 0.219 149.579); /* Cor de destaque / ação */
   --primary-foreground:    oklch(0.982 0.018 155.826);
   --secondary:             oklch(0.967 0.001 286.375);
   --secondary-foreground:  oklch(0.21 0.006 285.885);
@@ -34,15 +34,15 @@ The widget ships with light and dark palettes. Override any variable in the `:ho
   --muted-foreground:      oklch(0.552 0.016 285.938);
   --accent:                oklch(0.8865 0.0054 286.29);
   --accent-foreground:     oklch(0.21 0.006 285.885);
-  --destructive:           oklch(0.577 0.245 27.325); /* Error / hang-up red */
+  --destructive:           oklch(0.577 0.245 27.325); /* Vermelho de erro / encerrar chamada */
   --border:                oklch(0.92 0.004 286.32);
   --input:                 oklch(0.92 0.004 286.32);
-  --ring:                  oklch(0.723 0.219 149.579); /* Focus ring */
-  --radius:                0.65rem;                  /* Border radius */
+  --ring:                  oklch(0.723 0.219 149.579); /* Anel de foco */
+  --radius:                0.65rem;                  /* Raio da borda */
 }
 ```
 
-### Dark theme
+### Tema escuro
 
 ```css
 :host .dark {
@@ -65,55 +65,55 @@ The widget ships with light and dark palettes. Override any variable in the `:ho
 }
 ```
 
-## Key variables at a glance
+## Variáveis principais
 
-| Variable | What it controls |
+| Variável | O que controla |
 |---|---|
-| `--background` | Main panel background |
-| `--foreground` | Primary text colour |
-| `--primary` | Action buttons, highlights, the dialler ring |
-| `--destructive` | Hang-up button, error states |
-| `--widget-background` | Floating toggle button background |
-| `--widget-text` | Floating toggle button icon |
-| `--border` | Dividers and outlines |
-| `--radius` | Border-radius for all rounded elements |
+| `--background` | Fundo do painel principal |
+| `--foreground` | Cor do texto principal |
+| `--primary` | Botões de ação, destaques, anel do discador |
+| `--destructive` | Botão de encerrar chamada, estados de erro |
+| `--widget-background` | Fundo do botão flutuante de alternância |
+| `--widget-text` | Ícone do botão flutuante de alternância |
+| `--border` | Divisórias e contornos |
+| `--radius` | Border-radius de todos os elementos arredondados |
 
-## Customisation approaches
+## Abordagens de personalização
 
 {% columns %}
 {% column %}
-### Build from source
+### Build a partir do código-fonte
 
-Edit `src/assets/index.css` directly and rebuild:
+Edite `src/assets/index.css` diretamente e reconstrua:
 
 ```css
 :host {
-  --primary: oklch(0.6 0.2 260);  /* Blue */
+  --primary: oklch(0.6 0.2 260);  /* Azul */
   --widget-background: oklch(0.6 0.2 260);
 }
 ```
 
-Then run `pnpm build`.
+Depois execute `pnpm build`.
 {% endcolumn %}
 
 {% column %}
-### Runtime injection
+### Injeção em tempo de execução
 
-Inject a `<style>` element into the shadow root after render. This requires the shadow root reference, which is not currently exposed via the public API — use the build-from-source approach for permanent changes.
+Injete um elemento `<style>` no shadow root após o render. Isso requer a referência ao shadow root, que atualmente não é exposta pela API pública — use a abordagem de build a partir do código-fonte para mudanças permanentes.
 {% endcolumn %}
 {% endcolumns %}
 
-## Theme switching
+## Alternância de tema
 
-Switch between themes at runtime via the API:
+Alterne entre temas em tempo de execução via API:
 
 ```typescript
-api.theme.set("dark")    // Force dark
-api.theme.set("light")   // Force light
-api.theme.set("system")  // Follow OS preference
+api.theme.set("dark")    // Forçar escuro
+api.theme.set("light")   // Forçar claro
+api.theme.set("system")  // Seguir preferência do SO
 ```
 
-Or configure the initial theme on render:
+Ou configure o tema inicial no render:
 
 ```typescript
 await webphone.render({ theme: "dark" })

@@ -1,12 +1,12 @@
-# Summary
+# Sumário
 
-## Getting Started
+## Primeiros Passos
 
-* [Introduction](README.md)
-* [Installation](getting-started/installation.md)
-* [Initialization](getting-started/initialization.md)
+* [Introdução](README.md)
+* [Instalação](getting-started/installation.md)
+* [Inicialização](getting-started/initialization.md)
 
-## Reference
+## Referência
 
-* [JavaScript API](api.md)
-* [Theming](theming.md)
+* [API JavaScript](api.md)
+* [Temas](theming.md)
