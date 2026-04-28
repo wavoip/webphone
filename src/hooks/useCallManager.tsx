@@ -5,6 +5,7 @@ import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
+import { getSpeakerVolume } from "@/lib/device-settings";
 import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useWidget } from "@/providers/WidgetProvider";
@@ -218,14 +219,15 @@ function disableConfirmClose() {
 }
 
 function startRingtone() {
+  const vol = getSpeakerVolume();
   ringtone_sound.currentTime = 0;
   ringtone_sound.loop = true;
-  ringtone_sound.volume = 0.25;
+  ringtone_sound.volume = vol;
   ringtone_sound.play();
 
   vibration_sound.loop = true;
   vibration_sound.currentTime = 0;
-  vibration_sound.volume = 0.25;
+  vibration_sound.volume = vol;
   vibration_sound.play();
 }
 

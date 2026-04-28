@@ -5,6 +5,7 @@ import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getSpeakerVolume } from "@/lib/device-settings";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -25,7 +26,7 @@ export default function OutgoingScreen() {
 
       if (status === "RINGING") {
         calling_sound.currentTime = 0;
-        calling_sound.volume = 0.25;
+        calling_sound.volume = getSpeakerVolume();
         calling_sound.loop = true;
         calling_sound.play();
         setStatus("Chamando...");
@@ -34,7 +35,7 @@ export default function OutgoingScreen() {
 
       if (status === "FAILED") {
         postalcode_sound.currentTime = 0;
-        postalcode_sound.volume = 0.25;
+        postalcode_sound.volume = getSpeakerVolume();
         postalcode_sound.play();
         setStatus("A ligação falhou");
         return;
@@ -51,7 +52,7 @@ export default function OutgoingScreen() {
     callOutgoing?.onUnanswered(() => {
       setStatus("Chamada não atendida");
       postalcode_sound.currentTime = 0;
-      postalcode_sound.volume = 0.25;
+      postalcode_sound.volume = getSpeakerVolume();
       postalcode_sound.play();
     });
   }, [callOutgoing]);

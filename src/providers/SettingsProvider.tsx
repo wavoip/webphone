@@ -17,6 +17,7 @@ export type SettingsProviderState = {
   showWidgetButton: boolean;
   showHiddenWebphone: boolean;
   isDesktop: boolean;
+  settingsModalOpen: boolean;
   setShowNotifications: React.Dispatch<React.SetStateAction<boolean>>;
   setShowSettings: React.Dispatch<React.SetStateAction<boolean>>;
   setShowAudio: React.Dispatch<React.SetStateAction<boolean>>;
@@ -27,6 +28,7 @@ export type SettingsProviderState = {
   setShowWidgetButton: React.Dispatch<React.SetStateAction<boolean>>;
   setShowHiddenWebphone: React.Dispatch<React.SetStateAction<boolean>>;
   setIsDesktop: React.Dispatch<React.SetStateAction<boolean>>;
+  setSettingsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
@@ -44,6 +46,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
   const [showWidgetButton, setShowWidgetButton] = useState<boolean>(true);
   const [showHiddenWebphone, setShowHiddenWebphone] = useState<boolean>(true);
   const [isDesktop, setIsDesktop] = useState<boolean>(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState<boolean>(false);
 
   const settings = {
     showNotifications,
@@ -56,6 +59,7 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     showWidgetButton,
     showHiddenWebphone,
     isDesktop,
+    settingsModalOpen,
     setShowWidgetButton,
     setShowNotifications,
     setShowSettings,
@@ -65,7 +69,8 @@ export function SettingsProvider({ children }: SettingsProviderProps) {
     setShowEnableDevices,
     setShowRemoveDevices,
     setShowHiddenWebphone,
-    setIsDesktop
+    setIsDesktop,
+    setSettingsModalOpen,
   };
 
   useEffect(() => {

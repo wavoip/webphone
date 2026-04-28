@@ -196,7 +196,7 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
       <div
         ref={divRef}
         data-closed={closed}
-        className="wv:fixed wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-[580px] wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:desktop:w-dvw wv:desktop:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:desktop:bg-surface wv:shadow-lg wv:touch-manipulation wv:desktop:absolute wv:desktop:!top-0 wv:desktop:!left-0"
+        className="wv:fixed wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-[525px] wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:desktop:w-dvw wv:desktop:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:desktop:bg-surface wv:shadow-lg wv:touch-manipulation wv:desktop:absolute wv:desktop:!top-0 wv:desktop:!left-0"
         style={{
           left: position.x,
           top: position.y,

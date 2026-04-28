@@ -5,10 +5,26 @@ import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
+import { getSpeakerVolume } from "@/lib/device-settings";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
+
+const AVATAR_COLORS = [
+  "#F87171", "#FB923C", "#FBBF24", "#A3E635",
+  "#34D399", "#22D3EE", "#60A5FA", "#818CF8",
+  "#A78BFA", "#F472B6", "#2DD4BF", "#4ADE80",
+];
+
+function getAvatarColor(name: string | undefined | null): string {
+  if (!name) return AVATAR_COLORS[0];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export default function CallScreen() {
   const { callActive } = useWavoip();
@@ -26,6 +42,7 @@ export default function CallScreen() {
       setStatus("Chamada encerrada");
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
+      hang_up_sound.volume = getSpeakerVolume();
       hang_up_sound.play();
     });
 
@@ -49,9 +66,14 @@ export default function CallScreen() {
         </div>
 
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
-          <Avatar className="wv:size-[50px] wv:rounded-xl">
-            <AvatarImage src={callActive?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callActive?.peer?.displayName)}</AvatarFallback>
+          <Avatar className="wv:size-[50px] wv:rounded-2xl">
+            <AvatarImage src={callActive?.peer.profilePicture || undefined} className="wv:object-cover" />
+            <AvatarFallback
+              style={{ backgroundColor: getAvatarColor(callActive?.peer.displayName || callActive?.peer.phone) }}
+              className="wv:text-white wv:font-semibold wv:text-[16px]"
+            >
+              {getFullnameLetters(callActive?.peer?.displayName)}
+            </AvatarFallback>
           </Avatar>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start wv:overflow-hidden">
             <p className="wv:text-foreground wv:opacity-75 wv:text-[14px]">

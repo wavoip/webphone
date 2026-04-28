@@ -26,9 +26,16 @@ type Props = {
 
 export const SettingsModal = forwardRef(({ devices }: Props) => {
   const { addDevice } = useWavoip();
-  const { showAudio, showDevices, showAddDevices } = useSettings();
+  const { showAudio, showDevices, showAddDevices, settingsModalOpen, setSettingsModalOpen } = useSettings();
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
+
+  useEffect(() => {
+    if (settingsModalOpen) {
+      setOpen(true);
+      setSettingsModalOpen(false);
+    }
+  }, [settingsModalOpen, setSettingsModalOpen]);
   const [qrcode, setQrcode] = useState<null | string>(null);
   const { wavoip } = useWavoip();
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
