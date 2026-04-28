@@ -11,7 +11,7 @@ import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 interface StatusBarProps {
-  onPipClick?: () => void;
+  onPipClick: () => void;
   isPip?: boolean;
 }
 
