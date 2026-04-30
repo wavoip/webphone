@@ -10,7 +10,7 @@ import pkg from "../../package.json";
 
 interface WebPhoneProps {
   onPipClick: () => void;
-  isPip?: boolean;
+  isPip: boolean;
 }
 
 export function WebPhone({ onPipClick, isPip }: WebPhoneProps) {

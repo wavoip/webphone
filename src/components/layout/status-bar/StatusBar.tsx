@@ -12,7 +12,7 @@ import { useWidget } from "@/providers/WidgetProvider";
 
 interface StatusBarProps {
   onPipClick: () => void;
-  isPip?: boolean;
+  isPip: boolean;
 }
 
 
