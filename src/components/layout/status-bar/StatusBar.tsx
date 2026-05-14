@@ -6,7 +6,7 @@ import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
 import { mergeToAPI } from "@/lib/webphone-api/api";
-import { useScreen } from "@/providers/ScreenProvider"; // 👈 IMPORT NOVO AQUI
+import { useScreen } from "@/providers/ScreenProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
