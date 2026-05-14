@@ -192,7 +192,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       });
 
       if (err) {
-        return { err };
+        return { call: null, err };
       }
 
       if (callSettings?.displayName) {
@@ -224,7 +224,13 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       enablePiP();
       pictureInPicture.call = call;
 
-      return { err: null };
+      return {
+        call: {
+          id: call.id,
+          peer: call.peer,
+        },
+        err: null,
+      };
     },
     [
       devices,
