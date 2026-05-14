@@ -42,7 +42,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                   <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                     <PhoneIcon size={18} color="red" />
                     <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                      {device.contact.unofficial?.phone}
+                      {device.contact?.phone}
                     </p>
                   </div>
                 </TooltipTrigger>
@@ -51,7 +51,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                 </TooltipContent>
               </Tooltip>
             )}
-            {(["connecting"].includes(device.status) || device.qrcode) && (
+            {(["connecting"].includes(device.status) || device.qrCode) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <QrCodeIcon size={18} />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
@@ -79,7 +79,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <PhoneIcon size={18} color="green" />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  {device.contact.unofficial?.phone}
+                  {device.contact?.phone}
                 </p>
               </div>
             )}
@@ -100,13 +100,13 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
           />
         )}
 
-        {device.qrcode && (
+        {device.qrCode && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
                 className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
-                onClick={() => setShowQRCode(device.qrcode)}
+                onClick={() => setShowQRCode(device.qrCode ?? null)}
               >
                 <QrCodeIcon className="size-6" />
               </Button>

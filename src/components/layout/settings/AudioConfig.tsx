@@ -1,4 +1,3 @@
-import type { MultimediaDevice } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,13 +6,13 @@ import { useWavoip } from "@/providers/WavoipProvider";
 export function AudioConfig() {
   const { wavoip } = useWavoip();
 
-  const [microphones, setMicrophones] = useState<MultimediaDevice[]>([]);
-  const [speakers, setSpeakers] = useState<MultimediaDevice[]>([]);
+  const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
+  const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
 
   useEffect(() => {
     const devices = wavoip.getMultimediaDevices();
-    setMicrophones(devices.microphones);
-    setSpeakers(devices.speakers);
+    setMicrophones(devices.filter((d) => d.kind === "audioinput"));
+    setSpeakers(devices.filter((d) => d.kind === "audiooutput"));
   }, [wavoip.getMultimediaDevices]);
 
   return (

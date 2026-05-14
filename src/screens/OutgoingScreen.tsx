@@ -1,5 +1,5 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Calling from "@/assets/sounds/calling.mp3";
 import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
@@ -8,55 +8,51 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
+const calling_sound = new Audio(Calling);
+calling_sound.preload = "auto";
+const postalcode_sound = new Audio(PostalCode);
+
 export default function OutgoingScreen() {
-  const { callOutgoing } = useWavoip();
-  const calling_sound = new Audio(Calling);
-  calling_sound.preload = "auto";
-  const postalcode_sound = new Audio(PostalCode);
-  const [status, setStatus] = useState<null | string>("Ligando...");
+  const { callOutgoing, callStatus } = useWavoip();
+
+  const status = useMemo(() => {
+    switch (callStatus) {
+      case "calling":
+        return "Ligando...";
+      case "ringing":
+        return "Chamando...";
+      case "failed":
+        return "A ligação falhou";
+      case "rejected":
+        return "Chamada rejeitada";
+      case "unanswered":
+        return "Chamada não atendida";
+      case "ended":
+        return "Chamada encerrada";
+      default:
+        return null;
+    }
+  }, [callStatus]);
 
   useEffect(() => {
-    callOutgoing?.onStatus((status) => {
-      if (status === "CALLING") {
-        setStatus("Ligando...");
-        return;
-      }
-
-      if (status === "RINGING") {
-        calling_sound.currentTime = 0;
-        calling_sound.volume = 0.25;
-        calling_sound.loop = true;
-        calling_sound.play();
-        setStatus("Chamando...");
-        return;
-      }
-
-      if (status === "FAILED") {
-        postalcode_sound.currentTime = 0;
-        postalcode_sound.volume = 0.25;
-        postalcode_sound.play();
-        setStatus("A ligação falhou");
-        return;
-      }
-
+    if (callStatus === "ringing") {
+      calling_sound.currentTime = 0;
+      calling_sound.volume = 0.25;
+      calling_sound.loop = true;
+      calling_sound.play();
+    } else if (callStatus === "failed" || callStatus === "unanswered") {
       calling_sound.pause();
       calling_sound.currentTime = 0;
-      calling_sound.src = "";
-      postalcode_sound.pause();
-      postalcode_sound.currentTime = 0;
-    });
-
-    callOutgoing?.onPeerReject(() => {
-      setStatus("Chamada rejeitada");
-    });
-
-    callOutgoing?.onUnanswered(() => {
-      setStatus("Chamada não atendida");
       postalcode_sound.currentTime = 0;
       postalcode_sound.volume = 0.25;
       postalcode_sound.play();
-    });
-  }, [callOutgoing]);
+    } else if (callStatus !== "calling") {
+      calling_sound.pause();
+      calling_sound.currentTime = 0;
+      postalcode_sound.pause();
+      postalcode_sound.currentTime = 0;
+    }
+  }, [callStatus]);
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
@@ -69,9 +65,7 @@ export default function OutgoingScreen() {
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
           <Avatar className="wv:size-[50px] wv:rounded-xl">
             <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
-            <AvatarFallback>
-              {getFullnameLetters(callOutgoing?.peer?.displayName)}
-            </AvatarFallback>
+            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">

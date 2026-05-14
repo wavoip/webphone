@@ -11,10 +11,26 @@ type Props = {
 const deviceSettings = getSettings();
 
 export function useDeviceManager({ wavoip }: Props) {
-  const [_devices, setDevices] = useState<DeviceState[]>(() =>
+  const bindDeviceEvents = useCallback((device: Device) => {
+    device.on("qrCodeChanged", (qrcode) => {
+      setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...d, qrcode } : d)));
+    });
+
+    device.on("statusChanged", (status) => {
+      setDevices((prev) =>
+        prev.map((d) => (d.token === device.token ? { ...d, status, enable: status === "open" } : d)),
+      );
+    });
+
+    device.on("contactChanged", (contact) => {
+      setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...d, contact: contact } : d)));
+    });
+  }, []);
+
+  const [devices, setDevices] = useState<DeviceState[]>(() =>
     wavoip.getDevices().map((device) => {
       const settings = deviceSettings.get(device.token);
-
+      bindDeviceEvents(device);
       return {
         ...device,
         enable: !!settings?.enable,
@@ -27,9 +43,10 @@ export function useDeviceManager({ wavoip }: Props) {
     (token: string, persist?: boolean) => {
       const [device] = wavoip.addDevices([token]);
       if (!device) return;
+      bindDeviceEvents(device);
       setDevices((prev) => [...prev, { ...device, enable: device.status === "open", persist: persist || false }]);
     },
-    [wavoip.addDevices],
+    [wavoip.addDevices, bindDeviceEvents],
   );
 
   const remove = useCallback(
@@ -48,26 +65,9 @@ export function useDeviceManager({ wavoip }: Props) {
     setDevices((prev) => prev.map((device) => (device.token === token ? { ...device, enable: false } : device)));
   }, []);
 
-  const bindDeviceEvents = useCallback((device: DeviceState) => {
-    device.onQRCode((qrcode) => {
-      setDevices((prev) => prev.map((d) => (d.token === device.token ? { ...device, qrcode } : d)));
-    });
-
-    device.onStatus((status) => {
-      if (!status) return;
-      setDevices((prev) =>
-        prev.map((d) => (d.token === device.token ? { ...device, status, enable: status === "open" } : d)),
-      );
-    });
-  }, []);
-
   useEffect(() => {
-    for (const device of _devices) {
-      bindDeviceEvents(device);
-    }
+    saveSettings(devices);
+  }, [devices]);
 
-    saveSettings(_devices);
-  }, [bindDeviceEvents, _devices]);
-
-  return { devices: _devices, add, remove, enable, disable };
+  return { devices, add, remove, enable, disable };
 }

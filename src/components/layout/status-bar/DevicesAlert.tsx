@@ -1,14 +1,12 @@
 import { WarningIcon } from "@phosphor-icons/react";
-import type { Device } from "@wavoip/wavoip-api";
 import { Badge } from "lucide-react";
 import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useWavoip } from "@/providers/WavoipProvider";
 
-type Props = {
-  devices: Device[];
-};
+export function DevicesAlert() {
+  const { devices } = useWavoip();
 
-export function DevicesAlert({ devices }: Props) {
   const disconnectedDevices = useMemo(() => devices.filter(({ status }) => status === "disconnected"), [devices]);
   const qrcodeDevices = useMemo(() => devices.filter(({ status }) => status === "connecting"), [devices]);
   const closedDevices = useMemo(() => devices.filter(({ status }) => status === "close"), [devices]);
