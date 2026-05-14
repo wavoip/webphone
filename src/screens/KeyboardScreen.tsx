@@ -241,8 +241,6 @@ export default function KeyboardScreen({ onPipClick }: { onPipClick?: () => void
             disabled={callIsLoading}
 
             onClick={() => {
-              console.log("Clique no botão verde detectado!");
-              console.log("A função onPipClick existe?", !!onPipClick);
               onPipClick?.();
             }}
           >

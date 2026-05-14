@@ -6,6 +6,7 @@ import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
 import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useScreen } from "@/providers/ScreenProvider"; // 👈 IMPORT NOVO AQUI
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
@@ -19,16 +20,24 @@ export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
 
-  const { callActive, devices } = useWavoip();
+  const { callActive, devices, callStatus } = useWavoip();
+  const { screen } = useScreen();
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
 
   useEffect(() => {
-    if (callActive && callActive.direction === "INCOMING" && !isPip) {
+    const isReceiving = callActive && callActive.direction === "INCOMING";
+    const isCalling = screen === "outgoing" || screen === "call";
+
+    if ((isReceiving || isCalling) && !isPip) {
       onPipClick();
     }
-  }, [callActive, isPip, onPipClick]);
+
+    if (callStatus === "idle" && !isCalling && isPip) {
+      onPipClick();
+    }
+  }, [callActive, screen, isPip, onPipClick, callStatus]);
 
   useEffect(() => {
     mergeToAPI({
