@@ -1,5 +1,5 @@
-import { XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
+import { XIcon } from "@phosphor-icons/react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -10,10 +10,16 @@ import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
-export default function StatusBar() {
+interface StatusBarProps {
+  onPipClick: () => void;
+  isPip: boolean;
+}
+
+export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
-  const { callActive } = useWavoip();
+
+  const { callActive, devices } = useWavoip();
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
@@ -30,7 +36,6 @@ export default function StatusBar() {
   }, [showSettings, showNotifications]);
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
       onMouseUp={() => {
         stopDrag();
@@ -49,10 +54,10 @@ export default function StatusBar() {
         <Button
           type="button"
           variant={"ghost"}
-          className=" wv:size-fit  wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
+          className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
           onClick={() => close()}
         >
-          <XIcon className="wv:max-sm:size-6  wv:pointer-events-none" />
+          <XIcon className="wv:max-sm:size-6 wv:pointer-events-none" />
         </Button>
       </div>
     </div>
