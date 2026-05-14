@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -23,6 +23,12 @@ export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
+
+  useEffect(() => {
+    if (callActive && callActive.direction === "INCOMING" && !isPip) {
+      onPipClick();
+    }
+  }, [callActive, isPip, onPipClick]);
 
   useEffect(() => {
     mergeToAPI({
