@@ -1,7 +1,8 @@
 import { Wavoip } from "@wavoip/wavoip-api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
+import { documentPiPCallbacks } from "@/lib/picture-in-picture";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
@@ -17,7 +18,7 @@ type Props = {
   config: WebphoneSettings;
 };
 
-async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
+async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot) {
   if (!("documentPictureInPicture" in window)) {
     alert("Seu navegador não suporta janelas flutuantes nativas. Use Edge ou Chrome.");
     return;
@@ -32,8 +33,6 @@ async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIs
       height: 550,
     });
 
-    setIsPipActive(true);
-
     pipWindow.document.documentElement.className = document.documentElement.className;
     pipWindow.document.body.className = document.body.className;
     pipWindow.document.body.style.backgroundColor = "#1a1b1e";
@@ -45,7 +44,7 @@ async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIs
         const style = document.createElement("style");
         style.textContent = cssRules;
         pipWindow.document.head.appendChild(style);
-      } catch (e) {
+      } catch {
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href = (styleSheet as any).href;
@@ -60,8 +59,6 @@ async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIs
     pipWindow.document.body.append(root);
 
     pipWindow.addEventListener("pagehide", () => {
-      setIsPipActive(false);
-
       if (originalParent) {
         originalParent.appendChild(root);
       } else {
@@ -70,24 +67,27 @@ async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIs
     });
 
   } catch {
-    setIsPipActive(false);
+    // requestWindow falhou (sem suporte ou gesto do usuário inválido)
   }
 }
 
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
 
-  const [isPipActive, setIsPipActive] = useState(false);
-
   const togglePiP = () => {
     // @ts-expect-error
-    if (isPipActive && window.documentPictureInPicture?.window) {
+    if (window.documentPictureInPicture?.window) {
       // @ts-expect-error
       window.documentPictureInPicture.window.close();
     } else {
-      handleOpenPiP(root, shadowRoot, setIsPipActive);
+      handleOpenPiP(root, shadowRoot);
     }
   };
+
+  useEffect(() => {
+    documentPiPCallbacks.open = () => handleOpenPiP(root, shadowRoot);
+    return () => { documentPiPCallbacks.open = null; };
+  }, [root, shadowRoot]);
 
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
@@ -97,10 +97,7 @@ export function App({ shadowRoot, root, config }: Props) {
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
-                  <WebPhone
-                    onTogglePip={togglePiP}
-                    isPipActive={isPipActive}
-                  />
+                  <WebPhone onTogglePip={togglePiP} />
                 </WavoipProvider>
               </ScreenProvider>
             </NotificationsProvider>

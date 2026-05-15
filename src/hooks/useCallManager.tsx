@@ -5,7 +5,7 @@ import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
-import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import { disablePiP, documentPiPCallbacks, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
@@ -49,6 +49,8 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
     (status: CallStatus = "ended") => {
       disableConfirmClose();
       disablePiP();
+      // @ts-expect-error
+      window.documentPictureInPicture?.window?.close();
       setCallStatus(status);
       setPeerMuted(false);
 
@@ -141,24 +143,28 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       const offerIntegrated: Offer = {
         ...offer,
         async accept() {
-          const result = await originalAccept();
-
-          if (!result.call) return result;
-
-          setOffers([]);
-          stopRingtone();
           enablePiP();
+          documentPiPCallbacks.open?.();
           openWidget();
           widgetStatusCache = widgetIsClosed;
 
+
+          const result = await originalAccept();
+
+          if (!result.call) {
+            disablePiP();
+            return result;
+          }
+
+          setOffers([]);
+          stopRingtone();
           onCallAccept(result.call);
+
           return result;
         },
         async reject() {
           const result = await originalReject();
-
           if (!result.err) stopRingtone();
-
           return result;
         },
       };
@@ -186,7 +192,9 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
 
   const start = useCallback(
     async (to: string, config: { fromTokens?: string[] } = {}) => {
-
+      // 👇 MÁGICA AQUI: O enablePiP() DEVE vir antes do await para aproveitar o User Gesture!
+      enablePiP();
+      openWidget();
 
       const { call, err } = await wavoip.startCall({
         fromTokens: config.fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
@@ -194,6 +202,8 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       });
 
       if (err) {
+
+        disablePiP();
         return { call: null, err };
       }
 
@@ -219,15 +229,10 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
 
       widgetStatusCache = widgetIsClosed;
       enableConfirmClose();
-      enablePiP();
       pictureInPicture.call = call;
-      openWidget();
       setOutgoing(call);
       setScreen("outgoing");
       setCallStatus("calling");
-      enableConfirmClose();
-      enablePiP();
-      pictureInPicture.call = call;
 
       return {
         call: {

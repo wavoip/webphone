@@ -6,28 +6,17 @@ import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
 import { mergeToAPI } from "@/lib/webphone-api/api";
-import { useScreen } from "@/providers/ScreenProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
-interface StatusBarProps {
-  onTogglePip: () => void;
-  isPipActive: boolean;
-}
-
-export default function StatusBar({ onTogglePip, isPipActive }: StatusBarProps) {
+export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
   const { callActive } = useWavoip();
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
-
-  useEffect(() => {
-    if (callActive && !isPipActive) onTogglePip();
-    if (!callActive && isPipActive) onTogglePip();
-  }, [callActive, isPipActive, onTogglePip]);
 
   useEffect(() => {
     mergeToAPI({

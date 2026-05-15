@@ -9,10 +9,9 @@ import pkg from "../../package.json";
 
 interface WebPhoneProps {
   onTogglePip: () => void;
-  isPipActive: boolean;
 }
 
-export function WebPhone({ onTogglePip, isPipActive }: WebPhoneProps) {
+export function WebPhone({ onTogglePip }: WebPhoneProps) {
   const { screen } = useScreen();
   const { startDrag, stopDrag } = useWidget();
 
@@ -31,7 +30,7 @@ export function WebPhone({ onTogglePip, isPipActive }: WebPhoneProps) {
 
   return (
     <>
-      <StatusBar onTogglePip={onTogglePip} isPipActive={isPipActive} />
+      <StatusBar />
 
       <div
         role="application"

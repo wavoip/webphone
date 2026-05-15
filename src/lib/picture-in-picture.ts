@@ -1,5 +1,9 @@
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 
+export const documentPiPCallbacks = {
+  open: null as (() => void) | null,
+};
+
 export const pictureInPicture: {
   video: HTMLVideoElement;
   canvas: HTMLCanvasElement;
