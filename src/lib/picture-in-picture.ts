@@ -13,9 +13,7 @@ export const pictureInPicture: {
 };
 
 export function enablePiP() {
-  // document.addEventListener("visibilitychange", () => {
-  //   handlePictureInPicture(webphoneRef);
-  // });
+  document.addEventListener("visibilitychange", handlePictureInPicture);
 }
 
 export function disablePiP() {

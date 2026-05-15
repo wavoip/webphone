@@ -11,21 +11,14 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
-
-
 type Props = {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
   config: WebphoneSettings;
 };
 
-
-async function handleOpenPiP(
-  root: HTMLDivElement,
-  shadowRoot: ShadowRoot,
-  setIsPipActive: (active: boolean) => void
-) {
-  if (!('documentPictureInPicture' in window)) {
+async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
+  if (!("documentPictureInPicture" in window)) {
     alert("Seu navegador não suporta janelas flutuantes nativas. Use Edge ou Chrome.");
     return;
   }
@@ -33,12 +26,11 @@ async function handleOpenPiP(
   try {
     const originalParent = root.parentNode;
 
-    // @ts-ignore
+    // @ts-expect-error
     const pipWindow = await window.documentPictureInPicture.requestWindow({
       width: 320,
       height: 550,
     });
-
 
     setIsPipActive(true);
 
@@ -55,7 +47,7 @@ async function handleOpenPiP(
         pipWindow.document.head.appendChild(style);
       } catch (e) {
         const link = document.createElement("link");
-        link.rel = 'stylesheet';
+        link.rel = "stylesheet";
         link.href = (styleSheet as any).href;
         pipWindow.document.head.appendChild(link);
       }
@@ -68,7 +60,6 @@ async function handleOpenPiP(
     pipWindow.document.body.append(root);
 
     pipWindow.addEventListener("pagehide", () => {
-
       setIsPipActive(false);
 
       if (originalParent) {
@@ -86,8 +77,15 @@ async function handleOpenPiP(
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
 
-
   const [isPipActive, setIsPipActive] = useState(false);
+
+  const togglePiP = () => {
+    if (isPipActive && window.documentPictureInPicture?.window) {
+      window.documentPictureInPicture.window.close();
+    } else {
+      handleOpenPiP(root, shadowRoot, setIsPipActive);
+    }
+  };
 
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>

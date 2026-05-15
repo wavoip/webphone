@@ -186,12 +186,15 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
 
   const start = useCallback(
     async (to: string, config: { fromTokens?: string[] } = {}) => {
+      setCallStatus("calling");
+
       const { call, err } = await wavoip.startCall({
         fromTokens: config.fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
         to,
       });
 
       if (err) {
+        setCallStatus("idle");
         return { err };
       }
 
