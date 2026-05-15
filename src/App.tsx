@@ -11,22 +11,14 @@ import { ThemeProvider } from "@/providers/ThemeProvider";
 import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
-
-
 type Props = {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
   config: WebphoneSettings;
 };
 
-
-async function handleOpenPiP(
-  root: HTMLDivElement,
-  shadowRoot: ShadowRoot,
-  setIsPipActive: (active: boolean) => void
-) {
-  if (!('documentPictureInPicture' in window)) {
-    alert("Seu navegador não suporta janelas flutuantes nativas. Use Edge ou Chrome.");
+async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
+  if (!("documentPictureInPicture" in window)) {
     return;
   }
 
@@ -38,7 +30,6 @@ async function handleOpenPiP(
       width: 320,
       height: 550,
     });
-
 
     setIsPipActive(true);
 
@@ -53,10 +44,10 @@ async function handleOpenPiP(
         const style = document.createElement("style");
         style.textContent = cssRules;
         pipWindow.document.head.appendChild(style);
-      } catch (e) {
+      } catch (_error) {
         const link = document.createElement("link");
-        link.rel = 'stylesheet';
-        link.href = (styleSheet as any).href;
+        link.rel = "stylesheet";
+        link.href = styleSheet.href as string;
         pipWindow.document.head.appendChild(link);
       }
     });
@@ -68,7 +59,6 @@ async function handleOpenPiP(
     pipWindow.document.body.append(root);
 
     pipWindow.addEventListener("pagehide", () => {
-
       setIsPipActive(false);
 
       if (originalParent) {
@@ -77,7 +67,6 @@ async function handleOpenPiP(
         document.body.append(root);
       }
     });
-
   } catch (err) {
     console.error("Erro no PiP:", err);
     setIsPipActive(false);
@@ -86,7 +75,6 @@ async function handleOpenPiP(
 
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
-
 
   const [isPipActive, setIsPipActive] = useState(false);
 
@@ -98,10 +86,7 @@ export function App({ shadowRoot, root, config }: Props) {
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
-                  <WebPhone
-                    onPipClick={() => handleOpenPiP(root, shadowRoot, setIsPipActive)}
-                    isPip={isPipActive}
-                  />
+                  <WebPhone onPipClick={() => handleOpenPiP(root, shadowRoot, setIsPipActive)} isPip={isPipActive} />
                 </WavoipProvider>
               </ScreenProvider>
             </NotificationsProvider>
@@ -111,3 +96,4 @@ export function App({ shadowRoot, root, config }: Props) {
     </ShadowProvider>
   );
 }
+
