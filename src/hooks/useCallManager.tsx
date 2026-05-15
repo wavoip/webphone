@@ -195,7 +195,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
 
       if (err) {
         setCallStatus("idle");
-        return { err };
+        return { call: null, err };
       }
 
       if (callSettings?.displayName) {
@@ -226,8 +226,17 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       setOutgoing(call);
       setScreen("outgoing");
       setCallStatus("calling");
+      enableConfirmClose();
+      enablePiP();
+      pictureInPicture.call = call;
 
-      return { err: null };
+      return {
+        call: {
+          id: call.id,
+          peer: call.peer,
+        },
+        err: null,
+      };
     },
     [
       devices,
