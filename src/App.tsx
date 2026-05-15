@@ -80,7 +80,9 @@ export function App({ shadowRoot, root, config }: Props) {
   const [isPipActive, setIsPipActive] = useState(false);
 
   const togglePiP = () => {
+    // @ts-expect-error
     if (isPipActive && window.documentPictureInPicture?.window) {
+      // @ts-expect-error
       window.documentPictureInPicture.window.close();
     } else {
       handleOpenPiP(root, shadowRoot, setIsPipActive);
@@ -96,7 +98,7 @@ export function App({ shadowRoot, root, config }: Props) {
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
                   <WebPhone
-                    onTogglePip={() => handleOpenPiP(root, shadowRoot, setIsPipActive)}
+                    onTogglePip={togglePiP}
                     isPipActive={isPipActive}
                   />
                 </WavoipProvider>
