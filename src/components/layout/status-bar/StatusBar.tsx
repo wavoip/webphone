@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -11,18 +11,22 @@ import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 interface StatusBarProps {
-  onPipClick: () => void;
-  isPip: boolean;
+  onTogglePip: () => void;
+  isPipActive: boolean;
 }
 
-export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
+export default function StatusBar({ onTogglePip, isPipActive }: StatusBarProps) {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
-
-  const { callActive, devices } = useWavoip();
+  const { callActive } = useWavoip();
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
+
+  useEffect(() => {
+    if (callActive && !isPipActive) onTogglePip();
+    if (!callActive && isPipActive) onTogglePip();
+  }, [callActive, isPipActive, onTogglePip]);
 
   useEffect(() => {
     mergeToAPI({

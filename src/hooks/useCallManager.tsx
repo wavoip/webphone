@@ -216,13 +216,13 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       });
 
       widgetStatusCache = widgetIsClosed;
+      enableConfirmClose();
+      enablePiP();
+      pictureInPicture.call = call;
       openWidget();
       setOutgoing(call);
       setScreen("outgoing");
       setCallStatus("calling");
-      enableConfirmClose();
-      enablePiP();
-      pictureInPicture.call = call;
 
       return { err: null };
     },

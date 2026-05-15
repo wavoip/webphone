@@ -78,8 +78,7 @@ async function handleOpenPiP(
       }
     });
 
-  } catch (err) {
-    console.error("Erro no PiP:", err);
+  } catch {
     setIsPipActive(false);
   }
 }
@@ -99,8 +98,8 @@ export function App({ shadowRoot, root, config }: Props) {
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
                   <WebPhone
-                    onPipClick={() => handleOpenPiP(root, shadowRoot, setIsPipActive)}
-                    isPip={isPipActive}
+                    onTogglePip={() => handleOpenPiP(root, shadowRoot, setIsPipActive)}
+                    isPipActive={isPipActive}
                   />
                 </WavoipProvider>
               </ScreenProvider>
