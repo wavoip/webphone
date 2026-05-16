@@ -76,8 +76,6 @@ async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIs
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
 
-  const [_isPipActive, setIsPipActive] = useState(false);
-
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
@@ -86,7 +84,7 @@ export function App({ shadowRoot, root, config }: Props) {
             <NotificationsProvider>
               <ScreenProvider>
                 <WavoipProvider wavoip={wavoip}>
-                  <WebPhone onPipClick={() => handleOpenPiP(root, shadowRoot, setIsPipActive)} />
+                  <WebPhone />
                 </WavoipProvider>
               </ScreenProvider>
             </NotificationsProvider>
