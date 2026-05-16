@@ -10,16 +10,11 @@ import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
-interface StatusBarProps {
-  onPipClick: () => void;
-  isPip: boolean;
-}
-
-export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
+export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
 
-  const { callActive, devices } = useWavoip();
+  const { callActive } = useWavoip();
 
   const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
   const [showSettings, setShowSettings] = useState<boolean>(settings.show);
@@ -63,3 +58,4 @@ export default function StatusBar({ onPipClick, isPip }: StatusBarProps) {
     </div>
   );
 }
+
