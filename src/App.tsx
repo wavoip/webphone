@@ -17,61 +17,61 @@ type Props = {
   config: WebphoneSettings;
 };
 
-async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
-  if (!("documentPictureInPicture" in window)) {
-    return;
-  }
-
-  try {
-    const originalParent = root.parentNode;
-
-    // @ts-ignore
-    const pipWindow = await window.documentPictureInPicture.requestWindow({
-      width: 320,
-      height: 550,
-    });
-
-    setIsPipActive(true);
-
-    pipWindow.document.documentElement.className = document.documentElement.className;
-    pipWindow.document.body.className = document.body.className;
-    pipWindow.document.body.style.backgroundColor = "#1a1b1e";
-    pipWindow.document.body.style.overflow = "hidden";
-
-    [...document.styleSheets].forEach((styleSheet) => {
-      try {
-        const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join("");
-        const style = document.createElement("style");
-        style.textContent = cssRules;
-        pipWindow.document.head.appendChild(style);
-      } catch (_error) {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = styleSheet.href as string;
-        pipWindow.document.head.appendChild(link);
-      }
-    });
-
-    shadowRoot.querySelectorAll('style, link[rel="stylesheet"]').forEach((el) => {
-      pipWindow.document.head.appendChild(el.cloneNode(true));
-    });
-
-    pipWindow.document.body.append(root);
-
-    pipWindow.addEventListener("pagehide", () => {
-      setIsPipActive(false);
-
-      if (originalParent) {
-        originalParent.appendChild(root);
-      } else {
-        document.body.append(root);
-      }
-    });
-  } catch (err) {
-    console.error("Erro no PiP:", err);
-    setIsPipActive(false);
-  }
-}
+// async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
+//   if (!("documentPictureInPicture" in window)) {
+//     return;
+//   }
+//
+//   try {
+//     const originalParent = root.parentNode;
+//
+//     // @ts-ignore
+//     const pipWindow = await window.documentPictureInPicture.requestWindow({
+//       width: 320,
+//       height: 550,
+//     });
+//
+//     setIsPipActive(true);
+//
+//     pipWindow.document.documentElement.className = document.documentElement.className;
+//     pipWindow.document.body.className = document.body.className;
+//     pipWindow.document.body.style.backgroundColor = "#1a1b1e";
+//     pipWindow.document.body.style.overflow = "hidden";
+//
+//     [...document.styleSheets].forEach((styleSheet) => {
+//       try {
+//         const cssRules = [...styleSheet.cssRules].map((rule) => rule.cssText).join("");
+//         const style = document.createElement("style");
+//         style.textContent = cssRules;
+//         pipWindow.document.head.appendChild(style);
+//       } catch (_error) {
+//         const link = document.createElement("link");
+//         link.rel = "stylesheet";
+//         link.href = styleSheet.href as string;
+//         pipWindow.document.head.appendChild(link);
+//       }
+//     });
+//
+//     shadowRoot.querySelectorAll('style, link[rel="stylesheet"]').forEach((el) => {
+//       pipWindow.document.head.appendChild(el.cloneNode(true));
+//     });
+//
+//     pipWindow.document.body.append(root);
+//
+//     pipWindow.addEventListener("pagehide", () => {
+//       setIsPipActive(false);
+//
+//       if (originalParent) {
+//         originalParent.appendChild(root);
+//       } else {
+//         document.body.append(root);
+//       }
+//     });
+//   } catch (err) {
+//     console.error("Erro no PiP:", err);
+//     setIsPipActive(false);
+//   }
+// }
 
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
