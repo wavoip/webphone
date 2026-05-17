@@ -1,6 +1,5 @@
-import type { Device } from "@wavoip/wavoip-api";
 import type { CallStatus } from "@/hooks/useCallManager";
-import type { DeviceState } from "@/hooks/useDeviceManager";
+import type { Device, DeviceState } from "@/lib/webphone-api/sdk-types";
 import type { CallActiveProps, CallOfferProps, CallOutgoingProps } from "@/lib/webphone-api/WebphoneAPI";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
@@ -22,7 +21,7 @@ export type EventMap = {
 
   "device.list.changed": DeviceState[];
   "device.status.changed": { token: string; status: Device["status"] };
-  "device.qr.changed": { token: string; qrcode: string };
+  "device.qr.changed": { token: string; qrcode: string | undefined };
   "device.contact.changed": { token: string; contact: Device["contact"] };
 
   "notifications.changed": NotificationsType[];
@@ -75,6 +74,49 @@ export type RequestMap = {
     payload: { id: string };
     result: { err: null } | { err: { message: string } };
   };
+  "theme.set": {
+    payload: { theme: Theme };
+    result: void;
+  };
+  "widget.setIsClosed": {
+    payload: { isClosed: boolean };
+    result: void;
+  };
+  "widget.open": {
+    payload: void;
+    result: void;
+  };
+  "widget.close": {
+    payload: void;
+    result: void;
+  };
+  "widget.toggle": {
+    payload: void;
+    result: void;
+  };
+  "widget.buttonPosition.set": {
+    payload: { value: { x: number; y: number } };
+    result: void;
+  };
+  "position.set": {
+    payload: { value: { x: number; y: number } };
+    result: void;
+  };
+  "settings.setShowNotifications": { payload: { value: boolean }; result: void };
+  "settings.setShowSettings": { payload: { value: boolean }; result: void };
+  "settings.setShowDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowAddDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowEnableDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowRemoveDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowWidgetButton": { payload: { value: boolean }; result: void };
+  "notifications.add": { payload: { notification: NotificationsType }; result: void };
+  "notifications.remove": { payload: { id: Date }; result: void };
+  "notifications.clear": { payload: void; result: void };
+  "notifications.read": { payload: void; result: void };
+  "device.add": { payload: { token: string; persist?: boolean }; result: void };
+  "device.remove": { payload: { token: string }; result: void };
+  "device.enable": { payload: { token: string }; result: void };
+  "device.disable": { payload: { token: string }; result: void };
 };
 
 export type RequestType = keyof RequestMap;

@@ -1,5 +1,6 @@
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useMemo } from "react";
+import { bus } from "@/lib/webphone-api/bus";
+import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 
 export type NotificationsType = {
   id: Date;
@@ -12,119 +13,35 @@ export type NotificationsType = {
   created_at: Date;
 };
 
-type NotificationsContextType = {
+type NotificationManager = {
   notifications: NotificationsType[];
-  getNotifications: () => void;
+  getNotifications: () => NotificationsType[];
   addNotification: (notification: NotificationsType) => void;
   removeNotification: (id: Date) => void;
   readNotifications: () => void;
   clearNotifications: () => void;
 };
 
-const STORAGE_KEY = "webphone_notifications";
+export function useNotificationManager(): NotificationManager {
+  const notifications = useBusState("notifications.list", "notifications.changed");
 
-const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
-
-export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const [_notifications, setNotifications] = useState<NotificationsType[]>([]);
-
-  const getNotifications = useCallback(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as NotificationsType[]) : [];
-  }, []);
-
-  const clearNotifications = useCallback(() => {
-    setNotifications(
-      _notifications.map((notification) => ({
-        ...notification,
-        isHidden: true,
-      })),
-    );
-
-    setTimeout(() => {
-      setNotifications([]);
-    }, 1000);
-
-    localStorage.removeItem(STORAGE_KEY);
-  }, [_notifications]);
-
-  const addNotification = useCallback(
-    (notification: NotificationsType) => {
-      if (_notifications.length > 100) {
-        clearNotifications();
-      }
-      notification.id = new Date();
-      notification.created_at = new Date();
-      const notifications = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") || [];
-      notifications.unshift(notification);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-      setNotifications(notifications);
-    },
-    [_notifications, clearNotifications],
-  );
-
-  const removeNotification = useCallback(
-    (id: Date) => {
-      const notifications = _notifications.filter((notification) => notification.id !== id);
-
-      setNotifications(notifications);
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-    },
-    [_notifications],
-  );
-
-  const readNotifications = useCallback(() => {
-    const notifications = _notifications.map((notification) => ({
-      ...notification,
-      isRead: true,
-    }));
-
-    setNotifications(notifications);
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-  }, [_notifications]);
-
-  useEffect(() => {
-    const notifications = getNotifications();
-    setNotifications(notifications);
-  }, [getNotifications]);
-
-  useEffect(() => {
-    mergeToAPI({
-      notifications: {
-        getNotifications: () => getNotifications(),
-        get: () => getNotifications(),
-        clearNotifications: () => clearNotifications(),
-        clear: () => clearNotifications(),
-        addNotification: (...args) => addNotification(...args),
-        add: (...args) => addNotification(...args),
-        removeNotification: (...args) => removeNotification(...args),
-        remove: (...args) => removeNotification(...args),
-        readNotifications: () => readNotifications(),
-        read: () => readNotifications(),
+  return useMemo<NotificationManager>(
+    () => ({
+      notifications,
+      getNotifications: () => bus.query("notifications.list"),
+      addNotification: (notification) => {
+        void bus.request("notifications.add", { notification });
       },
-    });
-  }, [readNotifications, removeNotification, getNotifications, clearNotifications, addNotification]);
-
-  return (
-    <NotificationsContext.Provider
-      value={{
-        notifications: _notifications,
-        getNotifications,
-        addNotification,
-        removeNotification,
-        readNotifications,
-        clearNotifications,
-      }}
-    >
-      {children}
-    </NotificationsContext.Provider>
+      removeNotification: (id) => {
+        void bus.request("notifications.remove", { id });
+      },
+      readNotifications: () => {
+        void bus.request("notifications.read", undefined);
+      },
+      clearNotifications: () => {
+        void bus.request("notifications.clear", undefined);
+      },
+    }),
+    [notifications],
   );
-}
-
-export function useNotificationManager() {
-  const ctx = useContext(NotificationsContext);
-  if (!ctx) throw new Error("useNotificationManager deve ser usado dentro de <NotificationsProvider>");
-  return ctx;
 }

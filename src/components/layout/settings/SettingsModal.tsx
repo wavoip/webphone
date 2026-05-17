@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -23,34 +23,19 @@ import { useWavoip } from "@/providers/WavoipProvider";
 export const SettingsModal = forwardRef(() => {
   const { wavoip, addDevice, devices } = useWavoip();
   const { root } = useShadowRoot();
-  const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
+  const { audio: audioMenuSettings } = useSettings();
 
   const [showAudio] = useState(audioMenuSettings.show);
-  const [showDevices, setShowDevices] = useState(devicesMenuSettings.show);
-  const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
-  const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
-  const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
+  const showDevices = useBusState("settings.showDevices", "settings.changed");
+  const showAddDevice = useBusState("settings.showAddDevices", "settings.changed");
+  const showEnableDevice = useBusState("settings.showEnableDevices", "settings.changed");
+  const showRemoveDevice = useBusState("settings.showRemoveDevices", "settings.changed");
   const [error, setError] = useState("");
 
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
-
-  useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showDevices,
-        setShowDevices: (...args) => setShowDevices(...args),
-        showAddDevices: showAddDevice,
-        setShowAddDevices: (...args) => setShowAddDevice(...args),
-        showEnableDevices: showEnableDevice,
-        setShowEnableDevices: (...args) => setShowEnableDevice(...args),
-        showRemoveDevices: showRemoveDevice,
-        setShowRemoveDevices: (...args) => setShowRemoveDevice(...args),
-      },
-    });
-  }, [showDevices, showAddDevice, showEnableDevice, showRemoveDevice]);
 
   useEffect(() => {
     if (wavoip && open) {

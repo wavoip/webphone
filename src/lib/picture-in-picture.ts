@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
+import type { CallActive, CallOutgoing } from "@/lib/webphone-api/sdk-types";
 
 export const pictureInPicture: {
   video: HTMLVideoElement;
@@ -183,7 +183,7 @@ export function drawSoundwave(
     const avg = sum / step;
 
     // log scaling
-    const log = Math.pow(avg / 255, 0.6);
+    const log = (avg / 255) ** 0.6;
     const targetHeight = Math.max(log * height, 3);
 
     // easing

@@ -1,7 +1,7 @@
-import type { CallActive } from "@wavoip/wavoip-api";
 import { useTheme } from "next-themes";
 import { type RefObject, useEffect, useRef } from "react";
 import { drawSoundwave } from "@/lib/picture-in-picture";
+import type { CallActive } from "@/lib/webphone-api/sdk-types";
 
 type Props = {
   call?: CallActive;

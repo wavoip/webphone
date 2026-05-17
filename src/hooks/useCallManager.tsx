@@ -1,11 +1,10 @@
-import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
-import type { DeviceState } from "@/hooks/useDeviceManager";
-import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import type { CallActive, CallOutgoing, DeviceState, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
@@ -147,7 +146,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
 
           setOffers([]);
           stopRingtone();
-          enablePiP();
+          // enablePiP();
           openWidget();
           widgetStatusCache = widgetIsClosed;
 
@@ -221,7 +220,7 @@ export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Pr
       setScreen("outgoing");
       setCallStatus("calling");
       enableConfirmClose();
-      enablePiP();
+      // enablePiP();
       pictureInPicture.call = call;
 
       return {

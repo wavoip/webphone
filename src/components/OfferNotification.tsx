@@ -1,11 +1,11 @@
 import { PhoneIcon, PhoneSlash, WhatsappLogo } from "@phosphor-icons/react";
-import type { Offer } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { getFullnameLetters } from "@/lib/utils";
+import type { Offer } from "@/lib/webphone-api/sdk-types";
 
 type Props = {
   offer: Offer;
