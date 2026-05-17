@@ -110,6 +110,10 @@ export type RequestMap = {
   "settings.setShowEnableDevices": { payload: { value: boolean }; result: void };
   "settings.setShowRemoveDevices": { payload: { value: boolean }; result: void };
   "settings.setShowWidgetButton": { payload: { value: boolean }; result: void };
+  "notifications.add": { payload: { notification: NotificationsType }; result: void };
+  "notifications.remove": { payload: { id: Date }; result: void };
+  "notifications.clear": { payload: void; result: void };
+  "notifications.read": { payload: void; result: void };
 };
 
 export type RequestType = keyof RequestMap;

@@ -1,3 +1,4 @@
+import { bootNotificationsAdapter } from "@/lib/webphone-api/acl/adapters/notifications.adapter";
 import { bootSettingsAdapter } from "@/lib/webphone-api/acl/adapters/settings.adapter";
 import { bootThemeAdapter } from "@/lib/webphone-api/acl/adapters/theme.adapter";
 import { bootWidgetAdapter } from "@/lib/webphone-api/acl/adapters/widget.adapter";
@@ -37,6 +38,7 @@ export function bootACL({ wavoip: _wavoip, root, config, themeStorageKey }: Boot
     }),
     bootWidgetAdapter({ startOpen: config.widget?.startOpen }),
     bootSettingsAdapter(config),
+    bootNotificationsAdapter(),
   );
 
   bus.emit("acl.ready", undefined);

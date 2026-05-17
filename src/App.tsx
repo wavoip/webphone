@@ -3,7 +3,6 @@ import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
 import { bootACL } from "@/lib/webphone-api/acl/boot";
 import { Wavoip } from "@/lib/webphone-api/sdk-types";
-import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
@@ -33,13 +32,11 @@ export function App({ shadowRoot, root, config }: Props) {
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
         <WidgetProvider>
-          <NotificationsProvider>
-            <ScreenProvider>
-              <WavoipProvider wavoip={wavoip}>
-                <WebPhone />
-              </WavoipProvider>
-            </ScreenProvider>
-          </NotificationsProvider>
+          <ScreenProvider>
+            <WavoipProvider wavoip={wavoip}>
+              <WebPhone />
+            </WavoipProvider>
+          </ScreenProvider>
         </WidgetProvider>
       </SettingsProvider>
     </ShadowProvider>
