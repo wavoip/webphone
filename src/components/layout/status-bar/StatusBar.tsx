@@ -1,34 +1,19 @@
-import { useEffect, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
-import { mergeToAPI } from "@/lib/webphone-api/api";
-import { useSettings } from "@/providers/settings/Provider";
+import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  const { notifications, settings } = useSettings();
-
   const { callActive } = useWavoip();
 
-  const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
-  const [showSettings, setShowSettings] = useState<boolean>(settings.show);
-
-  useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showNotifications,
-        setShowNotifications: (...args) => setShowNotifications(...args),
-        showSettings,
-        setShowSettings: (...args) => setShowSettings(...args),
-      },
-    });
-  }, [showSettings, showNotifications]);
+  const showNotifications = useBusState("settings.showNotifications", "settings.changed");
+  const showSettings = useBusState("settings.showSettings", "settings.changed");
 
   return (
     <div
@@ -58,4 +43,3 @@ export default function StatusBar() {
     </div>
   );
 }
-

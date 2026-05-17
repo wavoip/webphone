@@ -23,9 +23,8 @@ export function App({ shadowRoot, root, config }: Props) {
     bootACL({
       wavoip: w,
       root,
-      defaultTheme: config.theme,
+      config,
       themeStorageKey: "webphone-ui-theme",
-      startOpen: config.widget?.startOpen,
     });
     return w;
   });

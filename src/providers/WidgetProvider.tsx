@@ -44,14 +44,14 @@ type Props = {
 
 export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
-  const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
+  const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
   const isOpen = useBusState("widget.isOpen", "widget.changed");
   const position = useBusState("position.value", "position.changed");
   const buttonPosition = useBusState("widget.buttonPosition", "widget.buttonPosition.changed");
+  const showWidget = useBusState("settings.showWidgetButton", "settings.changed");
   const isClosed = !isOpen;
 
-  const [showWidget, setShowWidget] = useState(widget.show);
   const [isDragging, setIsDragging] = useState(false);
 
   const divRef = useRef<HTMLDivElement>(null);
@@ -174,16 +174,12 @@ export function WidgetProvider({ children }: Props) {
           set: (raw) => setButtonPosition(handleButtonPositionInitialSettings(raw)),
         },
       },
-      settings: {
-        showWidgetButton: showWidget,
-        setShowWidgetButton: (next) => setShowWidget(next),
-      },
       position: {
         value: position,
         set: (raw) => setPosition(handlePositionInitialSettings(raw, divRef as RefObject<HTMLDivElement>)),
       },
     });
-  }, [isOpen, open, close, toggle, showWidget, position, buttonPosition, setPosition, setButtonPosition]);
+  }, [isOpen, open, close, toggle, position, buttonPosition, setPosition, setButtonPosition]);
 
   return (
     <WidgetContext.Provider

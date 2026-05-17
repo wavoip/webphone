@@ -103,6 +103,13 @@ export type RequestMap = {
     payload: { value: { x: number; y: number } };
     result: void;
   };
+  "settings.setShowNotifications": { payload: { value: boolean }; result: void };
+  "settings.setShowSettings": { payload: { value: boolean }; result: void };
+  "settings.setShowDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowAddDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowEnableDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowRemoveDevices": { payload: { value: boolean }; result: void };
+  "settings.setShowWidgetButton": { payload: { value: boolean }; result: void };
 };
 
 export type RequestType = keyof RequestMap;
