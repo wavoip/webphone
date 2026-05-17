@@ -1,3 +1,4 @@
+import { bootDeviceAdapter } from "@/lib/webphone-api/acl/adapters/device.adapter";
 import { bootNotificationsAdapter } from "@/lib/webphone-api/acl/adapters/notifications.adapter";
 import { bootSettingsAdapter } from "@/lib/webphone-api/acl/adapters/settings.adapter";
 import { bootThemeAdapter } from "@/lib/webphone-api/acl/adapters/theme.adapter";
@@ -25,7 +26,7 @@ type BootConfig = {
  */
 let cachedTeardown: (() => void) | null = null;
 
-export function bootACL({ wavoip: _wavoip, root, config, themeStorageKey }: BootConfig): () => void {
+export function bootACL({ wavoip, root, config, themeStorageKey }: BootConfig): () => void {
   if (cachedTeardown) return cachedTeardown;
 
   const teardowns: Array<() => void> = [];
@@ -39,6 +40,7 @@ export function bootACL({ wavoip: _wavoip, root, config, themeStorageKey }: Boot
     bootWidgetAdapter({ startOpen: config.widget?.startOpen }),
     bootSettingsAdapter(config),
     bootNotificationsAdapter(),
+    bootDeviceAdapter(wavoip),
   );
 
   bus.emit("acl.ready", undefined);

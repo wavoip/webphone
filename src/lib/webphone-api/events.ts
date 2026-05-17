@@ -1,6 +1,5 @@
 import type { CallStatus } from "@/hooks/useCallManager";
-import type { DeviceState } from "@/hooks/useDeviceManager";
-import type { Device } from "@/lib/webphone-api/sdk-types";
+import type { Device, DeviceState } from "@/lib/webphone-api/sdk-types";
 import type { CallActiveProps, CallOfferProps, CallOutgoingProps } from "@/lib/webphone-api/WebphoneAPI";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
@@ -22,7 +21,7 @@ export type EventMap = {
 
   "device.list.changed": DeviceState[];
   "device.status.changed": { token: string; status: Device["status"] };
-  "device.qr.changed": { token: string; qrcode: string };
+  "device.qr.changed": { token: string; qrcode: string | undefined };
   "device.contact.changed": { token: string; contact: Device["contact"] };
 
   "notifications.changed": NotificationsType[];
@@ -114,6 +113,10 @@ export type RequestMap = {
   "notifications.remove": { payload: { id: Date }; result: void };
   "notifications.clear": { payload: void; result: void };
   "notifications.read": { payload: void; result: void };
+  "device.add": { payload: { token: string; persist?: boolean }; result: void };
+  "device.remove": { payload: { token: string }; result: void };
+  "device.enable": { payload: { token: string }; result: void };
+  "device.disable": { payload: { token: string }; result: void };
 };
 
 export type RequestType = keyof RequestMap;

@@ -1,13 +1,14 @@
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { type CallStatus, useCallManager } from "@/hooks/useCallManager";
-import { useDeviceManager } from "@/hooks/useDeviceManager";
 import { mergeToAPI } from "@/lib/webphone-api/api";
-import type { CallActive, CallOutgoing, Device, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
+import { bus } from "@/lib/webphone-api/bus";
+import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
+import type { CallActive, CallOutgoing, DeviceState, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 
 interface WavoipContextProps {
   wavoip: Wavoip;
-  devices: (Device & { enable: boolean })[];
+  devices: DeviceState[];
   offers: Offer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
@@ -28,13 +29,20 @@ interface WavoipProviderProps {
 }
 
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
-  const {
-    devices,
-    add: addDevice,
-    remove: removeDevice,
-    disable: disableDevice,
-    enable: enableDevice,
-  } = useDeviceManager({ wavoip: wavoip });
+  const devices = useBusState("device.list", "device.list.changed");
+
+  const addDevice = (token: string, persist?: boolean) => {
+    void bus.request("device.add", { token, persist });
+  };
+  const removeDevice = (token: string) => {
+    void bus.request("device.remove", { token });
+  };
+  const enableDevice = (token: string) => {
+    void bus.request("device.enable", { token });
+  };
+  const disableDevice = (token: string) => {
+    void bus.request("device.disable", { token });
+  };
 
   const [onOffer, setOnOffer] = useState<(offer: CallOfferProps) => void>(() => () => {});
 
@@ -82,24 +90,8 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
           setOnOffer(() => cb);
         },
       },
-      device: {
-        getDevices: () => {
-          return devices;
-        },
-        get: () => {
-          return devices;
-        },
-        addDevice: (...args) => addDevice(...args),
-        add: (...args) => addDevice(...args),
-        removeDevice: (...args) => removeDevice(...args),
-        remove: (...args) => removeDevice(...args),
-        enableDevice: (...args) => enableDevice(...args),
-        enable: (...args) => enableDevice(...args),
-        disableDevice: (...args) => disableDevice(...args),
-        disable: (...args) => disableDevice(...args),
-      },
     });
-  }, [devices, disableDevice, enableDevice, removeDevice, addDevice, startCall, offers, callOutgoing, callActive]);
+  }, [startCall, offers, callOutgoing, callActive]);
 
   return (
     <WavoipContext.Provider

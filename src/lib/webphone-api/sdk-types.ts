@@ -8,6 +8,8 @@
  * changes a single-file migration.
  */
 
+import type { Device } from "@wavoip/wavoip-api";
+
 export type {
   CallActive,
   CallOutgoing,
@@ -17,3 +19,5 @@ export type {
   TransportStatus,
 } from "@wavoip/wavoip-api";
 export { Wavoip } from "@wavoip/wavoip-api";
+
+export type DeviceState = Device & { enable: boolean; persist: boolean };
