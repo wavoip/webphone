@@ -75,6 +75,10 @@ export type RequestMap = {
     payload: { id: string };
     result: { err: null } | { err: { message: string } };
   };
+  "theme.set": {
+    payload: { theme: Theme };
+    result: void;
+  };
 };
 
 export type RequestType = keyof RequestMap;
