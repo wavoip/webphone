@@ -7,9 +7,9 @@ import {
   PhoneTransferIcon,
   VideoCameraSlashIcon,
 } from "@phosphor-icons/react";
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { CallActive, CallOutgoing } from "@/lib/webphone-api/sdk-types";
 
 type Props = {
   call?: CallActive | CallOutgoing;
@@ -77,7 +77,9 @@ export function CallButtons({ call }: Props) {
               <MicrophoneIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Silenciar</p>
+          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
+            Silenciar
+          </p>
         </div>
       )}
 
@@ -92,7 +94,9 @@ export function CallButtons({ call }: Props) {
             <PhoneTransferIcon size={32} weight="fill" />{" "}
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Transferir</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          Transferir
+        </p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button

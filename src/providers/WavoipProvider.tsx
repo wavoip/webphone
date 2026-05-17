@@ -1,8 +1,8 @@
-import type { CallActive, CallOutgoing, Device, Offer, Wavoip } from "@wavoip/wavoip-api";
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { type CallStatus, useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
 import { mergeToAPI } from "@/lib/webphone-api/api";
+import type { CallActive, CallOutgoing, Device, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 
 interface WavoipContextProps {

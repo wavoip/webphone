@@ -1,6 +1,6 @@
 import { WifiHighIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
+import type { CallActive, TransportStatus } from "@/lib/webphone-api/sdk-types";
 
 type Props = {
   call: CallActive;

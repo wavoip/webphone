@@ -1,6 +1,6 @@
-import type { Device, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useEffect, useState } from "react";
 import { getSettings, saveSettings } from "@/lib/device-settings";
+import type { Device, Wavoip } from "@/lib/webphone-api/sdk-types";
 
 export type DeviceState = Device & { enable: boolean; persist: boolean };
 

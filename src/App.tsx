@@ -1,7 +1,7 @@
-import { Wavoip } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
+import { Wavoip } from "@/lib/webphone-api/sdk-types";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
@@ -25,7 +25,7 @@ type Props = {
 //   try {
 //     const originalParent = root.parentNode;
 //
-//     // @ts-ignore
+//     // @ts-expect-error
 //     const pipWindow = await window.documentPictureInPicture.requestWindow({
 //       width: 320,
 //       height: 550,

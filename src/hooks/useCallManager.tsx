@@ -1,4 +1,3 @@
-import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
@@ -6,6 +5,7 @@ import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
 import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import type { CallActive, CallOutgoing, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";

@@ -1,10 +1,10 @@
 import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
-import type { Device } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import type { Device } from "@/lib/webphone-api/sdk-types";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {

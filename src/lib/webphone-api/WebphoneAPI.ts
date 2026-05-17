@@ -1,5 +1,5 @@
-import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
 import type { DeviceState } from "@/hooks/useDeviceManager";
+import type { CallActive, CallOutgoing, CallPeer, Offer } from "@/lib/webphone-api/sdk-types";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
