@@ -79,6 +79,30 @@ export type RequestMap = {
     payload: { theme: Theme };
     result: void;
   };
+  "widget.setIsClosed": {
+    payload: { isClosed: boolean };
+    result: void;
+  };
+  "widget.open": {
+    payload: void;
+    result: void;
+  };
+  "widget.close": {
+    payload: void;
+    result: void;
+  };
+  "widget.toggle": {
+    payload: void;
+    result: void;
+  };
+  "widget.buttonPosition.set": {
+    payload: { value: { x: number; y: number } };
+    result: void;
+  };
+  "position.set": {
+    payload: { value: { x: number; y: number } };
+    result: void;
+  };
 };
 
 export type RequestType = keyof RequestMap;

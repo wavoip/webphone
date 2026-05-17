@@ -1,4 +1,5 @@
 import { bootThemeAdapter } from "@/lib/webphone-api/acl/adapters/theme.adapter";
+import { bootWidgetAdapter } from "@/lib/webphone-api/acl/adapters/widget.adapter";
 import { bus } from "@/lib/webphone-api/bus";
 import type { Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { Theme } from "@/providers/settings/settings";
@@ -8,6 +9,7 @@ type BootConfig = {
   root: HTMLElement;
   defaultTheme?: Theme;
   themeStorageKey?: string;
+  startOpen?: boolean;
 };
 
 /**
@@ -22,7 +24,7 @@ type BootConfig = {
  */
 let cachedTeardown: (() => void) | null = null;
 
-export function bootACL({ wavoip: _wavoip, root, defaultTheme, themeStorageKey }: BootConfig): () => void {
+export function bootACL({ wavoip: _wavoip, root, defaultTheme, themeStorageKey, startOpen }: BootConfig): () => void {
   if (cachedTeardown) return cachedTeardown;
 
   const teardowns: Array<() => void> = [];
@@ -33,6 +35,7 @@ export function bootACL({ wavoip: _wavoip, root, defaultTheme, themeStorageKey }
       defaultTheme,
       storageKey: themeStorageKey,
     }),
+    bootWidgetAdapter({ startOpen }),
   );
 
   bus.emit("acl.ready", undefined);

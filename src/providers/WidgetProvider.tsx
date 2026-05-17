@@ -14,6 +14,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { mergeToAPI } from "@/lib/webphone-api/api";
+import { bus } from "@/lib/webphone-api/bus";
+import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 import { useSettings } from "@/providers/settings/Provider";
 import type { WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -28,7 +30,7 @@ interface WidgetContextType {
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
   isClosed: boolean;
-  setIsClosed: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsClosed: (isClosed: boolean) => void;
   close: () => void;
   open: () => void;
   toggle: () => void;
@@ -44,34 +46,63 @@ export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
   const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
-  const [showWidget, setShowWidget] = useState(widget.show);
+  const isOpen = useBusState("widget.isOpen", "widget.changed");
+  const position = useBusState("position.value", "position.changed");
+  const buttonPosition = useBusState("widget.buttonPosition", "widget.buttonPosition.changed");
+  const isClosed = !isOpen;
 
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
-  const [buttonPosition, setButtonPosition] = useState<Position>({ x: 0, y: 0 });
+  const [showWidget, setShowWidget] = useState(widget.show);
   const [isDragging, setIsDragging] = useState(false);
-  const [isClosed, setIsClosed] = useState<boolean>(!widget.startOpen);
 
   const divRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
-  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
-    if (!divRef.current) return;
-    let x = e.clientX - offsetRef.current.x;
-    let y = e.clientY - offsetRef.current.y;
-
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-
-    if (x > window.innerWidth - divRef.current.getBoundingClientRect().width) {
-      x = window.innerWidth - divRef.current.getBoundingClientRect().width;
-    }
-
-    if (y > document.body.clientHeight - divRef.current.getBoundingClientRect().height) {
-      y = document.body.clientHeight - divRef.current.getBoundingClientRect().height;
-    }
-
-    setPosition({ x, y });
+  const setPosition = useCallback((value: Position) => {
+    void bus.request("position.set", { value });
   }, []);
+
+  const setButtonPosition = useCallback((value: Position) => {
+    void bus.request("widget.buttonPosition.set", { value });
+  }, []);
+
+  const setIsClosed = useCallback((next: boolean) => {
+    void bus.request("widget.setIsClosed", { isClosed: next });
+  }, []);
+
+  const open = useCallback(() => {
+    void bus.request("widget.open", undefined);
+  }, []);
+
+  const close = useCallback(() => {
+    void bus.request("widget.close", undefined);
+  }, []);
+
+  const toggle = useCallback(() => {
+    void bus.request("widget.toggle", undefined);
+  }, []);
+
+  const handleMouseMove = useCallback(
+    (e: globalThis.MouseEvent) => {
+      if (!divRef.current) return;
+      let x = e.clientX - offsetRef.current.x;
+      let y = e.clientY - offsetRef.current.y;
+
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
+
+      const rect = divRef.current.getBoundingClientRect();
+      if (x > window.innerWidth - rect.width) {
+        x = window.innerWidth - rect.width;
+      }
+
+      if (y > document.body.clientHeight - rect.height) {
+        y = document.body.clientHeight - rect.height;
+      }
+
+      setPosition({ x, y });
+    },
+    [setPosition],
+  );
 
   const startDrag = useCallback(
     (e: MouseEvent) => {
@@ -89,28 +120,8 @@ export function WidgetProvider({ children }: Props) {
     document.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
 
-  const open = useCallback(() => {
-    if (isClosed) setIsClosed(false);
-  }, [isClosed]);
-
-  const close = useCallback(() => {
-    if (!isClosed) setIsClosed(true);
-  }, [isClosed]);
-
-  const toggle = useCallback(() => {
-    setIsClosed((prev) => !prev);
-  }, []);
-
   useLayoutEffect(() => {
-    if (!open || !divRef.current) return;
-
-    const rect = divRef.current.getBoundingClientRect();
-
-    let x = window.innerWidth - rect.width - 24;
-    let y = window.innerHeight - rect.height - 24;
-
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
+    if (!divRef.current) return;
 
     setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
     setButtonPosition(handleButtonPositionInitialSettings(buttonPositionInitial));
@@ -120,15 +131,15 @@ export function WidgetProvider({ children }: Props) {
     return () => {
       document.removeEventListener("mouseleave", stopDrag);
     };
-  }, [open, stopDrag, positionInitial, buttonPositionInitial]);
+  }, [stopDrag, positionInitial, buttonPositionInitial, setPosition, setButtonPosition]);
 
   useLayoutEffect(() => {
     function handleResize() {
       if (!divRef.current) return;
 
       const div = divRef.current.getBoundingClientRect();
-      let x = null;
-      let y = null;
+      let x: number | null = null;
+      let y: number | null = null;
 
       if (div.x + div.width > window.innerWidth) {
         x = window.innerWidth - divRef.current.getBoundingClientRect().width;
@@ -139,8 +150,8 @@ export function WidgetProvider({ children }: Props) {
         if (y < 0) y = 0;
       }
 
-      if (x || y) {
-        setPosition((position) => ({ x: x || position.x, y: y || position.y }));
+      if (x !== null || y !== null) {
+        setPosition({ x: x ?? position.x, y: y ?? position.y });
       }
     }
 
@@ -149,30 +160,30 @@ export function WidgetProvider({ children }: Props) {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [position.x, position.y, setPosition]);
 
   useEffect(() => {
     mergeToAPI({
       widget: {
-        isOpen: !isClosed,
+        isOpen,
         open: () => open(),
         close: () => close(),
         toggle: () => toggle(),
         buttonPosition: {
           value: buttonPosition,
-          set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
+          set: (raw) => setButtonPosition(handleButtonPositionInitialSettings(raw)),
         },
       },
       settings: {
         showWidgetButton: showWidget,
-        setShowWidgetButton: (...args) => setShowWidget(...args),
+        setShowWidgetButton: (next) => setShowWidget(next),
       },
       position: {
         value: position,
-        set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
+        set: (raw) => setPosition(handlePositionInitialSettings(raw, divRef as RefObject<HTMLDivElement>)),
       },
     });
-  }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
+  }, [isOpen, open, close, toggle, showWidget, position, buttonPosition, setPosition, setButtonPosition]);
 
   return (
     <WidgetContext.Provider
@@ -183,23 +194,17 @@ export function WidgetProvider({ children }: Props) {
         startDrag,
         stopDrag,
         isDragging,
-        isClosed: isClosed,
-        setIsClosed: setIsClosed,
-        close: () => {
-          if (!isClosed) setIsClosed(true);
-        },
-        open: () => {
-          if (isClosed) setIsClosed(false);
-        },
-        toggle: () => {
-          setIsClosed((prev) => !prev);
-        },
+        isClosed,
+        setIsClosed,
+        close,
+        open,
+        toggle,
       }}
     >
       {showWidget && (
         <Button
           type="button"
-          onClick={() => setIsClosed(false)}
+          onClick={open}
           size={"icon"}
           data-closed={isClosed}
           className="wv:transition wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"

@@ -25,6 +25,7 @@ export function App({ shadowRoot, root, config }: Props) {
       root,
       defaultTheme: config.theme,
       themeStorageKey: "webphone-ui-theme",
+      startOpen: config.widget?.startOpen,
     });
     return w;
   });
