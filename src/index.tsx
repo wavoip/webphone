@@ -3,6 +3,7 @@ import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
 import { webphoneAPIPromise } from "@/lib/webphone-api/api";
+import type { Wavoip } from "@/lib/webphone-api/sdk-types";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 
@@ -10,7 +11,7 @@ class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render(config?: WebphoneSettings) {
+  async render(config?: WebphoneSettings, wavoip?: Wavoip) {
     if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");
@@ -21,7 +22,7 @@ class WebPhoneComponent {
 
     const style = document.createElement("style");
     style.textContent = `
-    ${styles} 
+    ${styles}
     ${sonnerStyles.replace(/(\[data-sonner-[^\]]+\])/g, `:host $1`)}
     `;
     shadowRoot.appendChild(style);
@@ -35,7 +36,7 @@ class WebPhoneComponent {
     root.appendChild(container);
 
     this.root = ReactDOM.createRoot(container);
-    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} />);
+    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} wavoip={wavoip} />);
 
     const webphoneAPI = await webphoneAPIPromise;
     window.wavoip = webphoneAPI;

@@ -15,6 +15,7 @@ type Props = {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
   config: WebphoneSettings;
+  wavoip?: Wavoip;
 };
 
 function ACLEffectsBridge() {
@@ -22,9 +23,9 @@ function ACLEffectsBridge() {
   return null;
 }
 
-export function App({ shadowRoot, root, config }: Props) {
+export function App({ shadowRoot, root, config, wavoip: providedWavoip }: Props) {
   const [wavoip] = useState(() => {
-    const w = new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform });
+    const w = providedWavoip ?? new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform });
     bootACL({
       wavoip: w,
       root,
