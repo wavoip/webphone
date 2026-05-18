@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
+import { useEffect, useState } from "react";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -31,6 +31,7 @@ export default function StatusBar() {
   }, [showSettings, showNotifications]);
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: Needs interaction
     <div
       onMouseUp={() => {
         stopDrag();
@@ -58,4 +59,3 @@ export default function StatusBar() {
     </div>
   );
 }
-

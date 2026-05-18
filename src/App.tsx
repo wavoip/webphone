@@ -25,7 +25,7 @@ type Props = {
 //   try {
 //     const originalParent = root.parentNode;
 //
-//     // @ts-ignore
+//     // @ts-expect-error
 //     const pipWindow = await window.documentPictureInPicture.requestWindow({
 //       width: 320,
 //       height: 550,
