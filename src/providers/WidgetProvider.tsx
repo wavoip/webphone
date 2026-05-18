@@ -13,7 +13,6 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { mergeToAPI } from "@/lib/webphone-api/api";
 import { bus } from "@/lib/webphone-api/bus";
 import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 import { useSettings } from "@/providers/settings/Provider";
@@ -61,7 +60,7 @@ export function WidgetProvider({ children }: Props) {
     void bus.request("position.set", { value });
   }, []);
 
-  const setButtonPosition = useCallback((value: Position) => {
+  const setButtonPosition = useCallback((value: WidgetButtonPosition) => {
     void bus.request("widget.buttonPosition.set", { value });
   }, []);
 
@@ -124,7 +123,7 @@ export function WidgetProvider({ children }: Props) {
     if (!divRef.current) return;
 
     setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
-    setButtonPosition(handleButtonPositionInitialSettings(buttonPositionInitial));
+    setButtonPosition(buttonPositionInitial);
 
     document.addEventListener("mouseleave", stopDrag);
 
@@ -163,23 +162,12 @@ export function WidgetProvider({ children }: Props) {
   }, [position.x, position.y, setPosition]);
 
   useEffect(() => {
-    mergeToAPI({
-      widget: {
-        isOpen,
-        open: () => open(),
-        close: () => close(),
-        toggle: () => toggle(),
-        buttonPosition: {
-          value: buttonPosition,
-          set: (raw) => setButtonPosition(handleButtonPositionInitialSettings(raw)),
-        },
-      },
-      position: {
-        value: position,
-        set: (raw) => setPosition(handlePositionInitialSettings(raw, divRef as RefObject<HTMLDivElement>)),
-      },
+    return bus.handle("position.setRaw", async ({ value }) => {
+      if (!divRef.current) return;
+      const resolved = handlePositionInitialSettings(value, divRef as RefObject<HTMLDivElement>);
+      await bus.request("position.set", { value: resolved });
     });
-  }, [isOpen, open, close, toggle, position, buttonPosition, setPosition, setButtonPosition]);
+  }, []);
 
   return (
     <WidgetContext.Provider
@@ -271,22 +259,4 @@ function handlePositionInitialSettings(
   if (position === "bottom-right") return { x: endX, y: bottomY < 0 ? 0 : bottomY };
 
   throw new Error("Initial position invalid");
-}
-
-function handleButtonPositionInitialSettings(position: WidgetButtonPosition): { x: number; y: number } {
-  const MARGIN = 20;
-  const button = { width: 56, height: 56 };
-
-  if (typeof position === "object") {
-    return position;
-  }
-  const endX = window.innerWidth - MARGIN - button.width;
-  const endY = window.innerHeight - MARGIN - button.height;
-
-  if (position === "top-right") return { x: endX, y: MARGIN };
-  if (position === "top-left") return { x: MARGIN, y: MARGIN };
-  if (position === "bottom-left") return { x: MARGIN, y: endY < 0 ? 0 : endY };
-  if (position === "bottom-right") return { x: endX, y: endY < 0 ? 0 : endY };
-
-  throw new Error("Initial button position invalid");
 }

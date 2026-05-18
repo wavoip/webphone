@@ -101,11 +101,15 @@ export type RequestMap = {
     result: void;
   };
   "widget.buttonPosition.set": {
-    payload: { value: { x: number; y: number } };
+    payload: { value: WidgetButtonPosition };
     result: void;
   };
   "position.set": {
     payload: { value: { x: number; y: number } };
+    result: void;
+  };
+  "position.setRaw": {
+    payload: { value: WebphonePosition };
     result: void;
   };
   "settings.setShowNotifications": { payload: { value: boolean }; result: void };

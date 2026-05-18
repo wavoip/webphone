@@ -1,4 +1,3 @@
-import { mergeToAPI } from "@/lib/webphone-api/api";
 import { bus } from "@/lib/webphone-api/bus";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
@@ -30,32 +29,10 @@ export function bootSettingsAdapter(config: WebphoneSettings): () => void {
 
   const emit = () => bus.emit("settings.changed", { ...flags });
 
-  const pushToLegacyFacade = () => {
-    mergeToAPI({
-      settings: {
-        showNotifications: flags.showNotifications,
-        setShowNotifications: (v) => set("showNotifications", v),
-        showSettings: flags.showSettings,
-        setShowSettings: (v) => set("showSettings", v),
-        showDevices: flags.showDevices,
-        setShowDevices: (v) => set("showDevices", v),
-        showAddDevices: flags.showAddDevices,
-        setShowAddDevices: (v) => set("showAddDevices", v),
-        showEnableDevices: flags.showEnableDevices,
-        setShowEnableDevices: (v) => set("showEnableDevices", v),
-        showRemoveDevices: flags.showRemoveDevices,
-        setShowRemoveDevices: (v) => set("showRemoveDevices", v),
-        showWidgetButton: flags.showWidgetButton,
-        setShowWidgetButton: (v) => set("showWidgetButton", v),
-      },
-    });
-  };
-
   function set<K extends keyof Flags>(key: K, value: boolean): void {
     if (flags[key] === value) return;
     flags[key] = value;
     emit();
-    pushToLegacyFacade();
   }
 
   const unsubs: Array<() => void> = [
@@ -76,7 +53,6 @@ export function bootSettingsAdapter(config: WebphoneSettings): () => void {
     bus.handle("settings.setShowWidgetButton", async ({ value }) => set("showWidgetButton", value)),
   ];
 
-  pushToLegacyFacade();
   emit();
 
   return () => {

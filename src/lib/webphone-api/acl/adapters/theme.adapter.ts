@@ -1,4 +1,3 @@
-import { mergeToAPI } from "@/lib/webphone-api/api";
 import { bus } from "@/lib/webphone-api/bus";
 import type { Theme } from "@/providers/settings/settings";
 
@@ -35,17 +34,6 @@ export function bootThemeAdapter({
     localStorage.setItem(storageKey, next);
     applyToRoot(root, next);
     bus.emit("theme.changed", next);
-    pushToLegacyFacade();
-  };
-
-  const pushToLegacyFacade = () => {
-    mergeToAPI({
-      theme: {
-        value: current,
-        set: setTheme,
-        setTheme,
-      },
-    });
   };
 
   const unsubQuery = bus.registerQuery("theme.value", () => current);
@@ -63,7 +51,6 @@ export function bootThemeAdapter({
   };
   media.addEventListener("change", onSystemChange);
 
-  pushToLegacyFacade();
   bus.emit("theme.changed", current);
 
   return () => {

@@ -1,7 +1,6 @@
 import { toast } from "sonner";
 import { OfferNotification } from "@/components/OfferNotification";
 import { pictureInPicture } from "@/lib/picture-in-picture";
-import { mergeToAPI } from "@/lib/webphone-api/api";
 import { bus } from "@/lib/webphone-api/bus";
 import type { CallStatus } from "@/lib/webphone-api/events";
 import type { CallActive, CallOutgoing, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
@@ -25,7 +24,6 @@ export function bootCallAdapter({ wavoip, callSettings }: CallAdapterConfig): ()
   let callStatus: CallStatus = "idle";
   let peerMuted = false;
   let widgetWasClosed: boolean | null = null;
-  let externalOnOffer: ((o: CallOfferProps) => void) | null = null;
 
   const setStatus = (s: CallStatus) => {
     callStatus = s;
@@ -147,9 +145,7 @@ export function bootCallAdapter({ wavoip, callSettings }: CallAdapterConfig): ()
     offers = [...offers, integrated];
     emitOffers();
 
-    const props = toOfferProps(offer);
-    bus.emit("offer.received", props);
-    externalOnOffer?.(props);
+    bus.emit("offer.received", toOfferProps(offer));
 
     bus.emit("fx.ringtone.start", undefined);
 
@@ -197,30 +193,6 @@ export function bootCallAdapter({ wavoip, callSettings }: CallAdapterConfig): ()
     return { call: { id: call.id, peer: call.peer }, err: null };
   }
 
-  const pushToLegacyFacade = () => {
-    mergeToAPI({
-      call: {
-        start: (to, config) => start({ to, fromTokens: config?.fromTokens, displayName: config?.displayName }),
-        startCall: (to, fromTokens) => start({ to, fromTokens: fromTokens ?? undefined }),
-        getCallActive: () => {
-          if (!active) return undefined;
-          const { id, type, status, device_token, direction, peer } = active;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getCallOutgoing: () => {
-          if (!outgoing) return undefined;
-          const { id, type, status, device_token, direction, peer } = outgoing;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getOffers: () => offers.map(toOfferProps),
-        setInput: (value) => bus.emit("call.input.changed", value),
-        onOffer: (cb) => {
-          externalOnOffer = cb;
-        },
-      },
-    });
-  };
-
   const unsubOffer = wavoip.on("offer", (o) => handleOffer(o));
 
   const unsubs: Array<() => void> = [
@@ -246,8 +218,6 @@ export function bootCallAdapter({ wavoip, callSettings }: CallAdapterConfig): ()
       return { err: null };
     }),
   ];
-
-  pushToLegacyFacade();
 
   return () => {
     unsubOffer?.();
