@@ -33,3 +33,10 @@ jobs:
 
       - name: Publish
         run: npm publish --access public --provenance
+
+      - name: Purge jsDelivr cache
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          curl -fsSL "https://purge.jsdelivr.net/npm/@wavoip/wavoip-webphone@${PKG_VERSION}" || true
+          curl -fsSL "https://purge.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest" || true
+          curl -fsSL "https://purge.jsdelivr.net/npm/@wavoip/wavoip-webphone" || true
