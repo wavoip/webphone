@@ -52,6 +52,13 @@ export default function OutgoingScreen() {
       postalcode_sound.pause();
       postalcode_sound.currentTime = 0;
     }
+
+    return () => {
+      calling_sound.pause();
+      calling_sound.currentTime = 0;
+      postalcode_sound.pause();
+      postalcode_sound.currentTime = 0;
+    };
   }, [callStatus]);
 
   return (
