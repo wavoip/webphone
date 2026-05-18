@@ -1,3 +1,4 @@
+import { bootCallAdapter } from "@/lib/webphone-api/acl/adapters/call.adapter";
 import { bootDeviceAdapter } from "@/lib/webphone-api/acl/adapters/device.adapter";
 import { bootNotificationsAdapter } from "@/lib/webphone-api/acl/adapters/notifications.adapter";
 import { bootSettingsAdapter } from "@/lib/webphone-api/acl/adapters/settings.adapter";
@@ -21,8 +22,6 @@ type BootConfig = {
  * registers its event listeners, request handlers, and query getters here.
  * Once all adapters are wired, `acl.ready` fires so the public facade can
  * resolve `webphoneAPIPromise`.
- *
- * Adapters are added incrementally as slices migrate.
  */
 let cachedTeardown: (() => void) | null = null;
 
@@ -41,6 +40,7 @@ export function bootACL({ wavoip, root, config, themeStorageKey }: BootConfig): 
     bootSettingsAdapter(config),
     bootNotificationsAdapter(),
     bootDeviceAdapter(wavoip),
+    bootCallAdapter({ wavoip, callSettings: config.callSettings }),
   );
 
   bus.emit("acl.ready", undefined);

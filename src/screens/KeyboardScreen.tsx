@@ -1,5 +1,5 @@
 import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import SoundDTMF0 from "@/assets/sounds/dtmf-0.mp3";
 import SoundDTMF1 from "@/assets/sounds/dtmf-1.mp3";
@@ -15,7 +15,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { bus } from "@/lib/webphone-api/bus";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -147,11 +147,9 @@ export default function KeyboardScreen() {
     });
   };
 
-  mergeToAPI({
-    call: {
-      setInput: (number) => setNumber(number),
-    },
-  });
+  useEffect(() => {
+    return bus.on("call.input.changed", (value) => setNumber(value));
+  }, []);
 
   return (
     <form

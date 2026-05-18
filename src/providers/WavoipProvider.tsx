@@ -1,10 +1,14 @@
-import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { type CallStatus, useCallManager } from "@/hooks/useCallManager";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import React, { createContext, type ReactNode, useContext, useEffect } from "react";
 import { bus } from "@/lib/webphone-api/bus";
+import type { CallStatus } from "@/lib/webphone-api/events";
 import { useBusState } from "@/lib/webphone-api/hooks/useBusState";
 import type { CallActive, CallOutgoing, DeviceState, Offer, Wavoip } from "@/lib/webphone-api/sdk-types";
-import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
+
+type StartCallResult =
+  | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
+  | { call: { id: string; peer: CallActive["peer"] }; err: null };
+
+type StartCall = (to: string, config?: { fromTokens?: string[]; displayName?: string }) => Promise<StartCallResult>;
 
 interface WavoipContextProps {
   wavoip: Wavoip;
@@ -18,7 +22,7 @@ interface WavoipContextProps {
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;
-  startCall: ReturnType<typeof useCallManager>["start"];
+  startCall: StartCall;
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
@@ -30,6 +34,11 @@ interface WavoipProviderProps {
 
 export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
   const devices = useBusState("device.list", "device.list.changed");
+  const offers = useBusState("call.offers", "offer.list.changed");
+  const callOutgoing = useBusState("call.outgoing", "call.outgoing.changed");
+  const callActive = useBusState("call.active", "call.active.changed");
+  const callStatus = useBusState("call.status", "call.status.changed");
+  const peerMuted = useBusState("call.peerMuted", "call.peer.muted.changed");
 
   const addDevice = (token: string, persist?: boolean) => {
     void bus.request("device.add", { token, persist });
@@ -44,54 +53,14 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     void bus.request("device.disable", { token });
   };
 
-  const [onOffer, setOnOffer] = useState<(offer: CallOfferProps) => void>(() => () => {});
-
-  const {
-    offers,
-    outgoing: callOutgoing,
-    active: callActive,
-    start: startCall,
-    callStatus,
-    peerMuted,
-  } = useCallManager({ wavoip, devices, onOffer });
+  const startCall: StartCall = (to, config = {}) =>
+    bus.request("call.start", { to, fromTokens: config.fromTokens, displayName: config.displayName });
 
   useEffect(() => {
     return () => {
       delete window.wavoip;
     };
   }, []);
-
-  useEffect(() => {
-    mergeToAPI({
-      call: {
-        start: (...args) => startCall(...args),
-        startCall: (to, fromTokens) => startCall(to, fromTokens ? { fromTokens } : {}), // Deprecated
-        getCallActive: () => {
-          if (!callActive) return undefined;
-          const { id, type, status, device_token, direction, peer } = callActive;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getCallOutgoing: () => {
-          if (!callOutgoing) return undefined;
-          const { id, type, status, device_token, direction, peer } = callOutgoing;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getOffers: () => {
-          return offers.map(({ id, type, status, device_token, direction, peer }) => ({
-            id,
-            type,
-            status,
-            device_token,
-            direction,
-            peer,
-          }));
-        },
-        onOffer: (cb) => {
-          setOnOffer(() => cb);
-        },
-      },
-    });
-  }, [startCall, offers, callOutgoing, callActive]);
 
   return (
     <WavoipContext.Provider

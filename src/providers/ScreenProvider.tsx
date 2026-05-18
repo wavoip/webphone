@@ -1,16 +1,15 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
-
-type Screen = "call" | "keyboard" | "outgoing" | "incoming";
+import type { ACLScreen } from "@/lib/webphone-api/events";
 
 type ScreenContextType = {
-  screen: Screen;
-  setScreen: (s: Screen) => void;
+  screen: ACLScreen;
+  setScreen: (s: ACLScreen) => void;
 };
 
 const ScreenContext = createContext<ScreenContextType | undefined>(undefined);
 
 export function ScreenProvider({ children }: { children: ReactNode }) {
-  const [screen, setScreen] = useState<Screen>("keyboard");
+  const [screen, setScreen] = useState<ACLScreen>("keyboard");
 
   return <ScreenContext.Provider value={{ screen, setScreen }}>{children}</ScreenContext.Provider>;
 }

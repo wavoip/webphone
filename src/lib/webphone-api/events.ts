@@ -1,22 +1,32 @@
-import type { CallStatus } from "@/hooks/useCallManager";
-import type { Device, DeviceState } from "@/lib/webphone-api/sdk-types";
-import type { CallActiveProps, CallOfferProps, CallOutgoingProps } from "@/lib/webphone-api/WebphoneAPI";
+import type { CallActive, CallOutgoing, Device, DeviceState, Offer } from "@/lib/webphone-api/sdk-types";
+import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
 export type ACLScreen = "call" | "keyboard" | "outgoing" | "incoming";
 
+export type CallStatus =
+  | "idle"
+  | "calling"
+  | "ringing"
+  | "active"
+  | "reconnecting"
+  | "ended"
+  | "failed"
+  | "rejected"
+  | "unanswered";
+
 export type EventMap = {
   "acl.ready": void;
 
-  "call.active.changed": CallActiveProps | undefined;
-  "call.outgoing.changed": CallOutgoingProps | undefined;
+  "call.active.changed": CallActive | undefined;
+  "call.outgoing.changed": CallOutgoing | undefined;
   "call.status.changed": CallStatus;
   "call.peer.muted.changed": boolean;
   "call.input.changed": string;
 
   "offer.received": CallOfferProps;
-  "offer.list.changed": CallOfferProps[];
+  "offer.list.changed": Offer[];
   "offer.ended": { id: string };
 
   "device.list.changed": DeviceState[];
@@ -50,8 +60,6 @@ export type EventMap = {
   "fx.unloadConfirm.enable": void;
   "fx.unloadConfirm.disable": void;
   "fx.screen.set": ACLScreen;
-  "fx.widget.open": void;
-  "fx.widget.restore": { isClosed: boolean };
 };
 
 export type EventType = keyof EventMap;
@@ -62,13 +70,11 @@ export type RequestMap = {
     payload: { to: string; fromTokens?: string[]; displayName?: string };
     result:
       | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
-      | { call: { id: string; peer: CallActiveProps["peer"] }; err: null };
+      | { call: { id: string; peer: CallActive["peer"] }; err: null };
   };
   "offer.accept": {
     payload: { id: string };
-    result:
-      | { call: null; err: { message: string } }
-      | { call: { id: string; peer: CallActiveProps["peer"] }; err: null };
+    result: { call: null; err: { message: string } } | { call: { id: string; peer: CallActive["peer"] }; err: null };
   };
   "offer.reject": {
     payload: { id: string };
@@ -124,11 +130,11 @@ export type RequestPayload<T extends RequestType> = RequestMap[T]["payload"];
 export type RequestResult<T extends RequestType> = RequestMap[T]["result"];
 
 export type QueryMap = {
-  "call.active": CallActiveProps | undefined;
-  "call.outgoing": CallOutgoingProps | undefined;
+  "call.active": CallActive | undefined;
+  "call.outgoing": CallOutgoing | undefined;
   "call.status": CallStatus;
   "call.peerMuted": boolean;
-  "call.offers": CallOfferProps[];
+  "call.offers": Offer[];
   "device.list": DeviceState[];
   "notifications.list": NotificationsType[];
   "widget.isOpen": boolean;

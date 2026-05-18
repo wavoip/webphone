@@ -2,6 +2,7 @@ import { useState } from "react";
 import { WebPhone } from "@/components/WebPhone";
 import { getSettings } from "@/lib/device-settings";
 import { bootACL } from "@/lib/webphone-api/acl/boot";
+import { useACLEffectsBridge } from "@/lib/webphone-api/hooks/useACLEffectsBridge";
 import { Wavoip } from "@/lib/webphone-api/sdk-types";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
@@ -15,6 +16,11 @@ type Props = {
   root: HTMLDivElement;
   config: WebphoneSettings;
 };
+
+function ACLEffectsBridge() {
+  useACLEffectsBridge();
+  return null;
+}
 
 export function App({ shadowRoot, root, config }: Props) {
   const [wavoip] = useState(() => {
@@ -33,6 +39,7 @@ export function App({ shadowRoot, root, config }: Props) {
       <SettingsProvider config={config}>
         <WidgetProvider>
           <ScreenProvider>
+            <ACLEffectsBridge />
             <WavoipProvider wavoip={wavoip}>
               <WebPhone />
             </WavoipProvider>
