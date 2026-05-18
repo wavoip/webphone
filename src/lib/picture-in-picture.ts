@@ -183,7 +183,7 @@ export function drawSoundwave(
     const avg = sum / step;
 
     // log scaling
-    const log = Math.pow(avg / 255, 0.6);
+    const log = (avg / 255) ** 0.6;
     const targetHeight = Math.max(log * height, 3);
 
     // easing

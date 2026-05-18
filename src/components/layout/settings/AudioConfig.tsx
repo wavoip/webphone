@@ -27,7 +27,7 @@ export function AudioConfig() {
               </SelectTrigger>
               <SelectContent>
                 {microphones.map((device, index) => (
-                  <SelectItem value={device.deviceId} key={`microphone_${index}`}>
+                  <SelectItem value={device.deviceId} key={`microphone_${device.deviceId || index}`}>
                     {device.label}
                   </SelectItem>
                 ))}
@@ -44,7 +44,7 @@ export function AudioConfig() {
               </SelectTrigger>
               <SelectContent>
                 {speakers.map((device, index) => (
-                  <SelectItem value={device.deviceId} key={`speaker_${index}`}>
+                  <SelectItem value={device.deviceId} key={`speaker_${device.deviceId || index}`}>
                     {device.label}
                   </SelectItem>
                 ))}
