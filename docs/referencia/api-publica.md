@@ -69,9 +69,21 @@ console.log("call id:", call.id);
 | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
 ```
 
-### `startCall(to, fromTokens)`
+### ~~`startCall(to, fromTokens)`~~ (depreciado)
 
-Versão posicional de `start`. Equivalente a `start(to, { fromTokens })`.
+{% hint style="warning" %}
+**Depreciado.** Use [`call.start(to, { fromTokens })`](#start-to-config) no lugar. `startCall` será removido em uma versão major futura e emite `console.warn` ao ser chamado.
+{% endhint %}
+
+Versão posicional de `start`, mantida apenas para compatibilidade retroativa. Equivalente a `start(to, { fromTokens })`.
+
+```ts
+// ❌ Depreciado
+await window.wavoip.call.startCall("5511999999999", ["token-a"]);
+
+// ✅ Use no lugar
+await window.wavoip.call.start("5511999999999", { fromTokens: ["token-a"] });
+```
 
 ### `getCallActive()`
 
@@ -112,15 +124,15 @@ window.wavoip.call.onOffer((offer) => {
 
 ## `device`
 
-Gerencia os dispositivos Wavoip cadastrados no navegador. Cada método possui um alias curto.
+Gerencia os dispositivos Wavoip cadastrados no navegador.
 
-| Método | Alias | Descrição |
-| --- | --- | --- |
-| `getDevices()` | `get()` | Retorna o array de dispositivos cadastrados. |
-| `addDevice(token, persist)` | `add(token, persist)` | Cadastra um dispositivo pelo token. Quando `persist` é `true`, grava em `localStorage`. |
-| `removeDevice(token)` | `remove(token)` | Remove o dispositivo. |
-| `enableDevice(token)` | `enable(token)` | Habilita o dispositivo para originar/receber chamadas. |
-| `disableDevice(token)` | `disable(token)` | Desabilita o dispositivo. |
+| Método | Descrição |
+| --- | --- |
+| `get()` | Retorna o array de dispositivos cadastrados. |
+| `add(token, persist)` | Cadastra um dispositivo pelo token. Quando `persist` é `true`, grava em `localStorage`. |
+| `remove(token)` | Remove o dispositivo. |
+| `enable(token)` | Habilita o dispositivo para originar/receber chamadas. |
+| `disable(token)` | Desabilita o dispositivo. |
 
 ```ts
 window.wavoip.device.add("token-abc", true);
@@ -129,17 +141,41 @@ window.wavoip.device.enable("token-abc");
 const devices = window.wavoip.device.get();
 ```
 
+{% hint style="warning" %}
+**Métodos depreciados.** As versões verbosas abaixo ainda funcionam, mas emitem `console.warn` e serão removidas em uma versão major futura. Prefira os aliases curtos.
+
+| Depreciado | Use no lugar |
+| --- | --- |
+| `getDevices()` | `get()` |
+| `addDevice(token, persist)` | `add(token, persist)` |
+| `removeDevice(token)` | `remove(token)` |
+| `enableDevice(token)` | `enable(token)` |
+| `disableDevice(token)` | `disable(token)` |
+{% endhint %}
+
 ## `notifications`
 
 Fila de notificações exibidas na barra superior.
 
-| Método | Alias | Descrição |
-| --- | --- | --- |
-| `getNotifications()` | `get()` | Lista as notificações atuais. |
-| `addNotification(n)` | `add(n)` | Adiciona uma notificação. |
-| `removeNotification(id)` | `remove(id)` | Remove pelo `id` (`Date`). |
-| `clearNotifications()` | `clear()` | Esvazia a lista. |
-| `readNotifications()` | `read()` | Marca todas como lidas. |
+| Método | Descrição |
+| --- | --- |
+| `get()` | Lista as notificações atuais. |
+| `add(n)` | Adiciona uma notificação. |
+| `remove(id)` | Remove pelo `id` (`Date`). |
+| `clear()` | Esvazia a lista. |
+| `read()` | Marca todas como lidas. |
+
+{% hint style="warning" %}
+**Métodos depreciados.** As versões verbosas abaixo ainda funcionam, mas emitem `console.warn` e serão removidas em uma versão major futura. Prefira os aliases curtos.
+
+| Depreciado | Use no lugar |
+| --- | --- |
+| `getNotifications()` | `get()` |
+| `addNotification(n)` | `add(n)` |
+| `removeNotification(id)` | `remove(id)` |
+| `clearNotifications()` | `clear()` |
+| `readNotifications()` | `read()` |
+{% endhint %}
 
 ## `widget`
 
@@ -174,7 +210,11 @@ window.wavoip.theme.set("system");
 | Campo | Tipo | Descrição |
 | --- | --- | --- |
 | `value` | `"dark" \| "light" \| "system"` | Tema atual. |
-| `set(theme)` / `setTheme(theme)` | `(Theme) => void` | Troca o tema. |
+| `set(theme)` | `(Theme) => void` | Troca o tema. |
+
+{% hint style="warning" %}
+**`setTheme(theme)` está depreciado.** Ainda funciona, mas emite `console.warn` e será removido em uma versão major futura. Use `set(theme)` no lugar.
+{% endhint %}
 
 ## `position`
 

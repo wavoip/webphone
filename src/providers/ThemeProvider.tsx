@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { mergeToAPI, warnDeprecated } from "@/lib/webphone-api/api";
 import type { Theme } from "@/providers/settings/settings";
 
 type ThemeProviderProps = {
@@ -54,9 +54,13 @@ export function ThemeProvider({
   useEffect(() => {
     mergeToAPI({
       theme: {
-        setTheme: (...args) => handleSetTheme(...args),
         value: theme,
         set: (...args) => handleSetTheme(...args),
+        // @deprecated Prefer `theme.set`.
+        setTheme: (...args) => {
+          warnDeprecated("theme.setTheme", "theme.set");
+          return handleSetTheme(...args);
+        },
       },
     });
   }, [theme, handleSetTheme]);

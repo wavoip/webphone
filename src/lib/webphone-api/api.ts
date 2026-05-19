@@ -5,6 +5,20 @@ const { promise: webphoneAPIPromise, resolve } = Promise.withResolvers<WebphoneA
 
 let apiAggregator: WebphoneAPIPartial = {};
 
+const warnedDeprecated = new Set<string>();
+
+/**
+ * Emits a console.warn the first time a deprecated public API method is invoked.
+ * Subsequent calls for the same method are silent to avoid log spam.
+ */
+export function warnDeprecated(method: string, replacement: string): void {
+  if (warnedDeprecated.has(method)) return;
+  warnedDeprecated.add(method);
+  console.warn(
+    `[wavoip-webphone] \`${method}\` is deprecated and will be removed in a future major release. Use \`${replacement}\` instead.`,
+  );
+}
+
 const APIProxy: WebphoneAPI = {
   call: {
     start: (...args) =>

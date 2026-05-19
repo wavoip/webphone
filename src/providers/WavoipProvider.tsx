@@ -2,7 +2,7 @@ import type { CallActive, CallOutgoing, Device, Offer, Wavoip } from "@wavoip/wa
 import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 import { type CallStatus, useCallManager } from "@/hooks/useCallManager";
 import { useDeviceManager } from "@/hooks/useDeviceManager";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { mergeToAPI, warnDeprecated } from "@/lib/webphone-api/api";
 import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
 
 interface WavoipContextProps {
@@ -57,7 +57,11 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
     mergeToAPI({
       call: {
         start: (...args) => startCall(...args),
-        startCall: (to, fromTokens) => startCall(to, fromTokens ? { fromTokens } : {}), // Deprecated
+        // @deprecated Kept for backward compatibility. Prefer `call.start(to, { fromTokens })`.
+        startCall: (to, fromTokens) => {
+          warnDeprecated("call.startCall", "call.start(to, { fromTokens })");
+          return startCall(to, fromTokens ? { fromTokens } : {});
+        },
         getCallActive: () => {
           if (!callActive) return undefined;
           const { id, type, status, device_token, direction, peer } = callActive;
@@ -83,20 +87,36 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
         },
       },
       device: {
-        getDevices: () => {
-          return devices;
-        },
-        get: () => {
-          return devices;
-        },
-        addDevice: (...args) => addDevice(...args),
+        get: () => devices,
         add: (...args) => addDevice(...args),
-        removeDevice: (...args) => removeDevice(...args),
         remove: (...args) => removeDevice(...args),
-        enableDevice: (...args) => enableDevice(...args),
         enable: (...args) => enableDevice(...args),
-        disableDevice: (...args) => disableDevice(...args),
         disable: (...args) => disableDevice(...args),
+        // @deprecated Prefer `device.get`.
+        getDevices: () => {
+          warnDeprecated("device.getDevices", "device.get");
+          return devices;
+        },
+        // @deprecated Prefer `device.add`.
+        addDevice: (...args) => {
+          warnDeprecated("device.addDevice", "device.add");
+          return addDevice(...args);
+        },
+        // @deprecated Prefer `device.remove`.
+        removeDevice: (...args) => {
+          warnDeprecated("device.removeDevice", "device.remove");
+          return removeDevice(...args);
+        },
+        // @deprecated Prefer `device.enable`.
+        enableDevice: (...args) => {
+          warnDeprecated("device.enableDevice", "device.enable");
+          return enableDevice(...args);
+        },
+        // @deprecated Prefer `device.disable`.
+        disableDevice: (...args) => {
+          warnDeprecated("device.disableDevice", "device.disable");
+          return disableDevice(...args);
+        },
       },
     });
   }, [devices, disableDevice, enableDevice, removeDevice, addDevice, startCall, offers, callOutgoing, callActive]);
