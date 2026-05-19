@@ -42,7 +42,7 @@ describe("beforeUnloadEffect", () => {
     store.getState().setCallStatus("ringing");
     store.getState().setCallStatus("active");
 
-    const addCalls = addSpy.mock.calls.filter((c) => c[0] === "beforeunload").length;
+    const addCalls = addSpy.mock.calls.filter((c: unknown[]) => c[0] === "beforeunload").length;
     expect(addCalls).toBe(1);
     unsub();
   });
