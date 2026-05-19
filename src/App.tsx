@@ -1,7 +1,4 @@
-import { Wavoip } from "@wavoip/wavoip-api";
-import { useState } from "react";
 import { WebPhone } from "@/components/WebPhone";
-import { getSettings } from "@/lib/device-settings";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
@@ -74,8 +71,6 @@ type Props = {
 // }
 
 export function App({ shadowRoot, root, config }: Props) {
-  const [wavoip] = useState(() => new Wavoip({ tokens: [...getSettings().keys()], platform: config.platform }));
-
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
@@ -83,7 +78,7 @@ export function App({ shadowRoot, root, config }: Props) {
           <WidgetProvider>
             <NotificationsProvider>
               <ScreenProvider>
-                <WavoipProvider wavoip={wavoip}>
+                <WavoipProvider>
                   <WebPhone />
                 </WavoipProvider>
               </ScreenProvider>

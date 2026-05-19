@@ -37,6 +37,12 @@ export class DeviceController {
     this.deps.store.getState().setDeviceEnable(token, false);
   }
 
+  async wakeUp(token: string): Promise<boolean> {
+    const device = this.deps.wavoip.getDevices().find((d) => d.token === token);
+    if (!device) return false;
+    return device.wakeUp();
+  }
+
   private bindEvents(device: Device): void {
     const { store } = this.deps;
     device.on("qrCodeChanged", (qrCode) => store.getState().updateDeviceState(device.token, { qrCode }));
