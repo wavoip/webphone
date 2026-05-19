@@ -18,6 +18,15 @@ export type CallAPI = {
     | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
     | { call: { id: string; peer: CallPeer }; err: null }
   >;
+  /**
+   * @deprecated Use {@link CallAPI.start} instead. `startCall` will be removed in a future major release.
+   *
+   * @example
+   * // Before
+   * window.wavoip.call.startCall("5511999999999", ["token-a"]);
+   * // After
+   * window.wavoip.call.start("5511999999999", { fromTokens: ["token-a"] });
+   */
   startCall: (
     to: string,
     fromTokens: string[] | null,
@@ -33,29 +42,39 @@ export type CallAPI = {
 };
 
 export type DeviceAPI = {
-  getDevices: () => DeviceState[];
   get: () => DeviceState[];
-  addDevice: (token: string, persist: boolean) => void;
   add: (token: string, persist: boolean) => void;
-  removeDevice: (token: string) => void;
   remove: (token: string) => void;
-  enableDevice: (token: string) => void;
   enable: (token: string) => void;
-  disableDevice: (token: string) => void;
   disable: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.get} instead. */
+  getDevices: () => DeviceState[];
+  /** @deprecated Use {@link DeviceAPI.add} instead. */
+  addDevice: (token: string, persist: boolean) => void;
+  /** @deprecated Use {@link DeviceAPI.remove} instead. */
+  removeDevice: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.enable} instead. */
+  enableDevice: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.disable} instead. */
+  disableDevice: (token: string) => void;
 };
 
 export type NotificationsAPI = {
-  getNotifications: () => NotificationsType[];
   get: () => NotificationsType[];
-  addNotification: (notification: NotificationsType) => void;
   add: (notification: NotificationsType) => void;
-  removeNotification: (id: Date) => void;
   remove: (id: Date) => void;
-  clearNotifications: () => void;
   clear: () => void;
-  readNotifications: () => void;
   read: () => void;
+  /** @deprecated Use {@link NotificationsAPI.get} instead. */
+  getNotifications: () => NotificationsType[];
+  /** @deprecated Use {@link NotificationsAPI.add} instead. */
+  addNotification: (notification: NotificationsType) => void;
+  /** @deprecated Use {@link NotificationsAPI.remove} instead. */
+  removeNotification: (id: Date) => void;
+  /** @deprecated Use {@link NotificationsAPI.clear} instead. */
+  clearNotifications: () => void;
+  /** @deprecated Use {@link NotificationsAPI.read} instead. */
+  readNotifications: () => void;
 };
 
 export type WidgetAPI = {
@@ -72,6 +91,7 @@ export type WidgetAPI = {
 export type ThemeAPI = {
   value: Theme;
   set: (theme: Theme) => void;
+  /** @deprecated Use {@link ThemeAPI.set} instead. */
   setTheme: (theme: Theme) => void;
 };
 

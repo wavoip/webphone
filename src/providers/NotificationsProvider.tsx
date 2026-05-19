@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { mergeToAPI, warnDeprecated } from "@/lib/webphone-api/api";
 
 export type NotificationsType = {
   id: Date;
@@ -93,16 +93,36 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     mergeToAPI({
       notifications: {
-        getNotifications: () => getNotifications(),
         get: () => getNotifications(),
-        clearNotifications: () => clearNotifications(),
         clear: () => clearNotifications(),
-        addNotification: (...args) => addNotification(...args),
         add: (...args) => addNotification(...args),
-        removeNotification: (...args) => removeNotification(...args),
         remove: (...args) => removeNotification(...args),
-        readNotifications: () => readNotifications(),
         read: () => readNotifications(),
+        // @deprecated Prefer `notifications.get`.
+        getNotifications: () => {
+          warnDeprecated("notifications.getNotifications", "notifications.get");
+          return getNotifications();
+        },
+        // @deprecated Prefer `notifications.clear`.
+        clearNotifications: () => {
+          warnDeprecated("notifications.clearNotifications", "notifications.clear");
+          return clearNotifications();
+        },
+        // @deprecated Prefer `notifications.add`.
+        addNotification: (...args) => {
+          warnDeprecated("notifications.addNotification", "notifications.add");
+          return addNotification(...args);
+        },
+        // @deprecated Prefer `notifications.remove`.
+        removeNotification: (...args) => {
+          warnDeprecated("notifications.removeNotification", "notifications.remove");
+          return removeNotification(...args);
+        },
+        // @deprecated Prefer `notifications.read`.
+        readNotifications: () => {
+          warnDeprecated("notifications.readNotifications", "notifications.read");
+          return readNotifications();
+        },
       },
     });
   }, [readNotifications, removeNotification, getNotifications, clearNotifications, addNotification]);
