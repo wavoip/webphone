@@ -43,13 +43,15 @@ export class FakeOffer extends FakeEmitter<OfferEvents> implements Offer {
   status = "RINGING" as const;
   acceptResult: { call: CallActive | null; err: string | null } = { call: null, err: "not-set" };
   rejectResult: { err: string | null } = { err: null };
+  readonly id: string;
+  readonly device_token: string;
+  peer: CallPeer;
 
-  constructor(
-    public id: string,
-    public device_token: string,
-    public peer: CallPeer = makePeer(),
-  ) {
+  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
+    this.id = id;
+    this.device_token = device_token;
+    this.peer = peer;
   }
 
   accept = async () => this.acceptResult as { call: CallActive; err: null } | { call: null; err: string };
@@ -65,13 +67,15 @@ export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
   status = "CALLING" as const;
+  readonly id: string;
+  readonly device_token: string;
+  peer: CallPeer;
 
-  constructor(
-    public id: string,
-    public device_token: string,
-    public peer: CallPeer = makePeer(),
-  ) {
+  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
+    this.id = id;
+    this.device_token = device_token;
+    this.peer = peer;
   }
 
   mute = async () => ({ err: null });
@@ -90,13 +94,15 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
   status = "ACTIVE" as const;
   connection_status = "connected" as const;
   audio_analyser = Promise.resolve({} as AnalyserNode);
+  readonly id: string;
+  readonly device_token: string;
+  peer: CallPeer;
 
-  constructor(
-    public id: string,
-    public device_token: string,
-    public peer: CallPeer = makePeer(),
-  ) {
+  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
+    this.id = id;
+    this.device_token = device_token;
+    this.peer = peer;
   }
 
   mute = async () => ({ err: null });
@@ -115,9 +121,11 @@ export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
   qrCode?: string;
   contact?: Contact;
   status: DeviceStatus = "disconnected";
+  readonly token: string;
 
-  constructor(public readonly token: string) {
+  constructor(token: string) {
     super();
+    this.token = token;
   }
 
   restart = async () => {};
@@ -133,8 +141,10 @@ type WavoipEvents = { offer: [Offer] };
 
 export class FakeWavoip extends FakeEmitter<WavoipEvents> {
   private _devices: FakeDevice[] = [];
-  startCallResult: { call: CallOutgoing | null; err: { message: string; devices: { token: string; reason: string }[] } | null } =
-    { call: null, err: { message: "not-set", devices: [] } };
+  startCallResult: {
+    call: CallOutgoing | null;
+    err: { message: string; devices: { token: string; reason: string }[] } | null;
+  } = { call: null, err: { message: "not-set", devices: [] } };
   startCallCalls: { fromTokens?: string[]; to: string }[] = [];
 
   constructor(initialTokens: string[] = []) {
