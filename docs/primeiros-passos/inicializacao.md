@@ -5,38 +5,7 @@ icon: rocket
 
 # Inicializando o Webphone
 
-O webphone é distribuído como o pacote npm [`@wavoip/wavoip-webphone`](https://www.npmjs.com/package/@wavoip/wavoip-webphone) e expõe um objeto único com o método `render()`, que monta o componente em um Shadow DOM anexado ao `document.body`.
-
-## Instalação
-
-{% tabs %}
-{% tab title="pnpm" %}
-```bash
-pnpm add @wavoip/wavoip-webphone
-```
-{% endtab %}
-
-{% tab title="npm" %}
-```bash
-npm install @wavoip/wavoip-webphone
-```
-{% endtab %}
-
-{% tab title="yarn" %}
-```bash
-yarn add @wavoip/wavoip-webphone
-```
-{% endtab %}
-
-{% tab title="CDN" %}
-```html
-<script type="module">
-  import webphone from "https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone/dist/index.es.js";
-  await webphone.render();
-</script>
-```
-{% endtab %}
-{% endtabs %}
+O webphone expõe um objeto único com o método `render()`, que monta o componente em um Shadow DOM anexado ao `document.body`. Para instalar o pacote, veja [Instalação](instalacao.md).
 
 ## Bootstrap mínimo
 

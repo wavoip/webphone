@@ -4,6 +4,7 @@
 
 ## Primeiros passos
 
+* [Instalação](primeiros-passos/instalacao.md)
 * [Inicializando o Webphone](primeiros-passos/inicializacao.md)
 
 ## Referência

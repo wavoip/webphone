@@ -24,6 +24,10 @@ O webphone é renderizado dentro de um Shadow DOM, portanto não sofre interfer�
   </thead>
   <tbody>
     <tr>
+      <td>Instalação</td>
+      <td><a href="primeiros-passos/instalacao.md">Instalação</a></td>
+    </tr>
+    <tr>
       <td>Inicializando o Webphone</td>
       <td><a href="primeiros-passos/inicializacao.md">Bootstrap</a></td>
     </tr>
