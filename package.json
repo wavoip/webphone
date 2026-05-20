@@ -25,7 +25,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "pnpm exec biome check .",
+    "lint": "pnpm exec biome check . --fix",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

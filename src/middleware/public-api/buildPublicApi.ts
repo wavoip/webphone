@@ -1,11 +1,6 @@
 import type { CallActive, CallOutgoing, Offer } from "@wavoip/wavoip-api";
 import { warnDeprecated } from "@/lib/webphone-api/api";
-import type {
-  CallActiveProps,
-  CallOfferProps,
-  CallOutgoingProps,
-  WebphoneAPI,
-} from "@/lib/webphone-api/WebphoneAPI";
+import type { CallActiveProps, CallOfferProps, CallOutgoingProps, WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import type { Middleware } from "@/middleware/Middleware";
 

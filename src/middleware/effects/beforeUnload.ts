@@ -1,5 +1,5 @@
-import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
+import type { CallStatus } from "@/middleware/store/slices/callSlice";
 
 type Deps = { store: MiddlewareStoreApi };
 export type Unsubscribe = () => void;

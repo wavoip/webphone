@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("buildPublicApi", () => {

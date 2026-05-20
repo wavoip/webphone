@@ -31,10 +31,8 @@ export type NotificationsSlice = NotificationsSliceState & NotificationsSliceAct
 export const createNotificationsSlice: StateCreator<MiddlewareStore, [], [], NotificationsSlice> = (set) => ({
   notifications: [],
   setNotifications: (notifications) => set({ notifications }),
-  addNotification: (notification) =>
-    set((state) => ({ notifications: [notification, ...state.notifications] })),
-  removeNotification: (id) =>
-    set((state) => ({ notifications: state.notifications.filter((n) => n.id !== id) })),
+  addNotification: (notification) => set((state) => ({ notifications: [notification, ...state.notifications] })),
+  removeNotification: (id) => set((state) => ({ notifications: state.notifications.filter((n) => n.id !== id) })),
   clearNotifications: () => set({ notifications: [] }),
   markAllNotificationsRead: () =>
     set((state) => ({

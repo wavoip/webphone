@@ -26,11 +26,7 @@ export type DeviceSliceActions = {
 
 export type DeviceSlice = DeviceSliceState & DeviceSliceActions;
 
-function patchDevice(
-  devices: DeviceStateEntry[],
-  token: string,
-  patch: Partial<DeviceStateEntry>,
-): DeviceStateEntry[] {
+function patchDevice(devices: DeviceStateEntry[], token: string, patch: Partial<DeviceStateEntry>): DeviceStateEntry[] {
   return devices.map((d) => (d.token === token ? { ...d, ...patch } : d));
 }
 
@@ -43,12 +39,8 @@ export const createDeviceSlice: StateCreator<MiddlewareStore, [], [], DeviceSlic
       if (exists) return { devices: patchDevice(state.devices, device.token, device) };
       return { devices: [...state.devices, device] };
     }),
-  removeDeviceState: (token) =>
-    set((state) => ({ devices: state.devices.filter((d) => d.token !== token) })),
-  updateDeviceState: (token, patch) =>
-    set((state) => ({ devices: patchDevice(state.devices, token, patch) })),
-  setDeviceEnable: (token, enable) =>
-    set((state) => ({ devices: patchDevice(state.devices, token, { enable }) })),
-  setDevicePersist: (token, persist) =>
-    set((state) => ({ devices: patchDevice(state.devices, token, { persist }) })),
+  removeDeviceState: (token) => set((state) => ({ devices: state.devices.filter((d) => d.token !== token) })),
+  updateDeviceState: (token, patch) => set((state) => ({ devices: patchDevice(state.devices, token, patch) })),
+  setDeviceEnable: (token, enable) => set((state) => ({ devices: patchDevice(state.devices, token, { enable }) })),
+  setDevicePersist: (token, persist) => set((state) => ({ devices: patchDevice(state.devices, token, { persist }) })),
 });

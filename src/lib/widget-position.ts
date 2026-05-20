@@ -26,15 +26,24 @@ export function resolveWebphonePosition(
   const endX = window.innerWidth - MARGIN_WIDGET - widgetSize.width;
 
   switch (position) {
-    case "top": return { x: middleX, y: MARGIN_WIDGET };
-    case "bottom": return { x: middleX, y: bottomY < 0 ? 0 : bottomY };
-    case "left": return { x: MARGIN_WIDGET, y: middleY };
-    case "right": return { x: endX, y: middleY };
-    case "center": return { x: middleX, y: middleY };
-    case "top-left": return { x: MARGIN_WIDGET, y: MARGIN_WIDGET };
-    case "top-right": return { x: endX, y: MARGIN_WIDGET };
-    case "bottom-left": return { x: MARGIN_WIDGET, y: bottomY < 0 ? 0 : bottomY };
-    case "bottom-right": return { x: endX, y: bottomY < 0 ? 0 : bottomY };
+    case "top":
+      return { x: middleX, y: MARGIN_WIDGET };
+    case "bottom":
+      return { x: middleX, y: bottomY < 0 ? 0 : bottomY };
+    case "left":
+      return { x: MARGIN_WIDGET, y: middleY };
+    case "right":
+      return { x: endX, y: middleY };
+    case "center":
+      return { x: middleX, y: middleY };
+    case "top-left":
+      return { x: MARGIN_WIDGET, y: MARGIN_WIDGET };
+    case "top-right":
+      return { x: endX, y: MARGIN_WIDGET };
+    case "bottom-left":
+      return { x: MARGIN_WIDGET, y: bottomY < 0 ? 0 : bottomY };
+    case "bottom-right":
+      return { x: endX, y: bottomY < 0 ? 0 : bottomY };
     default: {
       throw new Error(`Invalid WebphonePosition: ${JSON.stringify(position)}`);
     }
@@ -53,10 +62,14 @@ export function resolveWidgetButtonPosition(position: WidgetButtonPosition): { x
   const endY = window.innerHeight - MARGIN_BUTTON - BUTTON_SIZE.height;
 
   switch (position) {
-    case "top-right": return { x: endX, y: MARGIN_BUTTON };
-    case "top-left": return { x: MARGIN_BUTTON, y: MARGIN_BUTTON };
-    case "bottom-left": return { x: MARGIN_BUTTON, y: endY < 0 ? 0 : endY };
-    case "bottom-right": return { x: endX, y: endY < 0 ? 0 : endY };
+    case "top-right":
+      return { x: endX, y: MARGIN_BUTTON };
+    case "top-left":
+      return { x: MARGIN_BUTTON, y: MARGIN_BUTTON };
+    case "bottom-left":
+      return { x: MARGIN_BUTTON, y: endY < 0 ? 0 : endY };
+    case "bottom-right":
+      return { x: endX, y: endY < 0 ? 0 : endY };
     default: {
       throw new Error(`Invalid WidgetButtonPosition: ${JSON.stringify(position)}`);
     }

@@ -24,8 +24,7 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip }: Props) {
   const settings = useSettings();
 
   const [middleware] = useState(() => {
-    const wavoip =
-      injectedWavoip ?? new WavoipCtor({ tokens: [...getSettings().keys()], platform: settings.platform });
+    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: [...getSettings().keys()], platform: settings.platform });
     const mw = new Middleware({
       wavoip,
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),

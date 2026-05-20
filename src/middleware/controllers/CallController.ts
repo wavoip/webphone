@@ -97,6 +97,9 @@ export class CallController {
   }
 
   private enabledTokens(): string[] {
-    return this.deps.store.getState().devices.filter((d) => d.enable).map((d) => d.token);
+    return this.deps.store
+      .getState()
+      .devices.filter((d) => d.enable)
+      .map((d) => d.token);
   }
 }

@@ -1,8 +1,8 @@
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import type { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
-import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
+import type { CallStatus } from "@/middleware/store/slices/callSlice";
 
 type Deps = { store: MiddlewareStoreApi; events: EventBus<WebphoneEventMap> };
 export type Unsubscribe = () => void;
@@ -25,10 +25,7 @@ export function callLifecycleEventsEffect({ store, events }: Deps): Unsubscribe 
   };
 }
 
-function subscribeStartedFromOutgoing(
-  store: MiddlewareStoreApi,
-  events: EventBus<WebphoneEventMap>,
-): Unsubscribe {
+function subscribeStartedFromOutgoing(store: MiddlewareStoreApi, events: EventBus<WebphoneEventMap>): Unsubscribe {
   return store.subscribe(
     (s) => s.outgoing,
     (current, previous) => {
@@ -39,10 +36,7 @@ function subscribeStartedFromOutgoing(
   );
 }
 
-function subscribeAcceptedFromActive(
-  store: MiddlewareStoreApi,
-  events: EventBus<WebphoneEventMap>,
-): Unsubscribe {
+function subscribeAcceptedFromActive(store: MiddlewareStoreApi, events: EventBus<WebphoneEventMap>): Unsubscribe {
   return store.subscribe(
     (s) => s.active,
     (current, previous) => {
@@ -53,10 +47,7 @@ function subscribeAcceptedFromActive(
   );
 }
 
-function subscribeEndedFromStatus(
-  store: MiddlewareStoreApi,
-  events: EventBus<WebphoneEventMap>,
-): Unsubscribe {
+function subscribeEndedFromStatus(store: MiddlewareStoreApi, events: EventBus<WebphoneEventMap>): Unsubscribe {
   return store.subscribe(
     (s) => s.callStatus,
     (status) => {

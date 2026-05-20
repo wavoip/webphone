@@ -49,8 +49,7 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   keyboardInput: "",
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
-  setSetting: (key, value) =>
-    set((state) => ({ settings: { ...state.settings, [key]: value } })),
+  setSetting: (key, value) => set((state) => ({ settings: { ...state.settings, [key]: value } })),
   setKeyboardInput: (keyboardInput) => set({ keyboardInput }),
   appendKeyboardChar: (ch) => set((state) => ({ keyboardInput: state.keyboardInput + ch })),
   popKeyboardChar: () => set((state) => ({ keyboardInput: state.keyboardInput.slice(0, -1) })),

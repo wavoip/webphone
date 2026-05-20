@@ -7,7 +7,7 @@ import { beforeUnloadEffect } from "@/middleware/effects/beforeUnload";
 import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
-import { ringtoneEffect, type RingtonePlayer } from "@/middleware/effects/ringtone";
+import { type RingtonePlayer, ringtoneEffect } from "@/middleware/effects/ringtone";
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";

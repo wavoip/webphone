@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
-import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeCallActive, FakeCallOutgoing } from "@/middleware/testing/FakeWavoip";
 

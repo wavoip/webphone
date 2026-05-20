@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ringtoneEffect, type RingtonePlayer } from "@/middleware/effects/ringtone";
+import { type RingtonePlayer, ringtoneEffect } from "@/middleware/effects/ringtone";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeOffer } from "@/middleware/testing/FakeWavoip";
 

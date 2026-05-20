@@ -56,8 +56,7 @@ export class DeviceController {
     device.on("qrCodeChanged", (qrCode) => store.getState().updateDeviceState(device.token, { qrCode }));
     device.on("contactChanged", (contact) => store.getState().updateDeviceState(device.token, { contact }));
     device.on("statusChanged", (status) => {
-      const patch =
-        status === "open" ? { status, enable: true } : { status };
+      const patch = status === "open" ? { status, enable: true } : { status };
       store.getState().updateDeviceState(device.token, patch);
     });
   }
