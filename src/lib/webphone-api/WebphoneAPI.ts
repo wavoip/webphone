@@ -139,15 +139,3 @@ export type WebphoneAPI = {
   on: <K extends WebphoneEventName>(event: K, cb: (payload: WebphoneEventMap[K]) => void) => () => void;
   use: <E extends MiddlewareEvent>(event: E, fn: PublicMiddleware<E>) => void;
 };
-
-type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: T[P] extends Record<string, unknown>
-        ? T[P] extends { x: number; y: number }
-          ? T[P]
-          : DeepPartial<T[P]>
-        : T[P];
-    }
-  : T;
-
-export type WebphoneAPIPartial = DeepPartial<WebphoneAPI>;

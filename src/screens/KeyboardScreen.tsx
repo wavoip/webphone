@@ -1,5 +1,6 @@
 import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import { useStore } from "zustand";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import SoundDTMF0 from "@/assets/sounds/dtmf-0.mp3";
 import SoundDTMF1 from "@/assets/sounds/dtmf-1.mp3";
@@ -15,7 +16,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -85,7 +86,12 @@ const buttons = [
 const backspace_audio = new Audio(SoundBackspace);
 
 export default function KeyboardScreen() {
-  const [number, setNumber] = useState("");
+  const middleware = useMiddleware();
+  const number = useStore(middleware.store, (s) => s.keyboardInput);
+  const setNumber = useStore(middleware.store, (s) => s.setKeyboardInput);
+  const appendChar = useStore(middleware.store, (s) => s.appendKeyboardChar);
+  const popChar = useStore(middleware.store, (s) => s.popKeyboardChar);
+
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");
   const [callIsLoading, setCallIsLoading] = useState(false);
@@ -147,12 +153,6 @@ export default function KeyboardScreen() {
     });
   };
 
-  mergeToAPI({
-    call: {
-      setInput: (number) => setNumber(number),
-    },
-  });
-
   return (
     <form
       onSubmit={(e) => {
@@ -199,7 +199,7 @@ export default function KeyboardScreen() {
               variant={"secondary"}
               className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
               onClick={() => {
-                setNumber((prev) => prev + digit);
+                appendChar(digit);
                 audio.pause();
                 audio.currentTime = 0;
                 audio.volume = 0.25;
@@ -225,8 +225,7 @@ export default function KeyboardScreen() {
               backspace_audio.pause();
               backspace_audio.currentTime = 0;
               backspace_audio.play();
-
-              setNumber((prev) => prev.slice(0, -1));
+              popChar();
             }}
             className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] vw:border-none wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
           >

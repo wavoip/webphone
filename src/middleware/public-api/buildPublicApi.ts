@@ -29,10 +29,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       getCallActive: () => projectActive(store.getState().active),
       getCallOutgoing: () => projectOutgoing(store.getState().outgoing),
       getOffers: () => store.getState().offers.map(projectOffer),
-      setInput: () => {
-        // Placeholder: keyboard input setter is owned by the React layer
-        // and is overlaid via `mergeToAPI`. See KeyboardScreen.
-      },
+      setInput: (number) => store.getState().setKeyboardInput(number),
       onOffer: (cb) => {
         registry.use("offer", (offer, next) => {
           cb(projectOffer(offer));
