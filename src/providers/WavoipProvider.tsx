@@ -1,25 +1,11 @@
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
-import { Wavoip } from "@wavoip/wavoip-api";
-import React, { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
+import React, { createContext, type ReactNode, useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
-import Ringtone from "@/assets/sounds/ringtone-02.mp3";
-import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
-import { getSettings } from "@/lib/device-settings";
-import { setPublicApiBase } from "@/lib/webphone-api/api";
 import { Middleware } from "@/middleware/Middleware";
-import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
-import {
-  MiddlewareProvider,
-  useCallState,
-  useDevices,
-  useMiddleware,
-  useOffers,
-} from "@/middleware/react/hooks";
+import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { useScreen } from "@/providers/ScreenProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWidget } from "@/providers/WidgetProvider";
@@ -43,36 +29,10 @@ interface WavoipContextProps {
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
-type RootProps = { children: ReactNode; wavoip?: Wavoip };
+type RootProps = { children: ReactNode };
 
-export const WavoipProvider: React.FC<RootProps> = ({ children, wavoip: injectedWavoip }) => {
-  const settings = useSettings();
-
-  const [middleware] = useState(() => {
-    const wavoip =
-      injectedWavoip ?? new Wavoip({ tokens: [...getSettings().keys()], platform: settings.platform });
-    const mw = new Middleware({
-      wavoip,
-      ringtone: audioRingtonePlayer(new Audio(Ringtone)),
-      vibration: audioRingtonePlayer(new Audio(Vibration)),
-    }).init();
-    setPublicApiBase(buildPublicApi(mw));
-    return mw;
-  });
-
-  useEffect(() => {
-    return () => {
-      middleware.destroy();
-      pictureInPicture.call = null;
-      disablePiP();
-    };
-  }, [middleware]);
-
-  return (
-    <MiddlewareProvider middleware={middleware}>
-      <WavoipBridge>{children}</WavoipBridge>
-    </MiddlewareProvider>
-  );
+export const WavoipProvider: React.FC<RootProps> = ({ children }) => {
+  return <WavoipBridge>{children}</WavoipBridge>;
 };
 
 function WavoipBridge({ children }: { children: ReactNode }) {
@@ -106,13 +66,6 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   useToastBridge(middleware);
   useWidgetCache(middleware, isClosed, setIsClosed, openWidget);
   usePictureInPictureSync(middleware);
-
-  useEffect(() => {
-    window.wavoip = window.wavoip;
-    return () => {
-      delete window.wavoip;
-    };
-  }, []);
 
   return (
     <WavoipContext.Provider
@@ -241,4 +194,3 @@ function usePictureInPictureSync(middleware: Middleware) {
     );
   }, [middleware]);
 }
-
