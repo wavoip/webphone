@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing, Offer } from "@wavoip/wavoip-api";
+import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import { Wavoip } from "@wavoip/wavoip-api";
 import React, { createContext, type ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -6,9 +6,9 @@ import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import { getSettings } from "@/lib/device-settings";
-import { mergeToAPI, warnDeprecated } from "@/lib/webphone-api/api";
-import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
+import { setPublicApiBase } from "@/lib/webphone-api/api";
 import { Middleware } from "@/middleware/Middleware";
+import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
 import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
 import {
   MiddlewareProvider,
@@ -50,11 +50,13 @@ export const WavoipProvider: React.FC<RootProps> = ({ children }) => {
 
   const [middleware] = useState(() => {
     const wavoip = new Wavoip({ tokens: [...getSettings().keys()], platform: settings.platform });
-    return new Middleware({
+    const mw = new Middleware({
       wavoip,
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),
       vibration: audioRingtonePlayer(new Audio(Vibration)),
     }).init();
+    setPublicApiBase(buildPublicApi(mw));
+    return mw;
   });
 
   useEffect(() => {
@@ -103,9 +105,6 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   useToastBridge(middleware);
   useWidgetCache(middleware, isClosed, setIsClosed, openWidget);
   usePictureInPictureSync(middleware);
-
-  // Compat: keep the legacy public API surface populated until Stage 7.
-  useLegacyApiBridge({ middleware, startCall, devices, offers, outgoing, active });
 
   useEffect(() => {
     window.wavoip = window.wavoip;
@@ -242,80 +241,3 @@ function usePictureInPictureSync(middleware: Middleware) {
   }, [middleware]);
 }
 
-function useLegacyApiBridge({
-  middleware,
-  startCall,
-  devices,
-  offers,
-  outgoing,
-  active,
-}: {
-  middleware: Middleware;
-  startCall: StartCall;
-  devices: DeviceStateEntry[];
-  offers: Offer[];
-  outgoing?: CallOutgoing;
-  active?: CallActive;
-}) {
-  useEffect(() => {
-    mergeToAPI({
-      call: {
-        start: (...args) => startCall(...args),
-        startCall: (to, fromTokens) => {
-          warnDeprecated("call.startCall", "call.start(to, { fromTokens })");
-          return startCall(to, fromTokens ? { fromTokens } : {});
-        },
-        getCallActive: () => projectCall(active),
-        getCallOutgoing: () => projectCall(outgoing),
-        getOffers: () => offers.map(projectCallProps),
-        onOffer: (cb: (offer: CallOfferProps) => void) => {
-          middleware.registry.use("offer", (offer, next) => {
-            cb(projectCallProps(offer));
-            next();
-          });
-        },
-      },
-      device: {
-        get: () => devices,
-        add: (token, persist) => middleware.controllers.device.add(token, persist),
-        remove: (token) => middleware.controllers.device.remove(token),
-        enable: (token) => middleware.controllers.device.enable(token),
-        disable: (token) => middleware.controllers.device.disable(token),
-        getDevices: () => {
-          warnDeprecated("device.getDevices", "device.get");
-          return devices;
-        },
-        addDevice: (token, persist) => {
-          warnDeprecated("device.addDevice", "device.add");
-          return middleware.controllers.device.add(token, persist);
-        },
-        removeDevice: (token) => {
-          warnDeprecated("device.removeDevice", "device.remove");
-          return middleware.controllers.device.remove(token);
-        },
-        enableDevice: (token) => {
-          warnDeprecated("device.enableDevice", "device.enable");
-          return middleware.controllers.device.enable(token);
-        },
-        disableDevice: (token) => {
-          warnDeprecated("device.disableDevice", "device.disable");
-          return middleware.controllers.device.disable(token);
-        },
-      },
-    });
-  }, [middleware, startCall, devices, offers, outgoing, active]);
-}
-
-function projectCall<T extends { id: string; type: string; status: string; device_token: string; direction: string; peer: { phone: string; displayName: string | null; profilePicture: string | null; muted: boolean } }>(
-  call: T | undefined,
-) {
-  if (!call) return undefined;
-  return projectCallProps(call);
-}
-
-function projectCallProps<T extends { id: string; type: string; status: string; device_token: string; direction: string; peer: { phone: string; displayName: string | null; profilePicture: string | null; muted: boolean } }>(
-  call: T,
-) {
-  const { id, type, status, device_token, direction, peer } = call;
-  return { id, type, status, device_token, direction, peer } as CallOfferProps;
-}
