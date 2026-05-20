@@ -44,6 +44,17 @@ export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
   const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
+  // Seed store BEFORE the useStore selectors below so the first render already
+  // reflects `widget.startOpen`. Otherwise the container renders hidden, its
+  // bounding rect is zero, and keyword positions resolve outside the viewport.
+  useState(() => {
+    const s = middleware.store.getState();
+    s.setSetting("showWidgetButton", widget.show);
+    if (widget.startOpen) s.openWidget();
+    else s.closeWidget();
+    return true;
+  });
+
   const { isClosed, position, buttonPosition, showWidget } = useStore(
     middleware.store,
     useShallow((s) => ({
@@ -54,7 +65,7 @@ export function WidgetProvider({ children }: Props) {
     })),
   );
 
-  const { setStorePosition, setStoreButtonPosition, openStore, closeStore, toggleStore, setSetting } = useStore(
+  const { setStorePosition, setStoreButtonPosition, openStore, closeStore, toggleStore } = useStore(
     middleware.store,
     useShallow((s) => ({
       setStorePosition: s.setWidgetPosition,
@@ -62,11 +73,8 @@ export function WidgetProvider({ children }: Props) {
       openStore: s.openWidget,
       closeStore: s.closeWidget,
       toggleStore: s.toggleWidget,
-      setSetting: s.setSetting,
     })),
   );
-
-  useSeedSettingsOnce(widget.show, widget.startOpen, setSetting, openStore, closeStore);
 
   const [isDragging, setIsDragging] = useState(false);
   const divRef = useRef<HTMLDivElement>(null);
@@ -109,7 +117,11 @@ export function WidgetProvider({ children }: Props) {
   useLayoutEffect(() => {
     if (!divRef.current) return;
     const rect = divRef.current.getBoundingClientRect();
-    setStorePosition(resolveWebphonePosition(positionInitial, { width: rect.width, height: rect.height }));
+    // When the widget starts closed the container is `display:none`, so its
+    // rect is zeroed — falling back to the resolver's default keeps keyword
+    // positions (e.g. "bottom-left") inside the viewport.
+    const size = rect.width > 0 && rect.height > 0 ? { width: rect.width, height: rect.height } : undefined;
+    setStorePosition(resolveWebphonePosition(positionInitial, size));
     setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
     document.addEventListener("mouseleave", stopDrag);
     return () => {
@@ -196,19 +208,3 @@ export function useWidget() {
   return ctx;
 }
 
-function useSeedSettingsOnce(
-  showWidget: boolean,
-  startOpen: boolean | undefined,
-  setSetting: (key: "showWidgetButton", value: boolean) => void,
-  openStore: () => void,
-  closeStore: () => void,
-) {
-  const seeded = useRef(false);
-  useEffect(() => {
-    if (seeded.current) return;
-    seeded.current = true;
-    setSetting("showWidgetButton", showWidget);
-    if (startOpen) openStore();
-    else closeStore();
-  }, [showWidget, startOpen, setSetting, openStore, closeStore]);
-}
