@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
@@ -43,17 +44,27 @@ export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
   const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
-  const isClosed = useStore(middleware.store, (s) => s.isClosed);
-  const position = useStore(middleware.store, (s) => s.position);
-  const buttonPosition = useStore(middleware.store, (s) => s.buttonPosition);
-  const showWidget = useStore(middleware.store, (s) => s.settings.showWidgetButton);
+  const { isClosed, position, buttonPosition, showWidget } = useStore(
+    middleware.store,
+    useShallow((s) => ({
+      isClosed: s.isClosed,
+      position: s.position,
+      buttonPosition: s.buttonPosition,
+      showWidget: s.settings.showWidgetButton,
+    })),
+  );
 
-  const setStorePosition = useStore(middleware.store, (s) => s.setWidgetPosition);
-  const setStoreButtonPosition = useStore(middleware.store, (s) => s.setButtonPosition);
-  const openStore = useStore(middleware.store, (s) => s.openWidget);
-  const closeStore = useStore(middleware.store, (s) => s.closeWidget);
-  const toggleStore = useStore(middleware.store, (s) => s.toggleWidget);
-  const setSetting = useStore(middleware.store, (s) => s.setSetting);
+  const { setStorePosition, setStoreButtonPosition, openStore, closeStore, toggleStore, setSetting } = useStore(
+    middleware.store,
+    useShallow((s) => ({
+      setStorePosition: s.setWidgetPosition,
+      setStoreButtonPosition: s.setButtonPosition,
+      openStore: s.openWidget,
+      closeStore: s.closeWidget,
+      toggleStore: s.toggleWidget,
+      setSetting: s.setSetting,
+    })),
+  );
 
   useSeedSettingsOnce(widget.show, widget.startOpen, setSetting, openStore, closeStore);
 

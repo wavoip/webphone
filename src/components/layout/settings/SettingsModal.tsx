@@ -3,6 +3,7 @@ import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
@@ -29,11 +30,16 @@ export const SettingsModal = forwardRef(() => {
   const [showAudio] = useState(audioMenuSettings.show);
 
   const middleware = useMiddleware();
-  const showDevices = useStore(middleware.store, (s) => s.settings.showDevices);
-  const showAddDevice = useStore(middleware.store, (s) => s.settings.showAddDevices);
-  const showEnableDevice = useStore(middleware.store, (s) => s.settings.showEnableDevices);
-  const showRemoveDevice = useStore(middleware.store, (s) => s.settings.showRemoveDevices);
-  const setSetting = useStore(middleware.store, (s) => s.setSetting);
+  const { showDevices, showAddDevice, showEnableDevice, showRemoveDevice, setSetting } = useStore(
+    middleware.store,
+    useShallow((s) => ({
+      showDevices: s.settings.showDevices,
+      showAddDevice: s.settings.showAddDevices,
+      showEnableDevice: s.settings.showEnableDevices,
+      showRemoveDevice: s.settings.showRemoveDevices,
+      setSetting: s.setSetting,
+    })),
+  );
 
   const seeded = useRef(false);
   useEffect(() => {

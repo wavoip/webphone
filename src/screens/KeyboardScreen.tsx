@@ -1,6 +1,7 @@
 import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
 import SoundDTMF0 from "@/assets/sounds/dtmf-0.mp3";
 import SoundDTMF1 from "@/assets/sounds/dtmf-1.mp3";
@@ -88,9 +89,14 @@ const backspace_audio = new Audio(SoundBackspace);
 export default function KeyboardScreen() {
   const middleware = useMiddleware();
   const number = useStore(middleware.store, (s) => s.keyboardInput);
-  const setNumber = useStore(middleware.store, (s) => s.setKeyboardInput);
-  const appendChar = useStore(middleware.store, (s) => s.appendKeyboardChar);
-  const popChar = useStore(middleware.store, (s) => s.popKeyboardChar);
+  const { setNumber, appendChar, popChar } = useStore(
+    middleware.store,
+    useShallow((s) => ({
+      setNumber: s.setKeyboardInput,
+      appendChar: s.appendKeyboardChar,
+      popChar: s.popKeyboardChar,
+    })),
+  );
 
   const [status, setStatus] = useState("");
   const [error, setError] = useState("");

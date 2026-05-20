@@ -1,6 +1,7 @@
 import { XIcon } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -17,9 +18,14 @@ export default function StatusBar() {
   const { callActive } = useWavoip();
 
   const middleware = useMiddleware();
-  const showNotifications = useStore(middleware.store, (s) => s.settings.showNotifications);
-  const showSettings = useStore(middleware.store, (s) => s.settings.showSettings);
-  const setSetting = useStore(middleware.store, (s) => s.setSetting);
+  const { showNotifications, showSettings, setSetting } = useStore(
+    middleware.store,
+    useShallow((s) => ({
+      showNotifications: s.settings.showNotifications,
+      showSettings: s.settings.showSettings,
+      setSetting: s.setSetting,
+    })),
+  );
 
   const seeded = useRef(false);
   useEffect(() => {
