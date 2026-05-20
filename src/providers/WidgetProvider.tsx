@@ -3,7 +3,6 @@ import {
   createContext,
   type MouseEvent,
   type ReactNode,
-  type RefObject,
   useCallback,
   useContext,
   useEffect,
@@ -11,11 +10,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { useStore } from "zustand";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useSettings } from "@/providers/settings/Provider";
-import type { WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
@@ -28,7 +28,7 @@ interface WidgetContextType {
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
   isClosed: boolean;
-  setIsClosed: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsClosed: (closed: boolean) => void;
   close: () => void;
   open: () => void;
   toggle: () => void;
@@ -36,42 +36,48 @@ interface WidgetContextType {
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-type Props = {
-  children: ReactNode;
-};
+type Props = { children: ReactNode };
 
 export function WidgetProvider({ children }: Props) {
+  const middleware = useMiddleware();
   const { theme } = useTheme();
   const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
-  const [showWidget, setShowWidget] = useState(widget.show);
+  const isClosed = useStore(middleware.store, (s) => s.isClosed);
+  const position = useStore(middleware.store, (s) => s.position);
+  const buttonPosition = useStore(middleware.store, (s) => s.buttonPosition);
+  const showWidget = useStore(middleware.store, (s) => s.settings.showWidgetButton);
 
-  const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
-  const [buttonPosition, setButtonPosition] = useState<Position>({ x: 0, y: 0 });
+  const setStorePosition = useStore(middleware.store, (s) => s.setWidgetPosition);
+  const setStoreButtonPosition = useStore(middleware.store, (s) => s.setButtonPosition);
+  const openStore = useStore(middleware.store, (s) => s.openWidget);
+  const closeStore = useStore(middleware.store, (s) => s.closeWidget);
+  const toggleStore = useStore(middleware.store, (s) => s.toggleWidget);
+  const setSetting = useStore(middleware.store, (s) => s.setSetting);
+
+  useSeedSettingsOnce(widget.show, widget.startOpen, setSetting, openStore, closeStore);
+
   const [isDragging, setIsDragging] = useState(false);
-  const [isClosed, setIsClosed] = useState<boolean>(!widget.startOpen);
-
   const divRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
-  const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
-    if (!divRef.current) return;
-    let x = e.clientX - offsetRef.current.x;
-    let y = e.clientY - offsetRef.current.y;
+  const handleMouseMove = useCallback(
+    (e: globalThis.MouseEvent) => {
+      if (!divRef.current) return;
+      let x = e.clientX - offsetRef.current.x;
+      let y = e.clientY - offsetRef.current.y;
 
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
+      if (x < 0) x = 0;
+      if (y < 0) y = 0;
 
-    if (x > window.innerWidth - divRef.current.getBoundingClientRect().width) {
-      x = window.innerWidth - divRef.current.getBoundingClientRect().width;
-    }
+      const rect = divRef.current.getBoundingClientRect();
+      if (x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
+      if (y > document.body.clientHeight - rect.height) y = document.body.clientHeight - rect.height;
 
-    if (y > document.body.clientHeight - divRef.current.getBoundingClientRect().height) {
-      y = document.body.clientHeight - divRef.current.getBoundingClientRect().height;
-    }
-
-    setPosition({ x, y });
-  }, []);
+      setStorePosition({ x, y });
+    },
+    [setStorePosition],
+  );
 
   const startDrag = useCallback(
     (e: MouseEvent) => {
@@ -89,125 +95,66 @@ export function WidgetProvider({ children }: Props) {
     document.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
 
-  const open = useCallback(() => {
-    if (isClosed) setIsClosed(false);
-  }, [isClosed]);
-
-  const close = useCallback(() => {
-    if (!isClosed) setIsClosed(true);
-  }, [isClosed]);
-
-  const toggle = useCallback(() => {
-    setIsClosed((prev) => !prev);
-  }, []);
-
   useLayoutEffect(() => {
-    if (!open || !divRef.current) return;
-
+    if (!divRef.current) return;
     const rect = divRef.current.getBoundingClientRect();
-
-    let x = window.innerWidth - rect.width - 24;
-    let y = window.innerHeight - rect.height - 24;
-
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-
-    setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
-    setButtonPosition(handleButtonPositionInitialSettings(buttonPositionInitial));
-
+    setStorePosition(resolveWebphonePosition(positionInitial, { width: rect.width, height: rect.height }));
+    setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
     document.addEventListener("mouseleave", stopDrag);
-
     return () => {
       document.removeEventListener("mouseleave", stopDrag);
     };
-  }, [open, stopDrag, positionInitial, buttonPositionInitial]);
+  }, [stopDrag, positionInitial, buttonPositionInitial, setStorePosition, setStoreButtonPosition]);
 
   useLayoutEffect(() => {
     function handleResize() {
       if (!divRef.current) return;
-
-      const div = divRef.current.getBoundingClientRect();
-      let x = null;
-      let y = null;
-
-      if (div.x + div.width > window.innerWidth) {
-        x = window.innerWidth - divRef.current.getBoundingClientRect().width;
-      }
-
-      if (div.y + div.height > window.innerHeight) {
-        y = window.innerHeight - divRef.current.getBoundingClientRect().height;
+      const rect = divRef.current.getBoundingClientRect();
+      let x: number | null = null;
+      let y: number | null = null;
+      if (rect.x + rect.width > window.innerWidth) x = window.innerWidth - rect.width;
+      if (rect.y + rect.height > window.innerHeight) {
+        y = window.innerHeight - rect.height;
         if (y < 0) y = 0;
       }
-
-      if (x || y) {
-        setPosition((position) => ({ x: x || position.x, y: y || position.y }));
+      if (x !== null || y !== null) {
+        const current = middleware.store.getState().position;
+        setStorePosition({ x: x ?? current.x, y: y ?? current.y });
       }
     }
-
     window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [middleware, setStorePosition]);
 
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  useEffect(() => {
-    mergeToAPI({
-      widget: {
-        isOpen: !isClosed,
-        open: () => open(),
-        close: () => close(),
-        toggle: () => toggle(),
-        buttonPosition: {
-          value: buttonPosition,
-          set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
-        },
-      },
-      settings: {
-        showWidgetButton: showWidget,
-        setShowWidgetButton: (...args) => setShowWidget(...args),
-      },
-      position: {
-        value: position,
-        set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
-      },
-    });
-  }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
+  const setIsClosed = useCallback(
+    (closed: boolean) => (closed ? closeStore() : openStore()),
+    [openStore, closeStore],
+  );
 
   return (
     <WidgetContext.Provider
       value={{
         position,
         buttonPosition,
-        setPosition,
+        setPosition: setStorePosition,
         startDrag,
         stopDrag,
         isDragging,
-        isClosed: isClosed,
-        setIsClosed: setIsClosed,
-        close: () => {
-          if (!isClosed) setIsClosed(true);
-        },
-        open: () => {
-          if (isClosed) setIsClosed(false);
-        },
-        toggle: () => {
-          setIsClosed((prev) => !prev);
-        },
+        isClosed,
+        setIsClosed,
+        close: closeStore,
+        open: openStore,
+        toggle: toggleStore,
       }}
     >
       {showWidget && (
         <Button
           type="button"
-          onClick={() => setIsClosed(false)}
+          onClick={openStore}
           size={"icon"}
           data-closed={isClosed}
           className="wv:transition wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
-          style={{
-            position: "fixed",
-            top: buttonPosition.y,
-            left: buttonPosition.x,
-          }}
+          style={{ position: "fixed", top: buttonPosition.y, left: buttonPosition.x }}
         >
           <PhoneIcon className="wv:size-8" />
         </Button>
@@ -217,20 +164,14 @@ export function WidgetProvider({ children }: Props) {
         theme={theme}
         position="top-right"
         className="!w-[400px]"
-        toastOptions={{
-          className: "wv:max-w-[400px] wv:w-full",
-        }}
+        toastOptions={{ className: "wv:max-w-[400px] wv:w-full" }}
       />
 
       <div
         ref={divRef}
         data-closed={isClosed}
         className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
-        style={{
-          position: "fixed",
-          left: position.x,
-          top: position.y,
-        }}
+        style={{ position: "fixed", left: position.x, top: position.y }}
       >
         {children}
       </div>
@@ -244,48 +185,19 @@ export function useWidget() {
   return ctx;
 }
 
-function handlePositionInitialSettings(
-  position: WebphonePosition,
-  divRef: RefObject<HTMLDivElement>,
-): { x: number; y: number } {
-  const MARGIN = 24;
-
-  if (typeof position === "object") {
-    return position;
-  }
-
-  const rect = divRef.current.getBoundingClientRect();
-  const middleY = window.innerHeight / 2 - rect.height / 2;
-  const bottomY = window.innerHeight - MARGIN - rect.height;
-  const middleX = window.innerWidth / 2 - rect.width / 2;
-  const endX = window.innerWidth - MARGIN - rect.width;
-
-  if (position === "top") return { x: middleX, y: MARGIN };
-  if (position === "bottom") return { x: middleX, y: bottomY < 0 ? 0 : bottomY };
-  if (position === "left") return { x: MARGIN, y: middleY };
-  if (position === "right") return { x: endX, y: middleY };
-  if (position === "top-left") return { x: MARGIN, y: MARGIN };
-  if (position === "top-right") return { x: endX, y: MARGIN };
-  if (position === "bottom-left") return { x: MARGIN, y: bottomY < 0 ? 0 : bottomY };
-  if (position === "bottom-right") return { x: endX, y: bottomY < 0 ? 0 : bottomY };
-
-  throw new Error("Initial position invalid");
-}
-
-function handleButtonPositionInitialSettings(position: WidgetButtonPosition): { x: number; y: number } {
-  const MARGIN = 20;
-  const button = { width: 56, height: 56 };
-
-  if (typeof position === "object") {
-    return position;
-  }
-  const endX = window.innerWidth - MARGIN - button.width;
-  const endY = window.innerHeight - MARGIN - button.height;
-
-  if (position === "top-right") return { x: endX, y: MARGIN };
-  if (position === "top-left") return { x: MARGIN, y: MARGIN };
-  if (position === "bottom-left") return { x: MARGIN, y: endY < 0 ? 0 : endY };
-  if (position === "bottom-right") return { x: endX, y: endY < 0 ? 0 : endY };
-
-  throw new Error("Initial button position invalid");
+function useSeedSettingsOnce(
+  showWidget: boolean,
+  startOpen: boolean | undefined,
+  setSetting: (key: "showWidgetButton", value: boolean) => void,
+  openStore: () => void,
+  closeStore: () => void,
+) {
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current) return;
+    seeded.current = true;
+    setSetting("showWidgetButton", showWidget);
+    if (startOpen) openStore();
+    else closeStore();
+  }, [showWidget, startOpen, setSetting, openStore, closeStore]);
 }

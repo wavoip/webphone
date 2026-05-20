@@ -6,6 +6,7 @@ import type {
   CallOutgoingProps,
   WebphoneAPI,
 } from "@/lib/webphone-api/WebphoneAPI";
+import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import type { Middleware } from "@/middleware/Middleware";
 
 /**
@@ -104,9 +105,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
         get value() {
           return store.getState().buttonPosition;
         },
-        set: (position) => {
-          if (typeof position === "object") store.getState().setButtonPosition(position);
-        },
+        set: (position) => store.getState().setButtonPosition(resolveWidgetButtonPosition(position)),
       },
     },
     theme: {
@@ -153,9 +152,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       get value() {
         return store.getState().position;
       },
-      set: (position) => {
-        if (typeof position === "object") store.getState().setWidgetPosition(position);
-      },
+      set: (position) => store.getState().setWidgetPosition(resolveWebphonePosition(position)),
     },
   };
 }
