@@ -21,6 +21,25 @@ describe("DeviceController", () => {
     expect(store.getState().devices.map((d) => d.token)).toEqual(["tok-1", "tok-2"]);
   });
 
+  it("hydrate restores persist + enable flags from localStorage", () => {
+    localStorage.setItem("wavoip:tokens", "tok-1:true:true;tok-2:false:true");
+    wavoip.addDevices(["tok-1", "tok-2"]);
+    controller.hydrate();
+    const [a, b] = store.getState().devices;
+    expect(a.persist).toBe(true);
+    expect(a.enable).toBe(true);
+    expect(b.persist).toBe(true);
+    expect(b.enable).toBe(false);
+  });
+
+  it("hydrate falls back to status-based enable when no localStorage entry", () => {
+    wavoip.addDevices(["tok-1"]);
+    controller.hydrate();
+    const [device] = store.getState().devices;
+    expect(device.persist).toBe(false);
+    expect(device.enable).toBe(false);
+  });
+
   it("add invokes wavoip.addDevices and upserts into store", () => {
     controller.add("tok-1");
     expect(wavoip.getDevices().map((d) => d.token)).toEqual(["tok-1"]);

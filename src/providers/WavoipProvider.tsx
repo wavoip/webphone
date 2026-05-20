@@ -2,7 +2,7 @@ import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api
 import React, { createContext, type ReactNode, useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { OfferNotification } from "@/components/OfferNotification";
-import { Middleware } from "@/middleware/Middleware";
+import type { Middleware } from "@/middleware/Middleware";
 import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
@@ -188,9 +188,7 @@ function usePictureInPictureSync(middleware: Middleware) {
   useEffect(() => {
     return middleware.store.subscribe(
       (s) => s.active ?? s.outgoing,
-      (call) => {
-        pictureInPicture.call = call ?? null;
-      },
+      (call) => {},
     );
   }, [middleware]);
 }

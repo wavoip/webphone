@@ -5,7 +5,6 @@ import {
   type ReactNode,
   useCallback,
   useContext,
-  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -65,14 +64,14 @@ export function WidgetProvider({ children }: Props) {
     })),
   );
 
-  const { setStorePosition, setStoreButtonPosition, openStore, closeStore, toggleStore } = useStore(
+  const { setStorePosition, setStoreButtonPosition, openWidget, closeWidget, toggleWidget } = useStore(
     middleware.store,
     useShallow((s) => ({
       setStorePosition: s.setWidgetPosition,
       setStoreButtonPosition: s.setButtonPosition,
-      openStore: s.openWidget,
-      closeStore: s.closeWidget,
-      toggleStore: s.toggleWidget,
+      openWidget: s.openWidget,
+      closeWidget: s.closeWidget,
+      toggleWidget: s.toggleWidget,
     })),
   );
 
@@ -150,8 +149,8 @@ export function WidgetProvider({ children }: Props) {
   }, [middleware, setStorePosition]);
 
   const setIsClosed = useCallback(
-    (closed: boolean) => (closed ? closeStore() : openStore()),
-    [openStore, closeStore],
+    (closed: boolean) => (closed ? closeWidget() : openWidget()),
+    [openWidget, closeWidget],
   );
 
   return (
@@ -165,15 +164,15 @@ export function WidgetProvider({ children }: Props) {
         isDragging,
         isClosed,
         setIsClosed,
-        close: closeStore,
-        open: openStore,
-        toggle: toggleStore,
+        close: closeWidget,
+        open: openWidget,
+        toggle: toggleWidget,
       }}
     >
       {showWidget && (
         <Button
           type="button"
-          onClick={openStore}
+          onClick={openWidget}
           size={"icon"}
           data-closed={isClosed}
           className="wv:transition wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
@@ -207,4 +206,3 @@ export function useWidget() {
   if (!ctx) throw new Error("useWidget deve ser usado dentro de <WidgetProvider>");
   return ctx;
 }
-

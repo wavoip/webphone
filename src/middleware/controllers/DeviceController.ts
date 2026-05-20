@@ -1,4 +1,5 @@
 import type { Device, Wavoip } from "@wavoip/wavoip-api";
+import { getSettings } from "@/lib/device-settings";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
@@ -11,8 +12,15 @@ export class DeviceController {
   }
 
   hydrate(): void {
+    const stored = getSettings();
     const devices = this.deps.wavoip.getDevices();
-    const seeded = devices.map((d) => this.toState(d, { enable: d.status === "open", persist: false }));
+    const seeded = devices.map((d) => {
+      const saved = stored.get(d.token);
+      return this.toState(d, {
+        enable: saved?.enable ?? d.status === "open",
+        persist: saved?.persist ?? false,
+      });
+    });
     this.deps.store.getState().setDevices(seeded);
     for (const device of devices) this.bindEvents(device);
   }
