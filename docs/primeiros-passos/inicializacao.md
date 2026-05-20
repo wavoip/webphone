@@ -75,6 +75,24 @@ await webphone.render({
 | `callSettings.displayName` | `string` | Nome exibido para o destinatário ao iniciar chamadas. |
 | `platform` | `string` | Identificador da plataforma hospedeira repassado ao Wavoip API. |
 
+## Reutilizando uma instância do Wavoip
+
+`render()` aceita uma segunda posição opcional: uma instância já construída de `Wavoip` do pacote `@wavoip/wavoip-api`. Use quando seu app já tem o cliente Wavoip — o webphone se acopla a ele em vez de criar outro.
+
+```ts
+import webphone from "@wavoip/wavoip-webphone";
+import { Wavoip } from "@wavoip/wavoip-api";
+
+const wavoip = new Wavoip({ tokens: ["token-a"], platform: "meu-app" });
+
+await webphone.render(
+  { theme: "dark", widget: { startOpen: true } },
+  wavoip,
+);
+```
+
+Quando uma instância é injetada, o webphone **ainda** lê os tokens persistidos em `localStorage` e os adiciona via `wavoip.addDevices(stored)`. `addDevices` deduplica, então tokens já presentes não são duplicados.
+
 ## Desmontagem
 
 Para remover o webphone da página e liberar os recursos:
@@ -87,7 +105,21 @@ Após o `destroy()`, `window.wavoip` volta a ser `undefined` e é necessário ch
 
 ## Onde os tokens dos dispositivos ficam
 
-Os tokens dos dispositivos persistem em `localStorage`. Ao chamar `render()`, o webphone carrega os tokens previamente salvos e usa-os para se conectar ao Wavoip API. Use a [API de dispositivos](../referencia/api-publica.md#device) para adicionar, remover, habilitar ou desabilitar dispositivos em tempo de execução.
+Os tokens dos dispositivos persistem em `localStorage` na chave `wavoip:tokens`. Ao chamar `render()`, o webphone carrega os tokens previamente salvos e usa-os para se conectar ao Wavoip API.
+
+### Persistência é opt-in via API
+
+Dispositivos são **efêmeros por padrão**. Apenas chamadas programáticas com `persist: true` gravam em `localStorage`:
+
+```ts
+// Persiste no localStorage — sobrevive ao reload
+window.wavoip.device.add("token-a", true);
+
+// Não persiste — somem ao recarregar a página
+window.wavoip.device.add("token-b", false);
+```
+
+A UI nativa de adicionar dispositivo (no menu de configurações) sempre adiciona como efêmero. Para integrar persistência ao seu fluxo, faça a chamada `add(token, true)` no seu próprio código depois que o usuário confirmar.
 
 {% hint style="warning" %}
 Por usar `localStorage`, os tokens são escopados ao domínio do navegador. Trocar de domínio ou usar aba anônima começa sem dispositivos cadastrados.
