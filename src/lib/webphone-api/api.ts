@@ -82,6 +82,7 @@ function buildOverlayView(): WebphoneAPI {
     theme: buildTheme(),
     settings: buildSettings(),
     position: buildPosition(),
+    on: (event, cb) => (overlay.on ?? requireBase().on)(event, cb),
   };
 }
 

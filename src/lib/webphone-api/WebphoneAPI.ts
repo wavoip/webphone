@@ -1,4 +1,5 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
+import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
@@ -125,6 +126,7 @@ export type WebphoneAPI = {
   theme: ThemeAPI;
   position: PositionAPI;
   settings: SettingsAPI;
+  on: <K extends WebphoneEventName>(event: K, cb: (payload: WebphoneEventMap[K]) => void) => () => void;
 };
 
 type DeepPartial<T> = T extends object

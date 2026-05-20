@@ -132,6 +132,39 @@ describe("buildPublicApi", () => {
     });
   });
 
+  describe("on (programmatic events)", () => {
+    it("delegates to middleware.events and forwards payloads", () => {
+      const cb = vi.fn();
+      const off = api.on("call:started", cb);
+      middleware.events.emit("call:started", {
+        id: "c1",
+        type: "outgoing",
+        status: "calling",
+        device_token: "tok-1",
+        direction: "outgoing",
+        peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
+      });
+      expect(cb).toHaveBeenCalledTimes(1);
+      expect(cb.mock.calls[0][0].id).toBe("c1");
+      off();
+    });
+
+    it("returns an unsubscribe that stops further events", () => {
+      const cb = vi.fn();
+      const off = api.on("offer:received", cb);
+      off();
+      middleware.events.emit("offer:received", {
+        id: "o1",
+        type: "offer",
+        status: "received",
+        device_token: "tok-1",
+        direction: "incoming",
+        peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
+      });
+      expect(cb).not.toHaveBeenCalled();
+    });
+  });
+
   describe("theme + settings + position", () => {
     it("theme.set updates the store", () => {
       api.theme.set("dark");

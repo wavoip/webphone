@@ -14,9 +14,10 @@ import type { Middleware } from "@/middleware/Middleware";
  * through controllers or store actions.
  */
 export function buildPublicApi(middleware: Middleware): WebphoneAPI {
-  const { store, controllers, registry } = middleware;
+  const { store, controllers, registry, events } = middleware;
 
   return {
+    on: (event, cb) => events.on(event, cb),
     call: {
       start: (to, config) => controllers.call.start(to, config),
       startCall: (to, fromTokens) => {

@@ -25,6 +25,25 @@ describe("api.ts public surface", () => {
     expect(resolved.device.get().map((d) => d.token)).toEqual(["tok-1"]);
   });
 
+  it("on() forwards to the underlying base events", async () => {
+    const wavoip = new FakeWavoip(["tok-1"]);
+    const middleware = new Middleware({ wavoip: wavoip.asWavoip() }).init();
+    setPublicApiBase(buildPublicApi(middleware));
+    const api = await webphoneAPIPromise();
+    const cb = vi.fn();
+    const off = api.on("call:started", cb);
+    middleware.events.emit("call:started", {
+      id: "c1",
+      type: "outgoing",
+      status: "calling",
+      device_token: "tok-1",
+      direction: "outgoing",
+      peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
+    });
+    expect(cb).toHaveBeenCalledTimes(1);
+    off();
+  });
+
   it("subsequent setPublicApiBase calls are a no-op", async () => {
     const wavoip = new FakeWavoip(["tok-1"]);
     const middleware = new Middleware({ wavoip: wavoip.asWavoip() }).init();
