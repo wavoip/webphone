@@ -1,7 +1,8 @@
 import { GearIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
-import { forwardRef, useEffect, useMemo, useState } from "react";
+import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "react-qr-code";
+import { useStore } from "zustand";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -26,31 +27,29 @@ export const SettingsModal = forwardRef(() => {
   const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
 
   const [showAudio] = useState(audioMenuSettings.show);
-  const [showDevices, setShowDevices] = useState(devicesMenuSettings.show);
-  const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
-  const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
-  const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
-  const [error, setError] = useState("");
 
+  const middleware = useMiddleware();
+  const showDevices = useStore(middleware.store, (s) => s.settings.showDevices);
+  const showAddDevice = useStore(middleware.store, (s) => s.settings.showAddDevices);
+  const showEnableDevice = useStore(middleware.store, (s) => s.settings.showEnableDevices);
+  const showRemoveDevice = useStore(middleware.store, (s) => s.settings.showRemoveDevices);
+  const setSetting = useStore(middleware.store, (s) => s.setSetting);
+
+  const seeded = useRef(false);
+  useEffect(() => {
+    if (seeded.current) return;
+    seeded.current = true;
+    setSetting("showDevices", devicesMenuSettings.show);
+    setSetting("showAddDevices", devicesMenuSettings.showAdd);
+    setSetting("showEnableDevices", devicesMenuSettings.enableShow);
+    setSetting("showRemoveDevices", devicesMenuSettings.removeShow);
+  }, [devicesMenuSettings, setSetting]);
+
+  const [error, setError] = useState("");
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
   const [qrcode, setQrcode] = useState<null | string>(null);
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
-
-  useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showDevices,
-        setShowDevices: (...args) => setShowDevices(...args),
-        showAddDevices: showAddDevice,
-        setShowAddDevices: (...args) => setShowAddDevice(...args),
-        showEnableDevices: showEnableDevice,
-        setShowEnableDevices: (...args) => setShowEnableDevice(...args),
-        showRemoveDevices: showRemoveDevice,
-        setShowRemoveDevices: (...args) => setShowRemoveDevice(...args),
-      },
-    });
-  }, [showDevices, showAddDevice, showEnableDevice, showRemoveDevice]);
 
   useEffect(() => {
     if (wavoip && open) {

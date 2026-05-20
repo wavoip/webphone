@@ -1,11 +1,12 @@
 import { XIcon } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
+import { useStore } from "zustand";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
@@ -13,22 +14,20 @@ import { useWidget } from "@/providers/WidgetProvider";
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
   const { notifications, settings } = useSettings();
-
   const { callActive } = useWavoip();
 
-  const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
-  const [showSettings, setShowSettings] = useState<boolean>(settings.show);
+  const middleware = useMiddleware();
+  const showNotifications = useStore(middleware.store, (s) => s.settings.showNotifications);
+  const showSettings = useStore(middleware.store, (s) => s.settings.showSettings);
+  const setSetting = useStore(middleware.store, (s) => s.setSetting);
 
+  const seeded = useRef(false);
   useEffect(() => {
-    mergeToAPI({
-      settings: {
-        showNotifications,
-        setShowNotifications: (...args) => setShowNotifications(...args),
-        showSettings,
-        setShowSettings: (...args) => setShowSettings(...args),
-      },
-    });
-  }, [showSettings, showNotifications]);
+    if (seeded.current) return;
+    seeded.current = true;
+    setSetting("showNotifications", notifications.show);
+    setSetting("showSettings", settings.show);
+  }, [notifications.show, settings.show, setSetting]);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Needs interaction
