@@ -32,26 +32,28 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
         {device.status && (
           <>
             {["disconnected", "hibernating"].includes(device.status) && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant={"outline"}
-                    className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                    onClick={() => middleware.controllers.device.wakeUp(device.token)}
-                  >
-                    <PowerIcon />
-                  </Button>
-                  <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                    <PhoneIcon size={18} color="red" />
-                    <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                      {device.contact?.phone}
-                    </p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ligar Dispositivo</p>
-                </TooltipContent>
-              </Tooltip>
+              <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
+                      onClick={() => middleware.controllers.device.wakeUp(device.token)}
+                    >
+                      <PowerIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ligar Dispositivo</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                  <PhoneIcon size={18} color="red" />
+                  <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                    {device.contact?.phone ?? "Desconectado"}
+                  </p>
+                </div>
+              </div>
             )}
             {(["connecting"].includes(device.status) || device.qrCode) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
