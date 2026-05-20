@@ -41,18 +41,7 @@ type Props = { children: ReactNode };
 export function WidgetProvider({ children }: Props) {
   const middleware = useMiddleware();
   const { theme } = useTheme();
-  const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
-
-  // Seed store BEFORE the useStore selectors below so the first render already
-  // reflects `widget.startOpen`. Otherwise the container renders hidden, its
-  // bounding rect is zero, and keyword positions resolve outside the viewport.
-  useState(() => {
-    const s = middleware.store.getState();
-    s.setSetting("showWidgetButton", widget.show);
-    if (widget.startOpen) s.openWidget();
-    else s.closeWidget();
-    return true;
-  });
+  const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
 
   const { isClosed, position, buttonPosition, showWidget } = useStore(
     middleware.store,

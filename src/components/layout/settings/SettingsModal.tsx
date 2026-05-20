@@ -1,6 +1,6 @@
 import { GearIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
-import { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -25,31 +25,20 @@ import { useWavoip } from "@/providers/WavoipProvider";
 export const SettingsModal = forwardRef(() => {
   const { wavoip, addDevice, devices } = useWavoip();
   const { root } = useShadowRoot();
-  const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
+  const { audio: audioMenuSettings } = useSettings();
 
   const [showAudio] = useState(audioMenuSettings.show);
 
   const middleware = useMiddleware();
-  const { showDevices, showAddDevice, showEnableDevice, showRemoveDevice, setSetting } = useStore(
+  const { showDevices, showAddDevice, showEnableDevice, showRemoveDevice } = useStore(
     middleware.store,
     useShallow((s) => ({
       showDevices: s.settings.showDevices,
       showAddDevice: s.settings.showAddDevices,
       showEnableDevice: s.settings.showEnableDevices,
       showRemoveDevice: s.settings.showRemoveDevices,
-      setSetting: s.setSetting,
     })),
   );
-
-  const seeded = useRef(false);
-  useEffect(() => {
-    if (seeded.current) return;
-    seeded.current = true;
-    setSetting("showDevices", devicesMenuSettings.show);
-    setSetting("showAddDevices", devicesMenuSettings.showAdd);
-    setSetting("showEnableDevices", devicesMenuSettings.enableShow);
-    setSetting("showRemoveDevices", devicesMenuSettings.removeShow);
-  }, [devicesMenuSettings, setSetting]);
 
   const [error, setError] = useState("");
   const [open, setOpen] = useState(false);

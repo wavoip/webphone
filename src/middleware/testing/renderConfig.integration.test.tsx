@@ -69,18 +69,17 @@ describe("webphone.render(config) — provider tree integration", () => {
   });
 
   describe("theme via localStorage", () => {
-    it("ThemeProvider seeds store theme from localStorage on mount", async () => {
-      localStorage.setItem("webphone-ui-theme-test", "dark");
+    it("bootstrapStore seeds store theme from localStorage on mount", async () => {
+      localStorage.setItem("webphone-ui-theme", "dark");
       const { api } = await renderWithProviders();
       expect(api.theme.value).toBe("dark");
     });
 
-    it("api.theme.set writes to the configured storage key", async () => {
+    it("api.theme.set persists to localStorage via ThemeProvider effect", async () => {
       const { api } = await renderWithProviders();
       api.theme.set("light");
-      // ThemeProvider persists via useEffect → wait for the commit + flush.
       await waitFor(() => {
-        expect(localStorage.getItem("webphone-ui-theme-test")).toBe("light");
+        expect(localStorage.getItem("webphone-ui-theme")).toBe("light");
       });
       expect(api.theme.value).toBe("light");
     });

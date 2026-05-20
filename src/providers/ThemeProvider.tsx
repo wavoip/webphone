@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { useStore } from "zustand";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { Theme } from "@/providers/settings/settings";
@@ -6,32 +6,17 @@ import type { Theme } from "@/providers/settings/settings";
 type ThemeProviderProps = {
   children: React.ReactNode;
   root: HTMLDivElement;
-  defaultTheme?: Theme;
   storageKey?: string;
 };
 
 /**
  * Owns DOM theme class application and persistence. Theme value is sourced
- * from the middleware store so `window.wavoip.theme.set(...)` flows through
- * here automatically.
+ * from the middleware store (seeded at bootstrap) so `window.wavoip.theme.set`
+ * flows through here automatically. Initial seeding lives in `bootstrapStore`.
  */
-export function ThemeProvider({
-  children,
-  root,
-  defaultTheme = "system",
-  storageKey = "wavoip-webphone-ui-theme",
-}: ThemeProviderProps) {
+export function ThemeProvider({ children, root, storageKey = "webphone-ui-theme" }: ThemeProviderProps) {
   const middleware = useMiddleware();
   const theme = useStore(middleware.store, (s) => s.theme);
-  const setStoreTheme = useStore(middleware.store, (s) => s.setTheme);
-
-  const [seeded, setSeeded] = useState(false);
-  useEffect(() => {
-    if (seeded) return;
-    const stored = (localStorage.getItem(storageKey) as Theme | null) ?? defaultTheme;
-    setStoreTheme(stored);
-    setSeeded(true);
-  }, [seeded, storageKey, defaultTheme, setStoreTheme]);
 
   useEffect(() => {
     root.classList.remove("light", "dark");

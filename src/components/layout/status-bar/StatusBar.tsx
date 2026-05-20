@@ -1,5 +1,4 @@
 import { XIcon } from "@phosphor-icons/react";
-import { useEffect, useRef } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
@@ -8,32 +7,21 @@ import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
 import { useMiddleware } from "@/middleware/react/hooks";
-import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  const { notifications, settings } = useSettings();
   const { callActive } = useWavoip();
 
   const middleware = useMiddleware();
-  const { showNotifications, showSettings, setSetting } = useStore(
+  const { showNotifications, showSettings } = useStore(
     middleware.store,
     useShallow((s) => ({
       showNotifications: s.settings.showNotifications,
       showSettings: s.settings.showSettings,
-      setSetting: s.setSetting,
     })),
   );
-
-  const seeded = useRef(false);
-  useEffect(() => {
-    if (seeded.current) return;
-    seeded.current = true;
-    setSetting("showNotifications", notifications.show);
-    setSetting("showSettings", settings.show);
-  }, [notifications.show, settings.show, setSetting]);
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: Needs interaction

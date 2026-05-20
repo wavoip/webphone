@@ -67,8 +67,8 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const rendered = render(
     <ShadowRootContext.Provider value={{ shadowRoot, root }}>
       <SettingsProvider config={options.config ?? {}}>
-        <MiddlewareRoot wavoip={fake.asWavoip()}>
-          <ThemeProvider root={root} storageKey="webphone-ui-theme-test">
+        <MiddlewareRoot wavoip={fake.asWavoip()} config={options.config ?? {}}>
+          <ThemeProvider root={root}>
             <WidgetProvider>
               <NotificationsProvider>
                 <ScreenProvider>{options.children ?? null}</ScreenProvider>

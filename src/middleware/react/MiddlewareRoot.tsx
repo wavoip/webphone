@@ -5,13 +5,15 @@ import Vibration from "@/assets/sounds/vibration.mp3";
 import { getSettings } from "@/lib/device-settings";
 import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { setPublicApiBase } from "@/lib/webphone-api/api";
+import { bootstrapStore } from "@/middleware/bootstrap/bootstrapStore";
 import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
 import { MiddlewareProvider } from "@/middleware/react/hooks";
 import { useSettings } from "@/providers/settings/Provider";
+import type { WebphoneSettings } from "@/providers/settings/settings";
 
-type Props = { children: ReactNode; wavoip?: Wavoip };
+type Props = { children: ReactNode; wavoip?: Wavoip; config?: WebphoneSettings };
 
 /**
  * Owns the {@link Middleware} lifecycle and exposes it via
@@ -20,7 +22,7 @@ type Props = { children: ReactNode; wavoip?: Wavoip };
  * etc.) can read from / write to the middleware store without re-implementing
  * state.
  */
-export function MiddlewareRoot({ children, wavoip: injectedWavoip }: Props) {
+export function MiddlewareRoot({ children, wavoip: injectedWavoip, config }: Props) {
   const settings = useSettings();
 
   const [middleware] = useState(() => {
@@ -34,6 +36,7 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip }: Props) {
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),
       vibration: audioRingtonePlayer(new Audio(Vibration)),
     }).init();
+    bootstrapStore({ store: mw.store, config: config ?? {} });
     setPublicApiBase(buildPublicApi(mw));
     return mw;
   });

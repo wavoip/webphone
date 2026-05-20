@@ -21,8 +21,8 @@ export function App({ shadowRoot, root, config, wavoip }: Props) {
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
-        <MiddlewareRoot wavoip={wavoip}>
-          <ThemeProvider root={root} defaultTheme={config.theme} storageKey="webphone-ui-theme">
+        <MiddlewareRoot wavoip={wavoip} config={config}>
+          <ThemeProvider root={root}>
             <WidgetProvider>
               <NotificationsProvider>
                 <ScreenProvider>
