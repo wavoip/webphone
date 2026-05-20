@@ -115,7 +115,7 @@ export function CallButtons({ call }: Props) {
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foregroud wv:tracking-[.15em] wv:text-center">Finalizar</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Finalizar</p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button
