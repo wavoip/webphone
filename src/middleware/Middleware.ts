@@ -4,9 +4,12 @@ import { CallController } from "@/middleware/controllers/CallController";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
 import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { beforeUnloadEffect } from "@/middleware/effects/beforeUnload";
+import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
 import { ringtoneEffect, type RingtonePlayer } from "@/middleware/effects/ringtone";
+import { EventBus } from "@/middleware/events/EventBus";
+import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 
@@ -34,6 +37,7 @@ export class Middleware {
   readonly wavoip: Wavoip;
   readonly store: MiddlewareStoreApi;
   readonly registry: MiddlewareRegistry;
+  readonly events: EventBus<WebphoneEventMap>;
   readonly controllers: Controllers;
   private readonly ringtone: RingtonePlayer;
   private readonly vibration: RingtonePlayer;
@@ -46,6 +50,7 @@ export class Middleware {
     this.vibration = deps.vibration ?? NOOP_PLAYER;
     this.store = createMiddlewareStore();
     this.registry = new MiddlewareRegistry();
+    this.events = new EventBus<WebphoneEventMap>();
     this.controllers = {
       call: new CallController({ wavoip: this.wavoip, store: this.store }),
       device: new DeviceController({ wavoip: this.wavoip, store: this.store }),
@@ -61,7 +66,13 @@ export class Middleware {
     this.controllers.notifications.hydrate();
 
     this.unsubs.push(
-      bindWavoipEvents({ wavoip: this.wavoip, registry: this.registry, callController: this.controllers.call }),
+      bindWavoipEvents({
+        wavoip: this.wavoip,
+        registry: this.registry,
+        callController: this.controllers.call,
+        events: this.events,
+      }),
+      callLifecycleEventsEffect({ store: this.store, events: this.events }),
       persistDevicesEffect({ store: this.store }),
       resetCallTimerEffect({ store: this.store }),
       ringtoneEffect({ store: this.store, ringtone: this.ringtone, vibration: this.vibration }),
@@ -74,6 +85,7 @@ export class Middleware {
   destroy(): void {
     for (const unsub of this.unsubs) unsub();
     this.unsubs = [];
+    this.events.clear();
     this.started = false;
   }
 }
