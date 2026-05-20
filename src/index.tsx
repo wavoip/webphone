@@ -1,3 +1,4 @@
+import type { Wavoip } from "@wavoip/wavoip-api";
 import ReactDOM from "react-dom/client";
 import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
@@ -10,7 +11,7 @@ class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render(config?: WebphoneSettings) {
+  async render(config?: WebphoneSettings, wavoip?: Wavoip) {
     if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");
@@ -35,7 +36,7 @@ class WebPhoneComponent {
     root.appendChild(container);
 
     this.root = ReactDOM.createRoot(container);
-    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} />);
+    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} wavoip={wavoip} />);
 
     const webphoneAPI = await webphoneAPIPromise();
     window.wavoip = webphoneAPI;

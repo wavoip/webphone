@@ -1,3 +1,4 @@
+import type { Wavoip } from "@wavoip/wavoip-api";
 import { WebPhone } from "@/components/WebPhone";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ScreenProvider } from "@/providers/ScreenProvider";
@@ -12,6 +13,7 @@ type Props = {
   shadowRoot: ShadowRoot;
   root: HTMLDivElement;
   config: WebphoneSettings;
+  wavoip?: Wavoip;
 };
 
 // async function handleOpenPiP(root: HTMLDivElement, shadowRoot: ShadowRoot, setIsPipActive: (active: boolean) => void) {
@@ -70,7 +72,7 @@ type Props = {
 //   }
 // }
 
-export function App({ shadowRoot, root, config }: Props) {
+export function App({ shadowRoot, root, config, wavoip }: Props) {
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>
@@ -78,7 +80,7 @@ export function App({ shadowRoot, root, config }: Props) {
           <WidgetProvider>
             <NotificationsProvider>
               <ScreenProvider>
-                <WavoipProvider>
+                <WavoipProvider wavoip={wavoip}>
                   <WebPhone />
                 </WavoipProvider>
               </ScreenProvider>

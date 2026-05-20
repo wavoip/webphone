@@ -43,13 +43,14 @@ interface WavoipContextProps {
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
-type RootProps = { children: ReactNode };
+type RootProps = { children: ReactNode; wavoip?: Wavoip };
 
-export const WavoipProvider: React.FC<RootProps> = ({ children }) => {
+export const WavoipProvider: React.FC<RootProps> = ({ children, wavoip: injectedWavoip }) => {
   const settings = useSettings();
 
   const [middleware] = useState(() => {
-    const wavoip = new Wavoip({ tokens: [...getSettings().keys()], platform: settings.platform });
+    const wavoip =
+      injectedWavoip ?? new Wavoip({ tokens: [...getSettings().keys()], platform: settings.platform });
     const mw = new Middleware({
       wavoip,
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),
