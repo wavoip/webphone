@@ -83,6 +83,7 @@ function buildOverlayView(): WebphoneAPI {
     settings: buildSettings(),
     position: buildPosition(),
     on: (event, cb) => (overlay.on ?? requireBase().on)(event, cb),
+    use: (event, fn) => (overlay.use ?? requireBase().use)(event, fn),
   };
 }
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetForTesting, setPublicApiBase, webphoneAPIPromise } from "@/lib/webphone-api/api";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("api.ts public surface", () => {
   beforeEach(() => {
@@ -42,6 +42,21 @@ describe("api.ts public surface", () => {
     });
     expect(cb).toHaveBeenCalledTimes(1);
     off();
+  });
+
+  it("use() registers middleware on the underlying registry", async () => {
+    const wavoip = new FakeWavoip(["tok-1"]);
+    const middleware = new Middleware({ wavoip: wavoip.asWavoip() }).init();
+    setPublicApiBase(buildPublicApi(middleware));
+    const api = await webphoneAPIPromise();
+    const seen: string[] = [];
+    api.use("offer", (offer, next) => {
+      seen.push(offer.id);
+      next();
+    });
+    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    await new Promise((r) => setTimeout(r, 0));
+    expect(seen).toEqual(["o1"]);
   });
 
   it("subsequent setPublicApiBase calls are a no-op", async () => {

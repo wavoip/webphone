@@ -132,6 +132,37 @@ describe("buildPublicApi", () => {
     });
   });
 
+  describe("use (programmatic middleware)", () => {
+    it("registers an offer middleware that receives the live Offer", async () => {
+      const seen: string[] = [];
+      api.use("offer", (offer, next) => {
+        seen.push(offer.id);
+        next();
+      });
+      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(seen).toEqual(["o1"]);
+      expect(middleware.store.getState().offers.map((o) => o.id)).toEqual(["o1"]);
+    });
+
+    it("blocks the offer from reaching the store when next() is not called", async () => {
+      api.use("offer", () => {});
+      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(middleware.store.getState().offers).toEqual([]);
+    });
+
+    it("allows mutating the offer (e.g. peer.displayName) before delivery", async () => {
+      api.use("offer", (offer, next) => {
+        offer.peer.displayName = "Friendly Name";
+        next();
+      });
+      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      await new Promise((r) => setTimeout(r, 0));
+      expect(middleware.store.getState().offers[0]?.peer.displayName).toBe("Friendly Name");
+    });
+  });
+
   describe("on (programmatic events)", () => {
     it("delegates to middleware.events and forwards payloads", () => {
       const cb = vi.fn();

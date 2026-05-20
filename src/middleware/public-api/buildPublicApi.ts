@@ -18,6 +18,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
 
   return {
     on: (event, cb) => events.on(event, cb),
+    use: (event, fn) => registry.use(event, fn),
     call: {
       start: (to, config) => controllers.call.start(to, config),
       startCall: (to, fromTokens) => {
