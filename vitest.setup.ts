@@ -1,6 +1,41 @@
 import "@testing-library/jest-dom/vitest";
 import { beforeEach } from "vitest";
 
+// happy-dom 20 does not provide AudioContext or AudioWorkletNode; the wavoip
+// SDK constructs an AudioContext during `new Wavoip(...)` so stub a minimal
+// version for tests that exercise the real SDK.
+class FakeAudioContext {
+  audioWorklet = { addModule: async () => {} };
+  destination = {};
+  state = "suspended";
+  createMediaStreamSource() {
+    return { connect: () => {} };
+  }
+  suspend() {
+    return Promise.resolve();
+  }
+  resume() {
+    return Promise.resolve();
+  }
+  close() {
+    return Promise.resolve();
+  }
+}
+Object.defineProperty(window, "AudioContext", { value: FakeAudioContext, configurable: true });
+Object.defineProperty(globalThis, "AudioContext", { value: FakeAudioContext, configurable: true });
+
+if (!navigator.mediaDevices) {
+  Object.defineProperty(navigator, "mediaDevices", {
+    value: {
+      enumerateDevices: async () => [],
+      getUserMedia: async () => ({ getTracks: () => [], getAudioTracks: () => [] }),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    },
+    configurable: true,
+  });
+}
+
 // happy-dom 20 ships a stub localStorage without methods; supply a working one.
 class MemoryStorage implements Storage {
   private map = new Map<string, string>();

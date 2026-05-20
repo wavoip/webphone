@@ -32,6 +32,17 @@ describe("DeviceController", () => {
     expect(b.enable).toBe(false);
   });
 
+  it("hydrate restores a real-world UUID-style token from localStorage", () => {
+    const uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+    localStorage.setItem("wavoip:tokens", `${uuid}:true:true`);
+    wavoip.addDevices([uuid]);
+    controller.hydrate();
+    const [device] = store.getState().devices;
+    expect(device.token).toBe(uuid);
+    expect(device.persist).toBe(true);
+    expect(device.enable).toBe(true);
+  });
+
   it("hydrate falls back to status-based enable when no localStorage entry", () => {
     wavoip.addDevices(["tok-1"]);
     controller.hydrate();
