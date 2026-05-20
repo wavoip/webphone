@@ -47,8 +47,8 @@ describe("callLifecycleEventsEffect", () => {
     const cb = vi.fn();
     events.on("call:ended", cb);
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
-    store.getState().setCallStatus("ended");
-    expect(cb).toHaveBeenCalledWith({ id: "c1", status: "ended" });
+    store.getState().setCallStatus("ENDED");
+    expect(cb).toHaveBeenCalledWith({ id: "c1", status: "ENDED" });
     unsub();
   });
 
@@ -56,12 +56,12 @@ describe("callLifecycleEventsEffect", () => {
     const cb = vi.fn();
     events.on("call:ended", cb);
     store.getState().setOutgoing(new FakeCallOutgoing("c2", "tok-1"));
-    store.getState().setCallStatus("failed");
+    store.getState().setCallStatus("FAILED");
     store.getState().resetCall();
     store.getState().setOutgoing(new FakeCallOutgoing("c3", "tok-1"));
-    store.getState().setCallStatus("rejected");
+    store.getState().setCallStatus("REJECTED");
     expect(cb).toHaveBeenCalledTimes(2);
-    expect(cb.mock.calls.map((c) => c[0].status)).toEqual(["failed", "rejected"]);
+    expect(cb.mock.calls.map((c) => c[0].status)).toEqual(["FAILED", "REJECTED"]);
     unsub();
   });
 

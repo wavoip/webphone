@@ -88,7 +88,7 @@ describe("Middleware", () => {
   it("destroy() removes beforeunload listener if a call was active", () => {
     const removeSpy = vi.spyOn(window, "removeEventListener");
     const mw = new Middleware({ wavoip: wavoip.asWavoip() }).init();
-    mw.store.getState().setCallStatus("active");
+    mw.store.getState().setCallStatus("ACTIVE");
     mw.destroy();
     expect(removeSpy).toHaveBeenCalledWith("beforeunload", expect.any(Function));
     removeSpy.mockRestore();

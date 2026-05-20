@@ -44,7 +44,7 @@ describe("CallController", () => {
       const result = await controller.start("5511");
       expect(result.err).toBeNull();
       expect(store.getState().outgoing?.id).toBe("c1");
-      expect(store.getState().callStatus).toBe("calling");
+      expect(store.getState().callStatus).toBe("CALLING");
     });
 
     it("returns a CallSummary with id + peer", async () => {
@@ -61,7 +61,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("status", "RINGING");
-      expect(store.getState().callStatus).toBe("ringing");
+      expect(store.getState().callStatus).toBe("RINGING");
     });
 
     it("outgoing status FAILED transitions to 'failed'", async () => {
@@ -69,7 +69,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("status", "FAILED");
-      expect(store.getState().callStatus).toBe("failed");
+      expect(store.getState().callStatus).toBe("FAILED");
     });
 
     it("peerAccept moves outgoing to active and sets status", async () => {
@@ -80,7 +80,7 @@ describe("CallController", () => {
       outgoing.emitEvent("peerAccept", active);
       expect(store.getState().active?.id).toBe("c1");
       expect(store.getState().outgoing).toBeUndefined();
-      expect(store.getState().callStatus).toBe("active");
+      expect(store.getState().callStatus).toBe("ACTIVE");
     });
 
     it("active call ended event sets status 'ended'", async () => {
@@ -90,7 +90,7 @@ describe("CallController", () => {
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
       active.emitEvent("ended");
-      expect(store.getState().callStatus).toBe("ended");
+      expect(store.getState().callStatus).toBe("ENDED");
     });
 
     it("active peerMute / peerUnmute toggles peerMuted", async () => {
@@ -112,7 +112,21 @@ describe("CallController", () => {
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
       active.emitEvent("status", "DISCONNECTED");
-      expect(store.getState().callStatus).toBe("reconnecting");
+      expect(store.getState().callStatus).toBe("DISCONNECTED");
+    });
+
+    it("active status ENDED does not clobber a prior 'ended' state", async () => {
+      // Repro: webphone-side hangup sets "ended" synchronously, then wavoip
+      // emits status="ENDED" — old handler mapped that to "active", flashing
+      // the duration back on screen for a split second.
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      outgoing.emitEvent("peerAccept", active);
+      store.getState().setCallStatus("ENDED");
+      active.emitEvent("status", "ENDED");
+      expect(store.getState().callStatus).toBe("ENDED");
     });
 
     it("outgoing peerReject → 'rejected'", async () => {
@@ -120,7 +134,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerReject");
-      expect(store.getState().callStatus).toBe("rejected");
+      expect(store.getState().callStatus).toBe("REJECTED");
     });
 
     it("outgoing unanswered → 'unanswered'", async () => {
@@ -128,7 +142,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("unanswered");
-      expect(store.getState().callStatus).toBe("unanswered");
+      expect(store.getState().callStatus).toBe("NOT_ANSWERED");
     });
   });
 
@@ -136,17 +150,17 @@ describe("CallController", () => {
     it("flips callStatus to 'ended' immediately on active end", async () => {
       const active = new FakeCallActive("c1", "tok-1");
       store.getState().setActive(active);
-      store.getState().setCallStatus("active");
+      store.getState().setCallStatus("ACTIVE");
       await controller.end();
-      expect(store.getState().callStatus).toBe("ended");
+      expect(store.getState().callStatus).toBe("ENDED");
     });
 
     it("flips callStatus to 'ended' on outgoing end when no active call", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
-      store.getState().setCallStatus("calling");
+      store.getState().setCallStatus("CALLING");
       await controller.end();
-      expect(store.getState().callStatus).toBe("ended");
+      expect(store.getState().callStatus).toBe("ENDED");
     });
 
     it("no-ops when no call is in flight", async () => {
@@ -189,7 +203,7 @@ describe("CallController", () => {
       expect(result.err).toBeNull();
       expect(store.getState().active?.id).toBe("o1");
       expect(store.getState().offers).toEqual([]);
-      expect(store.getState().callStatus).toBe("active");
+      expect(store.getState().callStatus).toBe("ACTIVE");
     });
 
     it("accept() with err leaves offer in place and does not promote to active", async () => {

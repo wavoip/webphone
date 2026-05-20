@@ -64,10 +64,10 @@ describe("callSlice", () => {
   });
 
   it("setCallStatus transitions", () => {
-    store.getState().setCallStatus("calling");
-    expect(store.getState().callStatus).toBe("calling");
-    store.getState().setCallStatus("active");
-    expect(store.getState().callStatus).toBe("active");
+    store.getState().setCallStatus("CALLING");
+    expect(store.getState().callStatus).toBe("CALLING");
+    store.getState().setCallStatus("ACTIVE");
+    expect(store.getState().callStatus).toBe("ACTIVE");
   });
 
   it("setPeerMuted toggles", () => {
@@ -81,7 +81,7 @@ describe("callSlice", () => {
     store.getState().addOffer(makeOffer("a"));
     store.getState().setOutgoing(makeOutgoing("o"));
     store.getState().setActive(makeActive("c"));
-    store.getState().setCallStatus("active");
+    store.getState().setCallStatus("ACTIVE");
     store.getState().setPeerMuted(true);
 
     store.getState().resetCall();

@@ -25,13 +25,13 @@ export class CallController {
     this.bindOutgoing(call);
     const { store } = this.deps;
     store.getState().setOutgoing(call);
-    store.getState().setCallStatus("calling");
+    store.getState().setCallStatus("CALLING");
 
     return { call: { id: call.id, peer: call.peer }, err: null };
   }
 
   /**
-   * Ends the currently active or outgoing call and flips status to "ended"
+   * Ends the currently active or outgoing call and flips status to "ENDED"
    * immediately. wavoip-api's call.end() does not emit "ended" locally — it
    * only fires when the server confirms — so the UI would otherwise stay on
    * the running duration until the WSS round-trip lands.
@@ -42,7 +42,7 @@ export class CallController {
     const call = active ?? outgoing;
     if (!call) return { err: null };
     const result = await call.end();
-    store.getState().setCallStatus("ended");
+    store.getState().setCallStatus("ENDED");
     return result;
   }
 
@@ -75,7 +75,7 @@ export class CallController {
     store.getState().removeOffer(offerId);
     this.bindActive(call);
     store.getState().setActive(call);
-    store.getState().setCallStatus("active");
+    store.getState().setCallStatus("ACTIVE");
     store.getState().setPeerMuted(call.peer.muted ?? false);
   }
 
@@ -89,27 +89,21 @@ export class CallController {
       store.getState().setOutgoing(undefined);
       this.bindActive(active);
       store.getState().setActive(active);
-      store.getState().setCallStatus("active");
+      store.getState().setCallStatus("ACTIVE");
       store.getState().setPeerMuted(active.peer.muted ?? false);
     });
-    call.on("peerReject", () => store.getState().setCallStatus("rejected"));
-    call.on("unanswered", () => store.getState().setCallStatus("unanswered"));
-    call.on("ended", () => store.getState().setCallStatus("ended"));
-    call.on("status", (status) => {
-      if (status === "CALLING") store.getState().setCallStatus("calling");
-      if (status === "RINGING") store.getState().setCallStatus("ringing");
-      if (status === "FAILED") store.getState().setCallStatus("failed");
-    });
+    call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
+    call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
+    call.on("ended", () => store.getState().setCallStatus("ENDED"));
+    call.on("status", (status) => store.getState().setCallStatus(status));
   }
 
   private bindActive(call: CallActive): void {
     const { store } = this.deps;
-    call.on("ended", () => store.getState().setCallStatus("ended"));
+    call.on("ended", () => store.getState().setCallStatus("ENDED"));
     call.on("peerMute", () => store.getState().setPeerMuted(true));
     call.on("peerUnmute", () => store.getState().setPeerMuted(false));
-    call.on("status", (status) => {
-      store.getState().setCallStatus(status === "DISCONNECTED" ? "reconnecting" : "active");
-    });
+    call.on("status", (status) => store.getState().setCallStatus(status));
   }
 
   private enabledTokens(): string[] {

@@ -4,7 +4,7 @@ import type { CallStatus } from "@/middleware/store/slices/callSlice";
 type Deps = { store: MiddlewareStoreApi };
 export type Unsubscribe = () => void;
 
-const IN_CALL: ReadonlySet<CallStatus> = new Set(["calling", "ringing", "active", "reconnecting"]);
+const IN_CALL: ReadonlySet<CallStatus> = new Set(["CALLING", "RINGING", "ACTIVE", "DISCONNECTED"]);
 
 function handleBeforeUnload(e: BeforeUnloadEvent) {
   e.preventDefault();

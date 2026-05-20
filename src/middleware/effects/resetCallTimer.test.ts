@@ -18,7 +18,7 @@ describe("resetCallTimerEffect", () => {
   it("does not reset until 3s after a terminal status", () => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
-    store.getState().setCallStatus("ended");
+    store.getState().setCallStatus("ENDED");
 
     vi.advanceTimersByTime(2999);
     expect(store.getState().outgoing).toBeDefined();
@@ -32,11 +32,11 @@ describe("resetCallTimerEffect", () => {
   it("ignores non-terminal status changes", () => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
-    store.getState().setCallStatus("calling");
+    store.getState().setCallStatus("CALLING");
 
     vi.advanceTimersByTime(5000);
     expect(store.getState().outgoing).toBeDefined();
-    expect(store.getState().callStatus).toBe("calling");
+    expect(store.getState().callStatus).toBe("CALLING");
     unsub();
   });
 
@@ -44,7 +44,7 @@ describe("resetCallTimerEffect", () => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setActive(new FakeCallActive("c1", "tok"));
     store.getState().setPeerMuted(true);
-    store.getState().setCallStatus("failed");
+    store.getState().setCallStatus("FAILED");
 
     vi.advanceTimersByTime(3000);
     expect(store.getState().active).toBeUndefined();
@@ -52,7 +52,7 @@ describe("resetCallTimerEffect", () => {
     unsub();
   });
 
-  it.each(["ended", "failed", "rejected", "unanswered"] as const)("treats %s as terminal", (status) => {
+  it.each(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
     store.getState().setCallStatus(status);
@@ -64,7 +64,7 @@ describe("resetCallTimerEffect", () => {
   it("unsub cancels pending timer", () => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
-    store.getState().setCallStatus("ended");
+    store.getState().setCallStatus("ENDED");
     unsub();
 
     vi.advanceTimersByTime(3000);

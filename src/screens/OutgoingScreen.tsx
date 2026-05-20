@@ -17,17 +17,17 @@ export default function OutgoingScreen() {
 
   const status = useMemo(() => {
     switch (callStatus) {
-      case "calling":
+      case "CALLING":
         return "Ligando...";
-      case "ringing":
+      case "RINGING":
         return "Chamando...";
-      case "failed":
+      case "FAILED":
         return "A ligação falhou";
-      case "rejected":
+      case "REJECTED":
         return "Chamada rejeitada";
-      case "unanswered":
+      case "NOT_ANSWERED":
         return "Chamada não atendida";
-      case "ended":
+      case "ENDED":
         return "Chamada encerrada";
       default:
         return null;
@@ -35,18 +35,18 @@ export default function OutgoingScreen() {
   }, [callStatus]);
 
   useEffect(() => {
-    if (callStatus === "ringing") {
+    if (callStatus === "RINGING") {
       calling_sound.currentTime = 0;
       calling_sound.volume = 0.25;
       calling_sound.loop = true;
       calling_sound.play();
-    } else if (callStatus === "failed" || callStatus === "unanswered") {
+    } else if (callStatus === "FAILED" || callStatus === "NOT_ANSWERED") {
       calling_sound.pause();
       calling_sound.currentTime = 0;
       postalcode_sound.currentTime = 0;
       postalcode_sound.volume = 0.25;
       postalcode_sound.play();
-    } else if (callStatus !== "calling") {
+    } else if (callStatus !== "CALLING") {
       calling_sound.pause();
       calling_sound.currentTime = 0;
       postalcode_sound.pause();

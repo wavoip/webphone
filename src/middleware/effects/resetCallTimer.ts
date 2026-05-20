@@ -4,7 +4,7 @@ import type { CallStatus } from "@/middleware/store/slices/callSlice";
 type Deps = { store: MiddlewareStoreApi; delayMs?: number };
 export type Unsubscribe = () => void;
 
-const TERMINAL: ReadonlySet<CallStatus> = new Set(["ended", "failed", "rejected", "unanswered"]);
+const TERMINAL: ReadonlySet<CallStatus> = new Set(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"]);
 const DEFAULT_DELAY_MS = 3000;
 
 export function resetCallTimerEffect({ store, delayMs = DEFAULT_DELAY_MS }: Deps): Unsubscribe {

@@ -1,17 +1,12 @@
-import type { CallActive, CallOutgoing, Offer } from "@wavoip/wavoip-api";
+import type { CallActive, CallOutgoing, Offer, CallStatus as WavoipCallStatus } from "@wavoip/wavoip-api";
 import type { StateCreator } from "zustand";
 import type { MiddlewareStore } from "@/middleware/store/types";
 
-export type CallStatus =
-  | "idle"
-  | "calling"
-  | "ringing"
-  | "active"
-  | "reconnecting"
-  | "ended"
-  | "failed"
-  | "rejected"
-  | "unanswered";
+/**
+ * Mirrors `CallStatus` from `@wavoip/wavoip-api` verbatim, plus `"idle"` for
+ * the no-call resting state. Keep this in sync with the SDK's enum.
+ */
+export type CallStatus = WavoipCallStatus | "idle";
 
 export type CallSliceState = {
   offers: Offer[];
@@ -39,7 +34,7 @@ const initialCallState: CallSliceState = {
   active: undefined,
   callStatus: "idle",
   peerMuted: false,
-};
+} as const;
 
 export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> = (set) => ({
   ...initialCallState,

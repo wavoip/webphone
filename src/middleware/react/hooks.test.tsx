@@ -48,8 +48,8 @@ describe("MiddlewareProvider + hooks", () => {
 
   it("useCallState re-renders on callStatus changes", () => {
     const { result } = renderHook(() => useCallState(), { wrapper: withProvider(middleware) });
-    act(() => middleware.store.getState().setCallStatus("calling"));
-    expect(result.current.callStatus).toBe("calling");
+    act(() => middleware.store.getState().setCallStatus("CALLING"));
+    expect(result.current.callStatus).toBe("CALLING");
   });
 
   it("useDevices reflects current devices", () => {

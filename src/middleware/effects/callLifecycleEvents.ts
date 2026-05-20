@@ -7,7 +7,7 @@ import type { CallStatus } from "@/middleware/store/slices/callSlice";
 type Deps = { store: MiddlewareStoreApi; events: EventBus<WebphoneEventMap> };
 export type Unsubscribe = () => void;
 
-const TERMINAL: ReadonlySet<CallStatus> = new Set(["ended", "failed", "rejected", "unanswered"]);
+const TERMINAL: ReadonlySet<CallStatus> = new Set(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"]);
 
 /**
  * Bridges store state transitions to {@link WebphoneEventMap} broadcasts:
