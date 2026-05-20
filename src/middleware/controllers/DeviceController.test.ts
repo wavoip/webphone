@@ -43,6 +43,17 @@ describe("DeviceController", () => {
     expect(device.enable).toBe(true);
   });
 
+  it("hydrate from injected wavoip with merged stored tokens", () => {
+    // Simulates MiddlewareRoot path where caller passes their own (empty)
+    // Wavoip and the runtime calls addDevices(stored) before hydrate.
+    const uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
+    localStorage.setItem("wavoip:tokens", `${uuid}:true:true`);
+    wavoip.addDevices([uuid]);
+    controller.hydrate();
+    expect(store.getState().devices.map((d) => d.token)).toEqual([uuid]);
+    expect(store.getState().devices[0].persist).toBe(true);
+  });
+
   it("hydrate falls back to status-based enable when no localStorage entry", () => {
     wavoip.addDevices(["tok-1"]);
     controller.hydrate();

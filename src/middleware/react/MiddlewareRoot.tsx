@@ -24,7 +24,11 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip }: Props) {
   const settings = useSettings();
 
   const [middleware] = useState(() => {
-    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: [...getSettings().keys()], platform: settings.platform });
+    const storedTokens = [...getSettings().keys()];
+    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform });
+    // When the caller injects a Wavoip we still own device persistence — merge
+    // stored tokens in so hydrate can restore them. `addDevices` dedupes.
+    if (injectedWavoip && storedTokens.length) injectedWavoip.addDevices(storedTokens);
     const mw = new Middleware({
       wavoip,
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),
