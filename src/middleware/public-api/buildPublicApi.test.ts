@@ -169,10 +169,10 @@ describe("buildPublicApi", () => {
       const off = api.on("call:started", cb);
       middleware.events.emit("call:started", {
         id: "c1",
-        type: "outgoing",
-        status: "calling",
+        type: "UNOFFICIAL",
+        status: "CALLING",
         device_token: "tok-1",
-        direction: "outgoing",
+        direction: "OUTGOING",
         peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
       });
       expect(cb).toHaveBeenCalledTimes(1);
@@ -186,10 +186,10 @@ describe("buildPublicApi", () => {
       off();
       middleware.events.emit("offer:received", {
         id: "o1",
-        type: "offer",
-        status: "received",
+        type: "UNOFFICIAL",
+        status: "RINGING",
         device_token: "tok-1",
-        direction: "incoming",
+        direction: "INCOMING",
         peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
       });
       expect(cb).not.toHaveBeenCalled();

@@ -163,7 +163,7 @@ function useToastBridge(middleware: Middleware) {
 function useWidgetCache(
   middleware: Middleware,
   isClosed: boolean,
-  setIsClosed: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsClosed: (closed: boolean) => void,
   openWidget: () => void,
 ) {
   const closedCache = React.useRef<boolean | null>(null);
@@ -188,7 +188,7 @@ function usePictureInPictureSync(middleware: Middleware) {
   useEffect(() => {
     return middleware.store.subscribe(
       (s) => s.active ?? s.outgoing,
-      (call) => {},
+      () => {},
     );
   }, [middleware]);
 }

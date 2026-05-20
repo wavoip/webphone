@@ -34,10 +34,10 @@ describe("api.ts public surface", () => {
     const off = api.on("call:started", cb);
     middleware.events.emit("call:started", {
       id: "c1",
-      type: "outgoing",
-      status: "calling",
+      type: "UNOFFICIAL",
+      status: "CALLING",
       device_token: "tok-1",
-      direction: "outgoing",
+      direction: "OUTGOING",
       peer: { phone: "5511", displayName: null, profilePicture: null, muted: false },
     });
     expect(cb).toHaveBeenCalledTimes(1);
