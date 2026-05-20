@@ -132,6 +132,31 @@ describe("CallController", () => {
     });
   });
 
+  describe("end", () => {
+    it("flips callStatus to 'ended' immediately on active end", async () => {
+      const active = new FakeCallActive("c1", "tok-1");
+      store.getState().setActive(active);
+      store.getState().setCallStatus("active");
+      await controller.end();
+      expect(store.getState().callStatus).toBe("ended");
+    });
+
+    it("flips callStatus to 'ended' on outgoing end when no active call", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("calling");
+      await controller.end();
+      expect(store.getState().callStatus).toBe("ended");
+    });
+
+    it("no-ops when no call is in flight", async () => {
+      const before = store.getState().callStatus;
+      const result = await controller.end();
+      expect(result.err).toBeNull();
+      expect(store.getState().callStatus).toBe(before);
+    });
+  });
+
   describe("ingestOffer", () => {
     it("adds the offer to store", () => {
       const offer = new FakeOffer("o1", "tok-1");

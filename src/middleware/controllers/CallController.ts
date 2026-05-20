@@ -30,6 +30,22 @@ export class CallController {
     return { call: { id: call.id, peer: call.peer }, err: null };
   }
 
+  /**
+   * Ends the currently active or outgoing call and flips status to "ended"
+   * immediately. wavoip-api's call.end() does not emit "ended" locally — it
+   * only fires when the server confirms — so the UI would otherwise stay on
+   * the running duration until the WSS round-trip lands.
+   */
+  async end(): Promise<{ err: string | null }> {
+    const { store } = this.deps;
+    const { active, outgoing } = store.getState();
+    const call = active ?? outgoing;
+    if (!call) return { err: null };
+    const result = await call.end();
+    store.getState().setCallStatus("ended");
+    return result;
+  }
+
   ingestOffer(offer: Offer): void {
     this.deps.store.getState().addOffer(this.wrapOffer(offer));
     offer.on("ended", () => this.dropOffer(offer.id));
