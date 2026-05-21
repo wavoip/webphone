@@ -16,13 +16,13 @@ describe("MissedCallController", () => {
     controller = new MissedCallController({ store });
   });
 
-  it("records a MISSED_CALL notification with peer displayName", () => {
+  it("records a MISSED_CALL notification with peer label as message", () => {
     controller.record(buildOffer("o1", "Maria"));
     const list = store.getState().notifications;
     expect(list).toHaveLength(1);
     expect(list[0]).toMatchObject({
       type: "MISSED_CALL",
-      message: "Chamada perdida de Maria",
+      message: "Maria",
       detail: "5511999999999",
       token: "device-1",
       isRead: false,
@@ -32,7 +32,7 @@ describe("MissedCallController", () => {
   it("falls back to phone when displayName is null", () => {
     controller.record(buildOffer("o1", null, "5511888888888"));
     const list = store.getState().notifications;
-    expect(list[0]?.message).toBe("Chamada perdida de 5511888888888");
+    expect(list[0]?.message).toBe("5511888888888");
   });
 
   it("does not persist to localStorage (in-memory only)", () => {

@@ -19,11 +19,13 @@ export class MissedCallController {
   }
 
   record(offer: Offer): void {
+    // Field semantics for MISSED_CALL: `message` holds the peer label so the
+    // UI can render `<label> · <phone>` without parsing a pre-formatted string.
     const entry: Notification = {
       id: new Date(),
       type: "MISSED_CALL",
       created_at: new Date(),
-      message: `Chamada perdida de ${peerLabel(offer)}`,
+      message: peerLabel(offer),
       detail: offer.peer.phone,
       token: offer.device_token,
       isHidden: false,

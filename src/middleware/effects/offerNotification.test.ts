@@ -142,7 +142,7 @@ describe("offerNotificationEffect", () => {
     store.getState().removeOffer("o1");
     const notifs = store.getState().notifications;
     expect(notifs).toHaveLength(1);
-    expect(notifs[0]).toMatchObject({ type: "MISSED_CALL", message: "Chamada perdida de Maria" });
+    expect(notifs[0]).toMatchObject({ type: "MISSED_CALL", message: "Maria" });
     unsub();
   });
 
