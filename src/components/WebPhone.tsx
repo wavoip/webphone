@@ -1,6 +1,7 @@
 import { useCallback } from "react";
+import { useStore } from "zustand";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
-import { useScreen } from "@/providers/ScreenProvider";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
@@ -8,7 +9,8 @@ import OutgoingScreen from "@/screens/OutgoingScreen";
 import pkg from "../../package.json";
 
 export function WebPhone() {
-  const { screen } = useScreen();
+  const middleware = useMiddleware();
+  const screen = useStore(middleware.store, (s) => s.screen);
   const { startDrag, stopDrag } = useWidget();
 
   const handleMouseUp = useCallback(() => {

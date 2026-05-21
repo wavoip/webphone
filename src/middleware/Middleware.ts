@@ -12,6 +12,7 @@ import { offerNotificationEffect } from "@/middleware/effects/offerNotification"
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
 import { type RingtonePlayer, ringtoneEffect } from "@/middleware/effects/ringtone";
+import { screenSyncEffect } from "@/middleware/effects/screenSync";
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";
@@ -100,6 +101,7 @@ export class Middleware {
       persistDevicesEffect({ store: this.store }),
       resetCallTimerEffect({ store: this.store }),
       ringtoneEffect({ store: this.store, ringtone: this.ringtone, vibration: this.vibration }),
+      screenSyncEffect({ store: this.store }),
       offerNotificationEffect({
         store: this.store,
         notifier: this.notifier,

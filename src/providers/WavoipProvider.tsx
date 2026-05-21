@@ -6,7 +6,6 @@ import type { Middleware } from "@/middleware/Middleware";
 import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { useScreen } from "@/providers/ScreenProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWidget } from "@/providers/WidgetProvider";
 
@@ -40,7 +39,6 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   const devices = useDevices();
   const offers = useOffers();
   const { outgoing, active, callStatus, peerMuted } = useCallState();
-  const { setScreen } = useScreen();
   const { isClosed, setIsClosed, open: openWidget } = useWidget();
   const { callSettings } = useSettings();
 
@@ -62,7 +60,6 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   // guard against double-registration with a module-scoped flag per middleware.
   useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
 
-  useScreenSync(middleware, setScreen);
   useToastBridge(middleware);
   useWidgetCache(middleware, isClosed, setIsClosed, openWidget);
   usePictureInPictureSync(middleware);
@@ -123,19 +120,6 @@ function useDisplayNameOfferMiddleware(middleware: Middleware, displayName?: str
       },
     );
   }, [middleware, displayName]);
-}
-
-function useScreenSync(middleware: Middleware, setScreen: (s: "call" | "outgoing" | "keyboard") => void) {
-  useEffect(() => {
-    return middleware.store.subscribe(
-      (s) => ({ active: s.active, outgoing: s.outgoing, status: s.callStatus }),
-      ({ active, outgoing, status }) => {
-        if (active) setScreen("call");
-        else if (outgoing) setScreen("outgoing");
-        else if (status === "idle") setScreen("keyboard");
-      },
-    );
-  }, [middleware, setScreen]);
 }
 
 function useToastBridge(middleware: Middleware) {
