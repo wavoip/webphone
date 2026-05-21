@@ -2,6 +2,8 @@ import { type RenderResult, render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { resetForTesting, webphoneAPIPromise } from "@/lib/webphone-api/api";
 import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
+import type { FocusTracker } from "@/middleware/browser/focusTracker";
+import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
@@ -16,6 +18,8 @@ type MountOptions = {
   wavoip?: FakeWavoip;
   config?: WebphoneSettings;
   children?: ReactNode;
+  notifier?: BrowserNotifier;
+  focus?: FocusTracker;
 };
 
 /**
@@ -36,7 +40,9 @@ export async function renderWithMiddleware(options: MountOptions = {}): Promise<
   const fake = options.wavoip ?? new FakeWavoip();
   const rendered = render(
     <SettingsProvider config={options.config ?? {}}>
-      <MiddlewareRoot wavoip={fake.asWavoip()}>{options.children ?? null}</MiddlewareRoot>
+      <MiddlewareRoot wavoip={fake.asWavoip()} notifier={options.notifier} focus={options.focus}>
+        {options.children ?? null}
+      </MiddlewareRoot>
     </SettingsProvider>,
   );
   const api = await webphoneAPIPromise();
@@ -67,7 +73,12 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const rendered = render(
     <ShadowRootContext.Provider value={{ shadowRoot, root }}>
       <SettingsProvider config={options.config ?? {}}>
-        <MiddlewareRoot wavoip={fake.asWavoip()} config={options.config ?? {}}>
+        <MiddlewareRoot
+          wavoip={fake.asWavoip()}
+          config={options.config ?? {}}
+          notifier={options.notifier}
+          focus={options.focus}
+        >
           <ThemeProvider root={root}>
             <WidgetProvider>
               <NotificationsProvider>

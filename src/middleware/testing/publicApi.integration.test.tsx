@@ -1,6 +1,28 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { BrowserNotifier, NotifyArgs } from "@/middleware/browser/notifier";
 import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithMiddleware, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
+
+class FakeNotifier implements BrowserNotifier {
+  notifyCalls: NotifyArgs[] = [];
+  closeCalls: Array<string | undefined> = [];
+  permissionState: NotificationPermission = "default";
+  requestPermissionCalls = 0;
+  requestPermissionResult: NotificationPermission = "granted";
+
+  notify = (args: NotifyArgs): void => {
+    this.notifyCalls.push(args);
+  };
+  close = (tag?: string): void => {
+    this.closeCalls.push(tag);
+  };
+  permission = (): NotificationPermission => this.permissionState;
+  requestPermission = async (): Promise<NotificationPermission> => {
+    this.requestPermissionCalls += 1;
+    this.permissionState = this.requestPermissionResult;
+    return this.permissionState;
+  };
+}
 
 describe("public API React-tree integration", () => {
   beforeEach(() => {
@@ -82,6 +104,25 @@ describe("public API React-tree integration", () => {
       wavoip.emitEvent("offer", new FakeOffer("o-blocked", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(api.call.getOffers()).toEqual([]);
+    });
+  });
+
+  describe("notifications.permission + requestPermission", () => {
+    it("notifications.permission delegates to the injected notifier", async () => {
+      const notifier = new FakeNotifier();
+      notifier.permissionState = "denied";
+      const { api } = await renderWithMiddleware({ notifier });
+      expect(api.notifications.permission()).toBe("denied");
+    });
+
+    it("notifications.requestPermission calls the notifier and returns the new state", async () => {
+      const notifier = new FakeNotifier();
+      notifier.requestPermissionResult = "granted";
+      const { api } = await renderWithMiddleware({ notifier });
+      const result = await api.notifications.requestPermission();
+      expect(result).toBe("granted");
+      expect(notifier.requestPermissionCalls).toBe(1);
+      expect(api.notifications.permission()).toBe("granted");
     });
   });
 

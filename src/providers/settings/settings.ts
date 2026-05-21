@@ -58,6 +58,15 @@ export type CallSettings = {
   displayName?: string;
 };
 
+export type OfferNotificationSettings = {
+  /** When false, the OS notification on incoming offer is suppressed. Default: true. */
+  enabled?: boolean;
+  /** When true, asks for browser notification permission on mount. Default: false. */
+  autoRequest?: boolean;
+  /** Optional icon URL shown on the OS notification. */
+  icon?: string;
+};
+
 export type WebphoneSettings = {
   theme?: Theme;
   statusBar?: Partial<StatusBarSettings>;
@@ -66,5 +75,6 @@ export type WebphoneSettings = {
   position?: WebphonePosition;
   buttonPosition?: WidgetButtonPosition;
   callSettings?: CallSettings;
+  offerNotification?: OfferNotificationSettings;
   platform?: string;
 };

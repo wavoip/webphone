@@ -161,11 +161,13 @@ Fila de notificações exibidas na barra superior.
 
 | Método | Descrição |
 | --- | --- |
-| `get()` | Lista as notificações atuais. |
-| `add(n)` | Adiciona uma notificação. |
+| `get()` | Lista as notificações atuais (inclui entradas `MISSED_CALL` automáticas). |
+| `add(n)` | Adiciona uma notificação. Persiste em `localStorage`. |
 | `remove(id)` | Remove pelo `id` (`Date`). |
 | `clear()` | Esvazia a lista. |
 | `read()` | Marca todas como lidas. |
+| `permission()` | Retorna o estado atual de permissão de notificação OS (`"default" \| "granted" \| "denied"`). |
+| `requestPermission()` | Pede permissão de notificação OS. Deve ser chamado dentro de um gesto de usuário. Ver [Notificações push](../recursos/notificacoes-push.md). |
 
 {% hint style="warning" %}
 **Métodos depreciados.** As versões verbosas abaixo ainda funcionam, mas emitem `console.warn` e serão removidas em uma versão major futura. Prefira os aliases curtos.

@@ -1,7 +1,7 @@
 import type { StateCreator } from "zustand";
 import type { MiddlewareStore } from "@/middleware/store/types";
 
-export type NotificationType = "INFO" | "CALL_FAILED";
+export type NotificationType = "INFO" | "CALL_FAILED" | "MISSED_CALL";
 
 export type Notification = {
   id: Date;
