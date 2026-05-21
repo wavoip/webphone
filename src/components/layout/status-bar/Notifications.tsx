@@ -3,12 +3,9 @@ import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { relativeTimePt } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
-
-// @ts-expect-error
-import "moment/dist/locale/pt-br";
-import moment from "moment";
 
 const TYPE_LABEL: Record<Notification["type"], string> = {
   MISSED_CALL: "Chamada perdida",
@@ -91,7 +88,7 @@ export function Notifications() {
 
                 <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
                   <span className="wv:text-[10px] wv:text-foreground/50 wv:whitespace-nowrap">
-                    {moment(n.created_at).locale("pt-br").fromNow(true)}
+                    {relativeTimePt(n.created_at)}
                   </span>
                   <Button
                     type="button"
