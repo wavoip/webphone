@@ -11,6 +11,10 @@
 
 * [API pública](referencia/api-publica.md)
 
+## Recursos
+
+* [Notificações push](recursos/notificacoes-push.md)
+
 ## Customização
 
 * [Cores e tema](customizacao/cores.md)

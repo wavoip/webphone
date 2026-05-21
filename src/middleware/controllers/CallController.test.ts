@@ -215,5 +215,65 @@ describe("CallController", () => {
       expect(result.err).toBe("boom");
       expect(store.getState().active).toBeUndefined();
     });
+
+    it("reject() removes the offer and marks outcome 'rejected'", async () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      offer.rejectResult = { err: null };
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      const result = await stored.reject();
+      expect(result.err).toBeNull();
+      expect(store.getState().offers).toEqual([]);
+      expect(store.getState().lastOfferOutcomes.o1).toBe("rejected");
+    });
+
+    it("reject() with err leaves the offer in place and does not mark outcome", async () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      offer.rejectResult = { err: "boom" };
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      const result = await stored.reject();
+      expect(result.err).toBe("boom");
+      expect(store.getState().offers.map((o) => o.id)).toEqual(["o1"]);
+      expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
+    });
+
+    it("accept() marks outcome 'accepted' on the promoted offer", async () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      const active = new FakeCallActive("o1", "tok-1");
+      offer.acceptResult = { call: active, err: null };
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      await stored.accept();
+      expect(store.getState().lastOfferOutcomes.o1).toBe("accepted");
+    });
+
+    it("acceptedElsewhere marks outcome 'elsewhere'", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      offer.emitEvent("acceptedElsewhere");
+      expect(store.getState().lastOfferOutcomes.o1).toBe("elsewhere");
+    });
+
+    it("rejectedElsewhere marks outcome 'elsewhere'", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      offer.emitEvent("rejectedElsewhere");
+      expect(store.getState().lastOfferOutcomes.o1).toBe("elsewhere");
+    });
+
+    it("ended does not mark an outcome (counts as missed downstream)", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      offer.emitEvent("ended");
+      expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
+    });
+
+    it("unanswered does not mark an outcome (counts as missed downstream)", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      offer.emitEvent("unanswered");
+      expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
+    });
   });
 });

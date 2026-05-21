@@ -20,6 +20,9 @@ await webphone.render(
     widget: {
       startOpen: true,
     },
+    offerNotification: {
+      autoRequest: true,
+    },
   },
   new Wavoip({ tokens: [], platform: "dev" }),
 );

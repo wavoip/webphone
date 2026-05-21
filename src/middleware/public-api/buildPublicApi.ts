@@ -65,6 +65,8 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       remove: (id) => controllers.notifications.remove(id),
       clear: () => controllers.notifications.clear(),
       read: () => controllers.notifications.markAllRead(),
+      permission: () => middleware.browserNotifier.permission(),
+      requestPermission: () => middleware.browserNotifier.requestPermission(),
       getNotifications: () => {
         warnDeprecated("notifications.getNotifications", "notifications.get");
         return store.getState().notifications;

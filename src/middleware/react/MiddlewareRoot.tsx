@@ -6,6 +6,8 @@ import { getSettings } from "@/lib/device-settings";
 import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { setPublicApiBase } from "@/lib/webphone-api/api";
 import { bootstrapStore } from "@/middleware/bootstrap/bootstrapStore";
+import type { FocusTracker } from "@/middleware/browser/focusTracker";
+import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
@@ -13,7 +15,13 @@ import { MiddlewareProvider } from "@/middleware/react/hooks";
 import { useSettings } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
-type Props = { children: ReactNode; wavoip?: Wavoip; config?: WebphoneSettings };
+type Props = {
+  children: ReactNode;
+  wavoip?: Wavoip;
+  config?: WebphoneSettings;
+  notifier?: BrowserNotifier;
+  focus?: FocusTracker;
+};
 
 /**
  * Owns the {@link Middleware} lifecycle and exposes it via
@@ -22,7 +30,7 @@ type Props = { children: ReactNode; wavoip?: Wavoip; config?: WebphoneSettings }
  * etc.) can read from / write to the middleware store without re-implementing
  * state.
  */
-export function MiddlewareRoot({ children, wavoip: injectedWavoip, config }: Props) {
+export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notifier, focus }: Props) {
   const settings = useSettings();
 
   const [middleware] = useState(() => {
@@ -35,11 +43,23 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config }: Pro
       wavoip,
       ringtone: audioRingtonePlayer(new Audio(Ringtone)),
       vibration: audioRingtonePlayer(new Audio(Vibration)),
+      notifier,
+      focus,
+      offerNotification: {
+        enabled: config?.offerNotification?.enabled,
+        icon: config?.offerNotification?.icon,
+      },
     }).init();
     bootstrapStore({ store: mw.store, config: config ?? {} });
     setPublicApiBase(buildPublicApi(mw));
     return mw;
   });
+
+  useEffect(() => {
+    if (config?.offerNotification?.autoRequest) {
+      middleware.browserNotifier.requestPermission().catch(() => {});
+    }
+  }, [middleware, config?.offerNotification?.autoRequest]);
 
   useEffect(() => {
     return () => {

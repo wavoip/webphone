@@ -73,6 +73,9 @@ await webphone.render({
 | `settingsMenu.deviceMenu.showEnableDevicesButton` | `boolean` | Botão de habilitar dispositivo. |
 | `settingsMenu.deviceMenu.showRemoveDevicesButton` | `boolean` | Botão de remover dispositivo. |
 | `callSettings.displayName` | `string` | Nome exibido para o destinatário ao iniciar chamadas. |
+| `offerNotification.enabled` | `boolean` | Liga/desliga a notificação OS de oferta. Padrão `true`. Veja [Notificações push](../recursos/notificacoes-push.md). |
+| `offerNotification.autoRequest` | `boolean` | Pede permissão de notificação na montagem. Padrão `false`. |
+| `offerNotification.icon` | `string` | URL do ícone exibido na notificação OS. |
 | `platform` | `string` | Identificador da plataforma hospedeira repassado ao Wavoip API. |
 
 ## Reutilizando uma instância do Wavoip

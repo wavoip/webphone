@@ -76,6 +76,10 @@ export type NotificationsAPI = {
   remove: (id: Date) => void;
   clear: () => void;
   read: () => void;
+  /** Current browser permission for OS-level offer notifications. */
+  permission: () => NotificationPermission;
+  /** Prompts the browser for OS notification permission. Must be invoked from a user gesture. */
+  requestPermission: () => Promise<NotificationPermission>;
   /** @deprecated Use {@link NotificationsAPI.get} instead. */
   getNotifications: () => NotificationsType[];
   /** @deprecated Use {@link NotificationsAPI.add} instead. */

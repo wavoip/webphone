@@ -8,12 +8,21 @@ import type { MiddlewareStore } from "@/middleware/store/types";
  */
 export type CallStatus = WavoipCallStatus | "idle";
 
+/**
+ * Records how an offer left the store so the missed-call detector can ignore
+ * outcomes that are not truly "missed". Absence of an outcome means the offer
+ * ended without explicit user action (peer ended, timed out) → counted as
+ * missed.
+ */
+export type OfferOutcome = "accepted" | "rejected" | "elsewhere";
+
 export type CallSliceState = {
   offers: Offer[];
   outgoing?: CallOutgoing;
   active?: CallActive;
   callStatus: CallStatus;
   peerMuted: boolean;
+  lastOfferOutcomes: Record<string, OfferOutcome>;
 };
 
 export type CallSliceActions = {
@@ -23,6 +32,7 @@ export type CallSliceActions = {
   setActive: (call: CallActive | undefined) => void;
   setCallStatus: (status: CallStatus) => void;
   setPeerMuted: (muted: boolean) => void;
+  markOfferOutcome: (id: string, outcome: OfferOutcome) => void;
   resetCall: () => void;
 };
 
@@ -34,6 +44,7 @@ const initialCallState: CallSliceState = {
   active: undefined,
   callStatus: "idle",
   peerMuted: false,
+  lastOfferOutcomes: {},
 } as const;
 
 export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> = (set) => ({
@@ -44,5 +55,7 @@ export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> =
   setActive: (active) => set({ active }),
   setCallStatus: (callStatus) => set({ callStatus }),
   setPeerMuted: (peerMuted) => set({ peerMuted }),
-  resetCall: () => set({ ...initialCallState }),
+  markOfferOutcome: (id, outcome) =>
+    set((state) => ({ lastOfferOutcomes: { ...state.lastOfferOutcomes, [id]: outcome } })),
+  resetCall: () => set({ ...initialCallState, lastOfferOutcomes: {} }),
 });
