@@ -1,5 +1,5 @@
 import { WifiHighIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
+import type { CallActive, TransportStatus, Unsubscribe } from "@wavoip/wavoip-api";
 import { useEffect, useRef, useState } from "react";
 
 type Props = {
@@ -22,37 +22,46 @@ export function Ping({ call }: Props) {
   const connectingRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    call.onStats((stats) => {
-      const ping = stats.rtt.avg;
+    const applyPing = (ping: number) => {
       setPing(ping);
       setConnectionStrength(getPingLevel(ping));
-    });
+    };
 
-    call.onConnectionStatus((status) => {
-      setConnectionStatus(status);
+    const unsubs: Unsubscribe[] = [];
 
-      if (status === "connected") {
-        setConnectionStrength(ConnectionStrenght.high);
-        return;
-      }
+    unsubs.push(call.on("stats", (stats) => applyPing(stats.rtt.avg)));
+    unsubs.push(call.on("serverStats", (stats) => applyPing(stats.rtt.client.avg)));
 
-      if (status === "disconnected") {
-        setConnectionStrength(ConnectionStrenght.none);
-        return;
-      }
-    });
+    unsubs.push(
+      call.on("connectionStatus", (status) => {
+        setConnectionStatus(status);
 
-    call.onStatus((status) => {
-      if (status === "DISCONNECTED") {
-        setConnectionStrength(ConnectionStrenght.none);
-      }
+        if (status === "connected") {
+          setConnectionStrength(ConnectionStrenght.high);
+          return;
+        }
 
-      if (status === "ACTIVE") {
-        setConnectionStrength(ConnectionStrenght.high);
-      }
-    });
+        if (status === "disconnected") {
+          setConnectionStrength(ConnectionStrenght.none);
+          return;
+        }
+      }),
+    );
+
+    unsubs.push(
+      call.on("status", (status) => {
+        if (status === "DISCONNECTED") {
+          setConnectionStrength(ConnectionStrenght.none);
+        }
+
+        if (status === "ACTIVE") {
+          setConnectionStrength(ConnectionStrenght.high);
+        }
+      }),
+    );
 
     return () => {
+      for (const unsub of unsubs) unsub();
       if (connectingRef.current) {
         clearInterval(connectingRef.current);
       }

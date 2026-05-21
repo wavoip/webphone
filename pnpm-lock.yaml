@@ -45,8 +45,8 @@ importers:
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wavoip/wavoip-api':
-        specifier: ^2.3.6
-        version: 2.3.6
+        specifier: file:/mnt/HD/projects/wavoip/wavoip-api/wavoip-wavoip-api-2.3.6.tgz
+        version: file:../wavoip-api/wavoip-wavoip-api-2.3.6.tgz
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -1619,8 +1619,9 @@ packages:
   '@vue/shared@3.5.21':
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
-  '@wavoip/wavoip-api@2.3.6':
-    resolution: {integrity: sha512-2DXQDLj+D130amytgH0wyrVXFPkTNtgcxvCI+rwngy48QGTJaAwJ0ywFw3UV7InnRISGmMQ9EScDtjY0+6R39g==}
+  '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.3.6.tgz':
+    resolution: {integrity: sha512-J9q4So3KHZh9MA2K7kSbpaI7gbSmynNCMiK3me+qnshgBWpZsrD8I3OkWUeBo7tI8hICa0NCPep8xViSQQYs6Q==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.3.6.tgz}
+    version: 2.3.6
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -4352,7 +4353,7 @@ snapshots:
 
   '@vue/shared@3.5.21': {}
 
-  '@wavoip/wavoip-api@2.3.6':
+  '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.3.6.tgz':
     dependencies:
       axios: 1.15.0
       socket.io-client: 4.8.3
