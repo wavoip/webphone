@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
-import MarqueeText from "@/components/MarqueeText";
+import { CopyablePeer } from "@/components/CopyablePeer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
 import { getFullnameLetters } from "@/lib/utils";
@@ -76,16 +76,12 @@ export default function CallScreen() {
               {status || formatDuration(durationSeconds)}
             </p>
 
-            <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:font-normal wv:w-full">
-              <div className="wv:hidden  wv:group-hover/title:block ">
-                <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callActive?.peer.displayName || callActive?.peer.phone}
-                </MarqueeText>
-              </div>
-
-              <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-                {callActive?.peer.displayName || callActive?.peer.phone}
-              </p>
+            <div className="wv:flex wv:flex-col wv:font-normal wv:w-full">
+              <CopyablePeer
+                displayName={callActive?.peer.displayName}
+                phone={callActive?.peer.phone ?? ""}
+                className="wv:text-foreground wv:text-[24px] wv:leading-[28px]"
+              />
             </div>
           </div>
         </div>
