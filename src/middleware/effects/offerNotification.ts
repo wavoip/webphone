@@ -44,9 +44,11 @@ export function offerNotificationEffect(deps: Deps): Unsubscribe {
 function handleRemovals(curr: ReadonlyArray<Offer>, prev: ReadonlyArray<Offer>, deps: Deps): void {
   const removed = prev.filter((p) => !curr.find((c) => c.id === p.id));
   if (removed.length === 0) return;
-  const active = deps.store.getState().active;
+  const state = deps.store.getState();
   for (const gone of removed) {
-    if (active?.id === gone.id) continue;
+    const outcome = state.lastOfferOutcomes[gone.id];
+    if (outcome === "accepted" || outcome === "rejected" || outcome === "elsewhere") continue;
+    if (state.active?.id === gone.id) continue;
     deps.missedCall.record(gone);
   }
 }

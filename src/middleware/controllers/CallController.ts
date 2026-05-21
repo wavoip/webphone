@@ -1,5 +1,6 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer, Wavoip } from "@wavoip/wavoip-api";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
+import type { OfferOutcome } from "@/middleware/store/slices/callSlice";
 
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
 
@@ -49,19 +50,30 @@ export class CallController {
   ingestOffer(offer: Offer): void {
     this.deps.store.getState().addOffer(this.wrapOffer(offer));
     offer.on("ended", () => this.dropOffer(offer.id));
-    offer.on("acceptedElsewhere", () => this.dropOffer(offer.id));
-    offer.on("rejectedElsewhere", () => this.dropOffer(offer.id));
+    offer.on("acceptedElsewhere", () => this.dropOfferWithOutcome(offer.id, "elsewhere"));
+    offer.on("rejectedElsewhere", () => this.dropOfferWithOutcome(offer.id, "elsewhere"));
     offer.on("unanswered", () => this.dropOffer(offer.id));
   }
 
   private wrapOffer(offer: Offer): Offer {
     const originalAccept = offer.accept.bind(offer);
+    const originalReject = offer.reject.bind(offer);
     return new Proxy(offer, {
       get: (target, prop, receiver) => {
         if (prop === "accept") {
           return async () => {
             const result = await originalAccept();
             if (result.call) this.promoteToActive(result.call, offer.id);
+            return result;
+          };
+        }
+        // wavoip-api's offer.reject() does not emit "ended" locally — it only
+        // fires when the server confirms. Drop optimistically on success so
+        // the ringtone effect (subscribed to offers.length) stops immediately.
+        if (prop === "reject") {
+          return async () => {
+            const result = await originalReject();
+            if (!result.err) this.dropOfferWithOutcome(offer.id, "rejected");
             return result;
           };
         }
@@ -72,6 +84,7 @@ export class CallController {
 
   private promoteToActive(call: CallActive, offerId: string): void {
     const { store } = this.deps;
+    store.getState().markOfferOutcome(offerId, "accepted");
     store.getState().removeOffer(offerId);
     this.bindActive(call);
     store.getState().setActive(call);
@@ -80,6 +93,11 @@ export class CallController {
   }
 
   private dropOffer(id: string): void {
+    this.deps.store.getState().removeOffer(id);
+  }
+
+  private dropOfferWithOutcome(id: string, outcome: OfferOutcome): void {
+    this.deps.store.getState().markOfferOutcome(id, outcome);
     this.deps.store.getState().removeOffer(id);
   }
 

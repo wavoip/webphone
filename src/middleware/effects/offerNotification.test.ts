@@ -157,6 +157,33 @@ describe("offerNotificationEffect", () => {
     unsub();
   });
 
+  it("does not record missed call when outcome is 'rejected'", () => {
+    const unsub = start();
+    store.getState().addOffer(offerWith("o1", "Maria"));
+    store.getState().markOfferOutcome("o1", "rejected");
+    store.getState().removeOffer("o1");
+    expect(store.getState().notifications).toHaveLength(0);
+    unsub();
+  });
+
+  it("does not record missed call when outcome is 'accepted'", () => {
+    const unsub = start();
+    store.getState().addOffer(offerWith("o1", "Maria"));
+    store.getState().markOfferOutcome("o1", "accepted");
+    store.getState().removeOffer("o1");
+    expect(store.getState().notifications).toHaveLength(0);
+    unsub();
+  });
+
+  it("does not record missed call when outcome is 'elsewhere'", () => {
+    const unsub = start();
+    store.getState().addOffer(offerWith("o1", "Maria"));
+    store.getState().markOfferOutcome("o1", "elsewhere");
+    store.getState().removeOffer("o1");
+    expect(store.getState().notifications).toHaveLength(0);
+    unsub();
+  });
+
   it("passes through icon and invokes onClick with first offer id", () => {
     let clicked: string | undefined;
     const unsub = start({
