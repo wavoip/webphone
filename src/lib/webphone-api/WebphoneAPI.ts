@@ -1,7 +1,18 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
-import type { DeviceState } from "@/hooks/useDeviceManager";
+import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
+import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
+import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
+
+/**
+ * Public Express-style middleware callback. Call `next()` to forward the
+ * payload to subsequent middleware (and ultimately the UI); omit it to block.
+ */
+export type PublicMiddleware<E extends MiddlewareEvent> = (
+  payload: MiddlewareEventMap[E],
+  next: () => void,
+) => void | Promise<void>;
 
 export type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
 export type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
@@ -125,16 +136,6 @@ export type WebphoneAPI = {
   theme: ThemeAPI;
   position: PositionAPI;
   settings: SettingsAPI;
+  on: <K extends WebphoneEventName>(event: K, cb: (payload: WebphoneEventMap[K]) => void) => () => void;
+  use: <E extends MiddlewareEvent>(event: E, fn: PublicMiddleware<E>) => void;
 };
-
-type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: T[P] extends Record<string, unknown>
-        ? T[P] extends { x: number; y: number }
-          ? T[P]
-          : DeepPartial<T[P]>
-        : T[P];
-    }
-  : T;
-
-export type WebphoneAPIPartial = DeepPartial<WebphoneAPI>;

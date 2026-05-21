@@ -17,7 +17,7 @@ const api = await webphone.render();
 // api === window.wavoip
 ```
 
-A API é dividida em sete módulos:
+A API é dividida em nove módulos:
 
 | Módulo | Responsabilidade |
 | --- | --- |
@@ -28,6 +28,8 @@ A API é dividida em sete módulos:
 | [`theme`](#theme) | Trocar entre tema claro, escuro e do sistema. |
 | [`position`](#position) | Reposicionar o painel do webphone. |
 | [`settings`](#settings) | Mostrar/ocultar áreas da UI em tempo de execução. |
+| [`on`](#on) | Assinar eventos do ciclo de vida (chamadas, ofertas). |
+| [`use`](#use) | Registrar middleware estilo Express para interceptar/bloquear ofertas. |
 
 {% hint style="info" %}
 Todos os métodos de leitura retornam valores síncronos. Apenas `call.start` e `call.startCall` são assíncronos.
@@ -106,7 +108,7 @@ Retorna a lista de ofertas (chamadas recebidas pendentes de atender).
 
 ### `setInput(number)`
 
-Define o conteúdo atual do discador.
+Define o conteúdo atual do discador. O valor é persistido no store da middleware, então funciona mesmo se a tela de discagem ainda não foi montada.
 
 ```ts
 window.wavoip.call.setInput("5511999999999");
@@ -114,7 +116,7 @@ window.wavoip.call.setInput("5511999999999");
 
 ### `onOffer(cb)`
 
-Registra um callback disparado a cada nova oferta recebida.
+Registra um callback disparado a cada nova oferta recebida. Atalho equivalente a `api.use("offer", (offer, next) => { cb(offer); next(); })`. Para padrões mais avançados (bloquear/modificar a oferta antes de chegar na UI), use [`use`](#use).
 
 ```ts
 window.wavoip.call.onOffer((offer) => {
@@ -227,6 +229,67 @@ window.wavoip.position.set({ x: 200, y: 100 });
 
 Aceita os mesmos presets descritos em [`WebphonePosition`](../primeiros-passos/inicializacao.md#opcoes-de-webphonesettings).
 
+## `on`
+
+Assinatura de eventos do ciclo de vida do webphone. Diferente de [`use`](#use), os handlers de `on` são fire-and-forget — não podem bloquear ou modificar payloads.
+
+```ts
+const unsubscribe = window.wavoip.on("call:started", (call) => {
+  console.log("Chamada iniciada:", call.id, "para", call.peer.phone);
+});
+
+// Para desinscrever
+unsubscribe();
+```
+
+### Eventos disponíveis
+
+| Evento | Payload | Quando dispara |
+| --- | --- | --- |
+| `call:started` | `CallOutgoingProps` | Logo após `call.start()` — quando a chamada de saída aparece no store. |
+| `call:accepted` | `CallActiveProps` | Peer aceitou a chamada; a outgoing virou active. |
+| `call:ended` | `{ id: string; status: CallStatus }` | Status entrou em estado terminal (`ENDED`, `FAILED`, `REJECTED`, `NOT_ANSWERED`). |
+| `offer:received` | `CallOfferProps` | Uma oferta entrou no store após passar pela cadeia de middleware. |
+
+```ts
+window.wavoip.on("call:ended", ({ id, status }) => {
+  if (status === "FAILED") notifyOps(`Falha na chamada ${id}`);
+});
+
+window.wavoip.on("offer:received", (offer) => {
+  metrics.increment("calls.incoming");
+});
+```
+
+## `use`
+
+Registra middleware estilo Express para interceptar eventos antes que cheguem à UI. Atualmente só o evento `offer` é suportado.
+
+```ts
+window.wavoip.use("offer", (offer, next) => {
+  // Modificar o display name antes da UI renderizar
+  offer.peer.displayName = lookupContact(offer.peer.phone);
+  next();
+});
+
+window.wavoip.use("offer", async (offer, next) => {
+  // Bloquear ofertas de números banidos — não chama next()
+  if (await isBanned(offer.peer.phone)) {
+    return offer.reject();
+  }
+  next();
+});
+```
+
+| Argumento | Tipo | Descrição |
+| --- | --- | --- |
+| `event` | `"offer"` | Evento alvo. Outros serão adicionados em versões futuras. |
+| `fn` | `(payload, next) => void \| Promise<void>` | Handler. Chame `next()` para passar adiante; omita para bloquear. |
+
+{% hint style="info" %}
+Mutações no `payload` afetam o objeto que a UI recebe. Use middleware para enriquecer metadados (display name, profile picture) ou aplicar políticas de filtro centralmente.
+{% endhint %}
+
 ## `settings`
 
 Atalhos para esconder ou exibir áreas da UI sem precisar remontar o webphone.
@@ -246,10 +309,18 @@ window.wavoip.settings.setShowWidgetButton(false);
 window.wavoip.settings.setShowDevices(true);
 ```
 
-## Pronto antes da API resolver
+## Aguardando a API ficar pronta
 
-A API exposta antes do `await webphone.render()` resolver é um *proxy*: chamadas a métodos retornam valores padrão (arrays vazios, promises com `err: "API not ready yet"`) em vez de quebrar. Isso permite que você passe a referência da API por componentes mesmo antes do bootstrap completo, mas operações reais só funcionam após o `render()` resolver.
+`window.wavoip` só é definido depois que `webphone.render()` resolve. Antes disso o objeto não existe e qualquer acesso direto lança `TypeError`. Use a promise retornada por `render()` ou aguarde a `webphoneAPIPromise()` exportada:
 
-{% hint style="warning" %}
-Evite invocar `call.start` antes do `render()` resolver — a chamada retornará `{ call: null, err: { message: "API not ready yet", devices: [] } }`.
-{% endhint %}
+```ts
+import webphone from "@wavoip/wavoip-webphone";
+import { webphoneAPIPromise } from "@wavoip/wavoip-webphone/api";
+
+webphone.render(); // não awaitamos aqui
+
+const api = await webphoneAPIPromise();
+// equivalente ao retorno de render()
+```
+
+A `webphoneAPIPromise()` resolve assim que o `MiddlewareRoot` monta — o que acontece no primeiro `render()` da árvore React. A partir desse ponto, `window.wavoip` aponta para a mesma instância.

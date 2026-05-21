@@ -10,12 +10,14 @@ import {
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useMiddleware } from "@/middleware/react/hooks";
 
 type Props = {
   call?: CallActive | CallOutgoing;
 };
 
 export function CallButtons({ call }: Props) {
+  const middleware = useMiddleware();
   const [actionMade, setActionMade] = useState(false);
   const [muted, setMuted] = useState(false);
 
@@ -105,9 +107,7 @@ export function CallButtons({ call }: Props) {
           className="wv:aspect-square wv:size-[55px] wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#e7000b]"
           onClick={() => {
             setActionMade(true);
-            call?.end().finally(() => {
-              // setActionMade(false);
-            });
+            middleware.controllers.call.end();
           }}
           disabled={actionMade}
         >
@@ -115,7 +115,7 @@ export function CallButtons({ call }: Props) {
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foregroud wv:tracking-[.15em] wv:text-center">Finalizar</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Finalizar</p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button

@@ -1,10 +1,11 @@
 import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
-import type { Device } from "@wavoip/wavoip-api";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useMiddleware } from "@/middleware/react/hooks";
+import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -12,12 +13,13 @@ type Props = {
     showEnable: boolean;
     showRemove: boolean;
   };
-  device: Device & { enable: boolean };
+  device: DeviceStateEntry;
   setShowQRCode: React.Dispatch<React.SetStateAction<null | string>>;
 };
 
 export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const middleware = useMiddleware();
   const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -30,26 +32,28 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
         {device.status && (
           <>
             {["disconnected", "hibernating"].includes(device.status) && (
-              <Tooltip>
-                <TooltipTrigger>
-                  <Button
-                    variant={"outline"}
-                    className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                    onClick={() => device.wakeUp()}
-                  >
-                    <PowerIcon />
-                  </Button>
-                  <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                    <PhoneIcon size={18} color="red" />
-                    <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                      {device.contact?.phone}
-                    </p>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Ligar Dispositivo</p>
-                </TooltipContent>
-              </Tooltip>
+              <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
+                      onClick={() => middleware.controllers.device.wakeUp(device.token)}
+                    >
+                      <PowerIcon />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Ligar Dispositivo</p>
+                  </TooltipContent>
+                </Tooltip>
+                <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                  <PhoneIcon size={18} color="red" />
+                  <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                    {device.contact?.phone ?? "Desconectado"}
+                  </p>
+                </div>
+              </div>
             )}
             {(["connecting"].includes(device.status) || device.qrCode) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
