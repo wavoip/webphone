@@ -1,7 +1,7 @@
 import { GearIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
-import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
+import { useEffect, useMemo, useState } from "react";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,13 @@ import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-export const SettingsModal = forwardRef(() => {
+const _settingsModalHandlers = { setOpen: null as ((open: boolean) => void) | null };
+
+export function openSettingsModal() {
+  _settingsModalHandlers.setOpen?.(true);
+}
+
+export function SettingsModal() {
   const { wavoip, addDevice, devices } = useWavoip();
   const { root } = useShadowRoot();
   const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
@@ -31,18 +37,18 @@ export const SettingsModal = forwardRef(() => {
   const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
   const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
   const [error, setError] = useState("");
-
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
+  const [qrcode, setQrcode] = useState<null | string>(null);
+
+  const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
 
   useEffect(() => {
-    if (settingsModalOpen) {
-      setOpen(true);
-      setSettingsModalOpen(false);
-    }
-  }, [settingsModalOpen, setSettingsModalOpen]);
-  const [qrcode, setQrcode] = useState<null | string>(null);
-  const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
+    _settingsModalHandlers.setOpen = setOpen;
+    return () => {
+      _settingsModalHandlers.setOpen = null;
+    };
+  }, []);
 
   useEffect(() => {
     mergeToAPI({
@@ -161,4 +167,4 @@ export const SettingsModal = forwardRef(() => {
       </DialogContent>
     </Dialog>
   );
-});
+}

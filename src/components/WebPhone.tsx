@@ -7,7 +7,6 @@ import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 import OutgoingScreen from "@/screens/OutgoingScreen";
-import pkg from "../../package.json";
 
 function DeviceValidator() {
   const { devices } = useWavoip();
@@ -43,6 +42,8 @@ function DeviceValidator() {
   return null;
 }
 
+import pkg from "../../package.json";
+
 export function WebPhone() {
   const { screen } = useScreen();
   const { startDrag, stopDrag } = useWidget();
@@ -64,19 +65,17 @@ export function WebPhone() {
     <SelectedDeviceProvider>
       <DeviceValidator />
       <StatusBar />
-
       <div
         role="application"
-        className="wv:flex wv:flex-1 wv:relative wv:px-7"
+        className="wv:flex wv:flex-1 wv:relative wv:size-full wv:px-4"
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
       >
         {screen === "outgoing" && <OutgoingScreen />}
         {screen === "call" && <CallScreen />}
         {screen === "keyboard" && <KeyboardScreen />}
-
         <p
-          className="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]"
+          className="wv:text-neutral-500 wv:pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]"
           aria-hidden="true"
         >
           v {pkg.version}

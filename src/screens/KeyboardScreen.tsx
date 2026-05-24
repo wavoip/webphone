@@ -14,15 +14,16 @@ import SoundDTMF8 from "@/assets/sounds/dtmf-8.mp3";
 import SoundDTMF9 from "@/assets/sounds/dtmf-9.mp3";
 import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
-// kept for SOUND_URLS map — do not remove
 import { AudioInputPopover, AudioOutputPopover } from "@/components/AudioPopover";
 import { KeyboardInput } from "@/components/KeyboardInput";
+import { openSettingsModal } from "@/components/layout/settings/SettingsModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getSpeakerVolume } from "@/lib/device-settings";
 import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useSelectedDevice } from "@/providers/SelectedDeviceProvider";
-import { useSettings } from "@/providers/SettingsProvider";
+import { useSettings } from "@/providers/settings/Provider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -156,7 +157,7 @@ export default function KeyboardScreen() {
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
   const { selectedToken } = useSelectedDevice();
-  const { showAddDevices, setSettingsModalOpen } = useSettings();
+  const { devices: devicesSettings } = useSettings();
   const shadowRoot = useShadowRoot();
 
   const hasDevices = devices.some((d) => d.enable);
@@ -202,12 +203,8 @@ export default function KeyboardScreen() {
     setCallIsLoading(true);
     setError("");
 
-    await startCall(number, { fromTokens: [device] }).then(({ err }) => {
-      if (!err) {
-        setStatus("Ok");
-        setCallIsLoading(false);
-        return;
-      }
+    const fromTokens = selectedToken ? [selectedToken] : undefined;
+    const { err } = await startCall(number, { fromTokens });
 
     setCallIsLoading(false);
 
@@ -239,7 +236,6 @@ export default function KeyboardScreen() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-
         handleCall();
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:px-2 wv:overflow-hidden"
@@ -252,7 +248,7 @@ export default function KeyboardScreen() {
             value={number}
             callIsLoading={callIsLoading}
             country={countryCode}
-            onChange={(e: any) => {
+            onChange={(e) => {
               const digits = e.target.value.replace(/[^\d*#+]/g, "");
               setNumber(digits);
             }}
@@ -266,10 +262,10 @@ export default function KeyboardScreen() {
               {error}
             </p>
           ) : !hasDevices ? (
-            showAddDevices ? (
+            devicesSettings.showAdd ? (
               <button
                 type="button"
-                onClick={() => setSettingsModalOpen(true)}
+                onClick={() => openSettingsModal()}
                 className="wv:group wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em] wv:text-center wv:cursor-pointer wv:bg-transparent wv:border-0 wv:p-0"
               >
                 <span className="wv:group-hover:underline">
@@ -350,12 +346,12 @@ export default function KeyboardScreen() {
                 }, 400);
               }}
               onPointerUp={() => {
-                clearTimeout(backspaceHoldRef.current!);
-                clearTimeout(backspaceIntervalRef.current!);
+                if (backspaceHoldRef.current) clearTimeout(backspaceHoldRef.current);
+                if (backspaceIntervalRef.current) clearTimeout(backspaceIntervalRef.current);
               }}
               onPointerLeave={() => {
-                clearTimeout(backspaceHoldRef.current!);
-                clearTimeout(backspaceIntervalRef.current!);
+                if (backspaceHoldRef.current) clearTimeout(backspaceHoldRef.current);
+                if (backspaceIntervalRef.current) clearTimeout(backspaceIntervalRef.current);
               }}
             >
               <BackspaceIcon className="wv:size-5 wv:max-sm:size-8 wv:desktop:size-5 wv:text-[#66666c]" weight="fill" />
