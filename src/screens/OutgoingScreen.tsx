@@ -1,5 +1,5 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import Calling from "@/assets/sounds/calling.mp3";
 import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
@@ -10,52 +10,50 @@ import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const calling_sound = new Audio(Calling);
+calling_sound.preload = "auto";
 const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
-  const { callOutgoing } = useWavoip();
+  const { callOutgoing, callStatus } = useWavoip();
 
-  const [status, setStatus] = useState<null | string>("Ligando...");
+  const status = useMemo(() => {
+    switch (callStatus) {
+      case "calling":
+        return "Ligando...";
+      case "ringing":
+        return "Chamando...";
+      case "failed":
+        return "A ligação falhou";
+      case "rejected":
+        return "Chamada rejeitada";
+      case "unanswered":
+        return "Chamada não atendida";
+      case "ended":
+        return "Chamada encerrada";
+      default:
+        return null;
+    }
+  }, [callStatus]);
 
   useEffect(() => {
-    callOutgoing?.onStatus((status) => {
-      if (status === "CALLING") {
-        setStatus("Ligando...");
-        return;
-      }
-
-      if (status === "RINGING") {
-        calling_sound.currentTime = 0;
-        calling_sound.volume = getSpeakerVolume();
-        calling_sound.loop = true;
-        calling_sound.play();
-        setStatus("Chamando...");
-        return;
-      }
-
-      if (status === "FAILED") {
-        postalcode_sound.currentTime = 0;
-        postalcode_sound.volume = getSpeakerVolume();
-        postalcode_sound.play();
-        setStatus("A ligação falhou");
-        return;
-      }
-
+    if (callStatus === "ringing") {
+      calling_sound.currentTime = 0;
+      calling_sound.volume = 0.25;
+      calling_sound.loop = true;
+      calling_sound.play();
+    } else if (callStatus === "failed" || callStatus === "unanswered") {
       calling_sound.pause();
-      postalcode_sound.pause();
-    });
-
-    callOutgoing?.onPeerReject(() => {
-      setStatus("Chamada rejeitada");
-    });
-
-    callOutgoing?.onUnanswered(() => {
-      setStatus("Chamada não atendida");
+      calling_sound.currentTime = 0;
       postalcode_sound.currentTime = 0;
       postalcode_sound.volume = getSpeakerVolume();
       postalcode_sound.play();
-    });
-  }, [callOutgoing]);
+    } else if (callStatus !== "calling") {
+      calling_sound.pause();
+      calling_sound.currentTime = 0;
+      postalcode_sound.pause();
+      postalcode_sound.currentTime = 0;
+    }
+  }, [callStatus]);
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
@@ -71,7 +69,7 @@ export default function OutgoingScreen() {
             <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
-            <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+            <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
               {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
             </MarqueeText>
           </div>
@@ -82,12 +80,12 @@ export default function OutgoingScreen() {
 
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
               <div className="wv:hidden  wv:group-hover/title:block">
-                <MarqueeText speed={10} className="wv:text-[24px] wv:leading-[28px] wv:select-none">
+                <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
                   {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
                 </MarqueeText>
               </div>
 
-              <p className="wv:block wv:group-hover/title:hidden wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
+              <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
                 {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
               </p>
             </div>

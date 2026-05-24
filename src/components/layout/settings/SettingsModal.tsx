@@ -1,5 +1,4 @@
 import { GearIcon } from "@phosphor-icons/react";
-import type { Device } from "@wavoip/wavoip-api";
 import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
@@ -16,17 +15,23 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useSettings } from "@/providers/SettingsProvider";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
-type Props = {
-  devices: (Device & { enable: boolean })[];
-};
+export const SettingsModal = forwardRef(() => {
+  const { wavoip, addDevice, devices } = useWavoip();
+  const { root } = useShadowRoot();
+  const { audio: audioMenuSettings, devices: devicesMenuSettings } = useSettings();
 
-export const SettingsModal = forwardRef(({ devices }: Props) => {
-  const { addDevice } = useWavoip();
-  const { showAudio, showDevices, showAddDevices, settingsModalOpen, setSettingsModalOpen } = useSettings();
+  const [showAudio] = useState(audioMenuSettings.show);
+  const [showDevices, setShowDevices] = useState(devicesMenuSettings.show);
+  const [showAddDevice, setShowAddDevice] = useState(devicesMenuSettings.showAdd);
+  const [showEnableDevice, setShowEnableDevice] = useState(devicesMenuSettings.enableShow);
+  const [showRemoveDevice, setShowRemoveDevice] = useState(devicesMenuSettings.removeShow);
+  const [error, setError] = useState("");
+
   const [open, setOpen] = useState(false);
   const [token, setToken] = useState("");
 
@@ -37,9 +42,22 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
     }
   }, [settingsModalOpen, setSettingsModalOpen]);
   const [qrcode, setQrcode] = useState<null | string>(null);
-  const { wavoip } = useWavoip();
   const devicesSorted = useMemo(() => devices.sort((a, b) => Number(b.enable) - Number(a.enable)), [devices]);
-  const shadowRoot = useShadowRoot();
+
+  useEffect(() => {
+    mergeToAPI({
+      settings: {
+        showDevices,
+        setShowDevices: (...args) => setShowDevices(...args),
+        showAddDevices: showAddDevice,
+        setShowAddDevices: (...args) => setShowAddDevice(...args),
+        showEnableDevices: showEnableDevice,
+        setShowEnableDevices: (...args) => setShowEnableDevice(...args),
+        showRemoveDevices: showRemoveDevice,
+        setShowRemoveDevices: (...args) => setShowRemoveDevice(...args),
+      },
+    });
+  }, [showDevices, showAddDevice, showEnableDevice, showRemoveDevice]);
 
   useEffect(() => {
     if (wavoip && open) {
@@ -62,11 +80,7 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
       <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2 wv:desktop:p-1 ">
         <GearIcon className="wv:max-sm:size-6 wv:desktop:size-4 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
-      <DialogContent
-        container={shadowRoot}
-        onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:h-1/2"
-      >
+      <DialogContent container={root} onClick={(e) => e.stopPropagation()} className="wv:flex wv:flex-col wv:h-1/2">
         <DialogTitle className="wv:sr-only">Configurações</DialogTitle>
         <DialogDescription className="wv:sr-only">Aqui você pode configurar todo webphone</DialogDescription>
         <div className="wv:flex wv:w-full wv:flex-col wv:gap-6 wv:overflow-hidden">
@@ -96,17 +110,24 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
                     <DialogTitle></DialogTitle>
                   </DialogHeader>
                   <DialogDescription />
-                  {showAddDevices && (
+                  {showAddDevice && (
                     <div className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:py-4">
                       <Input
-                        placeholder="Token"
+                        placeholder={error ? error : "Token"}
                         value={token}
-                        onChange={(e) => setToken(e.target.value)}
-                        className="wv:focus-visible:ring-0 wv:flex-1"
+                        onChange={(e) => {
+                          setToken(e.target.value);
+                          if (error) setError("");
+                        }}
+                        className={`wv:focus-visible:ring-0 wv:flex-1 ${error ? "wv:border-red-500" : ""}`}
                       />
                       <Button
                         type="button"
                         onClick={() => {
+                          if (!token.trim()) {
+                            setError("Informe o Token");
+                            return;
+                          }
                           addDevice(token);
                           setToken("");
                         }}
@@ -119,7 +140,12 @@ export const SettingsModal = forwardRef(({ devices }: Props) => {
 
                   <div className="wv:overflow-auto wv:flex wv:flex-col wv:gap-2">
                     {devicesSorted.map((device) => (
-                      <DeviceInfo key={device.token} device={device} setShowQRCode={setQrcode} />
+                      <DeviceInfo
+                        key={device.token}
+                        settings={{ showEnable: showEnableDevice, showRemove: showRemoveDevice }}
+                        device={device}
+                        setShowQRCode={setQrcode}
+                      />
                     ))}
                   </div>
                 </TabsContent>

@@ -3,28 +3,32 @@ import {
   createContext,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { buildAPI } from "@/lib/webphone-api";
-import { useSettings } from "@/providers/SettingsProvider";
+import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useSettings } from "@/providers/settings/Provider";
+import type { WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
 
 interface WidgetContextType {
   position: Position;
+  buttonPosition: Position;
   isDragging: boolean;
   setPosition: (pos: Position) => void;
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
-  closed: boolean;
-  setClosed: React.Dispatch<React.SetStateAction<boolean>>;
+  isClosed: boolean;
+  setIsClosed: React.Dispatch<React.SetStateAction<boolean>>;
   close: () => void;
   open: () => void;
   toggle: () => void;
@@ -32,15 +36,23 @@ interface WidgetContextType {
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-export function WidgetProvider({ children }: { children: ReactNode }) {
+type Props = {
+  children: ReactNode;
+};
+
+export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
-  const { showWidgetButton } = useSettings();
-  const divRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef<Position>({ x: 0, y: 0 });
+  const { widget, position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
+
+  const [showWidget, setShowWidget] = useState(widget.show);
 
   const [position, setPosition] = useState<Position>({ x: 0, y: 0 });
+  const [buttonPosition, setButtonPosition] = useState<Position>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
-  const [closed, setClosed] = useState(false);
+  const [isClosed, setIsClosed] = useState<boolean>(!widget.startOpen);
+
+  const divRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
   const handleMouseMove = useCallback((e: globalThis.MouseEvent) => {
     if (!divRef.current) return;
@@ -78,15 +90,15 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
   }, [handleMouseMove]);
 
   const open = useCallback(() => {
-    if (closed) setClosed(false);
-  }, [closed]);
+    if (isClosed) setIsClosed(false);
+  }, [isClosed]);
 
   const close = useCallback(() => {
-    if (!closed) setClosed(true);
-  }, [closed]);
+    if (!isClosed) setIsClosed(true);
+  }, [isClosed]);
 
   const toggle = useCallback(() => {
-    setClosed((prev) => !prev);
+    setIsClosed((prev) => !prev);
   }, []);
 
   useLayoutEffect(() => {
@@ -100,14 +112,15 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     if (x < 0) x = 0;
     if (y < 0) y = 0;
 
-    setPosition({ x, y });
+    setPosition(handlePositionInitialSettings(positionInitial, divRef as RefObject<HTMLDivElement>));
+    setButtonPosition(handleButtonPositionInitialSettings(buttonPositionInitial));
 
     document.addEventListener("mouseleave", stopDrag);
 
     return () => {
       document.removeEventListener("mouseleave", stopDrag);
     };
-  }, [open, stopDrag]);
+  }, [open, stopDrag, positionInitial, buttonPositionInitial]);
 
   useLayoutEffect(() => {
     function handleResize() {
@@ -138,46 +151,62 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  buildAPI({
-    widget: {
-      open: open,
-      close: close,
-      toggle: toggle,
-    },
-  });
+  useEffect(() => {
+    mergeToAPI({
+      widget: {
+        isOpen: !isClosed,
+        open: () => open(),
+        close: () => close(),
+        toggle: () => toggle(),
+        buttonPosition: {
+          value: buttonPosition,
+          set: (...args) => setButtonPosition(handleButtonPositionInitialSettings(...args)),
+        },
+      },
+      settings: {
+        showWidgetButton: showWidget,
+        setShowWidgetButton: (...args) => setShowWidget(...args),
+      },
+      position: {
+        value: position,
+        set: (...args) => setPosition(handlePositionInitialSettings(...args, divRef as RefObject<HTMLDivElement>)),
+      },
+    });
+  }, [open, close, toggle, showWidget, position, buttonPosition, isClosed]);
 
   return (
     <WidgetContext.Provider
       value={{
         position,
+        buttonPosition,
         setPosition,
         startDrag,
         stopDrag,
         isDragging,
-        closed,
-        setClosed,
+        isClosed: isClosed,
+        setIsClosed: setIsClosed,
         close: () => {
-          if (!closed) setClosed(true);
+          if (!isClosed) setIsClosed(true);
         },
         open: () => {
-          if (closed) setClosed(false);
+          if (isClosed) setIsClosed(false);
         },
         toggle: () => {
-          setClosed((prev) => !prev);
+          setIsClosed((prev) => !prev);
         },
       }}
     >
-      {showWidgetButton && (
+      {showWidget && (
         <Button
           type="button"
-          onClick={() => setClosed(false)}
+          onClick={() => setIsClosed(false)}
           size={"icon"}
-          data-closed={closed}
-          className="wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-green-500 wv:text-white wv:font-bold wv:hover:bg-green-600"
+          data-closed={isClosed}
+          className="wv:transition wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
           style={{
             position: "fixed",
-            bottom: "20px",
-            right: "20px",
+            top: buttonPosition.y,
+            left: buttonPosition.x,
           }}
         >
           <PhoneIcon className="wv:size-8" />
@@ -195,8 +224,8 @@ export function WidgetProvider({ children }: { children: ReactNode }) {
 
       <div
         ref={divRef}
-        data-closed={closed}
-        className="wv:fixed wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-[525px] wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:desktop:w-dvw wv:desktop:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:desktop:bg-surface wv:shadow-lg wv:touch-manipulation wv:desktop:absolute wv:desktop:!top-0 wv:desktop:!left-0"
+        data-closed={isClosed}
+        className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
           left: position.x,
           top: position.y,
@@ -212,4 +241,50 @@ export function useWidget() {
   const ctx = useContext(WidgetContext);
   if (!ctx) throw new Error("useWidget deve ser usado dentro de <WidgetProvider>");
   return ctx;
+}
+
+function handlePositionInitialSettings(
+  position: WebphonePosition,
+  divRef: RefObject<HTMLDivElement>,
+): { x: number; y: number } {
+  const MARGIN = 24;
+
+  if (typeof position === "object") {
+    return position;
+  }
+
+  const rect = divRef.current.getBoundingClientRect();
+  const middleY = window.innerHeight / 2 - rect.height / 2;
+  const bottomY = window.innerHeight - MARGIN - rect.height;
+  const middleX = window.innerWidth / 2 - rect.width / 2;
+  const endX = window.innerWidth - MARGIN - rect.width;
+
+  if (position === "top") return { x: middleX, y: MARGIN };
+  if (position === "bottom") return { x: middleX, y: bottomY < 0 ? 0 : bottomY };
+  if (position === "left") return { x: MARGIN, y: middleY };
+  if (position === "right") return { x: endX, y: middleY };
+  if (position === "top-left") return { x: MARGIN, y: MARGIN };
+  if (position === "top-right") return { x: endX, y: MARGIN };
+  if (position === "bottom-left") return { x: MARGIN, y: bottomY < 0 ? 0 : bottomY };
+  if (position === "bottom-right") return { x: endX, y: bottomY < 0 ? 0 : bottomY };
+
+  throw new Error("Initial position invalid");
+}
+
+function handleButtonPositionInitialSettings(position: WidgetButtonPosition): { x: number; y: number } {
+  const MARGIN = 20;
+  const button = { width: 56, height: 56 };
+
+  if (typeof position === "object") {
+    return position;
+  }
+  const endX = window.innerWidth - MARGIN - button.width;
+  const endY = window.innerHeight - MARGIN - button.height;
+
+  if (position === "top-right") return { x: endX, y: MARGIN };
+  if (position === "top-left") return { x: MARGIN, y: MARGIN };
+  if (position === "bottom-left") return { x: MARGIN, y: endY < 0 ? 0 : endY };
+  if (position === "bottom-right") return { x: endX, y: endY < 0 ? 0 : endY };
+
+  throw new Error("Initial button position invalid");
 }

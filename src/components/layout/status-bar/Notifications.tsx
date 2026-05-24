@@ -1,4 +1,4 @@
-import { Bell, PhoneOutgoing, X, XIcon } from "@phosphor-icons/react";
+import { BellIcon, PhoneOutgoingIcon, XIcon } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,29 +10,35 @@ import "moment/dist/locale/pt-br";
 import moment from "moment";
 
 export function Notifications() {
-  const [items, setItems] = useState(3);
-
   const { notifications, readNotifications, clearNotifications, removeNotification } = useNotificationManager();
+
+  const [items, setItems] = useState(3);
 
   const handleSeeMore = () => {
     setItems(items + 5);
   };
 
-  const hasNotification = notifications.filter((notification) => !notification.isHidden).length > 0;
+  const notificationsVisible = useMemo(
+    () => notifications.filter((n) => !n.isHidden).sort((a) => (!a.isRead ? -1 : 1)),
+    [notifications],
+  );
 
-  const notificationsToRead = useMemo(() => {
-    return notifications.filter((notification) => !notification.isRead).length;
-  }, [notifications]);
+  const hasNotification = !!notificationsVisible.length;
+
+  const notificationsToRead = useMemo(
+    () => notificationsVisible.filter((notification) => !notification.isRead).length,
+    [notificationsVisible],
+  );
 
   return (
     <Popover>
       <PopoverTrigger
-        className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
+        className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
         onClick={() => {
           readNotifications();
         }}
       >
-        <Bell className="wv:max-sm:size-6 wv:desktop:size-4 wv:max-sm:text-blue wv:pointer-events-none " />
+        <BellIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none " />
         {notificationsToRead > 0 && (
           <Badge
             className="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
@@ -41,32 +47,23 @@ export function Notifications() {
             {notificationsToRead}
           </Badge>
         )}
-        {/* <Button
-          type="button"
-          variant={"ghost"}
-          className="wv:flex wv:justify-center wv:relative wv:size-fit wv:!p-0.5 wv:aspect-square"
-          onClick={() => close()}
-        >
-          
-
-        </Button> */}
       </PopoverTrigger>
       <PopoverContent className="wv:flex wv:flex-col wv:max-h-[200px] wv:w-[400px] wv:overflow-y-scroll wv:p-2">
         <div className="wv:flex wv:flex-col">
           {hasNotification &&
-            notifications.slice(0, items).map((notification) => (
+            notificationsVisible.slice(0, items).map((notification) => (
               <div
                 className={`wv:bg-background  ${notification.isHidden ? " notification exit" : "wv:flex notification"}  wv:flex-col wv:p-1 wv:gap-2`}
                 key={`notification_${notification.id}`}
               >
                 <div className="wv:flex wv:flex-row wv:gap-2 wv:full">
                   <div className="wv:bg-background/50 wv:relative wv:flex wv:flex-row wv:w-8 wv:h-8 wv:justify-center wv:items-center wv:rounded-full ">
-                    <PhoneOutgoing size={15} />
+                    <PhoneOutgoingIcon size={15} />
                     <Badge
                       className="wv:absolute wv:bottom-0 wv:right-0 wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-red-400"
                       variant="destructive"
                     >
-                      <X size={20} />
+                      <XIcon size={20} />
                     </Badge>
                   </div>
 
@@ -109,26 +106,30 @@ export function Notifications() {
               </div>
             ))}
 
-          {!hasNotification && <p className="wv:text-center wv:pt-2">Nenhuma notificação</p>}
+          {!hasNotification && <p className="wv:text-center wv:p-2 wv:font-bold wv:text-sm">Nenhuma notificação</p>}
 
           <div className="wv:flex wv:gap-2 wv:justify-center wv:items-center">
-            <Button
-              variant="link"
-              onClick={handleSeeMore}
-              className="wv:text-[blue] wv:text-[12px] wv:select-none wv:p-1 wv:cursor-pointer"
-              disabled={items >= notifications.length}
-            >
-              <p>Ver mais</p>
-            </Button>
+            {items < notifications.length && (
+              <Button
+                variant="link"
+                onClick={handleSeeMore}
+                className="wv:text-xs wv:select-none wv:p-1"
+                disabled={items >= notifications.length}
+              >
+                <p>Ver mais</p>
+              </Button>
+            )}
 
-            <Button
-              variant="link"
-              onClick={clearNotifications}
-              className="wv:text-[blue] wv:text-[12px] wv:select-none wv:p-1"
-              disabled={!hasNotification}
-            >
-              <p>Limpar</p>
-            </Button>
+            {hasNotification && (
+              <Button
+                variant="link"
+                onClick={clearNotifications}
+                className="wv:text-xs wv:select-none wv:p-1"
+                disabled={!hasNotification}
+              >
+                <p>Limpar</p>
+              </Button>
+            )}
           </div>
         </div>
       </PopoverContent>

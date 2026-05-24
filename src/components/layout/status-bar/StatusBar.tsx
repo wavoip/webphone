@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { XIcon } from "@phosphor-icons/react";
 import { DeviceSwitcher } from "@/components/layout/device-switcher/DeviceSwitcher";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
@@ -5,17 +6,32 @@ import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
-import { useSettings } from "@/providers/SettingsProvider";
+import { mergeToAPI } from "@/lib/webphone-api/api";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  const { showNotifications, showSettings, showHiddenWebphone } = useSettings();
-  const { callActive, devices } = useWavoip();
+  const { notifications, settings } = useSettings();
+
+  const { callActive } = useWavoip();
+
+  const [showNotifications, setShowNotifications] = useState<boolean>(notifications.show);
+  const [showSettings, setShowSettings] = useState<boolean>(settings.show);
+
+  useEffect(() => {
+    mergeToAPI({
+      settings: {
+        showNotifications,
+        setShowNotifications: (...args) => setShowNotifications(...args),
+        showSettings,
+        setShowSettings: (...args) => setShowSettings(...args),
+      },
+    });
+  }, [showSettings, showNotifications]);
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Drag
     <div
       onMouseUp={() => {
         stopDrag();
@@ -35,20 +51,18 @@ export default function StatusBar() {
 
       <div className="wv:flex wv:items-center wv:gap-2">
         {showNotifications && <Notifications />}
-        {showSettings && <SettingsModal devices={devices} />}
-        <DevicesAlert devices={devices} />
-        {showHiddenWebphone && (
-          <Button
-            type="button"
-            variant={"ghost"}
-            className=" wv:size-fit  wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:desktop:!p-1 wv:text-foreground"
-            onClick={() => close()}
-          >
-            <XIcon className="wv:max-sm:size-6  wv:desktop:size-4 wv:pointer-events-none" />
-          </Button>
-        )}
-
+        {showSettings && <SettingsModal />}
+        <DevicesAlert />
+        <Button
+          type="button"
+          variant={"ghost"}
+          className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
+          onClick={() => close()}
+        >
+          <XIcon className="wv:max-sm:size-6 wv:pointer-events-none" />
+        </Button>
       </div>
     </div>
   );
 }
+

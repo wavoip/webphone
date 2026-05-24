@@ -18,8 +18,8 @@ import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { AudioInputPopover, AudioOutputPopover } from "@/components/AudioPopover";
 import { KeyboardInput } from "@/components/KeyboardInput";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getSpeakerVolume } from "@/lib/device-settings";
+import { Input } from "@/components/ui/input";
+import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useSelectedDevice } from "@/providers/SelectedDeviceProvider";
 import { useSettings } from "@/providers/SettingsProvider";
@@ -202,7 +202,12 @@ export default function KeyboardScreen() {
     setCallIsLoading(true);
     setError("");
 
-    const { err } = await startCall(number, null);
+    await startCall(number, { fromTokens: [device] }).then(({ err }) => {
+      if (!err) {
+        setStatus("Ok");
+        setCallIsLoading(false);
+        return;
+      }
 
     setCallIsLoading(false);
 
@@ -223,6 +228,12 @@ export default function KeyboardScreen() {
       });
     }
   };
+
+  mergeToAPI({
+    call: {
+      setInput: (number) => setNumber(number),
+    },
+  });
 
   return (
     <form
@@ -320,8 +331,7 @@ export default function KeyboardScreen() {
             <Button
               type="button"
               variant={"secondary"}
-              size={"icon"}
-              className="wv:size-fit wv:p-1.5 wv:shadow-none wv:bg-transparent wv:border-0 wv:rounded-full wv:hover:bg-muted wv:hover:cursor-pointer wv:touch-manipulation wv:transition-colors wv:duration-200"
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
               onClick={() => {
                 playSound("backspace");
                 setNumber((prev) => prev.slice(0, -1));

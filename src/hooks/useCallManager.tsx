@@ -1,135 +1,177 @@
-import type { CallActive, CallOffer, CallOutgoing, Wavoip } from "@wavoip/wavoip-api";
-import { useCallback, useState } from "react";
+import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { DeviceState } from "@/hooks/useDeviceManager";
-import { getSpeakerVolume } from "@/lib/device-settings";
-import { disablePiP, enablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
+import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
+import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useScreen } from "@/providers/ScreenProvider";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWidget } from "@/providers/WidgetProvider";
+
+export type CallStatus =
+  | "idle"
+  | "calling"
+  | "ringing"
+  | "active"
+  | "reconnecting"
+  | "ended"
+  | "failed"
+  | "rejected"
+  | "unanswered";
 
 type Props = {
   wavoip: Wavoip;
   devices: DeviceState[];
+  onOffer: (offer: CallOfferProps) => void;
 };
 
 const ringtone_sound = new Audio(Ringtone);
 const vibration_sound = new Audio(Vibration);
 let widgetStatusCache: null | boolean = null;
 
-export function useCallManager({ wavoip, devices }: Props) {
+export function useCallManager({ wavoip, devices, onOffer: onOfferExternal }: Props) {
   const { setScreen } = useScreen();
-  const { closed: widgetIsClosed, setClosed: setWidgetClosed, open: openWidget } = useWidget();
+  const { isClosed: widgetIsClosed, setIsClosed: setWidgetClosed, open: openWidget } = useWidget();
+  const { addNotification } = useNotificationManager();
+  const { callSettings } = useSettings();
 
-  const [offers, setOffers] = useState<CallOffer[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [outgoing, setOutgoing] = useState<CallOutgoing | undefined>(undefined);
   const [active, setActive] = useState<CallActive | undefined>(undefined);
+  const [callStatus, setCallStatus] = useState<CallStatus>("idle");
+  const [peerMuted, setPeerMuted] = useState(false);
 
-  const onCallEnd = useCallback(() => {
-    disableConfirmClose();
-    disablePiP();
+  const onCallEnd = useCallback(
+    (status: CallStatus = "ended") => {
+      disableConfirmClose();
+      disablePiP();
+      setCallStatus(status);
+      setPeerMuted(false);
 
-    setTimeout(() => {
-      if (widgetStatusCache) {
-        setWidgetClosed(widgetStatusCache);
-        widgetStatusCache = null;
-      }
+      setTimeout(() => {
+        if (widgetStatusCache) {
+          setWidgetClosed(widgetStatusCache);
+          widgetStatusCache = null;
+        }
 
-      setScreen("keyboard");
-      setOutgoing(undefined);
-      setActive(undefined);
-      pictureInPicture.call = null;
-    }, 3000);
-  }, [setScreen, setWidgetClosed]);
+        setScreen("keyboard");
+        setOutgoing(undefined);
+        setActive(undefined);
+        setCallStatus("idle");
+        pictureInPicture.call = null;
+      }, 3000);
+    },
+    [setScreen, setWidgetClosed],
+  );
+
+  const onCallError = useCallback(
+    (callId: string, deviceToken: string, error: string) => {
+      addNotification({
+        id: new Date(),
+        type: "CALL_FAILED",
+        created_at: new Date(),
+        message: error,
+        detail: `Chamada: ${callId}`,
+        isHidden: false,
+        isRead: false,
+        token: deviceToken,
+      });
+    },
+    [addNotification],
+  );
 
   const onCallAccept = useCallback(
     (call: CallActive) => {
-      call.onEnd(() => onCallEnd());
-
-      const callIntegrated: CallActive = {
-        ...call,
-        peer: call.peer,
-        onEnd: (cb) => {
-          call.onEnd(() => {
-            onCallEnd();
-            cb();
-          });
-        },
-      };
+      call.on("ended", () => onCallEnd("ended"));
+      call.on("error", (error) => onCallError(call.id, call.device_token, error));
+      call.on("peerMute", () => setPeerMuted(true));
+      call.on("peerUnmute", () => setPeerMuted(false));
+      call.on("status", (status) => {
+        if (status === "DISCONNECTED") {
+          setCallStatus("reconnecting");
+        } else {
+          setCallStatus("active");
+        }
+      });
 
       setScreen("call");
-      setActive(callIntegrated);
+      setActive(call);
+      setCallStatus("active");
+      setPeerMuted(call.peer.muted || false);
       pictureInPicture.call = call;
 
-      return callIntegrated;
+      return call;
     },
-    [onCallEnd, setScreen],
+    [onCallEnd, setScreen, onCallError],
   );
 
   const onOffer = useCallback(
-    (offer: CallOffer) => {
+    (offer: Offer) => {
       if (active) return;
 
+      if (callSettings?.displayName) {
+        offer.peer.displayName = callSettings.displayName;
+        offer.peer.phone = callSettings.displayName;
+      }
+
       function onOfferEnd() {
-        setOffers((prev) => prev.filter(({ id }) => id !== offer.id));
-        stopRingtone(offers);
+        setOffers((prev) => {
+          const remaining = prev.filter(({ id }) => id !== offer.id);
+          if (!remaining.length) stopRingtone();
+          return remaining;
+        });
 
         setTimeout(() => {
           toast.dismiss(offer.id);
         }, 2000);
       }
 
-      const offerIntegrated: CallOffer = {
-        ...offer,
-        onEnd(cb) {
-          offer.onEnd(() => {
-            onOfferEnd();
-            cb();
-          });
-        },
-        onAcceptedElsewhere(cb) {
-          offer.onAcceptedElsewhere(() => {
-            onOfferEnd();
-            cb();
-          });
-        },
-        onRejectedElsewhere(cb) {
-          offer.onRejectedElsewhere(() => {
-            onOfferEnd();
-            cb();
-          });
-        },
-        onUnanswered(cb) {
-          offer.onUnanswered(() => {
-            onOfferEnd();
-            cb();
-          });
-        },
-        async accept() {
-          const { call, err } = await offer.accept();
+      offer.on("ended", () => onOfferEnd());
+      offer.on("acceptedElsewhere", () => onOfferEnd());
+      offer.on("rejectedElsewhere", () => onOfferEnd());
+      offer.on("unanswered", () => onOfferEnd());
 
-          if (!call) return { call, err };
+      const originalAccept = offer.accept.bind(offer);
+      const originalReject = offer.reject.bind(offer);
+
+      const offerIntegrated: Offer = {
+        ...offer,
+        async accept() {
+          const result = await originalAccept();
+
+          if (!result.call) return result;
 
           setOffers([]);
-          stopRingtone(offers);
-          enablePiP();
+          stopRingtone();
+          // enablePiP();
           openWidget();
           widgetStatusCache = widgetIsClosed;
 
-          return { call: onCallAccept(call), err };
+          onCallAccept(result.call);
+          return result;
         },
         async reject() {
-          const { err } = await offer.reject();
+          const result = await originalReject();
 
-          if (!err) stopRingtone(offers);
+          if (!result.err) stopRingtone();
 
-          return { err };
+          return result;
         },
       };
 
       setOffers((prev) => [...prev, offerIntegrated]);
+      onOfferExternal({
+        id: offer.id,
+        type: offer.type,
+        status: offer.status,
+        device_token: offer.device_token,
+        direction: offer.direction,
+        peer: offer.peer,
+      });
 
       startRingtone();
 
@@ -139,69 +181,78 @@ export function useCallManager({ wavoip, devices }: Props) {
         className: "wv:max-w-[400px] wv:!w-full",
       });
     },
-    [widgetIsClosed, active, onCallAccept, openWidget, offers],
+    [widgetIsClosed, active, onCallAccept, openWidget, onOfferExternal, callSettings.displayName],
   );
 
   const start = useCallback(
-    async (to: string, fromTokens: string[] | null) => {
+    async (to: string, config: { fromTokens?: string[] } = {}) => {
       const { call, err } = await wavoip.startCall({
-        fromTokens: fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
+        fromTokens: config.fromTokens ?? devices.filter((device) => device.enable).map((device) => device.token),
         to,
       });
 
       if (err) {
-        return { err };
+        return { call: null, err };
       }
 
-      call.onPeerAccept((activeCall) => {
+      if (callSettings?.displayName) {
+        call.peer.displayName = callSettings.displayName;
+        call.peer.phone = callSettings.displayName;
+      }
+
+      call.on("peerAccept", (activeCall) => {
         onCallAccept(activeCall);
         setOutgoing(undefined);
       });
 
-      call.onUnanswered(() => onCallEnd());
+      call.on("unanswered", () => onCallEnd("unanswered"));
+      call.on("ended", () => onCallEnd("ended"));
+      call.on("peerReject", () => onCallEnd("rejected"));
 
-      call.onEnd(() => onCallEnd());
-
-      const callOutgoinIntegrated: CallOutgoing = {
-        ...call,
-        peer: call.peer,
-        onPeerAccept: (cb) => {
-          call.onPeerAccept((activeCall) => {
-            const callIntegrated = onCallAccept(activeCall);
-            setOutgoing(undefined);
-            cb(callIntegrated);
-          });
-        },
-        onEnd: (cb) => {
-          call.onEnd(() => {
-            cb();
-            onCallEnd();
-          });
-        },
-        onUnanswered: (cb) => {
-          call.onUnanswered(() => {
-            cb();
-            onCallEnd();
-          });
-        },
-      };
+      call.on("status", (status) => {
+        if (status === "CALLING") setCallStatus("calling");
+        if (status === "RINGING") setCallStatus("ringing");
+        if (status === "FAILED") onCallEnd("failed");
+      });
 
       widgetStatusCache = widgetIsClosed;
       openWidget();
-      setOutgoing(callOutgoinIntegrated);
+      setOutgoing(call);
       setScreen("outgoing");
+      setCallStatus("calling");
       enableConfirmClose();
-      enablePiP();
-      pictureInPicture.call = callOutgoinIntegrated;
+      // enablePiP();
+      pictureInPicture.call = call;
 
-      return { err: null };
+      return {
+        call: {
+          id: call.id,
+          peer: call.peer,
+        },
+        err: null,
+      };
     },
-    [devices, onCallAccept, onCallEnd, setScreen, wavoip.startCall, openWidget, widgetIsClosed],
+    [
+      devices,
+      onCallAccept,
+      onCallEnd,
+      setScreen,
+      wavoip.startCall,
+      openWidget,
+      widgetIsClosed,
+      callSettings.displayName,
+    ],
   );
 
-  wavoip.onOffer((offer) => onOffer(offer));
+  const onOfferRef = useRef(onOffer);
+  onOfferRef.current = onOffer;
 
-  return { offers, outgoing, active, start };
+  useEffect(() => {
+    const unsub = wavoip.on("offer", (offer) => onOfferRef.current(offer));
+    return () => unsub?.();
+  }, [wavoip]);
+
+  return { offers, outgoing, active, start, callStatus, peerMuted };
 }
 
 function handleBeforeUnload(e: BeforeUnloadEvent) {
@@ -231,9 +282,7 @@ function startRingtone() {
   vibration_sound.play();
 }
 
-function stopRingtone(offers: CallOffer[]) {
-  if (!offers.length) {
-    ringtone_sound.pause();
-    vibration_sound.pause();
-  }
+function stopRingtone() {
+  ringtone_sound.pause();
+  vibration_sound.pause();
 }

@@ -8,12 +8,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
+  settings: {
+    showEnable: boolean;
+    showRemove: boolean;
+  };
   device: Device & { enable: boolean };
   setShowQRCode: React.Dispatch<React.SetStateAction<null | string>>;
 };
 
-export function DeviceInfo({ device, setShowQRCode }: Props) {
+export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [wakingUp, setWakingUp] = useState(false);
 
@@ -32,14 +37,28 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
         {device.status && (
           <>
             {["disconnected", "hibernating"].includes(device.status) && (
-              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <PhoneXIcon size={18} color="red" />
-                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  {device.contact.unofficial?.phone ?? "Desconectado"}
-                </p>
-              </div>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant={"outline"}
+                    className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
+                    onClick={() => device.wakeUp()}
+                  >
+                    <PowerIcon />
+                  </Button>
+                  <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+                    <PhoneIcon size={18} color="red" />
+                    <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+                      {device.contact?.phone}
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Ligar Dispositivo</p>
+                </TooltipContent>
+              </Tooltip>
             )}
-            {(["connecting"].includes(device.status) || device.qrcode) && (
+            {(["connecting"].includes(device.status) || device.qrCode) && (
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <QrCodeIcon size={18} />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
@@ -67,85 +86,19 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <PhoneIcon size={18} color="green" />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  {device.contact.unofficial?.phone}
+                  {device.contact?.phone}
                 </p>
               </div>
             )}
-            {/* {["UP"].includes(device.status) && (
-              <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
-                <Phone size={18} color="green" />
-                <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  Disponível
-                </p>
-              </div>
-            )} */}
           </>
         )}
 
         <p data-enable={device.enable} className="wv:text-[12px] wv:text-foreground">
           {device.token}
         </p>
-        {/* <div className="wv:flex wv:items-center wv:gap-2">
-          {device.status && (
-            <>
-              <Badge variant={badgeVariant}>{device.status.toUpperCase()}</Badge>
-              {["disconnected", "hibernating"].includes(device.status) && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                      onClick={() => device.powerOn()}
-                    >
-                      <PowerIcon />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Ligar Dispositivo</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </>
-          )}
-
-          {device.qrcode && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className="wv:size-fit !wv:p-0.5 wv:aspect-square wv:hover:cursor-pointer"
-                  onClick={() => setShowQRCode(device.qrcode)}
-                >
-                  <QrCodeIcon className="size-6" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Mostrar QRCode</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div> */}
       </div>
       <div className="wv:flex wv:gap-2 wv:items-center">
-        {device.status && ["disconnected", "hibernating"].includes(device.status) && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={"ghost"}
-                disabled={wakingUp}
-                className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:border-0 wv:bg-[#4169E1] wv:text-white wv:hover:bg-[#3458c4] wv:transition-colors"
-                onClick={handleWakeUp}
-              >
-                {wakingUp
-                  ? <SpinnerGapIcon className="wv:animate-spin" />
-                  : <PowerIcon />
-                }
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent><p>{wakingUp ? "Ligando..." : "Ligar Dispositivo"}</p></TooltipContent>
-          </Tooltip>
-        )}
-        {!["disconnected", "hibernating"].includes(device.status as string) && (
+        {showEnable && (
           <Switch
             className="wv:hover:cursor-pointer"
             checked={device.enable}
@@ -154,13 +107,13 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           />
         )}
 
-        {device.qrcode && (
+        {device.qrCode && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
                 className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer wv:bg-red"
-                onClick={() => setShowQRCode(device.qrcode)}
+                onClick={() => setShowQRCode(device.qrCode ?? null)}
               >
                 <QrCodeIcon className="size-6" />
               </Button>
@@ -171,15 +124,17 @@ export function DeviceInfo({ device, setShowQRCode }: Props) {
           </Tooltip>
         )}
 
-        <Button
-          variant={"destructive"}
-          className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
-          onClick={() => {
-            setConfirmDelete(true);
-          }}
-        >
-          <TrashIcon />
-        </Button>
+        {showRemove && (
+          <Button
+            variant={"destructive"}
+            className="wv:size-fit !wv:p-1.5 wv:aspect-square wv:hover:cursor-pointer"
+            onClick={() => {
+              setConfirmDelete(true);
+            }}
+          >
+            <TrashIcon />
+          </Button>
+        )}
       </div>
 
       {confirmDelete && (

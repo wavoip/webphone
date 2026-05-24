@@ -2,13 +2,15 @@ import ReactDOM from "react-dom/client";
 import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
-import { type WebphoneAPI, webphoneAPIPromise } from "@/lib/webphone-api";
+import { webphoneAPIPromise } from "@/lib/webphone-api/api";
+import type { WebphoneSettings } from "@/providers/settings/settings";
+import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render(container?: HTMLElement) {
+  async render(config?: WebphoneSettings) {
     if (this.root) return window.wavoip as WebphoneAPI;
 
     this.container = document.createElement("div");
@@ -24,12 +26,16 @@ class WebPhoneComponent {
     `;
     shadowRoot.appendChild(style);
 
-    const shadowContainer = document.createElement("div");
-    shadowContainer.id = "root";
-    shadowRoot.appendChild(shadowContainer);
+    const root = document.createElement("div");
+    root.id = "root";
+    shadowRoot.appendChild(root);
 
-    this.root = ReactDOM.createRoot(shadowContainer);
-    this.root.render(<App shadowRoot={shadowRoot} />);
+    const container = document.createElement("div");
+    container.id = "container";
+    root.appendChild(container);
+
+    this.root = ReactDOM.createRoot(container);
+    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} />);
 
     const webphoneAPI = await webphoneAPIPromise;
     window.wavoip = webphoneAPI;
@@ -52,5 +58,4 @@ class WebPhoneComponent {
 }
 
 const webphone = new WebPhoneComponent();
-
 export default webphone;

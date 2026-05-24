@@ -1,5 +1,5 @@
 import { PhoneIcon, PhoneSlash, WhatsappLogo } from "@phosphor-icons/react";
-import type { CallOffer } from "@wavoip/wavoip-api";
+import type { Offer } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import MarqueeText from "@/components/MarqueeText";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { getFullnameLetters } from "@/lib/utils";
 
 type Props = {
-  offer: CallOffer;
+  offer: Offer;
 };
 
 export function OfferNotification({ offer }: Props) {
@@ -80,11 +80,11 @@ export function OfferNotification({ offer }: Props) {
           <Button
             type="submit"
             size={"icon"}
-            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[40px] wv:w-[40px]"
+            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              offer.reject().then(({ err }) => {
+              offer.reject().then(({ err }: { err: string | null }) => {
                 if (err) {
                   setError(err);
                   setActionMade(false);
@@ -99,13 +99,13 @@ export function OfferNotification({ offer }: Props) {
           <Button
             type="submit"
             size={"icon"}
-            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[40px] wv:w-[40px]"
+            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              offer.accept().then(({ err }) => {
-                if (err) {
-                  setError(err);
+              offer.accept().then((result) => {
+                if (result.err) {
+                  setError(result.err);
                   setActionMade(false);
                   return;
                 }

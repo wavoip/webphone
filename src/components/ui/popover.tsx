@@ -18,10 +18,10 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  const shadowRoot = useShadowRoot();
+  const { root } = useShadowRoot();
 
   return (
-    <PopoverPrimitive.Portal container={shadowRoot}>
+    <PopoverPrimitive.Portal container={root}>
       <PopoverPrimitive.Content
         data-slot="popover-content"
         align={align}
