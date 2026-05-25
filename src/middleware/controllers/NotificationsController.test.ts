@@ -34,6 +34,7 @@ describe("NotificationsController", () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
     controller.hydrate();
     expect(store.getState().notifications.map((n) => n.message)).toEqual(["a", "b"]);
+    expect(store.getState().notifications[0].id.getTime).toBeTruthy();
   });
 
   it("hydrate handles empty storage as empty list", () => {

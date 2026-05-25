@@ -18,7 +18,12 @@ export class NotificationsController {
       this.deps.store.getState().setNotifications([]);
       return;
     }
-    const parsed = JSON.parse(raw) as Notification[];
+    const parsed = (JSON.parse(raw) as Notification[]).map((n) => ({
+      ...n,
+      id: new Date(n.id),
+      created_at: new Date(n.created_at),
+    }));
+
     this.deps.store.getState().setNotifications(parsed);
   }
 
