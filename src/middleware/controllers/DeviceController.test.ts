@@ -139,6 +139,20 @@ describe("DeviceController", () => {
       expect(notes).toHaveLength(1);
       expect(notes[0].type).toBe("DEVICE_RESTRICTED");
       expect(notes[0].token).toBe("tok-1");
+      expect(notes[0].message).toBe("tok-1");
+    });
+
+    it("notification message includes contact phone and device token when contact is known", () => {
+      controller.add("tok-1");
+      const [fake] = wavoip.getDevices() as unknown as Array<{
+        contact: { phone: string };
+        emitEvent: (e: string, v: unknown) => void;
+      }>;
+      fake.contact = { phone: "5511999990000" };
+      fake.emitEvent("restrictedChanged", true);
+
+      const notes = store.getState().notifications;
+      expect(notes[0].message).toBe("5511999990000 · tok-1");
     });
 
     it("restrictedChanged false patches state and adds DEVICE_RESTRICTION_LIFTED notification", () => {
