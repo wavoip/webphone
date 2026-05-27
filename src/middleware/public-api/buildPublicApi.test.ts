@@ -83,9 +83,7 @@ describe("buildPublicApi", () => {
   describe("notifications", () => {
     it("add inserts a notification", () => {
       api.notifications.add({
-        id: "n-1",
         type: "INFO",
-        created_at: new Date(),
         message: "hi",
         detail: "",
         token: "tok-1",
@@ -97,9 +95,7 @@ describe("buildPublicApi", () => {
 
     it("clear empties the notifications", () => {
       api.notifications.add({
-        id: "n-2",
         type: "INFO",
-        created_at: new Date(),
         message: "hi",
         detail: "",
         token: "tok-1",
@@ -108,6 +104,21 @@ describe("buildPublicApi", () => {
       });
       api.notifications.clear();
       expect(api.notifications.get()).toEqual([]);
+    });
+
+    it("add returns the stamped notification with generated id and created_at", () => {
+      const stamped = api.notifications.add({
+        type: "INFO",
+        message: "hi",
+        detail: "",
+        token: "tok-1",
+        isHidden: false,
+        isRead: false,
+      });
+      expect(typeof stamped.id).toBe("string");
+      expect(stamped.id.length).toBeGreaterThan(0);
+      expect(stamped.created_at).toBeInstanceOf(Date);
+      expect(api.notifications.get()[0].id).toBe(stamped.id);
     });
   });
 

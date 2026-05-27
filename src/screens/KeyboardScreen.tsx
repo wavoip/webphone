@@ -18,7 +18,6 @@ import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { t } from "@/lib/i18n";
-import { newId } from "@/middleware/controllers/NotificationsController";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -137,14 +136,12 @@ export default function KeyboardScreen() {
       }
 
       addNotification({
-        id: newId(),
         type: "CALL_FAILED",
         detail: `${device} -> ${number}`,
         message: error_message,
         token: device,
         isRead: false,
         isHidden: false,
-        created_at: new Date(),
       });
 
       if (!isLast) {

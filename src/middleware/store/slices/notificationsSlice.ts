@@ -19,6 +19,9 @@ export type Notification = {
   isRead: boolean;
 };
 
+/** Caller-supplied input for `notifications.add`. `id` and `created_at` are stamped by the API. */
+export type NotificationInput = Omit<Notification, "id" | "created_at">;
+
 export type NotificationsSliceState = {
   notifications: Notification[];
 };

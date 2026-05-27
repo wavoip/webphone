@@ -2,6 +2,7 @@ import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-a
 import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
 import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
+import type { NotificationInput } from "@/middleware/store/slices/notificationsSlice";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
@@ -72,7 +73,12 @@ export type DeviceAPI = {
 
 export type NotificationsAPI = {
   get: () => NotificationsType[];
-  add: (notification: NotificationsType) => void;
+  /**
+   * Stamps `id` and `created_at` and inserts the notification. Returns the
+   * stored notification so callers can reference its generated `id` (e.g. for
+   * later `remove`).
+   */
+  add: (notification: NotificationInput) => NotificationsType;
   remove: (id: string) => void;
   clear: () => void;
   read: () => void;
@@ -83,7 +89,7 @@ export type NotificationsAPI = {
   /** @deprecated Use {@link NotificationsAPI.get} instead. */
   getNotifications: () => NotificationsType[];
   /** @deprecated Use {@link NotificationsAPI.add} instead. */
-  addNotification: (notification: NotificationsType) => void;
+  addNotification: (notification: NotificationInput) => NotificationsType;
   /** @deprecated Use {@link NotificationsAPI.remove} instead. */
   removeNotification: (id: string) => void;
   /** @deprecated Use {@link NotificationsAPI.clear} instead. */
