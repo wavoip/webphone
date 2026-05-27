@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
 
 type Props = {
@@ -18,19 +19,19 @@ export function OfferNotification({ offer }: Props) {
 
   useEffect(() => {
     offer.onEnd(() => {
-      setStatus("Chamada encerrada");
+      setStatus(t("Call ended"));
     });
 
     offer.onAcceptedElsewhere(() => {
-      setStatus("Aceita por outro usuário");
+      setStatus(t("Accepted by another user"));
     });
 
     offer.onRejectedElsewhere(() => {
-      setStatus("Rejeitada pelo aplicativo");
+      setStatus(t("Rejected by the app"));
     });
 
     offer.onUnanswered(() => {
-      setStatus("Tempo limite");
+      setStatus(t("Timed out"));
     });
   }, [offer]);
 

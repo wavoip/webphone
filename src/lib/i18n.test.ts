@@ -14,6 +14,9 @@ describe("webphone i18n", () => {
     expect(t("Device restricted")).toBe("Dispositivo restrito");
     expect(t("Restriction lifted")).toBe("Restrição removida");
     expect(t("Restricted")).toBe("Restrito");
+    expect(t("Cancel")).toBe("Cancelar");
+    expect(t("Notifications")).toBe("Notificações");
+    expect(t("Calling...")).toBe("Chamando...");
   });
 
   it("returns es translation when locale is es", () => {
@@ -21,5 +24,8 @@ describe("webphone i18n", () => {
     expect(t("Device restricted")).toBe("Dispositivo restringido");
     expect(t("Restriction lifted")).toBe("Restricción levantada");
     expect(t("Restricted")).toBe("Restringido");
+    expect(t("Cancel")).toBe("Cancelar");
+    expect(t("Notifications")).toBe("Notificaciones");
+    expect(t("Calling...")).toBe("Llamando...");
   });
 });

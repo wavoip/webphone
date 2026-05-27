@@ -5,6 +5,7 @@ import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -18,17 +19,17 @@ export default function OutgoingScreen() {
   const status = useMemo(() => {
     switch (callStatus) {
       case "CALLING":
-        return "Ligando...";
+        return t("Connecting...");
       case "RINGING":
-        return "Chamando...";
+        return t("Calling...");
       case "FAILED":
-        return "A ligação falhou";
+        return t("The call failed");
       case "REJECTED":
-        return "Chamada rejeitada";
+        return t("Call rejected");
       case "NOT_ANSWERED":
-        return "Chamada não atendida";
+        return t("Call unanswered");
       case "ENDED":
-        return "Chamada encerrada";
+        return t("Call ended");
       default:
         return null;
     }

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
@@ -68,14 +69,14 @@ export const SettingsModal = forwardRef(() => {
         <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
       <DialogContent container={root} onClick={(e) => e.stopPropagation()} className="wv:flex wv:flex-col wv:h-1/2">
-        <DialogTitle className="wv:sr-only">Configurações</DialogTitle>
-        <DialogDescription className="wv:sr-only">Aqui você pode configurar todo webphone</DialogDescription>
+        <DialogTitle className="wv:sr-only">{t("Settings")}</DialogTitle>
+        <DialogDescription className="wv:sr-only">{t("Here you can configure the entire webphone")}</DialogDescription>
         <div className="wv:flex wv:w-full wv:flex-col wv:gap-6 wv:overflow-hidden">
           {qrcode && (
             <>
               <DialogHeader>
                 <DialogTitle>QRCode</DialogTitle>
-                <DialogDescription>Aponte a câmera do celular</DialogDescription>
+                <DialogDescription>{t("Point your phone camera")}</DialogDescription>
               </DialogHeader>
 
               <QRCode value={qrcode} level="L" className="wv:size-full"></QRCode>
@@ -84,7 +85,7 @@ export const SettingsModal = forwardRef(() => {
           {!qrcode && (
             <Tabs defaultValue="devices" orientation="vertical" className="wv:overflow-hidden">
               <TabsList>
-                {showDevices && <TabsTrigger value="devices">Números</TabsTrigger>}
+                {showDevices && <TabsTrigger value="devices">{t("Numbers")}</TabsTrigger>}
                 {showAudio && (
                   <TabsTrigger value="settings" disabled>
                     Audio
@@ -112,7 +113,7 @@ export const SettingsModal = forwardRef(() => {
                         type="button"
                         onClick={() => {
                           if (!token.trim()) {
-                            setError("Informe o Token");
+                            setError(t("Enter the token"));
                             return;
                           }
                           addDevice(token);

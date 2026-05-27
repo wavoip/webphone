@@ -1,4 +1,5 @@
 import type { Offer } from "@wavoip/wavoip-api";
+import { t } from "@/lib/i18n";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
@@ -40,5 +41,5 @@ export function peerLabel(offer: Offer): string {
   if (name) return name;
   const phone = offer.peer.phone.trim();
   if (phone) return phone;
-  return "Desconhecido";
+  return t("Unknown");
 }

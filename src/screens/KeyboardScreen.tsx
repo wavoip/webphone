@@ -17,6 +17,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -111,7 +112,7 @@ export default function KeyboardScreen() {
 
     setCallIsLoading(true);
     setError("");
-    setStatus(`Ligando de ${device}`);
+    setStatus(`${t("Calling from")} ${device}`);
 
     await startCall(number, { fromTokens: [device] }).then(({ err }) => {
       if (!err) {
@@ -149,7 +150,7 @@ export default function KeyboardScreen() {
         // setStatus(err.message);
         handleCall(devices.slice(1));
       } else {
-        setStatus("Nenhum dispositivo está disponível");
+        setStatus(t("No device available"));
         setCallIsLoading(false);
 
         setTimeout(() => {
@@ -171,7 +172,7 @@ export default function KeyboardScreen() {
     >
       <div className="wv:text-center">
         <Input
-          placeholder="Digite..."
+          placeholder={t("Type...")}
           value={number}
           onChange={(e) => {
             const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";

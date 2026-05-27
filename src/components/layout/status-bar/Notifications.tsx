@@ -3,16 +3,17 @@ import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { t } from "@/lib/i18n";
 import { relativeTimePt } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 
-const TYPE_LABEL: Record<Notification["type"], string> = {
-  MISSED_CALL: "Chamada perdida",
-  CALL_FAILED: "Ligação falhou",
-  INFO: "Aviso",
-  DEVICE_RESTRICTED: "Dispositivo restrito",
-  DEVICE_RESTRICTION_LIFTED: "Restrição removida",
+const typeLabel = (type: Notification["type"]): string => {
+  if (type === "MISSED_CALL") return t("Missed call");
+  if (type === "CALL_FAILED") return t("Call failed");
+  if (type === "DEVICE_RESTRICTED") return t("Device restricted");
+  if (type === "DEVICE_RESTRICTION_LIFTED") return t("Restriction lifted");
+  return t("Notice");
 };
 
 function TypeIcon({ type }: { type: Notification["type"] }) {
@@ -44,7 +45,7 @@ export function Notifications() {
   return (
     <Popover>
       <PopoverTrigger
-        aria-label="Notificações"
+        aria-label={t("Notifications")}
         className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
         onClick={() => readNotifications()}
       >
@@ -59,7 +60,7 @@ export function Notifications() {
         )}
       </PopoverTrigger>
       <PopoverContent className="wv:flex wv:flex-col wv:max-h-[320px] wv:w-[320px] wv:overflow-y-auto wv:p-0">
-        {!hasAny && <p className="wv:text-center wv:py-6 wv:text-xs wv:text-foreground/60">Nenhuma notificação</p>}
+        {!hasAny && <p className="wv:text-center wv:py-6 wv:text-xs wv:text-foreground/60">{t("No notifications")}</p>}
 
         {hasAny && (
           <ul className="wv:flex wv:flex-col wv:divide-y wv:divide-foreground/10">
@@ -77,12 +78,12 @@ export function Notifications() {
                   <div className="wv:flex wv:items-center wv:gap-1.5">
                     {!n.isRead && (
                       <output
-                        aria-label="não lida"
+                        aria-label={t("Unread")}
                         className="wv:size-1.5 wv:rounded-full wv:bg-blue-500 wv:shrink-0"
                       />
                     )}
                     <p className="wv:text-[12px] wv:font-medium wv:leading-tight wv:text-foreground wv:truncate">
-                      {TYPE_LABEL[n.type]}
+                      {typeLabel(n.type)}
                     </p>
                   </div>
                   <p className="wv:text-[11px] wv:leading-tight wv:text-foreground/60 wv:truncate">
@@ -97,7 +98,7 @@ export function Notifications() {
                   <Button
                     type="button"
                     variant="ghost"
-                    aria-label="Remover notificação"
+                    aria-label={t("Remove notification")}
                     className="wv:p-0 wv:size-4 wv:rounded-full wv:hover:bg-foreground/10 wv:text-foreground/60"
                     onClick={() => removeNotification(n.id)}
                   >
@@ -116,7 +117,7 @@ export function Notifications() {
               onClick={clearNotifications}
               className="wv:text-[11px] wv:select-none wv:p-0 wv:h-auto"
             >
-              Limpar
+              {t("Clear")}
             </Button>
           </div>
         )}
