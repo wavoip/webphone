@@ -13,7 +13,7 @@ async function seed(notifications: Notification[]) {
 
 function makeMissed(id: number, displayName = "Maria", phone = "5511999999999"): Notification {
   return {
-    id: new Date(id),
+    id: String(id),
     type: "MISSED_CALL",
     created_at: new Date(id),
     message: displayName,
@@ -26,7 +26,7 @@ function makeMissed(id: number, displayName = "Maria", phone = "5511999999999"):
 
 function makeFailed(id: number, error = "Número não atende"): Notification {
   return {
-    id: new Date(id),
+    id: String(id),
     type: "CALL_FAILED",
     created_at: new Date(id),
     message: error,

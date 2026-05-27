@@ -31,8 +31,8 @@ describe("CallController", () => {
     it("derives fromTokens from enabled devices when not provided", async () => {
       wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
       store.getState().setDevices([
-        { token: "tok-on", status: "open", enable: true, persist: false },
-        { token: "tok-off", status: "open", enable: false, persist: false },
+        { token: "tok-on", status: "open", restricted: false, enable: true, persist: false },
+        { token: "tok-off", status: "open", restricted: false, enable: false, persist: false },
       ]);
       await controller.start("5511");
       expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-on"]);

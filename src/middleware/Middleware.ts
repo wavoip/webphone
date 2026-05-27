@@ -71,10 +71,11 @@ export class Middleware {
     this.store = createMiddlewareStore();
     this.registry = new MiddlewareRegistry();
     this.events = new EventBus<WebphoneEventMap>();
+    const notifications = new NotificationsController({ store: this.store });
     this.controllers = {
       call: new CallController({ wavoip: this.wavoip, store: this.store }),
-      device: new DeviceController({ wavoip: this.wavoip, store: this.store }),
-      notifications: new NotificationsController({ store: this.store }),
+      device: new DeviceController({ wavoip: this.wavoip, store: this.store, notifications }),
+      notifications,
       missedCall: new MissedCallController({ store: this.store }),
     };
   }
@@ -87,8 +88,8 @@ export class Middleware {
     if (this.started) return this;
     this.started = true;
 
-    this.controllers.device.hydrate();
     this.controllers.notifications.hydrate();
+    this.controllers.device.hydrate();
 
     this.unsubs.push(
       bindWavoipEvents({

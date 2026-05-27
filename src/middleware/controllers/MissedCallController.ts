@@ -1,4 +1,6 @@
 import type { Offer } from "@wavoip/wavoip-api";
+import { t } from "@/lib/i18n";
+import { newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
@@ -22,7 +24,7 @@ export class MissedCallController {
     // Field semantics for MISSED_CALL: `message` holds the peer label so the
     // UI can render `<label> · <phone>` without parsing a pre-formatted string.
     const entry: Notification = {
-      id: new Date(),
+      id: newId(),
       type: "MISSED_CALL",
       created_at: new Date(),
       message: peerLabel(offer),
@@ -40,5 +42,5 @@ export function peerLabel(offer: Offer): string {
   if (name) return name;
   const phone = offer.peer.phone.trim();
   if (phone) return phone;
-  return "Desconhecido";
+  return t("Unknown");
 }

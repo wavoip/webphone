@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { t } from "@/lib/i18n";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export function AudioConfig() {
@@ -20,7 +21,7 @@ export function AudioConfig() {
       <FieldSet>
         <FieldGroup className="wv:flex wv:flex-col wv:gap-4">
           <Field className="wv:flex wv:flex-col wv:gap-1 wv:text-foreground">
-            <FieldLabel>Microfone</FieldLabel>
+            <FieldLabel>{t("Microphone")}</FieldLabel>
             <Select>
               <SelectTrigger className="wv:max-w-[300px]">
                 <SelectValue placeholder="Choose department" />
@@ -33,11 +34,11 @@ export function AudioConfig() {
                 ))}
               </SelectContent>
             </Select>
-            <FieldDescription>Selecione o microfone que deseja usar na ligação</FieldDescription>
+            <FieldDescription>{t("Select the microphone to use on calls")}</FieldDescription>
           </Field>
 
           <Field className="wv:flex wv:flex-col wv:gap-1 wv:text-foreground">
-            <FieldLabel>Alto falante</FieldLabel>
+            <FieldLabel>{t("Speaker")}</FieldLabel>
             <Select>
               <SelectTrigger className="wv:max-w-[300px]">
                 <SelectValue placeholder="Choose department" />
@@ -50,7 +51,7 @@ export function AudioConfig() {
                 ))}
               </SelectContent>
             </Select>
-            <FieldDescription>Selecione o alto falante que deseja usar na ligação</FieldDescription>
+            <FieldDescription>{t("Select the speaker to use on calls")}</FieldDescription>
           </Field>
         </FieldGroup>
       </FieldSet>

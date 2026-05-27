@@ -1,9 +1,10 @@
-import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
+import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -44,13 +45,13 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Ligar Dispositivo</p>
+                    <p>{t("Power on device")}</p>
                   </TooltipContent>
                 </Tooltip>
                 <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                   <PhoneIcon size={18} color="red" />
                   <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                    {device.contact?.phone ?? "Desconectado"}
+                    {device.contact?.phone ?? t("Disconnected")}
                   </p>
                 </div>
               </div>
@@ -59,7 +60,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <QrCodeIcon size={18} />
                 <p data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-                  Aguardando vincular Whatsapp
+                  {t("Waiting to link WhatsApp")}
                 </p>
               </div>
             )}
@@ -67,7 +68,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <PhoneXIcon size={18} color="red" />
                 <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
-                  Desconectado
+                  {t("Disconnected")}
                 </p>
               </div>
             )}
@@ -75,7 +76,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
                 <PhoneXIcon size={18} color="red" />
                 <p data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
-                  Falha
+                  {t("Failed")}
                 </p>
               </div>
             )}
@@ -88,6 +89,15 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               </div>
             )}
           </>
+        )}
+
+        {device.restricted && (
+          <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
+            <WarningIcon size={18} color="#f59e0b" weight="fill" />
+            <p data-enable={device.enable} className="wv:font-medium wv:text-[#f59e0b]">
+              {t("Restricted")}
+            </p>
+          </div>
         )}
 
         <p data-enable={device.enable} className="wv:text-[12px] wv:text-foreground">
@@ -116,7 +126,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Mostrar QRCode</p>
+              <p>{t("Show QR Code")}</p>
             </TooltipContent>
           </Tooltip>
         )}
@@ -139,7 +149,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
           <div className="wv:flex wv:flex-row wv:gap-1 wv:w-full wv:justify-between">
             <div className="wv:flex wv:flex-row wv:gap-1 wv:items-center">
               <p data-enable={device.enable} className="wv:font-medium wv:text-[white] wv:select-none">
-                Deseja excluir esse dispositivo?
+                {t("Delete this device?")}
               </p>
             </div>
             <div className="wv:flex wv:flex-row wv:gap-2">
@@ -152,7 +162,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                   removeDevice(device.token);
                 }}
               >
-                Excluir
+                {t("Delete")}
               </Button>
               <Button
                 variant="outline"
@@ -161,7 +171,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                   setConfirmDelete(false);
                 }}
               >
-                Cancelar
+                {t("Cancel")}
               </Button>
             </div>
           </div>

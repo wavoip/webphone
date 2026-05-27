@@ -1,5 +1,8 @@
 import "@testing-library/jest-dom/vitest";
 import { beforeEach } from "vitest";
+import { setLanguage } from "@/lib/i18n";
+
+setLanguage("pt-BR");
 
 // happy-dom 20 does not provide AudioContext or AudioWorkletNode; the wavoip
 // SDK constructs an AudioContext during `new Wavoip(...)` so stub a minimal
@@ -67,4 +70,5 @@ Object.defineProperty(globalThis, "sessionStorage", { value: window.sessionStora
 beforeEach(() => {
   window.localStorage.clear();
   window.sessionStorage.clear();
+  setLanguage("pt-BR");
 });

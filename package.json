@@ -1,6 +1,6 @@
 {
   "name": "@wavoip/wavoip-webphone",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "main": "dist/index.umd.js",
@@ -43,7 +43,8 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@wavoip/wavoip-api": "^2.4.1",
+    "@wavoip/wavoip-api": "^2.4.2",
+    "a18n": "^1.12.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.540.0",

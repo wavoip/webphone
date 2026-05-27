@@ -71,7 +71,7 @@ describe("MiddlewareProvider + hooks", () => {
     expect(result.current).toEqual([]);
     act(() => {
       middleware.controllers.notifications.add({
-        id: new Date(),
+        id: "hook-1",
         type: "INFO",
         created_at: new Date(),
         message: "hi",

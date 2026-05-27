@@ -1,8 +1,10 @@
 import type { Device, Wavoip } from "@wavoip/wavoip-api";
 import { getSettings } from "@/lib/device-settings";
+import { type NotificationsController, newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
+import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
-type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
+type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi; notifications: NotificationsController };
 
 export class DeviceController {
   private readonly deps: Deps;
@@ -22,7 +24,10 @@ export class DeviceController {
       });
     });
     this.deps.store.getState().setDevices(seeded);
-    for (const device of devices) this.bindEvents(device);
+    for (const device of devices) {
+      this.bindEvents(device);
+      if (device.restricted) this.notifyRestriction(device, true);
+    }
   }
 
   add(token: string, persist = false): void {
@@ -30,6 +35,7 @@ export class DeviceController {
     if (!device) return;
     this.deps.store.getState().upsertDevice(this.toState(device, { enable: device.status === "open", persist }));
     this.bindEvents(device);
+    if (device.restricted) this.notifyRestriction(device, true);
   }
 
   remove(token: string): void {
@@ -59,6 +65,27 @@ export class DeviceController {
       const patch = status === "open" ? { status, enable: true } : { status };
       store.getState().updateDeviceState(device.token, patch);
     });
+    device.on("restrictedChanged", (restricted) => {
+      const prev = store.getState().devices.find((d) => d.token === device.token)?.restricted ?? false;
+      store.getState().updateDeviceState(device.token, { restricted });
+      if (prev !== restricted) this.notifyRestriction(device, restricted);
+    });
+  }
+
+  private notifyRestriction(device: Device, restricted: boolean): void {
+    const phone = device.contact?.phone;
+    const message = phone ? `${phone} · ${device.token}` : device.token;
+    const entry: Notification = {
+      id: newId(),
+      created_at: new Date(),
+      type: restricted ? "DEVICE_RESTRICTED" : "DEVICE_RESTRICTION_LIFTED",
+      message,
+      detail: "",
+      token: device.token,
+      isHidden: false,
+      isRead: false,
+    };
+    this.deps.notifications.add(entry);
   }
 
   private toState(device: Device, extras: { enable: boolean; persist: boolean }) {
@@ -67,6 +94,7 @@ export class DeviceController {
       status: device.status,
       qrCode: device.qrCode,
       contact: device.contact,
+      restricted: device.restricted,
       enable: extras.enable,
       persist: extras.persist,
     };

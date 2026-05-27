@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { NotificationsController } from "@/middleware/controllers/NotificationsController";
+import { NotificationsController, newId } from "@/middleware/controllers/NotificationsController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
@@ -7,7 +7,7 @@ const STORAGE_KEY = "webphone_notifications";
 
 function makeNotification(message: string, overrides: Partial<Notification> = {}): Notification {
   return {
-    id: new Date(),
+    id: newId(),
     type: "INFO",
     created_at: new Date(),
     message,
@@ -34,12 +34,32 @@ describe("NotificationsController", () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(seed));
     controller.hydrate();
     expect(store.getState().notifications.map((n) => n.message)).toEqual(["a", "b"]);
-    expect(store.getState().notifications[0].id.getTime).toBeTruthy();
+    expect(typeof store.getState().notifications[0].id).toBe("string");
   });
 
   it("hydrate handles empty storage as empty list", () => {
     controller.hydrate();
     expect(store.getState().notifications).toEqual([]);
+  });
+
+  it("hydrate migrates legacy Date ids (ISO strings from JSON.stringify(Date)) to string ids", () => {
+    const legacyIso = "2026-01-02T03:04:05.000Z";
+    const legacyEntry = {
+      id: legacyIso,
+      type: "INFO",
+      created_at: legacyIso,
+      message: "legacy",
+      detail: "",
+      token: "tok",
+      isHidden: false,
+      isRead: false,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([legacyEntry]));
+    controller.hydrate();
+    const [migrated] = store.getState().notifications;
+    expect(typeof migrated.id).toBe("string");
+    expect(migrated.id).toBe(String(new Date(legacyIso).getTime()));
+    expect(migrated.created_at).toBeInstanceOf(Date);
   });
 
   it("add pushes to store and persists to localStorage", () => {

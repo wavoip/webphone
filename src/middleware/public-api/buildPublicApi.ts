@@ -2,7 +2,13 @@ import type { CallActive, CallOutgoing, Offer } from "@wavoip/wavoip-api";
 import { warnDeprecated } from "@/lib/webphone-api/api";
 import type { CallActiveProps, CallOfferProps, CallOutgoingProps, WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
+import { newId } from "@/middleware/controllers/NotificationsController";
 import type { Middleware } from "@/middleware/Middleware";
+import type { Notification, NotificationInput } from "@/middleware/store/slices/notificationsSlice";
+
+function stampNotification(input: NotificationInput): Notification {
+  return { ...input, id: newId(), created_at: new Date() };
+}
 
 /**
  * Builds the public `window.wavoip` API from a {@link Middleware} instance.
@@ -61,7 +67,11 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
     },
     notifications: {
       get: () => store.getState().notifications,
-      add: (n) => controllers.notifications.add(n),
+      add: (input) => {
+        const stamped = stampNotification(input);
+        controllers.notifications.add(stamped);
+        return stamped;
+      },
       remove: (id) => controllers.notifications.remove(id),
       clear: () => controllers.notifications.clear(),
       read: () => controllers.notifications.markAllRead(),
@@ -71,9 +81,11 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
         warnDeprecated("notifications.getNotifications", "notifications.get");
         return store.getState().notifications;
       },
-      addNotification: (n) => {
+      addNotification: (input) => {
         warnDeprecated("notifications.addNotification", "notifications.add");
-        controllers.notifications.add(n);
+        const stamped = stampNotification(input);
+        controllers.notifications.add(stamped);
+        return stamped;
       },
       removeNotification: (id) => {
         warnDeprecated("notifications.removeNotification", "notifications.remove");

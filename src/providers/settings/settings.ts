@@ -67,6 +67,8 @@ export type OfferNotificationSettings = {
   icon?: string;
 };
 
+import type { Language } from "@/lib/i18n";
+
 export type WebphoneSettings = {
   theme?: Theme;
   statusBar?: Partial<StatusBarSettings>;
@@ -77,4 +79,5 @@ export type WebphoneSettings = {
   callSettings?: CallSettings;
   offerNotification?: OfferNotificationSettings;
   platform?: string;
+  language?: Language;
 };

@@ -121,6 +121,7 @@ export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
   qrCode?: string;
   contact?: Contact;
   status: DeviceStatus = "disconnected";
+  restricted = false;
   readonly token: string;
 
   constructor(token: string) {

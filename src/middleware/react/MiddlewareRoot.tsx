@@ -3,6 +3,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { getSettings } from "@/lib/device-settings";
+import { setLanguage as setWebphoneLanguage } from "@/lib/i18n";
 import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { setPublicApiBase } from "@/lib/webphone-api/api";
 import { bootstrapStore } from "@/middleware/bootstrap/bootstrapStore";
@@ -35,7 +36,10 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
 
   const [middleware] = useState(() => {
     const storedTokens = [...getSettings().keys()];
-    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform });
+    const language = config?.language;
+    if (language) setWebphoneLanguage(language);
+    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, language });
+    if (injectedWavoip && language) injectedWavoip.setLanguage(language);
     // When the caller injects a Wavoip we still own device persistence — merge
     // stored tokens in so hydrate can restore them. `addDevices` dedupes.
     if (injectedWavoip && storedTokens.length) injectedWavoip.addDevices(storedTokens);
