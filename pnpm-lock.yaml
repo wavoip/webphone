@@ -1627,7 +1627,7 @@ packages:
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
   '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.4.1.tgz':
-    resolution: {integrity: sha512-VROQJt51kDbF+zmnMG7hF2yUiqv6OEew3DlLoq48/nioEOkF1IXVxxpxC5Hp7M/flW+spYOy0biltTVcRXXhFg==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.4.1.tgz}
+    resolution: {integrity: sha512-mXPOi7Rv9jT6CxxRUNNA/KupxXDxtjd4JD4tOcnSESoUx/Ktctrz3lk/D+7tH96W+sJxLS6AMbqqFxhuzK5vrA==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.4.1.tgz}
     version: 2.4.1
 
   a18n@1.12.4:
