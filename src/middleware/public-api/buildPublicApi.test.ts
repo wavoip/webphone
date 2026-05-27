@@ -83,7 +83,7 @@ describe("buildPublicApi", () => {
   describe("notifications", () => {
     it("add inserts a notification", () => {
       api.notifications.add({
-        id: new Date(),
+        id: "n-1",
         type: "INFO",
         created_at: new Date(),
         message: "hi",
@@ -97,7 +97,7 @@ describe("buildPublicApi", () => {
 
     it("clear empties the notifications", () => {
       api.notifications.add({
-        id: new Date(),
+        id: "n-2",
         type: "INFO",
         created_at: new Date(),
         message: "hi",

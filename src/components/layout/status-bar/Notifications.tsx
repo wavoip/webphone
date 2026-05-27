@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { t } from "@/lib/i18n";
-import { relativeTimePt } from "@/lib/relative-time";
+import { relativeTime } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 
@@ -66,8 +66,8 @@ export function Notifications() {
           <ul className="wv:flex wv:flex-col wv:divide-y wv:divide-foreground/10">
             {visible.map((n) => (
               <li
-                key={`notification_${n.id.getTime()}`}
-                data-notification-id={n.id.getTime()}
+                key={`notification_${n.id}`}
+                data-notification-id={n.id}
                 className="wv:flex wv:flex-row wv:items-start wv:gap-2 wv:px-2 wv:py-1.5 wv:hover:bg-foreground/5"
               >
                 <span className="wv:flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:bg-foreground/10 wv:text-foreground wv:shrink-0 wv:mt-0.5">
@@ -93,7 +93,7 @@ export function Notifications() {
 
                 <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
                   <span className="wv:text-[10px] wv:text-foreground/50 wv:whitespace-nowrap">
-                    {relativeTimePt(n.created_at)}
+                    {relativeTime(n.created_at)}
                   </span>
                   <Button
                     type="button"

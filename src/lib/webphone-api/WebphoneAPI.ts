@@ -73,7 +73,7 @@ export type DeviceAPI = {
 export type NotificationsAPI = {
   get: () => NotificationsType[];
   add: (notification: NotificationsType) => void;
-  remove: (id: Date) => void;
+  remove: (id: string) => void;
   clear: () => void;
   read: () => void;
   /** Current browser permission for OS-level offer notifications. */
@@ -85,7 +85,7 @@ export type NotificationsAPI = {
   /** @deprecated Use {@link NotificationsAPI.add} instead. */
   addNotification: (notification: NotificationsType) => void;
   /** @deprecated Use {@link NotificationsAPI.remove} instead. */
-  removeNotification: (id: Date) => void;
+  removeNotification: (id: string) => void;
   /** @deprecated Use {@link NotificationsAPI.clear} instead. */
   clearNotifications: () => void;
   /** @deprecated Use {@link NotificationsAPI.read} instead. */

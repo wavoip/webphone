@@ -1,5 +1,6 @@
 import { type ReactNode, useMemo } from "react";
 import { useStore } from "zustand";
+import { newId } from "@/middleware/controllers/NotificationsController";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
@@ -34,10 +35,10 @@ export function useNotificationManager() {
         if (middleware.store.getState().notifications.length > MAX_NOTIFICATIONS) {
           controller.clear();
         }
-        const stamped: Notification = { ...notification, id: new Date(), created_at: new Date() };
+        const stamped: Notification = { ...notification, id: newId(), created_at: new Date() };
         controller.add(stamped);
       },
-      removeNotification: (id: Date) => controller.remove(id),
+      removeNotification: (id: string) => controller.remove(id),
       readNotifications: () => controller.markAllRead(),
       clearNotifications: () => controller.clear(),
     }),

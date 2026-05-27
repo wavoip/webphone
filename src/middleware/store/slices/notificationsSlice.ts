@@ -9,7 +9,7 @@ export type NotificationType =
   | "DEVICE_RESTRICTION_LIFTED";
 
 export type Notification = {
-  id: Date;
+  id: string;
   type: NotificationType;
   created_at: Date;
   message: string;
@@ -26,7 +26,7 @@ export type NotificationsSliceState = {
 export type NotificationsSliceActions = {
   setNotifications: (notifications: Notification[]) => void;
   addNotification: (notification: Notification) => void;
-  removeNotification: (id: Date) => void;
+  removeNotification: (id: string) => void;
   clearNotifications: () => void;
   markAllNotificationsRead: () => void;
 };

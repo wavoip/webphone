@@ -40,6 +40,7 @@ export type TranslationKey =
   // keyboard / outgoing
   | "Calling from"
   | "No device available"
+  | "Number does not exist"
   | "Type..."
   | "Connecting..."
   | "Calling..."
@@ -93,6 +94,7 @@ const ptBR: LocaleResource = {
   Unknown: "Desconhecido",
   "Calling from": "Ligando de",
   "No device available": "Nenhum dispositivo está disponível",
+  "Number does not exist": "Número não existe",
   "Type...": "Digite...",
   "Connecting...": "Ligando...",
   "Calling...": "Chamando...",
@@ -142,6 +144,7 @@ const es: LocaleResource = {
   Unknown: "Desconocido",
   "Calling from": "Llamando desde",
   "No device available": "Ningún dispositivo disponible",
+  "Number does not exist": "El número no existe",
   "Type...": "Escribir...",
   "Connecting...": "Conectando...",
   "Calling...": "Llamando...",

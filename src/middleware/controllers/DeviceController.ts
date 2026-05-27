@@ -1,7 +1,7 @@
 import type { Device, Wavoip } from "@wavoip/wavoip-api";
 import { getSettings } from "@/lib/device-settings";
 import { t } from "@/lib/i18n";
-import type { NotificationsController } from "@/middleware/controllers/NotificationsController";
+import { type NotificationsController, newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
@@ -75,7 +75,7 @@ export class DeviceController {
 
   private notifyRestriction(device: Device, restricted: boolean): void {
     const entry: Notification = {
-      id: new Date(),
+      id: newId(),
       created_at: new Date(),
       type: restricted ? "DEVICE_RESTRICTED" : "DEVICE_RESTRICTION_LIFTED",
       message: restricted ? t("Device restricted") : t("Restriction lifted"),
