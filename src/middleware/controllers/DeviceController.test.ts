@@ -1,18 +1,21 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("DeviceController", () => {
   let store: MiddlewareStoreApi;
   let wavoip: FakeWavoip;
+  let notifications: NotificationsController;
   let controller: DeviceController;
 
   beforeEach(() => {
     localStorage.clear();
     wavoip = new FakeWavoip();
     store = createMiddlewareStore();
-    controller = new DeviceController({ wavoip: wavoip.asWavoip(), store });
+    notifications = new NotificationsController({ store });
+    controller = new DeviceController({ wavoip: wavoip.asWavoip(), store, notifications });
   });
 
   it("hydrate seeds store with wavoip.getDevices()", () => {
@@ -123,5 +126,57 @@ describe("DeviceController", () => {
       phone: "5511",
     });
     expect(store.getState().devices[0].contact).toEqual({ phone: "5511" });
+  });
+
+  describe("restriction", () => {
+    it("restrictedChanged true patches state and adds DEVICE_RESTRICTED notification", () => {
+      controller.add("tok-1");
+      const [fake] = wavoip.getDevices();
+      (fake as unknown as { emitEvent: (e: string, v: boolean) => void }).emitEvent("restrictedChanged", true);
+
+      expect(store.getState().devices[0].restricted).toBe(true);
+      const notes = store.getState().notifications;
+      expect(notes).toHaveLength(1);
+      expect(notes[0].type).toBe("DEVICE_RESTRICTED");
+      expect(notes[0].token).toBe("tok-1");
+    });
+
+    it("restrictedChanged false patches state and adds DEVICE_RESTRICTION_LIFTED notification", () => {
+      controller.add("tok-1");
+      const [fake] = wavoip.getDevices() as unknown as Array<{
+        restricted: boolean;
+        emitEvent: (e: string, v: boolean) => void;
+      }>;
+      fake.restricted = true;
+      store.getState().updateDeviceState("tok-1", { restricted: true });
+
+      fake.emitEvent("restrictedChanged", false);
+
+      expect(store.getState().devices[0].restricted).toBe(false);
+      const notes = store.getState().notifications;
+      expect(notes[0].type).toBe("DEVICE_RESTRICTION_LIFTED");
+    });
+
+    it("does not duplicate notification when restrictedChanged fires with same value", () => {
+      controller.add("tok-1");
+      const [fake] = wavoip.getDevices();
+      const emit = (fake as unknown as { emitEvent: (e: string, v: boolean) => void }).emitEvent;
+      emit.call(fake, "restrictedChanged", false);
+      emit.call(fake, "restrictedChanged", false);
+      expect(store.getState().notifications).toHaveLength(0);
+    });
+
+    it("hydrate fires notification once for devices that start restricted", () => {
+      wavoip.addDevices(["tok-1"]);
+      const [fake] = wavoip.getDevices() as unknown as Array<{ restricted: boolean }>;
+      fake.restricted = true;
+
+      controller.hydrate();
+
+      expect(store.getState().devices[0].restricted).toBe(true);
+      const notes = store.getState().notifications;
+      expect(notes).toHaveLength(1);
+      expect(notes[0].type).toBe("DEVICE_RESTRICTED");
+    });
   });
 });

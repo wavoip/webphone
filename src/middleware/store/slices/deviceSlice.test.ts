@@ -8,6 +8,7 @@ function makeDevice(token: string, overrides: Partial<DeviceStateEntry> = {}): D
     status: "disconnected",
     qrCode: undefined,
     contact: undefined,
+    restricted: false,
     enable: false,
     persist: false,
     ...overrides,
@@ -79,5 +80,13 @@ describe("deviceSlice", () => {
     store.getState().setDevices([makeDevice("a")]);
     store.getState().setDevicePersist("a", true);
     expect(store.getState().devices[0].persist).toBe(true);
+  });
+
+  it("updateDeviceState patches restricted flag", () => {
+    store.getState().setDevices([makeDevice("a")]);
+    store.getState().updateDeviceState("a", { restricted: true });
+    expect(store.getState().devices[0].restricted).toBe(true);
+    store.getState().updateDeviceState("a", { restricted: false });
+    expect(store.getState().devices[0].restricted).toBe(false);
   });
 });

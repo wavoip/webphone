@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
@@ -16,8 +17,8 @@ describe("persistDevicesEffect", () => {
   it("writes persisted devices to localStorage on change", () => {
     const unsub = persistDevicesEffect({ store });
     store.getState().setDevices([
-      { token: "a", status: "open", enable: true, persist: true },
-      { token: "b", status: "open", enable: false, persist: false },
+      { token: "a", status: "open", restricted: false, enable: true, persist: true },
+      { token: "b", status: "open", restricted: false, enable: false, persist: false },
     ]);
 
     expect(localStorage.getItem(STORAGE_KEY)).toBe("a:true:true");
@@ -26,7 +27,7 @@ describe("persistDevicesEffect", () => {
 
   it("ignores devices with persist=false", () => {
     const unsub = persistDevicesEffect({ store });
-    store.getState().setDevices([{ token: "a", status: "open", enable: true, persist: false }]);
+    store.getState().setDevices([{ token: "a", status: "open", restricted: false, enable: true, persist: false }]);
 
     expect(localStorage.getItem(STORAGE_KEY)).toBe("");
     unsub();
@@ -34,16 +35,17 @@ describe("persistDevicesEffect", () => {
 
   it("unsub stops further writes", () => {
     const unsub = persistDevicesEffect({ store });
-    store.getState().setDevices([{ token: "a", status: "open", enable: true, persist: true }]);
+    store.getState().setDevices([{ token: "a", status: "open", restricted: false, enable: true, persist: true }]);
     unsub();
 
-    store.getState().setDevices([{ token: "b", status: "open", enable: true, persist: true }]);
+    store.getState().setDevices([{ token: "b", status: "open", restricted: false, enable: true, persist: true }]);
     expect(localStorage.getItem(STORAGE_KEY)).toBe("a:true:true");
   });
 
   it("DeviceController.add(token, true) writes the token to localStorage through the effect", () => {
     const wavoip = new FakeWavoip();
-    const controller = new DeviceController({ wavoip: wavoip.asWavoip(), store });
+    const notifications = new NotificationsController({ store });
+    const controller = new DeviceController({ wavoip: wavoip.asWavoip(), store, notifications });
     const unsub = persistDevicesEffect({ store });
 
     controller.add("tok-x", true);
@@ -54,7 +56,8 @@ describe("persistDevicesEffect", () => {
 
   it("DeviceController.add(token) without persist does not write to localStorage", () => {
     const wavoip = new FakeWavoip();
-    const controller = new DeviceController({ wavoip: wavoip.asWavoip(), store });
+    const notifications = new NotificationsController({ store });
+    const controller = new DeviceController({ wavoip: wavoip.asWavoip(), store, notifications });
     const unsub = persistDevicesEffect({ store });
 
     controller.add("tok-x");
@@ -67,7 +70,12 @@ describe("persistDevicesEffect", () => {
     // Round 1: add with persist
     const wavoipA = new FakeWavoip();
     const storeA = createMiddlewareStore();
-    const controllerA = new DeviceController({ wavoip: wavoipA.asWavoip(), store: storeA });
+    const notificationsA = new NotificationsController({ store: storeA });
+    const controllerA = new DeviceController({
+      wavoip: wavoipA.asWavoip(),
+      store: storeA,
+      notifications: notificationsA,
+    });
     const unsubA = persistDevicesEffect({ store: storeA });
     controllerA.add("tok-y", true);
     unsubA();
@@ -78,7 +86,12 @@ describe("persistDevicesEffect", () => {
     const tokens = stored?.split(";").map((entry) => entry.split(":")[0]) ?? [];
     const wavoipB = new FakeWavoip(tokens);
     const storeB = createMiddlewareStore();
-    const controllerB = new DeviceController({ wavoip: wavoipB.asWavoip(), store: storeB });
+    const notificationsB = new NotificationsController({ store: storeB });
+    const controllerB = new DeviceController({
+      wavoip: wavoipB.asWavoip(),
+      store: storeB,
+      notifications: notificationsB,
+    });
     controllerB.hydrate();
 
     const [device] = storeB.getState().devices;

@@ -1,4 +1,4 @@
-import { BellIcon, PhoneIncomingIcon, PhoneXIcon, XIcon } from "@phosphor-icons/react";
+import { BellIcon, CheckCircleIcon, PhoneIncomingIcon, PhoneXIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,15 @@ const TYPE_LABEL: Record<Notification["type"], string> = {
   MISSED_CALL: "Chamada perdida",
   CALL_FAILED: "Ligação falhou",
   INFO: "Aviso",
+  DEVICE_RESTRICTED: "Dispositivo restrito",
+  DEVICE_RESTRICTION_LIFTED: "Restrição removida",
 };
 
 function TypeIcon({ type }: { type: Notification["type"] }) {
   if (type === "MISSED_CALL") return <PhoneIncomingIcon size={14} weight="fill" />;
   if (type === "CALL_FAILED") return <PhoneXIcon size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTED") return <WarningIcon size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircleIcon size={14} weight="fill" />;
   return <BellIcon size={14} weight="fill" />;
 }
 
