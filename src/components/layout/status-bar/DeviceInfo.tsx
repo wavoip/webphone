@@ -27,7 +27,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="wv:relative wv:flex wv:justify-between wv:items-center wv:gap-2 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-muted-foreground/30 wv:rounded-md wv:overflow-hidden"
+      className="wv:relative wv:flex wv:justify-between wv:items-center wv:gap-4 wv:flex-wrap wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-muted-foreground/30 wv:rounded-md wv:overflow-hidden"
     >
       <div className="wv:flex wv:flex-col wv:gap-1">
         {device.status && (

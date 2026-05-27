@@ -132,10 +132,11 @@ export function WidgetProvider({ children }: Props) {
         const current = middleware.store.getState().position;
         setStorePosition({ x: x ?? current.x, y: y ?? current.y });
       }
+      setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
     }
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [middleware, setStorePosition]);
+  }, [middleware, setStorePosition, setStoreButtonPosition, buttonPositionInitial]);
 
   const setIsClosed = useCallback(
     (closed: boolean) => (closed ? closeWidget() : openWidget()),
@@ -164,8 +165,7 @@ export function WidgetProvider({ children }: Props) {
           onClick={openWidget}
           size={"icon"}
           data-closed={isClosed}
-          className="wv:transition wv:data-[closed=false]:hidden wv:bottom-0 wv:right-0 wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
-          style={{ position: "fixed", top: buttonPosition.y, left: buttonPosition.x }}
+          className="wv:fixed wv:bottom-6 wv:right-6 wv:z-50 wv:transition wv:data-[closed=false]:hidden wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
         >
           <PhoneIcon className="wv:size-8" />
         </Button>
