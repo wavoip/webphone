@@ -14,6 +14,7 @@
 ## Recursos
 
 * [Notificações push](recursos/notificacoes-push.md)
+* [Auto-atualização da CDN](recursos/auto-atualizacao.md)
 
 ## Customização
 
