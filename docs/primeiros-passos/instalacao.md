@@ -93,10 +93,6 @@ Para ambientes que não suportam ESM, use o bundle UMD. Ele expõe o webphone em
 </script>
 ```
 
-{% hint style="warning" %}
-jsDelivr cacheia agressivamente. Após publicar nova versão, o cache do `@latest` pode levar algumas horas para atualizar. Para forçar a atualização, fixe a versão exata.
-{% endhint %}
-
 ### Auto-atualização
 
 Quando carregado via `<script>` na CDN, o webphone verifica o jsDelivr a cada `render()` e troca automaticamente para a versão `latest` publicada. Para desativar o comportamento e travar na versão exata, adicione `data-auto-update="false"` à tag `<script>`. Detalhes completos em [Auto-atualização da CDN](../recursos/auto-atualizacao.md).
