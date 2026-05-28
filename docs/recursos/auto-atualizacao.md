@@ -76,7 +76,3 @@ Use essa opção quando:
 ## Comparação de versão
 
 A comparação usa SemVer numérico — `major.minor.patch`. Sufixos de pré-lançamento (`-beta`, `-rc.1`) são ignorados na ordenação. Se a versão local for igual ou maior que `latest`, o upgrade não dispara, então deploys de canary com versão acima da `latest` continuam funcionando.
-
-## Implementação
-
-A lógica vive em `src/lib/auto-update.ts` e é exercitada pelos testes em `src/lib/auto-update.test.ts`. A constante `__WEBPHONE_VERSION__` é injetada em build pelo Vite a partir de `package.json` — o override `WEBPHONE_VERSION_OVERRIDE=<versão>` no `pnpm build` permite simular uma build mais antiga para validar o fluxo localmente.
