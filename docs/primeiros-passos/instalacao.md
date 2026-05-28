@@ -69,6 +69,19 @@ Para HTML estático ou prototipagem rápida, carregue o bundle ESM direto via js
 </script>
 ```
 
+{% hint style="warning" %}
+Fixar a versão na URL **não basta** para builds UMD via `<script src="...">`. O webphone verifica o jsDelivr a cada `render()` e troca para a `latest` publicada mesmo quando a URL aponta para uma versão exata. Para travar de fato, adicione `data-auto-update="false"` à tag `<script>` — veja [Auto-atualização da CDN](../recursos/auto-atualizacao.md).
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@1.3.9/dist/index.umd.min.js"
+  data-auto-update="false"
+></script>
+```
+
+Imports ESM (`<script type="module">` com `import` da URL) não disparam o check e travam na versão da URL sem configuração extra.
+{% endhint %}
+
 ### Build UMD (sem `type="module"`)
 
 Para ambientes que não suportam ESM, use o bundle UMD. Ele expõe o webphone em `window.wavoipWebphone`:
