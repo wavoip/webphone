@@ -70,7 +70,10 @@ Para HTML estático ou prototipagem rápida, carregue o bundle ESM direto via js
 ```
 
 {% hint style="warning" %}
-Fixar a versão na URL **não basta** para builds UMD via `<script src="...">`. O webphone verifica o jsDelivr a cada `render()` e troca para a `latest` publicada mesmo quando a URL aponta para uma versão exata. Para travar de fato, adicione `data-auto-update="false"` à tag `<script>` — veja [Auto-atualização da CDN](../recursos/auto-atualizacao.md).
+Fixar a versão na URL **não basta** para builds UMD. O webphone verifica o jsDelivr a cada `render()` e troca para a `latest` publicada mesmo com a URL apontando para versão exata. Para travar, adicione `data-auto-update="false"` na tag `<script>` (exemplo abaixo). Imports ESM via `<script type="module">` não disparam o check.
+
+Veja [Auto-atualização da CDN](../recursos/auto-atualizacao.md) para detalhes.
+{% endhint %}
 
 ```html
 <script
@@ -78,9 +81,6 @@ Fixar a versão na URL **não basta** para builds UMD via `<script src="...">`. 
   data-auto-update="false"
 ></script>
 ```
-
-Imports ESM (`<script type="module">` com `import` da URL) não disparam o check e travam na versão da URL sem configuração extra.
-{% endhint %}
 
 ### Build UMD (sem `type="module"`)
 
