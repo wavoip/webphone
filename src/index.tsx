@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
+import { maybeUpgrade } from "@/lib/auto-update";
 import { webphoneAPIPromise } from "@/lib/webphone-api/api";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
@@ -11,8 +12,21 @@ class WebPhoneComponent {
   private container: HTMLElement | null = null;
   private root: ReactDOM.Root | null = null;
 
-  async render(config?: WebphoneSettings, wavoip?: Wavoip) {
+  async render(config?: WebphoneSettings, wavoip?: Wavoip): Promise<WebphoneAPI | undefined> {
     if (this.root) return window.wavoip as WebphoneAPI;
+
+    try {
+      const upgraded = await maybeUpgrade(__WEBPHONE_VERSION__);
+      if (upgraded) {
+        this.destroy();
+        return window.wavoipWebphone?.render(config, wavoip);
+      }
+    } catch (err) {
+      console.warn(
+        `[wavoip-webphone] auto-update failed at ${__WEBPHONE_VERSION__}; continuing with the current bundle`,
+        err,
+      );
+    }
 
     this.container = document.createElement("div");
     this.container.id = "webphone";

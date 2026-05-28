@@ -69,20 +69,40 @@ Para HTML estático ou prototipagem rápida, carregue o bundle ESM direto via js
 </script>
 ```
 
-### Build UMD (sem `type="module"`)
+{% hint style="warning" %}
+Fixar a versão na URL **não basta** para builds UMD. O webphone verifica o jsDelivr a cada `render()` e troca para a `latest` publicada mesmo com a URL apontando para versão exata. Para travar, adicione `data-auto-update="false"` na tag `<script>` (exemplo abaixo). Imports ESM via `<script type="module">` não disparam o check.
 
-Para ambientes que não suportam ESM, use o bundle UMD. Ele expõe o webphone em `window.WavoipWebphone`:
+Veja [Auto-atualização da CDN](../recursos/auto-atualizacao.md) para detalhes.
+{% endhint %}
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest/dist/index.umd.js"></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@1.3.9/dist/index.umd.min.js"
+  data-auto-update="false"
+></script>
+```
+
+### Build UMD (sem `type="module"`)
+
+Para ambientes que não suportam ESM, use o bundle UMD. Ele expõe o webphone em `window.wavoipWebphone`:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@latest/dist/index.umd.min.js"></script>
 <script>
-  WavoipWebphone.default.render();
+  wavoipWebphone.render();
 </script>
 ```
 
-{% hint style="warning" %}
-jsDelivr cacheia agressivamente. Após publicar nova versão, o cache do `@latest` pode levar algumas horas para atualizar. Para forçar a atualização, fixe a versão exata.
-{% endhint %}
+### Auto-atualização
+
+Quando carregado via `<script>` na CDN, o webphone verifica o jsDelivr a cada `render()` e troca automaticamente para a versão `latest` publicada. Para desativar o comportamento e travar na versão exata, adicione `data-auto-update="false"` à tag `<script>`. Detalhes completos em [Auto-atualização da CDN](../recursos/auto-atualizacao.md).
+
+```html
+<script
+  src="https://cdn.jsdelivr.net/npm/@wavoip/wavoip-webphone@1.4.3/dist/index.umd.min.js"
+  data-auto-update="false"
+></script>
+```
 
 ## Próximo passo
 
