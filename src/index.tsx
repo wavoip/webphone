@@ -15,10 +15,17 @@ class WebPhoneComponent {
   async render(config?: WebphoneSettings, wavoip?: Wavoip): Promise<WebphoneAPI | undefined> {
     if (this.root) return window.wavoip as WebphoneAPI;
 
-    const upgraded = await maybeUpgrade(__WEBPHONE_VERSION__);
-    if (upgraded) {
-      this.destroy();
-      return window.wavoipWebphone?.render(config, wavoip);
+    try {
+      const upgraded = await maybeUpgrade(__WEBPHONE_VERSION__);
+      if (upgraded) {
+        this.destroy();
+        return window.wavoipWebphone?.render(config, wavoip);
+      }
+    } catch (err) {
+      console.warn(
+        `[wavoip-webphone] auto-update failed at ${__WEBPHONE_VERSION__}; continuing with the current bundle`,
+        err,
+      );
     }
 
     this.container = document.createElement("div");
