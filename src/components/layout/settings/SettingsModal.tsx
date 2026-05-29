@@ -22,6 +22,7 @@ import { useMiddleware } from "@/middleware/react/hooks";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
+import { DebugScreen } from "@/screens/DebugScreen";
 
 export const SettingsModal = forwardRef(() => {
   const { wavoip, addDevice, devices } = useWavoip();
@@ -91,6 +92,7 @@ export const SettingsModal = forwardRef(() => {
                     Audio
                   </TabsTrigger>
                 )}
+                <TabsTrigger value="diagnostics">{t("Diagnostics")}</TabsTrigger>
               </TabsList>
               {showDevices && (
                 <TabsContent value="devices" className="wv:overflow-auto">
@@ -143,6 +145,9 @@ export const SettingsModal = forwardRef(() => {
                   <AudioConfig />
                 </TabsContent>
               )}
+              <TabsContent value="diagnostics" className="wv:overflow-auto">
+                <DebugScreen onClose={() => setOpen(false)} />
+              </TabsContent>
             </Tabs>
           )}
         </div>

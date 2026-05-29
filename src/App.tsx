@@ -1,6 +1,7 @@
 import type { Wavoip } from "@wavoip/wavoip-api";
 import { WebPhone } from "@/components/WebPhone";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
+import { DebugProvider } from "@/providers/DebugProvider";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
@@ -25,7 +26,9 @@ export function App({ shadowRoot, root, config, wavoip }: Props) {
             <WidgetProvider>
               <NotificationsProvider>
                 <WavoipProvider>
-                  <WebPhone />
+                  <DebugProvider>
+                    <WebPhone />
+                  </DebugProvider>
                 </WavoipProvider>
               </NotificationsProvider>
             </WidgetProvider>

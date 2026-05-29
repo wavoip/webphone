@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@wavoip/wavoip-api': link:../wavoip-api
+
 importers:
 
   .:
@@ -45,8 +48,8 @@ importers:
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wavoip/wavoip-api':
-        specifier: ^2.4.2
-        version: 2.4.2
+        specifier: file:/mnt/HD/projects/wavoip/wavoip-api/wavoip-wavoip-api-2.4.2.tgz
+        version: file:../wavoip-api/wavoip-wavoip-api-2.4.2.tgz
       a18n:
         specifier: ^1.12.4
         version: 1.12.4
@@ -1626,8 +1629,9 @@ packages:
   '@vue/shared@3.5.21':
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
-  '@wavoip/wavoip-api@2.4.2':
-    resolution: {integrity: sha512-Jg/1KxkiIlXK9Dq8PXp+q3SYp+gpCRMD8qQsa+QVh5RvSHhWo0H5vmiD6SYkD78QkaLAVgWWUHYlz1sqI1TnIw==}
+  '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.4.2.tgz':
+    resolution: {integrity: sha512-4OreuS42fVvU85T4B2yS2H4DFGBp3+lU+WkFyODbY7y4hSELTqTD41uRg/Kz3HWED/DlDS/pnTXOfaNqL4qH0w==, tarball: file:../wavoip-api/wavoip-wavoip-api-2.4.2.tgz}
+    version: 2.4.2
 
   a18n@1.12.4:
     resolution: {integrity: sha512-CvDcw/b7+u8iyLSN6008iEKR36oAnAF6RgprHZy3Tiw8bQuSVm0q2daYwnjIeM92TZktxkgfL+uYwwdsJXDVCA==}
@@ -4522,7 +4526,7 @@ snapshots:
 
   '@vue/shared@3.5.21': {}
 
-  '@wavoip/wavoip-api@2.4.2':
+  '@wavoip/wavoip-api@file:../wavoip-api/wavoip-wavoip-api-2.4.2.tgz':
     dependencies:
       a18n: 1.12.4
       axios: 1.15.0

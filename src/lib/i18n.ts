@@ -56,7 +56,23 @@ export type TranslationKey =
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
   | "Numbers"
-  | "Enter the token";
+  | "Enter the token"
+  // troubleshooting
+  | "Diagnostics"
+  | "Open diagnostics"
+  | "Close"
+  | "Copy report"
+  | "Test STUN"
+  | "Browser"
+  | "Network"
+  | "Audio devices"
+  | "STUN reachability"
+  | "Recent issues"
+  | "STUN unreachable"
+  | "ICE gathering timed out"
+  | "Connection failed"
+  | "No host candidates"
+  | "Symmetric NAT suspected";
 
 type LocaleResource = Record<TranslationKey, string>;
 
@@ -110,6 +126,21 @@ const ptBR: LocaleResource = {
   "Point your phone camera": "Aponte a câmera do celular",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
+  Diagnostics: "Diagnóstico",
+  "Open diagnostics": "Abrir diagnóstico",
+  Close: "Fechar",
+  "Copy report": "Copiar relatório",
+  "Test STUN": "Testar STUN",
+  Browser: "Navegador",
+  Network: "Rede",
+  "Audio devices": "Áudio",
+  "STUN reachability": "Reachability STUN",
+  "Recent issues": "Problemas recentes",
+  "STUN unreachable": "STUN inacessível — confira firewall/proxy.",
+  "ICE gathering timed out": "Tempo de coleta ICE esgotado — a chamada seguiu com os candidatos disponíveis.",
+  "Connection failed": "Conexão de mídia falhou.",
+  "No host candidates": "Nenhum candidato local — verifique mDNS/VPN.",
+  "Symmetric NAT suspected": "NAT simétrico suspeito — pode bloquear a chamada.",
 };
 
 const es: LocaleResource = {
@@ -160,6 +191,21 @@ const es: LocaleResource = {
   "Point your phone camera": "Apunta la cámara del móvil",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
+  Diagnostics: "Diagnóstico",
+  "Open diagnostics": "Abrir diagnóstico",
+  Close: "Cerrar",
+  "Copy report": "Copiar informe",
+  "Test STUN": "Probar STUN",
+  Browser: "Navegador",
+  Network: "Red",
+  "Audio devices": "Audio",
+  "STUN reachability": "Alcance STUN",
+  "Recent issues": "Problemas recientes",
+  "STUN unreachable": "STUN inalcanzable — revisa firewall/proxy.",
+  "ICE gathering timed out": "Tiempo de recolección ICE agotado — la llamada continuó con los candidatos disponibles.",
+  "Connection failed": "La conexión de medios falló.",
+  "No host candidates": "Sin candidatos locales — revisa mDNS/VPN.",
+  "Symmetric NAT suspected": "NAT simétrico sospechado — puede bloquear la llamada.",
 };
 
 a18n.addLocaleResource("pt-BR", ptBR);
