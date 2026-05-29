@@ -53,10 +53,10 @@ export function DebugScreen({ onClose }: Props) {
   };
 
   return (
-    <div className="wv:flex wv:flex-col wv:gap-4 wv:p-4 wv:max-h-full wv:overflow-auto wv:text-foreground">
-      <header className="wv:flex wv:items-center wv:justify-between">
+    <div className="wv:flex wv:flex-col wv:gap-4 wv:p-4 wv:max-sm:p-2 wv:h-full wv:overflow-auto wv:text-foreground">
+      <header className="wv:flex wv:items-center wv:justify-between wv:gap-2 wv:flex-wrap">
         <h2 className="wv:text-lg wv:font-semibold">{t("Diagnostics")}</h2>
-        <div className="wv:flex wv:gap-2">
+        <div className="wv:flex wv:gap-2 wv:flex-wrap">
           <Button type="button" variant="outline" size="sm" onClick={handleCopy}>
             {t("Copy report")}
           </Button>
@@ -92,7 +92,7 @@ export function DebugScreen({ onClose }: Props) {
           {t("Test STUN")}
         </Button>
         {stunResults && (
-          <ul className="wv:mt-2 wv:text-xs wv:font-mono">
+          <ul className="wv:mt-2 wv:text-xs wv:font-mono wv:break-all">
             {stunResults.map((r) => (
               <li key={r.server}>
                 {r.server} — {r.reachable ? `✓ ${r.latencyMs ?? "?"} ms` : "✗"}
@@ -103,14 +103,14 @@ export function DebugScreen({ onClose }: Props) {
       </Section>
 
       <Section title="ICE">
-        <pre className="wv:text-xs wv:font-mono wv:whitespace-pre-wrap">
+        <pre className="wv:text-xs wv:font-mono wv:whitespace-pre-wrap wv:break-all">
           {debug.lastIceDiagnostics ? JSON.stringify(debug.lastIceDiagnostics, null, 2) : "—"}
         </pre>
       </Section>
 
       <Section title={t("Recent issues")}>
         {debug.recentIssues.length === 0 && <p className="wv:text-xs">—</p>}
-        <ul className="wv:text-xs wv:font-mono">
+        <ul className="wv:text-xs wv:font-mono wv:break-all">
           {debug.recentIssues.map((r, idx) => (
             <li key={`${r.at}-${idx}`}>
               {new Date(r.at).toISOString()} {r.issue}

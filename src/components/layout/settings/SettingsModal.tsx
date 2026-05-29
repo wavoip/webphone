@@ -69,7 +69,11 @@ export const SettingsModal = forwardRef(() => {
       <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2">
         <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
-      <DialogContent container={root} onClick={(e) => e.stopPropagation()} className="wv:flex wv:flex-col wv:h-1/2">
+      <DialogContent
+        container={root}
+        onClick={(e) => e.stopPropagation()}
+        className="wv:flex wv:flex-col wv:h-[85vh] wv:max-h-[85vh] wv:sm:max-w-3xl wv:max-sm:h-[100vh] wv:max-sm:max-h-[100vh] wv:max-sm:max-w-full wv:max-sm:rounded-none wv:max-sm:p-4"
+      >
         <DialogTitle className="wv:sr-only">{t("Settings")}</DialogTitle>
         <DialogDescription className="wv:sr-only">{t("Here you can configure the entire webphone")}</DialogDescription>
         <div className="wv:flex wv:w-full wv:flex-col wv:gap-6 wv:overflow-hidden">
@@ -84,7 +88,7 @@ export const SettingsModal = forwardRef(() => {
             </>
           )}
           {!qrcode && (
-            <Tabs defaultValue="devices" orientation="vertical" className="wv:overflow-hidden">
+            <Tabs defaultValue="devices" orientation="vertical" className="wv:flex-1 wv:overflow-hidden wv:flex wv:flex-col wv:max-sm:gap-3">
               <TabsList>
                 {showDevices && <TabsTrigger value="devices">{t("Numbers")}</TabsTrigger>}
                 {showAudio && (
@@ -145,7 +149,7 @@ export const SettingsModal = forwardRef(() => {
                   <AudioConfig />
                 </TabsContent>
               )}
-              <TabsContent value="diagnostics" className="wv:overflow-auto">
+              <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-auto">
                 <DebugScreen onClose={() => setOpen(false)} />
               </TabsContent>
             </Tabs>
