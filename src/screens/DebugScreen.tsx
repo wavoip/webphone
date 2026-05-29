@@ -53,7 +53,7 @@ export function DebugScreen({ onClose }: Props) {
   };
 
   return (
-    <div className="wv:flex wv:flex-col wv:gap-4 wv:p-4 wv:max-h-full wv:overflow-auto">
+    <div className="wv:flex wv:flex-col wv:gap-4 wv:p-4 wv:max-h-full wv:overflow-auto wv:text-foreground">
       <header className="wv:flex wv:items-center wv:justify-between">
         <h2 className="wv:text-lg wv:font-semibold">{t("Diagnostics")}</h2>
         <div className="wv:flex wv:gap-2">
