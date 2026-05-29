@@ -164,7 +164,7 @@ export const SettingsModal = forwardRef(() => {
               )}
 
               <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-hidden">
-                <DebugScreen onClose={() => setOpen(false)} />
+                <DebugScreen />
               </TabsContent>
             </Tabs>
           </>

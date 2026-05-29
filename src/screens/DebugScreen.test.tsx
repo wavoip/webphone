@@ -44,7 +44,7 @@ describe("DebugScreen", () => {
   });
 
   it("renders the main sections", () => {
-    render(<DebugScreen onClose={() => {}} />, { wrapper: Wrapper });
+    render(<DebugScreen />, { wrapper: Wrapper });
     expect(screen.getByText(/Navegador/i)).toBeDefined();
     expect(screen.getByText(/Rede/i)).toBeDefined();
     expect(screen.getByText(/Áudio/i)).toBeDefined();
@@ -53,7 +53,7 @@ describe("DebugScreen", () => {
 
   it("runs runStunProbe when the user clicks the probe button and renders results", async () => {
     const api = await import("@wavoip/wavoip-api");
-    render(<DebugScreen onClose={() => {}} />, { wrapper: Wrapper });
+    render(<DebugScreen />, { wrapper: Wrapper });
 
     const button = screen.getByRole("button", { name: /Testar STUN/i });
     button.click();
@@ -67,7 +67,7 @@ describe("DebugScreen", () => {
   });
 
   it("copies a JSON report when the copy button is clicked", async () => {
-    render(<DebugScreen onClose={() => {}} />, { wrapper: Wrapper });
+    render(<DebugScreen />, { wrapper: Wrapper });
 
     const copy = screen.getByRole("button", { name: /Copiar relatório/i });
     copy.click();
@@ -79,13 +79,6 @@ describe("DebugScreen", () => {
     expect(payload).toHaveProperty("system");
     expect(payload).toHaveProperty("lastIceDiagnostics");
     expect(payload).toHaveProperty("recentIssues");
-  });
-
-  it("calls onClose when the user clicks the close button", () => {
-    const onClose = vi.fn();
-    render(<DebugScreen onClose={onClose} />, { wrapper: Wrapper });
-    screen.getByRole("button", { name: /Fechar/i }).click();
-    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
 

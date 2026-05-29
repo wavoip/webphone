@@ -12,11 +12,7 @@ const DEFAULT_STUN_SERVERS = [
   "stun:stun.cloudflare.com:3478",
 ];
 
-type Props = {
-  onClose: () => void;
-};
-
-export function DebugScreen({ onClose }: Props) {
+export function DebugScreen() {
   const debug = useDebugInfo();
   const [system, setSystem] = useState<SystemInfo | null>(null);
   const [stunResults, setStunResults] = useState<StunProbeResult[] | null>(null);
@@ -62,9 +58,6 @@ export function DebugScreen({ onClose }: Props) {
         <Button type="button" variant="outline" size="sm" onClick={handleCopy} className="wv:gap-2">
           <CopyIcon className="wv:size-4" weight="duotone" />
           {copied ? "✓" : t("Copy report")}
-        </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onClose}>
-          {t("Close")}
         </Button>
       </div>
 
