@@ -21,9 +21,11 @@ export function DebugScreen() {
 
   useEffect(() => {
     let cancelled = false;
-    collectSystemInfo().then((info) => {
-      if (!cancelled) setSystem(info);
-    });
+    collectSystemInfo()
+      .then((info) => {
+        if (!cancelled) setSystem(info);
+      })
+      .catch((err) => console.warn("[DebugScreen] collectSystemInfo failed", err));
     return () => {
       cancelled = true;
     };
