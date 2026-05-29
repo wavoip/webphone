@@ -1,4 +1,4 @@
-import { GearIcon } from "@phosphor-icons/react";
+import { GearIcon, MicrophoneIcon, PhoneIcon, StethoscopeIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
@@ -72,40 +72,52 @@ export const SettingsModal = forwardRef(() => {
       <DialogContent
         container={root}
         onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:h-[85vh] wv:max-h-[85vh] wv:sm:max-w-3xl wv:max-sm:h-[100vh] wv:max-sm:max-h-[100vh] wv:max-sm:max-w-full wv:max-sm:rounded-none wv:max-sm:p-4"
+        className="wv:flex wv:flex-col wv:gap-0 wv:h-[85vh] wv:max-h-[85vh] wv:sm:max-w-3xl wv:p-0 wv:overflow-hidden wv:max-sm:h-[100vh] wv:max-sm:max-h-[100vh] wv:max-sm:max-w-full wv:max-sm:rounded-none"
       >
-        <DialogTitle className="wv:sr-only">{t("Settings")}</DialogTitle>
-        <DialogDescription className="wv:sr-only">{t("Here you can configure the entire webphone")}</DialogDescription>
-        <div className="wv:flex wv:w-full wv:flex-col wv:gap-6 wv:overflow-hidden">
-          {qrcode && (
-            <>
-              <DialogHeader>
-                <DialogTitle>QRCode</DialogTitle>
-                <DialogDescription>{t("Point your phone camera")}</DialogDescription>
-              </DialogHeader>
+        {qrcode ? (
+          <div className="wv:flex wv:flex-col wv:gap-4 wv:p-6">
+            <DialogHeader>
+              <DialogTitle>QRCode</DialogTitle>
+              <DialogDescription>{t("Point your phone camera")}</DialogDescription>
+            </DialogHeader>
+            <QRCode value={qrcode} level="L" className="wv:size-full" />
+          </div>
+        ) : (
+          <>
+            <DialogHeader className="wv:px-6 wv:pt-6 wv:pb-3 wv:border-b wv:border-border wv:max-sm:px-4 wv:max-sm:pt-4">
+              <DialogTitle className="wv:text-lg wv:font-semibold wv:text-foreground">{t("Settings")}</DialogTitle>
+              <DialogDescription className="wv:text-sm wv:text-muted-foreground">
+                {t("Here you can configure the entire webphone")}
+              </DialogDescription>
+            </DialogHeader>
 
-              <QRCode value={qrcode} level="L" className="wv:size-full"></QRCode>
-            </>
-          )}
-          {!qrcode && (
-            <Tabs defaultValue="devices" orientation="vertical" className="wv:flex-1 wv:overflow-hidden wv:flex wv:flex-col wv:max-sm:gap-3">
-              <TabsList>
-                {showDevices && <TabsTrigger value="devices">{t("Numbers")}</TabsTrigger>}
+            <Tabs defaultValue="devices" className="wv:flex wv:flex-1 wv:flex-col wv:gap-0 wv:overflow-hidden">
+              <TabsList className="wv:mx-6 wv:mt-4 wv:h-10 wv:w-auto wv:justify-start wv:max-sm:mx-4">
+                {showDevices && (
+                  <TabsTrigger value="devices" className="wv:gap-2">
+                    <PhoneIcon className="wv:size-4" weight="duotone" />
+                    {t("Numbers")}
+                  </TabsTrigger>
+                )}
                 {showAudio && (
-                  <TabsTrigger value="settings" disabled>
+                  <TabsTrigger value="settings" disabled className="wv:gap-2">
+                    <MicrophoneIcon className="wv:size-4" weight="duotone" />
                     Audio
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="diagnostics">{t("Diagnostics")}</TabsTrigger>
+                <TabsTrigger value="diagnostics" className="wv:gap-2">
+                  <StethoscopeIcon className="wv:size-4" weight="duotone" />
+                  {t("Diagnostics")}
+                </TabsTrigger>
               </TabsList>
+
               {showDevices && (
-                <TabsContent value="devices" className="wv:overflow-auto">
-                  <DialogHeader>
-                    <DialogTitle></DialogTitle>
-                  </DialogHeader>
-                  <DialogDescription />
+                <TabsContent
+                  value="devices"
+                  className="wv:flex-1 wv:overflow-auto wv:flex wv:flex-col wv:gap-3 wv:px-6 wv:py-4 wv:max-sm:px-4"
+                >
                   {showAddDevice && (
-                    <div className="wv:flex wv:justify-between wv:items-center wv:gap-2 wv:py-4">
+                    <div className="wv:flex wv:items-center wv:gap-2 wv:sticky wv:top-0 wv:bg-background wv:pb-2 wv:z-10">
                       <Input
                         placeholder={error ? error : "Token"}
                         value={token}
@@ -125,14 +137,14 @@ export const SettingsModal = forwardRef(() => {
                           addDevice(token);
                           setToken("");
                         }}
-                        className="wv:bg-green-400 wv:size-fit !wv:p-1.5 wv:h-full wv:aspect-square wv:hover:cursor-pointer"
+                        className="wv:bg-green-500 wv:hover:bg-green-600 wv:h-9 wv:aspect-square wv:p-0 wv:hover:cursor-pointer"
                       >
-                        <PlusIcon />
+                        <PlusIcon className="wv:size-4" />
                       </Button>
                     </div>
                   )}
 
-                  <div className="wv:overflow-auto wv:flex wv:flex-col wv:gap-2">
+                  <div className="wv:flex wv:flex-col wv:gap-2">
                     {devicesSorted.map((device) => (
                       <DeviceInfo
                         key={device.token}
@@ -144,17 +156,19 @@ export const SettingsModal = forwardRef(() => {
                   </div>
                 </TabsContent>
               )}
+
               {showAudio && (
-                <TabsContent value="settings">
+                <TabsContent value="settings" className="wv:flex-1 wv:overflow-auto wv:px-6 wv:py-4 wv:max-sm:px-4">
                   <AudioConfig />
                 </TabsContent>
               )}
-              <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-auto">
+
+              <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-hidden">
                 <DebugScreen onClose={() => setOpen(false)} />
               </TabsContent>
             </Tabs>
-          )}
-        </div>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   );
