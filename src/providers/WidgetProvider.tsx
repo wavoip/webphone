@@ -68,6 +68,56 @@ export function WidgetProvider({ children }: Props) {
   const divRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef<Position>({ x: 0, y: 0 });
 
+
+  const buttonOffsetY = useRef(0)
+  const didDrag = useRef(false)
+
+
+  //ela puxa a variavel que vem como string e puxa como NUmber
+  const [buttonY, setButtonY] = useState(() => {
+    const saved = localStorage.getItem("webphone:button-y")
+    if (!saved) return window.innerHeight / 2
+    return Number(saved)
+  })
+
+  //calculo do botãop se movendo e salva como String   
+  function onButtonMouseMove(e: globalThis.MouseEvent) {
+
+    didDrag.current = true
+
+    let y = e.clientY - buttonOffsetY.current
+
+    if (y < 0) y = 0
+
+    if (y > window.innerHeight - 60) y = window.innerHeight - 60
+    setButtonY(y)
+
+    localStorage.setItem("webphone:button-y", String(y))
+
+
+  }
+
+
+
+  function onButtonMouseDown(e: React.MouseEvent) {
+    didDrag.current = false;
+    buttonOffsetY.current = e.clientY - buttonY;
+    document.addEventListener("mousemove", onButtonMouseMove)
+    document.addEventListener("mouseup", onButtonMouseUp)
+  }
+
+
+  function onButtonMouseUp() {
+    document.removeEventListener("mousemove", onButtonMouseMove);
+    document.removeEventListener("mouseup", onButtonMouseUp)
+  }
+
+
+
+
+
+
+
   const handleMouseMove = useCallback(
     (e: globalThis.MouseEvent) => {
       if (!divRef.current) return;
@@ -162,10 +212,12 @@ export function WidgetProvider({ children }: Props) {
       {showWidget && (
         <Button
           type="button"
-          onClick={openWidget}
+          onMouseDown={onButtonMouseDown}
+          onClick={() => { if (!didDrag.current) openWidget() }}
           size={"icon"}
           data-closed={isClosed}
-          className="wv:fixed wv:bottom-6 wv:right-6 wv:z-50 wv:transition wv:data-[closed=false]:hidden wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
+          style={{ position: "fixed", right: 0, top: buttonY }}
+          className="wv:z-50 wv:data-[closed=false]:hidden wv:w-14 wv:h-14 wv:rounded-l-2xl wv:rounded-r-none wv:bg-[#25D366] wv:hover:bg-[#128C7E] wv:shadow-[-4px_4px_10px_rgba(0,0,0,0.1)] wv:flex wv:items-center wv:justify-center wv:text-white wv:transition-colors wv:cursor-grab active:wv:cursor-grabbing"
         >
           <PhoneIcon className="wv:size-8" />
         </Button>
