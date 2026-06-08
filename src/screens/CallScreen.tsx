@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
+import { CallMicPicker } from "@/components/CallMicPicker";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
@@ -95,6 +96,10 @@ export default function CallScreen() {
           ) : (
             <WaveSound call={callActive} />
           )}
+        </div>
+
+        <div className="wv:flex wv:justify-center wv:pb-2">
+          <CallMicPicker />
         </div>
       </div>
 

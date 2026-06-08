@@ -52,6 +52,23 @@ export type TranslationKey =
   | "Select the microphone to use on calls"
   | "Speaker"
   | "Select the speaker to use on calls"
+  | "Default microphone"
+  | "Failed to switch microphone"
+  | "Microphone permission required"
+  | "Grant permission to list your audio devices"
+  | "Grant permission"
+  | "Microphone permission denied"
+  | "Permission status"
+  | "granted"
+  | "denied"
+  | "prompt"
+  | "unknown"
+  | "Microphone permission denied. Enable it in your browser settings."
+  | "Insecure context"
+  | "Webphone requires HTTPS or localhost to list audio devices. Audio names are hidden by the browser."
+  | "Secure context"
+  | "yes"
+  | "no"
   | "Settings"
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
@@ -105,6 +122,25 @@ const ptBR: LocaleResource = {
   "Select the microphone to use on calls": "Selecione o microfone que deseja usar na ligação",
   Speaker: "Alto falante",
   "Select the speaker to use on calls": "Selecione o alto falante que deseja usar na ligação",
+  "Default microphone": "Microfone padrão",
+  "Failed to switch microphone": "Falha ao trocar o microfone",
+  "Microphone permission required": "Permissão de microfone necessária",
+  "Grant permission to list your audio devices": "Conceda permissão para listar seus dispositivos de áudio",
+  "Grant permission": "Conceder permissão",
+  "Microphone permission denied": "Permissão de microfone negada",
+  "Permission status": "Status da permissão",
+  granted: "concedida",
+  denied: "negada",
+  prompt: "aguardando",
+  unknown: "desconhecida",
+  "Microphone permission denied. Enable it in your browser settings.":
+    "Permissão de microfone negada. Habilite-a nas configurações do navegador.",
+  "Insecure context": "Contexto inseguro",
+  "Webphone requires HTTPS or localhost to list audio devices. Audio names are hidden by the browser.":
+    "O Webphone precisa de HTTPS ou localhost para listar dispositivos de áudio. Os nomes dos dispositivos são ocultados pelo navegador.",
+  "Secure context": "Contexto seguro",
+  yes: "sim",
+  no: "não",
   Settings: "Configurações",
   "Here you can configure the entire webphone": "Aqui você pode configurar todo webphone",
   "Point your phone camera": "Aponte a câmera do celular",
@@ -155,6 +191,25 @@ const es: LocaleResource = {
   "Select the microphone to use on calls": "Selecciona el micrófono que deseas usar en la llamada",
   Speaker: "Altavoz",
   "Select the speaker to use on calls": "Selecciona el altavoz que deseas usar en la llamada",
+  "Default microphone": "Micrófono predeterminado",
+  "Failed to switch microphone": "Error al cambiar el micrófono",
+  "Microphone permission required": "Se requiere permiso de micrófono",
+  "Grant permission to list your audio devices": "Concede permiso para listar tus dispositivos de audio",
+  "Grant permission": "Conceder permiso",
+  "Microphone permission denied": "Permiso de micrófono denegado",
+  "Permission status": "Estado del permiso",
+  granted: "concedido",
+  denied: "denegado",
+  prompt: "esperando",
+  unknown: "desconocido",
+  "Microphone permission denied. Enable it in your browser settings.":
+    "Permiso de micrófono denegado. Actívalo en la configuración del navegador.",
+  "Insecure context": "Contexto inseguro",
+  "Webphone requires HTTPS or localhost to list audio devices. Audio names are hidden by the browser.":
+    "El Webphone requiere HTTPS o localhost para listar dispositivos de audio. Los nombres son ocultados por el navegador.",
+  "Secure context": "Contexto seguro",
+  yes: "sí",
+  no: "no",
   Settings: "Configuración",
   "Here you can configure the entire webphone": "Aquí puedes configurar todo el webphone",
   "Point your phone camera": "Apunta la cámara del móvil",
