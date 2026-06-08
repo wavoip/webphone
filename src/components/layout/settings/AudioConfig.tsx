@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AudioLevelMeter } from "@/components/audio-level/AudioLevelMeter";
 import { useMicAnalyser } from "@/components/audio-level/useMicAnalyser";
@@ -18,7 +18,13 @@ export function AudioConfig() {
   const mics = availableAudio.mics.filter((d) => d.deviceId);
   const speakers = availableAudio.speakers.filter((d) => d.deviceId);
 
-  const micAnalyser = useMicAnalyser({ deviceId: selectedMicId, enabled: granted });
+  const [monitoring, setMonitoring] = useState(false);
+  const { analyser: micAnalyser } = useMicAnalyser({
+    deviceId: selectedMicId,
+    enabled: granted,
+    playback: monitoring,
+    speakerId: selectedSpeakerId,
+  });
   const speakerTester = useSpeakerTester({ deviceId: selectedSpeakerId, enabled: granted });
 
   // Force a refresh on tab open so Chromium's persisted-permission/blank-ids
@@ -84,6 +90,15 @@ export function AudioConfig() {
             <FieldLabel className="wv:flex wv:items-center wv:gap-2">
               <span>{t("Microphone")}</span>
               <AudioLevelMeter analyser={micAnalyser} />
+              {granted && (
+                <button
+                  type="button"
+                  onClick={() => setMonitoring((v) => !v)}
+                  className="wv:text-[11px] wv:text-foreground/70 wv:hover:text-foreground wv:underline wv:hover:cursor-pointer wv:ml-1"
+                >
+                  {monitoring ? t("Stop") : t("Listen")}
+                </button>
+              )}
             </FieldLabel>
             <Select value={selectedMicId ?? undefined} onValueChange={onMicChange} disabled={!granted}>
               <SelectTrigger className="wv:max-w-[300px]">
@@ -98,6 +113,9 @@ export function AudioConfig() {
               </SelectContent>
             </Select>
             <FieldDescription>{t("Select the microphone to use on calls")}</FieldDescription>
+            {monitoring && (
+              <p className="wv:text-[11px] wv:text-yellow-600 wv:opacity-90">{t("Use headphones to avoid feedback")}</p>
+            )}
           </Field>
 
           <Field className="wv:flex wv:flex-col wv:gap-1 wv:text-foreground">

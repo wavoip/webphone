@@ -44,7 +44,7 @@ export function AudioLevelMeter({ analyser, bars = 8 }: Props) {
     <div className="wv:flex wv:items-end wv:gap-[2px] wv:h-3" aria-hidden>
       {Array.from({ length: bars }).map((_, i) => (
         <div
-          key={i}
+          key={`bar-${i}-of-${bars}`}
           className={
             "wv:w-[3px] wv:rounded-sm wv:transition-opacity " +
             (i < lit ? "wv:bg-green-500 wv:opacity-100" : "wv:bg-foreground/20")
