@@ -77,7 +77,15 @@ export type TranslationKey =
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
   | "Numbers"
-  | "Enter the token";
+  | "Enter the token"
+  | "No devices yet"
+  | "About"
+  | "Webphone version"
+  | "Documentation"
+  | "Repository"
+  | "Manage your WhatsApp devices"
+  | "Microphone, speaker and permission settings"
+  | "Version and references";
 
 type LocaleResource = Record<TranslationKey, string>;
 
@@ -154,6 +162,14 @@ const ptBR: LocaleResource = {
   "Point your phone camera": "Aponte a câmera do celular",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
+  "No devices yet": "Nenhum dispositivo cadastrado",
+  About: "Sobre",
+  "Webphone version": "Versão do Webphone",
+  Documentation: "Documentação",
+  Repository: "Repositório",
+  "Manage your WhatsApp devices": "Gerencie seus dispositivos do WhatsApp",
+  "Microphone, speaker and permission settings": "Configurações de microfone, alto falante e permissões",
+  "Version and references": "Versão e referências",
 };
 
 const es: LocaleResource = {
@@ -227,6 +243,14 @@ const es: LocaleResource = {
   "Point your phone camera": "Apunta la cámara del móvil",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
+  "No devices yet": "No hay dispositivos",
+  About: "Acerca de",
+  "Webphone version": "Versión del Webphone",
+  Documentation: "Documentación",
+  Repository: "Repositorio",
+  "Manage your WhatsApp devices": "Gestiona tus dispositivos de WhatsApp",
+  "Microphone, speaker and permission settings": "Ajustes de micrófono, altavoz y permisos",
+  "Version and references": "Versión y referencias",
 };
 
 a18n.addLocaleResource("pt-BR", ptBR);
