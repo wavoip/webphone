@@ -3,6 +3,7 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useShadowRoot } from "@/providers/ShadowRootProvider"
 
 function Select({
   ...props
@@ -55,8 +56,9 @@ function SelectContent({
   align = "center",
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content>) {
+  const { root } = useShadowRoot();
   return (
-    <SelectPrimitive.Portal>
+    <SelectPrimitive.Portal container={root}>
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
