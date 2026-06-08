@@ -5,22 +5,26 @@ type Props = {
   bars?: number;
 };
 
+const FRAME_INTERVAL_MS = 50;
+
 /**
- * Horizontal bar-strip volume meter. Reads `getByteTimeDomainData` every frame,
+ * Horizontal bar-strip volume meter. Reads `getByteTimeDomainData` at ~20fps,
  * normalizes peak deviation from the 128 mid-line to 0–1, lights up the
- * proportional count of `bars`. Renders nothing when `analyser` is null so the
- * caller can lay out around it.
+ * proportional count of `bars`. State updates only when the lit-bar count
+ * actually changes so React skips no-op renders. Renders nothing when
+ * `analyser` is null so the caller can lay out around it.
  */
 export function AudioLevelMeter({ analyser, bars = 8 }: Props) {
-  const [level, setLevel] = useState(0);
-  const rafRef = useRef<number | null>(null);
+  const [lit, setLit] = useState(0);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!analyser) {
-      setLevel(0);
+      setLit(0);
       return;
     }
     const buffer = new Uint8Array(analyser.fftSize);
+    let lastLit = -1;
     const tick = () => {
       analyser.getByteTimeDomainData(buffer);
       let peak = 0;
@@ -28,18 +32,19 @@ export function AudioLevelMeter({ analyser, bars = 8 }: Props) {
         const v = Math.abs(buffer[i] - 128) / 128;
         if (v > peak) peak = v;
       }
-      setLevel(peak);
-      rafRef.current = requestAnimationFrame(tick);
+      const next = Math.min(bars, Math.floor(peak * bars * 1.4));
+      if (next !== lastLit) {
+        lastLit = next;
+        setLit(next);
+      }
     };
-    rafRef.current = requestAnimationFrame(tick);
+    timerRef.current = window.setInterval(tick, FRAME_INTERVAL_MS);
     return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+      if (timerRef.current !== null) window.clearInterval(timerRef.current);
     };
-  }, [analyser]);
+  }, [analyser, bars]);
 
   if (!analyser) return null;
-
-  const lit = Math.min(bars, Math.floor(level * bars * 1.4));
   return (
     <div className="wv:flex wv:items-end wv:gap-[2px] wv:h-3" aria-hidden>
       {Array.from({ length: bars }).map((_, i) => (
