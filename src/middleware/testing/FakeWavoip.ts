@@ -8,6 +8,7 @@ import type {
   Device,
   DeviceEvents,
   DeviceStatus,
+  MicrophonePermissionState,
   Offer,
   OfferEvents,
   Wavoip,
@@ -94,6 +95,8 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
   status = "ACTIVE" as const;
   connection_status = "connected" as const;
   audio_analyser = Promise.resolve({} as AnalyserNode);
+  setMicrophoneResult: { err: string | null } = { err: null };
+  setMicrophoneCalls: string[] = [];
   readonly id: string;
   readonly device_token: string;
   peer: CallPeer;
@@ -108,6 +111,10 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
   mute = async () => ({ err: null });
   unmute = async () => ({ err: null });
   end = async () => ({ err: null });
+  setMicrophone = async (deviceId: string) => {
+    this.setMicrophoneCalls.push(deviceId);
+    return this.setMicrophoneResult;
+  };
   onError() {}
   onPeerMute() {}
   onPeerUnmute() {}
@@ -148,6 +155,14 @@ export class FakeWavoip extends FakeEmitter<WavoipEvents> {
   } = { call: null, err: { message: "not-set", devices: [] } };
   startCallCalls: { fromTokens?: string[]; to: string }[] = [];
 
+  multimediaDevices: MediaDeviceInfo[] = [];
+  setMicrophoneResult: { err: string | null } = { err: null };
+  setMicrophoneCalls: string[] = [];
+  micPermission: MicrophonePermissionState = "unknown";
+  requestMicrophonePermissionResult: MicrophonePermissionState = "granted";
+  devicesChangedListeners: ((devices: MediaDeviceInfo[]) => void)[] = [];
+  permissionChangedListeners: ((state: MicrophonePermissionState) => void)[] = [];
+
   constructor(initialTokens: string[] = []) {
     super();
     this._devices = initialTokens.map((t) => new FakeDevice(t));
@@ -158,6 +173,53 @@ export class FakeWavoip extends FakeEmitter<WavoipEvents> {
     return this.startCallResult as
       | { call: CallOutgoing; err: null }
       | { call: null; err: { message: string; devices: { token: string; reason: string }[] } };
+  };
+
+  refreshMultimediaDevicesCalls = 0;
+
+  getMultimediaDevices = () => this.multimediaDevices;
+
+  refreshMultimediaDevices = async () => {
+    this.refreshMultimediaDevicesCalls += 1;
+    for (const cb of this.devicesChangedListeners) cb(this.multimediaDevices);
+    return this.multimediaDevices;
+  };
+
+  setMicrophone = async (deviceId: string) => {
+    this.setMicrophoneCalls.push(deviceId);
+    return this.setMicrophoneResult;
+  };
+
+  getMicrophonePermission = () => this.micPermission;
+
+  requestMicrophonePermission = async () => {
+    this.micPermission = this.requestMicrophonePermissionResult;
+    for (const cb of this.permissionChangedListeners) cb(this.micPermission);
+    return this.micPermission;
+  };
+
+  onDevicesChanged = (cb: (devices: MediaDeviceInfo[]) => void) => {
+    this.devicesChangedListeners.push(cb);
+    return () => {
+      this.devicesChangedListeners = this.devicesChangedListeners.filter((l) => l !== cb);
+    };
+  };
+
+  onMicrophonePermissionChanged = (cb: (state: MicrophonePermissionState) => void) => {
+    this.permissionChangedListeners.push(cb);
+    return () => {
+      this.permissionChangedListeners = this.permissionChangedListeners.filter((l) => l !== cb);
+    };
+  };
+
+  emitDevicesChanged = (devices: MediaDeviceInfo[]) => {
+    this.multimediaDevices = devices;
+    for (const cb of this.devicesChangedListeners) cb(devices);
+  };
+
+  emitMicrophonePermissionChanged = (state: MicrophonePermissionState) => {
+    this.micPermission = state;
+    for (const cb of this.permissionChangedListeners) cb(state);
   };
 
   getDevices = () => this._devices as unknown as Device[];
