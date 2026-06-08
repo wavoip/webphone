@@ -29,7 +29,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
   const showNotifications = statusBar?.showNotificationsIcon ?? true;
   const showSettings = statusBar?.showSettingsIcon ?? true;
 
-  const showAudio = false;
+  const showAudio = settingsMenu?.audioMenu?.show ?? true;
 
   const deviceMenu = settingsMenu?.deviceMenu;
   const showDevices = deviceMenu?.show || true;

@@ -86,11 +86,7 @@ export const SettingsModal = forwardRef(() => {
             <Tabs defaultValue="devices" orientation="vertical" className="wv:overflow-hidden">
               <TabsList>
                 {showDevices && <TabsTrigger value="devices">{t("Numbers")}</TabsTrigger>}
-                {showAudio && (
-                  <TabsTrigger value="settings" disabled>
-                    Audio
-                  </TabsTrigger>
-                )}
+                {showAudio && <TabsTrigger value="settings">Audio</TabsTrigger>}
               </TabsList>
               {showDevices && (
                 <TabsContent value="devices" className="wv:overflow-auto">

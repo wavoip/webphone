@@ -15,6 +15,7 @@ export type StatusBarSettings = {
 
 export type SettingsMenuSettings = {
   deviceMenu?: DeviceMenuSettings;
+  audioMenu?: AudioMenuSettings;
 };
 
 export type DeviceMenuSettings = {
@@ -22,6 +23,10 @@ export type DeviceMenuSettings = {
   showAddDevices?: boolean;
   showEnableDevicesButton?: boolean;
   showRemoveDevicesButton?: boolean;
+};
+
+export type AudioMenuSettings = {
+  show?: boolean;
 };
 
 export type WidgetSettings = {
