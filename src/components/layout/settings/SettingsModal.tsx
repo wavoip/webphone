@@ -98,7 +98,7 @@ export const SettingsModal = forwardRef(() => {
       <DialogContent
         container={root}
         onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:p-0 wv:gap-0 wv:max-w-[720px] wv:w-[90vw] wv:h-[80vh] wv:max-h-[640px] wv:max-sm:max-w-none wv:max-sm:w-screen wv:max-sm:h-screen wv:max-sm:max-h-none wv:max-sm:rounded-none"
+        className="wv:flex wv:flex-col wv:p-0 wv:gap-0 wv:max-w-[860px] wv:w-[95vw] wv:h-[88vh] wv:max-h-[720px] wv:max-sm:max-w-none wv:max-sm:w-screen wv:max-sm:h-screen wv:max-sm:max-h-none wv:max-sm:rounded-none"
       >
         <DialogHeader className="wv:px-5 wv:py-4 wv:border-b wv:border-foreground/10">
           <DialogTitle>{t("Settings")}</DialogTitle>

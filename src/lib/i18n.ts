@@ -10,6 +10,7 @@ export type TranslationKey =
   // device status
   | "Power on device"
   | "Disconnected"
+  | "Connected"
   | "Waiting to link WhatsApp"
   | "Failed"
   | "Show QR Code"
@@ -97,6 +98,7 @@ const ptBR: LocaleResource = {
   Restricted: "Restrito",
   "Power on device": "Ligar Dispositivo",
   Disconnected: "Desconectado",
+  Connected: "Conectado",
   "Waiting to link WhatsApp": "Aguardando vincular Whatsapp",
   Failed: "Falha",
   "Show QR Code": "Mostrar QRCode",
@@ -178,6 +180,7 @@ const es: LocaleResource = {
   Restricted: "Restringido",
   "Power on device": "Encender dispositivo",
   Disconnected: "Desconectado",
+  Connected: "Conectado",
   "Waiting to link WhatsApp": "Esperando vincular WhatsApp",
   Failed: "Fallo",
   "Show QR Code": "Mostrar código QR",
