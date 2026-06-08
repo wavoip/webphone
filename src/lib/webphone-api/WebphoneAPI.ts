@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
+import type { CallActive, CallOutgoing, CallPeer, MicrophonePermissionState, Offer } from "@wavoip/wavoip-api";
 import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
 import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
@@ -138,9 +138,29 @@ export type PositionAPI = {
   set: (position: WebphonePosition) => void;
 };
 
+export type AudioAPI = {
+  /** Latest snapshot of `enumerateDevices()` filtered to mic/speaker. */
+  listDevices: () => { mics: MediaDeviceInfo[]; speakers: MediaDeviceInfo[] };
+  /** Last-known microphone permission state reported by the browser. */
+  getPermission: () => MicrophonePermissionState;
+  /** Trigger the browser permission prompt and resolve with the resulting state. */
+  requestPermission: () => Promise<MicrophonePermissionState>;
+  /**
+   * Hot-swap the active microphone. If a call is in progress the SDK calls
+   * `RTCRtpSender.replaceTrack` (WebRTC) or rebuilds the WebSocket transport's
+   * AudioInput source — no call drop, no SDP renegotiation.
+   */
+  setMicrophone: (deviceId: string) => Promise<{ err: string | null }>;
+  /** Persist the speaker preference. */
+  setSpeaker: (deviceId: string) => void;
+  /** Currently selected mic + speaker device IDs. */
+  getSelected: () => { micId: string | null; speakerId: string | null };
+};
+
 export type WebphoneAPI = {
   call: CallAPI;
   device: DeviceAPI;
+  audio: AudioAPI;
   notifications: NotificationsAPI;
   widget: WidgetAPI;
   theme: ThemeAPI;

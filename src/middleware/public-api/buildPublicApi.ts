@@ -38,6 +38,17 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
         });
       },
     },
+    audio: {
+      listDevices: () => store.getState().availableAudio,
+      getPermission: () => store.getState().micPermission,
+      requestPermission: () => controllers.audio.requestPermission(),
+      setMicrophone: (deviceId) => controllers.audio.setMicrophone(deviceId),
+      setSpeaker: (deviceId) => controllers.audio.setSpeaker(deviceId),
+      getSelected: () => ({
+        micId: store.getState().selectedMicId,
+        speakerId: store.getState().selectedSpeakerId,
+      }),
+    },
     device: {
       get: () => store.getState().devices,
       add: (token, persist) => controllers.device.add(token, persist),
