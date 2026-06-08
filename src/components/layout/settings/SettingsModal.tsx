@@ -14,7 +14,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+} from "@/components/ui/sidebar";
 import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
@@ -68,7 +77,8 @@ export const SettingsModal = forwardRef(() => {
     content: <AboutTab />,
   });
 
-  const defaultTab = tabs[0]?.value ?? "about";
+  const [activeTab, setActiveTab] = useState(tabs[0]?.value ?? "about");
+  const active = tabs.find((tab) => tab.value === activeTab) ?? tabs[0];
 
   return (
     <Dialog
@@ -104,36 +114,39 @@ export const SettingsModal = forwardRef(() => {
             <QRCode value={qrcode} level="L" className="wv:size-full wv:max-h-[400px]" />
           </div>
         ) : (
-          <Tabs defaultValue={defaultTab} className="wv:flex wv:flex-1 wv:overflow-hidden wv:max-sm:flex-col">
-            <TabsList className="wv:flex wv:flex-col wv:items-stretch wv:gap-1 wv:w-[180px] wv:p-3 wv:bg-foreground/[0.03] wv:border-r wv:border-foreground/10 wv:max-sm:flex-row wv:max-sm:w-full wv:max-sm:border-r-0 wv:max-sm:border-b wv:max-sm:overflow-x-auto">
-              {tabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="wv:flex wv:items-center wv:gap-2 wv:justify-start wv:px-3 wv:py-2 wv:text-sm wv:rounded-md wv:data-[state=active]:bg-background wv:data-[state=active]:shadow-sm wv:hover:bg-foreground/5 wv:max-sm:flex-1"
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <SidebarProvider
+            className="wv:flex-1 wv:min-h-0 wv:items-stretch wv:overflow-hidden"
+            style={{ "--sidebar-width": "200px" } as React.CSSProperties}
+          >
+            <Sidebar collapsible="none" className="wv:border-r wv:border-foreground/10">
+              <SidebarContent>
+                <SidebarGroup>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {tabs.map((tab) => (
+                        <SidebarMenuItem key={tab.value}>
+                          <SidebarMenuButton isActive={activeTab === tab.value} onClick={() => setActiveTab(tab.value)}>
+                            {tab.icon}
+                            <span>{tab.label}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              </SidebarContent>
+            </Sidebar>
 
-            {tabs.map((tab) => (
-              <TabsContent
-                key={tab.value}
-                value={tab.value}
-                className="wv:flex-1 wv:overflow-auto wv:p-5 wv:data-[state=inactive]:hidden"
-              >
-                <div className="wv:flex wv:flex-col wv:gap-4 wv:h-full">
-                  <div>
-                    <h2 className="wv:text-base wv:font-medium wv:text-foreground">{tab.label}</h2>
-                    <p className="wv:text-sm wv:text-foreground/60">{tab.description}</p>
-                  </div>
-                  <div className="wv:flex-1 wv:overflow-auto">{tab.content}</div>
+            <main className="wv:flex-1 wv:overflow-auto wv:p-5">
+              <div className="wv:flex wv:flex-col wv:gap-4 wv:h-full">
+                <div>
+                  <h2 className="wv:text-base wv:font-medium wv:text-foreground">{active.label}</h2>
+                  <p className="wv:text-sm wv:text-foreground/60">{active.description}</p>
                 </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                <div className="wv:flex-1 wv:overflow-auto">{active.content}</div>
+              </div>
+            </main>
+          </SidebarProvider>
         )}
       </DialogContent>
     </Dialog>
