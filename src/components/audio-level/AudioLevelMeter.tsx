@@ -2,29 +2,28 @@ import { useEffect, useRef, useState } from "react";
 
 type Props = {
   analyser: AnalyserNode | null;
-  bars?: number;
+  width?: number;
 };
 
 const FRAME_INTERVAL_MS = 50;
 
 /**
- * Horizontal bar-strip volume meter. Reads `getByteTimeDomainData` at ~20fps,
- * normalizes peak deviation from the 128 mid-line to 0–1, lights up the
- * proportional count of `bars`. State updates only when the lit-bar count
- * actually changes so React skips no-op renders. Renders nothing when
- * `analyser` is null so the caller can lay out around it.
+ * Slim horizontal level bar. Reads `getByteTimeDomainData` at ~20fps, scales
+ * the peak deviation from the 128 mid-line into a 0–1 fill value. State updates
+ * only when the bucketed percentage actually changes, so React skips no-op
+ * renders. Renders nothing when `analyser` is null so the caller can hide it.
  */
-export function AudioLevelMeter({ analyser, bars = 8 }: Props) {
-  const [lit, setLit] = useState(0);
+export function AudioLevelMeter({ analyser, width = 60 }: Props) {
+  const [pct, setPct] = useState(0);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!analyser) {
-      setLit(0);
+      setPct(0);
       return;
     }
     const buffer = new Uint8Array(analyser.fftSize);
-    let lastLit = -1;
+    let lastPct = -1;
     const tick = () => {
       analyser.getByteTimeDomainData(buffer);
       let peak = 0;
@@ -32,31 +31,29 @@ export function AudioLevelMeter({ analyser, bars = 8 }: Props) {
         const v = Math.abs(buffer[i] - 128) / 128;
         if (v > peak) peak = v;
       }
-      const next = Math.min(bars, Math.floor(peak * bars * 1.4));
-      if (next !== lastLit) {
-        lastLit = next;
-        setLit(next);
+      const next = Math.min(100, Math.round(peak * 140));
+      if (next !== lastPct) {
+        lastPct = next;
+        setPct(next);
       }
     };
     timerRef.current = window.setInterval(tick, FRAME_INTERVAL_MS);
     return () => {
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
     };
-  }, [analyser, bars]);
+  }, [analyser]);
 
   if (!analyser) return null;
   return (
-    <div className="wv:flex wv:items-end wv:gap-[2px] wv:h-3" aria-hidden>
-      {Array.from({ length: bars }).map((_, i) => (
-        <div
-          key={`bar-${i}-of-${bars}`}
-          className={
-            "wv:w-[3px] wv:rounded-sm wv:transition-opacity " +
-            (i < lit ? "wv:bg-green-500 wv:opacity-100" : "wv:bg-foreground/20")
-          }
-          style={{ height: `${4 + (i / bars) * 8}px` }}
-        />
-      ))}
+    <div
+      className="wv:relative wv:h-1 wv:rounded-full wv:bg-foreground/15 wv:overflow-hidden"
+      style={{ width }}
+      aria-hidden
+    >
+      <div
+        className="wv:absolute wv:inset-y-0 wv:left-0 wv:bg-emerald-500 wv:transition-[width] wv:duration-75 wv:ease-out"
+        style={{ width: `${pct}%` }}
+      />
     </div>
   );
 }

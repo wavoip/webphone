@@ -89,90 +89,64 @@ function stubGetUserMedia(streamFactory: () => MediaStream) {
 }
 
 describe("useMicAnalyser", () => {
-  it("returns null when disabled", () => {
+  it("does not acquire stream while playback is off", () => {
     stubGetUserMedia(() => makeFakeStream().stream);
-    const { result } = renderHook(() =>
-      useMicAnalyser({ deviceId: "mic-1", enabled: false, playback: false, speakerId: null }),
-    );
+    const { result } = renderHook(() => useMicAnalyser({ deviceId: "mic-1", playback: false, speakerId: null }));
     expect(result.current.analyser).toBeNull();
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
   });
 
-  it("returns null when deviceId is null", () => {
+  it("does not acquire stream when deviceId is null", () => {
     stubGetUserMedia(() => makeFakeStream().stream);
-    const { result } = renderHook(() =>
-      useMicAnalyser({ deviceId: null, enabled: true, playback: false, speakerId: null }),
-    );
+    const { result } = renderHook(() => useMicAnalyser({ deviceId: null, playback: true, speakerId: null }));
     expect(result.current.analyser).toBeNull();
+    expect(navigator.mediaDevices.getUserMedia).not.toHaveBeenCalled();
   });
 
-  it("acquires stream and exposes an analyser when enabled", async () => {
+  it("acquires stream, builds playback chain and exposes analyser when playback is on", async () => {
     const { stream } = makeFakeStream();
     stubGetUserMedia(() => stream);
-    const { result } = renderHook(() =>
-      useMicAnalyser({ deviceId: "mic-1", enabled: true, playback: false, speakerId: null }),
-    );
+    const { result } = renderHook(() => useMicAnalyser({ deviceId: "mic-1", playback: true, speakerId: "spk-1" }));
     await waitFor(() => expect(result.current.analyser).not.toBeNull());
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({
       audio: { deviceId: { exact: "mic-1" } },
       video: false,
     });
-  });
-
-  it("does not build a playback chain when playback is false", async () => {
-    const { stream } = makeFakeStream();
-    stubGetUserMedia(() => stream);
-    const { result } = renderHook(() =>
-      useMicAnalyser({ deviceId: "mic-1", enabled: true, playback: false, speakerId: null }),
-    );
-    await waitFor(() => expect(result.current.analyser).not.toBeNull());
-    expect(audioInstances).toHaveLength(0);
-  });
-
-  it("attaches an audio element with setSinkId and plays when playback is true", async () => {
-    const { stream } = makeFakeStream();
-    stubGetUserMedia(() => stream);
-    const { result } = renderHook(() =>
-      useMicAnalyser({ deviceId: "mic-1", enabled: true, playback: true, speakerId: "spk-1" }),
-    );
-    await waitFor(() => expect(result.current.analyser).not.toBeNull());
-    await waitFor(() => expect(audioInstances).toHaveLength(1));
+    expect(audioInstances).toHaveLength(1);
     expect(audioInstances[0].setSinkId).toHaveBeenCalledWith("spk-1");
     expect(audioInstances[0].play).toHaveBeenCalled();
   });
 
-  it("pauses the audio element when playback toggles to false", async () => {
-    const { stream } = makeFakeStream();
+  it("tears down stream and analyser when playback toggles off", async () => {
+    const { stream, tracks } = makeFakeStream();
     stubGetUserMedia(() => stream);
     const { result, rerender } = renderHook(
-      ({ playback }: { playback: boolean }) =>
-        useMicAnalyser({ deviceId: "mic-1", enabled: true, playback, speakerId: "spk-1" }),
+      ({ playback }: { playback: boolean }) => useMicAnalyser({ deviceId: "mic-1", playback, speakerId: "spk-1" }),
       { initialProps: { playback: true } },
     );
-    await waitFor(() => expect(audioInstances).toHaveLength(1));
+    await waitFor(() => expect(result.current.analyser).not.toBeNull());
     act(() => rerender({ playback: false }));
-    await waitFor(() => expect(audioInstances[0].pause).toHaveBeenCalled());
-    expect(result.current.analyser).not.toBeNull();
+    await waitFor(() => expect(result.current.analyser).toBeNull());
+    expect(tracks[0].stop).toHaveBeenCalled();
   });
 
-  it("re-applies setSinkId when speakerId changes during playback", async () => {
+  it("rebuilds the chain when speakerId changes during playback", async () => {
     const { stream } = makeFakeStream();
     stubGetUserMedia(() => stream);
     const { rerender } = renderHook(
-      ({ speakerId }: { speakerId: string }) =>
-        useMicAnalyser({ deviceId: "mic-1", enabled: true, playback: true, speakerId }),
+      ({ speakerId }: { speakerId: string }) => useMicAnalyser({ deviceId: "mic-1", playback: true, speakerId }),
       { initialProps: { speakerId: "spk-1" } },
     );
-    await waitFor(() => expect(audioInstances).toHaveLength(1));
+    await waitFor(() => expect(audioInstances.length).toBeGreaterThanOrEqual(1));
     act(() => rerender({ speakerId: "spk-2" }));
-    await waitFor(() => expect(audioInstances[0].setSinkId).toHaveBeenLastCalledWith("spk-2"));
+    await waitFor(() => expect(audioInstances.length).toBeGreaterThanOrEqual(2));
+    expect(audioInstances[audioInstances.length - 1].setSinkId).toHaveBeenCalledWith("spk-2");
   });
 
-  it("stops tracks and closes the context on unmount", async () => {
+  it("stops tracks and closes context on unmount", async () => {
     const fake = makeFakeStream();
     stubGetUserMedia(() => fake.stream);
-    const { unmount } = renderHook(() =>
-      useMicAnalyser({ deviceId: "mic-1", enabled: true, playback: false, speakerId: null }),
-    );
+    const { unmount } = renderHook(() => useMicAnalyser({ deviceId: "mic-1", playback: true, speakerId: null }));
     await waitFor(() => expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalled());
     unmount();
     await waitFor(() => expect(fake.tracks[0].stop).toHaveBeenCalled());

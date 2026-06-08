@@ -21,11 +21,10 @@ export function AudioConfig() {
   const [monitoring, setMonitoring] = useState(false);
   const { analyser: micAnalyser } = useMicAnalyser({
     deviceId: selectedMicId,
-    enabled: granted,
-    playback: monitoring,
+    playback: monitoring && granted,
     speakerId: selectedSpeakerId,
   });
-  const speakerTester = useSpeakerTester({ deviceId: selectedSpeakerId, enabled: granted });
+  const speakerTester = useSpeakerTester({ deviceId: selectedSpeakerId });
 
   // Force a refresh on tab open so Chromium's persisted-permission/blank-ids
   // edge case resolves before render settles. SDK fires `devicesChanged`; the
