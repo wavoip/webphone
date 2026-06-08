@@ -1,5 +1,6 @@
 import { subscribeWithSelector } from "zustand/middleware";
 import { createStore } from "zustand/vanilla";
+import { createAudioSlice } from "@/middleware/store/slices/audioSlice";
 import { createCallSlice } from "@/middleware/store/slices/callSlice";
 import { createDeviceSlice } from "@/middleware/store/slices/deviceSlice";
 import { createNotificationsSlice } from "@/middleware/store/slices/notificationsSlice";
@@ -17,6 +18,7 @@ export function createMiddlewareStore() {
       ...createNotificationsSlice(...a),
       ...createWidgetSlice(...a),
       ...createUiSlice(...a),
+      ...createAudioSlice(...a),
     })),
   );
 }

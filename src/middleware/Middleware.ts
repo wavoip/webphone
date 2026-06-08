@@ -2,6 +2,7 @@ import type { Wavoip } from "@wavoip/wavoip-api";
 import { bindWavoipEvents } from "@/middleware/bindings/wavoipBindings";
 import { documentFocusTracker, type FocusTracker } from "@/middleware/browser/focusTracker";
 import { type BrowserNotifier, domNotifier } from "@/middleware/browser/notifier";
+import { AudioDeviceController } from "@/middleware/controllers/AudioDeviceController";
 import { CallController } from "@/middleware/controllers/CallController";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
 import { MissedCallController } from "@/middleware/controllers/MissedCallController";
@@ -9,6 +10,7 @@ import { NotificationsController } from "@/middleware/controllers/NotificationsC
 import { beforeUnloadEffect } from "@/middleware/effects/beforeUnload";
 import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { offerNotificationEffect } from "@/middleware/effects/offerNotification";
+import { persistAudioEffect } from "@/middleware/effects/persistAudio";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
 import { type RingtonePlayer, ringtoneEffect } from "@/middleware/effects/ringtone";
@@ -21,6 +23,7 @@ import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/sto
 type Controllers = {
   call: CallController;
   device: DeviceController;
+  audio: AudioDeviceController;
   notifications: NotificationsController;
   missedCall: MissedCallController;
 };
@@ -75,6 +78,7 @@ export class Middleware {
     this.controllers = {
       call: new CallController({ wavoip: this.wavoip, store: this.store }),
       device: new DeviceController({ wavoip: this.wavoip, store: this.store, notifications }),
+      audio: new AudioDeviceController({ wavoip: this.wavoip, store: this.store }),
       notifications,
       missedCall: new MissedCallController({ store: this.store }),
     };
@@ -90,6 +94,7 @@ export class Middleware {
 
     this.controllers.notifications.hydrate();
     this.controllers.device.hydrate();
+    this.controllers.audio.hydrate();
 
     this.unsubs.push(
       bindWavoipEvents({
@@ -100,6 +105,7 @@ export class Middleware {
       }),
       callLifecycleEventsEffect({ store: this.store, events: this.events }),
       persistDevicesEffect({ store: this.store }),
+      persistAudioEffect({ store: this.store }),
       resetCallTimerEffect({ store: this.store }),
       ringtoneEffect({ store: this.store, ringtone: this.ringtone, vibration: this.vibration }),
       screenSyncEffect({ store: this.store }),
@@ -121,6 +127,7 @@ export class Middleware {
   destroy(): void {
     for (const unsub of this.unsubs) unsub();
     this.unsubs = [];
+    this.controllers.audio.destroy();
     this.events.clear();
     this.started = false;
   }

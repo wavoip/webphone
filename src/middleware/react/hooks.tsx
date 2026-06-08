@@ -67,3 +67,12 @@ export function useUiState() {
     settings: s.settings,
   }));
 }
+
+export function useAudioState() {
+  return useMiddlewareShallow((s) => ({
+    micPermission: s.micPermission,
+    availableAudio: s.availableAudio,
+    selectedMicId: s.selectedMicId,
+    selectedSpeakerId: s.selectedSpeakerId,
+  }));
+}
