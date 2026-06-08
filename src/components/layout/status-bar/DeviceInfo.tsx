@@ -44,11 +44,21 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const middleware = useMiddleware();
   const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [waking, setWaking] = useState(false);
 
   const status = (device.status as Status | null) ?? null;
   const tone = statusTone(status, device.restricted);
   const canWakeUp = !device.restricted && (status === "disconnected" || status === "hibernating");
   const switchDisabled = !(status === "open" || (status as string) === "CONNECTED");
+
+  const onWakeUp = async () => {
+    setWaking(true);
+    try {
+      await middleware.controllers.device.wakeUp(device.token);
+    } finally {
+      setWaking(false);
+    }
+  };
 
   return (
     <div
@@ -81,10 +91,11 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="wv:size-7 wv:hover:cursor-pointer"
-                onClick={() => middleware.controllers.device.wakeUp(device.token)}
+                className="wv:size-7 wv:hover:cursor-pointer wv:disabled:cursor-wait"
+                onClick={onWakeUp}
+                disabled={waking}
               >
-                <PowerIcon size={14} />
+                <PowerIcon size={14} className={waking ? "wv:animate-pulse" : ""} />
               </Button>
             </TooltipTrigger>
             <TooltipContent>{t("Power on device")}</TooltipContent>

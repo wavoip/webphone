@@ -54,7 +54,10 @@ export class DeviceController {
   async wakeUp(token: string): Promise<boolean> {
     const device = this.deps.wavoip.getDevices().find((d) => d.token === token);
     if (!device) return false;
-    return device.wakeUp();
+    const status = this.deps.store.getState().devices.find((d) => d.token === token)?.status;
+    if (status === "hibernating") return device.wakeUp();
+    await device.restart();
+    return true;
   }
 
   private bindEvents(device: Device): void {
