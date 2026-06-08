@@ -98,20 +98,27 @@ export const SettingsModal = forwardRef(() => {
       <DialogContent
         container={root}
         onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:p-0 wv:gap-0 wv:max-w-[860px] wv:w-[95vw] wv:h-[88vh] wv:max-h-[720px] wv:max-sm:max-w-none wv:max-sm:w-screen wv:max-sm:h-screen wv:max-sm:max-h-none wv:max-sm:rounded-none"
+        className="wv:flex wv:flex-col wv:p-0 wv:gap-0 wv:max-w-[1000px] wv:w-[96vw] wv:h-[90vh] wv:max-h-[780px] wv:max-sm:max-w-none wv:max-sm:w-screen wv:max-sm:h-screen wv:max-sm:max-h-none wv:max-sm:rounded-none"
       >
         <DialogHeader className="wv:px-5 wv:py-4 wv:border-b wv:border-foreground/10">
-          <DialogTitle>{t("Settings")}</DialogTitle>
-          <DialogDescription>{t("Here you can configure the entire webphone")}</DialogDescription>
+          <DialogTitle className="wv:text-foreground">{t("Settings")}</DialogTitle>
+          <DialogDescription className="wv:text-foreground/60">
+            {t("Here you can configure the entire webphone")}
+          </DialogDescription>
         </DialogHeader>
 
         {qrcode ? (
-          <div className="wv:flex wv:flex-col wv:gap-3 wv:p-5 wv:overflow-auto">
-            <div>
-              <h2 className="wv:text-base wv:font-medium">QRCode</h2>
+          <div className="wv:flex wv:flex-col wv:items-center wv:gap-4 wv:p-6 wv:overflow-auto">
+            <div className="wv:text-center">
+              <h2 className="wv:text-base wv:font-medium wv:text-foreground">QR Code</h2>
               <p className="wv:text-sm wv:text-foreground/60">{t("Point your phone camera")}</p>
             </div>
-            <QRCode value={qrcode} level="L" className="wv:size-full wv:max-h-[400px]" />
+            <div className="wv:bg-white wv:p-4 wv:rounded-lg wv:shadow-md">
+              <QRCode value={qrcode} level="M" size={280} className="wv:size-full wv:max-w-[320px]" />
+            </div>
+            <p className="wv:text-xs wv:text-foreground/60 wv:text-center wv:max-w-[400px]">
+              {t("Open WhatsApp on your phone, go to Settings > Linked Devices and scan this code")}
+            </p>
           </div>
         ) : (
           <SidebarProvider

@@ -1,5 +1,6 @@
 import { PowerIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -60,6 +61,15 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
     }
   };
 
+  const onCopyToken = async () => {
+    try {
+      await navigator.clipboard.writeText(device.token);
+      toast.success(t("Token copied"));
+    } catch {
+      toast.error(t("Failed to copy token"));
+    }
+  };
+
   return (
     <div
       data-enable={device.enable}
@@ -81,7 +91,18 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
             </Tooltip>
           )}
         </div>
-        <p className="wv:text-[11px] wv:text-foreground/50 wv:font-mono wv:truncate">{device.token}</p>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={onCopyToken}
+              className="wv:text-[11px] wv:text-foreground/50 wv:font-mono wv:truncate wv:text-left wv:hover:text-foreground wv:hover:cursor-pointer wv:max-w-full"
+            >
+              {device.token}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{t("Copy token")}</TooltipContent>
+        </Tooltip>
       </div>
 
       <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">

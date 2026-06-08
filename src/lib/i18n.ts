@@ -80,6 +80,10 @@ export type TranslationKey =
   | "Numbers"
   | "Enter the token"
   | "No devices yet"
+  | "Copy token"
+  | "Token copied"
+  | "Failed to copy token"
+  | "Open WhatsApp on your phone, go to Settings > Linked Devices and scan this code"
   | "About"
   | "Webphone version"
   | "Documentation"
@@ -165,6 +169,11 @@ const ptBR: LocaleResource = {
   Numbers: "Números",
   "Enter the token": "Informe o Token",
   "No devices yet": "Nenhum dispositivo cadastrado",
+  "Copy token": "Copiar token",
+  "Token copied": "Token copiado",
+  "Failed to copy token": "Falha ao copiar o token",
+  "Open WhatsApp on your phone, go to Settings > Linked Devices and scan this code":
+    "Abra o WhatsApp no celular, vá em Configurações > Aparelhos conectados e escaneie este código",
   About: "Sobre",
   "Webphone version": "Versão do Webphone",
   Documentation: "Documentação",
@@ -247,6 +256,11 @@ const es: LocaleResource = {
   Numbers: "Números",
   "Enter the token": "Introduce el token",
   "No devices yet": "No hay dispositivos",
+  "Copy token": "Copiar token",
+  "Token copied": "Token copiado",
+  "Failed to copy token": "Error al copiar el token",
+  "Open WhatsApp on your phone, go to Settings > Linked Devices and scan this code":
+    "Abre WhatsApp en tu teléfono, ve a Ajustes > Dispositivos vinculados y escanea este código",
   About: "Acerca de",
   "Webphone version": "Versión del Webphone",
   Documentation: "Documentación",
