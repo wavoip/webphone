@@ -1,5 +1,8 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { AudioLevelMeter } from "@/components/audio-level/AudioLevelMeter";
+import { useMicAnalyser } from "@/components/audio-level/useMicAnalyser";
+import { useSpeakerTester } from "@/components/audio-level/useSpeakerTester";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +17,9 @@ export function AudioConfig() {
   const granted = micPermission === "granted";
   const mics = availableAudio.mics.filter((d) => d.deviceId);
   const speakers = availableAudio.speakers.filter((d) => d.deviceId);
+
+  const micAnalyser = useMicAnalyser({ deviceId: selectedMicId, enabled: granted });
+  const speakerTester = useSpeakerTester({ deviceId: selectedSpeakerId, enabled: granted });
 
   // Force a refresh on tab open so Chromium's persisted-permission/blank-ids
   // edge case resolves before render settles. SDK fires `devicesChanged`; the
@@ -75,7 +81,10 @@ export function AudioConfig() {
       <FieldSet>
         <FieldGroup className="wv:flex wv:flex-col wv:gap-4">
           <Field className="wv:flex wv:flex-col wv:gap-1 wv:text-foreground">
-            <FieldLabel>{t("Microphone")}</FieldLabel>
+            <FieldLabel className="wv:flex wv:items-center wv:gap-2">
+              <span>{t("Microphone")}</span>
+              <AudioLevelMeter analyser={micAnalyser} />
+            </FieldLabel>
             <Select value={selectedMicId ?? undefined} onValueChange={onMicChange} disabled={!granted}>
               <SelectTrigger className="wv:max-w-[300px]">
                 <SelectValue placeholder={t("Select the microphone to use on calls")} />
@@ -92,7 +101,19 @@ export function AudioConfig() {
           </Field>
 
           <Field className="wv:flex wv:flex-col wv:gap-1 wv:text-foreground">
-            <FieldLabel>{t("Speaker")}</FieldLabel>
+            <FieldLabel className="wv:flex wv:items-center wv:gap-2">
+              <span>{t("Speaker")}</span>
+              <AudioLevelMeter analyser={speakerTester.analyser} />
+              {granted && (
+                <button
+                  type="button"
+                  onClick={speakerTester.play}
+                  className="wv:text-[11px] wv:text-foreground/70 wv:hover:text-foreground wv:underline wv:hover:cursor-pointer wv:ml-1"
+                >
+                  {t("Test")}
+                </button>
+              )}
+            </FieldLabel>
             <Select value={selectedSpeakerId ?? undefined} onValueChange={onSpeakerChange} disabled={!granted}>
               <SelectTrigger className="wv:max-w-[300px]">
                 <SelectValue placeholder={t("Select the speaker to use on calls")} />

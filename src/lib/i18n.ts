@@ -52,6 +52,7 @@ export type TranslationKey =
   | "Select the microphone to use on calls"
   | "Speaker"
   | "Select the speaker to use on calls"
+  | "Test"
   | "Default microphone"
   | "Failed to switch microphone"
   | "Microphone permission required"
@@ -122,6 +123,7 @@ const ptBR: LocaleResource = {
   "Select the microphone to use on calls": "Selecione o microfone que deseja usar na ligação",
   Speaker: "Alto falante",
   "Select the speaker to use on calls": "Selecione o alto falante que deseja usar na ligação",
+  Test: "Testar",
   "Default microphone": "Microfone padrão",
   "Failed to switch microphone": "Falha ao trocar o microfone",
   "Microphone permission required": "Permissão de microfone necessária",
@@ -191,6 +193,7 @@ const es: LocaleResource = {
   "Select the microphone to use on calls": "Selecciona el micrófono que deseas usar en la llamada",
   Speaker: "Altavoz",
   "Select the speaker to use on calls": "Selecciona el altavoz que deseas usar en la llamada",
+  Test: "Probar",
   "Default microphone": "Micrófono predeterminado",
   "Failed to switch microphone": "Error al cambiar el micrófono",
   "Microphone permission required": "Se requiere permiso de micrófono",
