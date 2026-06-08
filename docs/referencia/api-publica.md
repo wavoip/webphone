@@ -17,12 +17,13 @@ const api = await webphone.render();
 // api === window.wavoip
 ```
 
-A API é dividida em nove módulos:
+A API é dividida em dez módulos:
 
 | Módulo | Responsabilidade |
 | --- | --- |
 | [`call`](#call) | Iniciar chamadas, ler estado de chamada ativa, manipular o discador. |
 | [`device`](#device) | Cadastrar, habilitar, desabilitar e remover dispositivos. |
+| [`audio`](#audio) | Permissão de microfone, listar dispositivos de áudio e trocar microfone/alto-falante em tempo real. |
 | [`notifications`](#notifications) | Listar, adicionar, remover e marcar notificações como lidas. |
 | [`widget`](#widget) | Abrir, fechar e reposicionar o botão flutuante. |
 | [`theme`](#theme) | Trocar entre tema claro, escuro e do sistema. |
@@ -153,6 +154,36 @@ const devices = window.wavoip.device.get();
 | `removeDevice(token)` | `remove(token)` |
 | `enableDevice(token)` | `enable(token)` |
 | `disableDevice(token)` | `disable(token)` |
+{% endhint %}
+
+## `audio`
+
+Gerencia permissão de microfone, lista de dispositivos de áudio e troca em tempo real entre microfones/alto-falantes. A troca de microfone funciona **durante uma chamada ativa** — o SDK usa `RTCRtpSender.replaceTrack` (WebRTC) ou reconstrói o `AudioInput` do transporte WebSocket, sem renegociação de SDP e sem derrubar a chamada.
+
+| Método | Descrição |
+| --- | --- |
+| `listDevices()` | Snapshot atual de `enumerateDevices()` filtrado por `audioinput`/`audiooutput`. Retorna `{ mics, speakers }`. |
+| `getPermission()` | Último estado conhecido da permissão de microfone (`"granted"`, `"denied"`, `"prompt"` ou `"unknown"`). |
+| `requestPermission()` | Aciona o prompt do navegador e resolve com o estado resultante. |
+| `setMicrophone(deviceId)` | Troca o microfone ativo. Persiste a preferência em `localStorage`. Retorna `Promise<{ err: string \| null }>`. |
+| `setSpeaker(deviceId)` | Define o alto-falante. Aplicado via `HTMLAudioElement.setSinkId` no áudio remoto. Persistido em `localStorage`. |
+| `getSelected()` | Retorna `{ micId, speakerId }` selecionados. |
+
+```ts
+if (window.wavoip.audio.getPermission() !== "granted") {
+  await window.wavoip.audio.requestPermission();
+}
+
+const { mics, speakers } = window.wavoip.audio.listDevices();
+
+const { err } = await window.wavoip.audio.setMicrophone(mics[1].deviceId);
+if (err) console.error("Falha ao trocar microfone:", err);
+
+window.wavoip.audio.setSpeaker(speakers[0].deviceId);
+```
+
+{% hint style="info" %}
+A UI nativa expõe os mesmos controles: a aba **Audio** no menu de configurações (controlada por `settingsMenu.audioMenu.show`) e o seletor de microfone na tela de chamada (`CallMicPicker`), que aparece sempre que houver uma chamada ativa. Ambos ficam desabilitados enquanto a permissão não for `"granted"`.
 {% endhint %}
 
 ## `notifications`

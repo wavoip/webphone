@@ -49,6 +49,9 @@ await webphone.render({
       showEnableDevicesButton: true,
       showRemoveDevicesButton: true,
     },
+    audioMenu: {
+      show: true,
+    },
   },
   callSettings: {
     displayName: "Atendimento",
@@ -72,6 +75,7 @@ await webphone.render({
 | `settingsMenu.deviceMenu.showAddDevices` | `boolean` | Botão de adicionar dispositivo. |
 | `settingsMenu.deviceMenu.showEnableDevicesButton` | `boolean` | Botão de habilitar dispositivo. |
 | `settingsMenu.deviceMenu.showRemoveDevicesButton` | `boolean` | Botão de remover dispositivo. |
+| `settingsMenu.audioMenu.show` | `boolean` | Exibe a aba "Audio" no menu de configurações (seleção de microfone e alto-falante). Padrão `true`. |
 | `callSettings.displayName` | `string` | Nome exibido para o destinatário ao iniciar chamadas. |
 | `offerNotification.enabled` | `boolean` | Liga/desliga a notificação OS de oferta. Padrão `true`. Veja [Notificações push](../recursos/notificacoes-push.md). |
 | `offerNotification.autoRequest` | `boolean` | Pede permissão de notificação na montagem. Padrão `false`. |
