@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import { useMiddleware } from "@/middleware/react/hooks";
+import { usePip } from "@/providers/PipProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useTheme } from "@/providers/ThemeProvider";
 
@@ -42,6 +43,7 @@ export function WidgetProvider({ children }: Props) {
   const middleware = useMiddleware();
   const { theme } = useTheme();
   const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
+  const { isPipActive } = usePip();
 
   const { isClosed, position, buttonPosition, showWidget } = useStore(
     middleware.store,
@@ -159,7 +161,7 @@ export function WidgetProvider({ children }: Props) {
         toggle: toggleWidget,
       }}
     >
-      {showWidget && (
+      {showWidget && !isPipActive && (
         <Button
           type="button"
           onClick={openWidget}
