@@ -7,12 +7,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
+import { usePip } from "@/providers/PipProvider";
 
 type Props = {
   offer: Offer;
 };
 
 export function OfferNotification({ offer }: Props) {
+  const { togglePip } = usePip();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -104,6 +106,7 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
+              togglePip();
               offer.accept().then((result) => {
                 if (result.err) {
                   setError(result.err);

@@ -20,69 +20,22 @@ import { Input } from "@/components/ui/input";
 import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
+import { usePip } from "@/providers/PipProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [
-  {
-    digit: "1",
-    letters: "",
-    audio: new Audio(SoundDTMF1),
-  },
-  {
-    digit: "2",
-    letters: "ABC",
-    audio: new Audio(SoundDTMF2),
-  },
-  {
-    digit: "3",
-    letters: "DEF",
-    audio: new Audio(SoundDTMF3),
-  },
-  {
-    digit: "4",
-    letters: "GHI",
-    audio: new Audio(SoundDTMF4),
-  },
-  {
-    digit: "5",
-    letters: "JKL",
-    audio: new Audio(SoundDTMF5),
-  },
-  {
-    digit: "6",
-    letters: "MNO",
-    audio: new Audio(SoundDTMF6),
-  },
-  {
-    digit: "7",
-    letters: "PQES",
-    audio: new Audio(SoundDTMF7),
-  },
-  {
-    digit: "8",
-    letters: "TUV",
-    audio: new Audio(SoundDTMF8),
-  },
-  {
-    digit: "9",
-    letters: "WXYZ",
-    audio: new Audio(SoundDTMF9),
-  },
-  {
-    digit: "*",
-    letters: "",
-    audio: new Audio(SoundDTMFStar),
-  },
-  {
-    digit: "0",
-    letters: "+",
-    audio: new Audio(SoundDTMF0),
-  },
-  {
-    digit: "#",
-    letters: "",
-    audio: new Audio(SoundDTMFHash),
-  },
+  { digit: "1", letters: "", audio: new Audio(SoundDTMF1) },
+  { digit: "2", letters: "ABC", audio: new Audio(SoundDTMF2) },
+  { digit: "3", letters: "DEF", audio: new Audio(SoundDTMF3) },
+  { digit: "4", letters: "GHI", audio: new Audio(SoundDTMF4) },
+  { digit: "5", letters: "JKL", audio: new Audio(SoundDTMF5) },
+  { digit: "6", letters: "MNO", audio: new Audio(SoundDTMF6) },
+  { digit: "7", letters: "PQRS", audio: new Audio(SoundDTMF7) },
+  { digit: "8", letters: "TUV", audio: new Audio(SoundDTMF8) },
+  { digit: "9", letters: "WXYZ", audio: new Audio(SoundDTMF9) },
+  { digit: "*", letters: "", audio: new Audio(SoundDTMFStar) },
+  { digit: "0", letters: "+", audio: new Audio(SoundDTMF0) },
+  { digit: "#", letters: "", audio: new Audio(SoundDTMFHash) },
 ];
 
 const backspace_audio = new Audio(SoundBackspace);
@@ -90,10 +43,9 @@ const backspace_audio = new Audio(SoundBackspace);
 export default function KeyboardScreen() {
   const middleware = useMiddleware();
   const number = useStore(middleware.store, (s) => s.keyboardInput);
-  const { setNumber, appendChar, popChar } = useStore(
+  const { appendChar, popChar } = useStore(
     middleware.store,
     useShallow((s) => ({
-      setNumber: s.setKeyboardInput,
       appendChar: s.appendKeyboardChar,
       popChar: s.popKeyboardChar,
     })),
@@ -105,10 +57,11 @@ export default function KeyboardScreen() {
 
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
+  const { togglePip } = usePip();
 
-  const handleCall = async (devices: string[]) => {
-    const isLast = devices.length <= 1;
-    const device = devices[0];
+  const handleCall = async (allDevices: string[]) => {
+    const isLast = allDevices.length <= 1;
+    const device = allDevices[0];
 
     setCallIsLoading(true);
     setError("");
@@ -127,11 +80,8 @@ export default function KeyboardScreen() {
         setError(t("Number does not exist"));
         setStatus("");
         setCallIsLoading(false);
-
-        setTimeout(() => {
-          setError("");
-        }, 4000);
-
+        setTimeout(() => setError(""), 4000);
+        togglePip();
         return;
       }
 
@@ -145,15 +95,12 @@ export default function KeyboardScreen() {
       });
 
       if (!isLast) {
-        // setStatus(err.message);
-        handleCall(devices.slice(1));
+        handleCall(allDevices.slice(1));
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
-
-        setTimeout(() => {
-          setStatus("");
-        }, 3000);
+        togglePip();
+        setTimeout(() => setStatus(""), 3000);
       }
     });
   };
@@ -162,8 +109,10 @@ export default function KeyboardScreen() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-
+        if (!number.trim()) return;
         const tokens = devices.filter((device) => device.enable).map((device) => device.token);
+        if (!tokens.length) return;
+        togglePip();
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
@@ -174,34 +123,30 @@ export default function KeyboardScreen() {
           value={number}
           onChange={(e) => {
             const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
-            setNumber(digits);
+            middleware.store.getState().setKeyboardInput(digits);
           }}
-          className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[24px]  wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
+          className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[24px] wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
         />
-        {/* <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">Brasil</p> */}
+
+        {error && <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em]">{error}</p>}
 
         {status && (
           <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
             {callIsLoading && (
-              <div className="wv:flex  ">
-                <div className="wv:h-3 wv:w-3 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent"></div>
-              </div>
+              <div className="wv:h-3 wv:w-3 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
             )}
-
             <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
           </div>
         )}
-
-        {error && <p className="wv:text-[10px] wv:font-light wv:text-[red] wv:tracking-[.15em]">{error}</p>}
       </div>
 
       <div className="wv:flex wv:max-w-[300px] wv:w-full">
         <div className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center">
-          {Object.entries(buttons).map(([key, { digit, letters, audio }]) => (
+          {buttons.map(({ digit, letters, audio }) => (
             <Button
-              key={`webphone-keyboard-${key}`}
+              key={`webphone-keyboard-${digit}`}
               type="button"
-              variant={"secondary"}
+              variant="secondary"
               className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
               onClick={() => {
                 appendChar(digit);
@@ -211,7 +156,7 @@ export default function KeyboardScreen() {
                 audio.play();
               }}
             >
-              <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">{digit}</p>
+              <p className="wv:text-[24px] wv:leading-6 wv:font-semibold">{digit}</p>
               {!!letters && (
                 <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
               )}
@@ -224,23 +169,22 @@ export default function KeyboardScreen() {
         <div className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center wv:items-center">
           <Button
             type="button"
-            variant={"secondary"}
-            size={"icon"}
+            variant="secondary"
+            size="icon"
             onClick={() => {
               backspace_audio.pause();
               backspace_audio.currentTime = 0;
               backspace_audio.play();
               popChar();
             }}
-            className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] vw:border-none wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
+            className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
           >
             <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
           <Button
             type="submit"
-            size={"icon"}
-            // className="wv:text-background wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:hover:cursor-pointer wv:w-full wv:rounded-full wv:h-[56px]"
+            size="icon"
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             disabled={callIsLoading}
           >
