@@ -1,5 +1,6 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo } from "react";
+import { useStore } from "zustand";
 import Calling from "@/assets/sounds/calling.mp3";
 import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
@@ -7,6 +8,7 @@ import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const calling_sound = new Audio(Calling);
@@ -15,8 +17,13 @@ const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
   const { callOutgoing, callStatus } = useWavoip();
+  const middleware = useMiddleware();
+  const keyboardInput = useStore(middleware.store, (s) => s.keyboardInput);
+
+  const displayName = callOutgoing?.peer.displayName || callOutgoing?.peer.phone || keyboardInput;
 
   const status = useMemo(() => {
+    if (!callOutgoing && keyboardInput) return t("Connecting...");
     switch (callStatus) {
       case "CALLING":
         return t("Connecting...");
@@ -33,7 +40,7 @@ export default function OutgoingScreen() {
       default:
         return null;
     }
-  }, [callStatus]);
+  }, [callStatus, callOutgoing, keyboardInput]);
 
   useEffect(() => {
     if (callStatus === "RINGING") {
@@ -77,7 +84,7 @@ export default function OutgoingScreen() {
           </Avatar>
           <div className="wv:hidden  wv:group-hover/title:block">
             <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-              {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+              {displayName}
             </MarqueeText>
           </div>
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start">
@@ -88,12 +95,12 @@ export default function OutgoingScreen() {
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
               <div className="wv:hidden  wv:group-hover/title:block">
                 <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                  {displayName}
                 </MarqueeText>
               </div>
 
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-                {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                {displayName}
               </p>
             </div>
           </div>
