@@ -115,10 +115,7 @@ export type MaybeUpgradeDeps = {
  * `deps` exists so tests can swap the network fetch and the script-load step
  * without needing a real CDN or a script-loading DOM.
  */
-export async function maybeUpgrade(
-  currentVersion: string,
-  deps: MaybeUpgradeDeps = {},
-): Promise<string | null> {
+export async function maybeUpgrade(currentVersion: string, deps: MaybeUpgradeDeps = {}): Promise<string | null> {
   if (!isAutoUpdateEnabled()) return null;
 
   const fetchLatest = deps.fetchLatest ?? fetchLatestVersion;
