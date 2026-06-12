@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useStore } from "zustand";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
+import { PipPortal } from "@/components/PipPortal";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { usePip } from "@/providers/PipProvider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
@@ -51,7 +52,7 @@ export function WebPhone() {
 
   return (
     <>
-      {!isPipActive && <StatusBar />}
+      {<StatusBar />}
       <div
         role="application"
         className="wv:flex wv:flex-1 wv:relative wv:px-7"
@@ -69,17 +70,11 @@ export function WebPhone() {
         </p>
       </div>
 
-      {pipWindow &&
-        createPortal(
-          <div
-            className={`wv:fixed wv:inset-0 wv:flex wv:flex-col wv:items-center wv:justify-center wv:bg-background wv:overflow-hidden wv:m-0 wv:p-0 ${resolvedTheme}`}
-          >
-            <div className="wv:h-full wv:w-full wv:flex wv:flex-col">
-              {screen === "keyboard" ? <OutgoingScreen /> : callScreens}
-            </div>
-          </div>,
-          pipWindow.document.body,
-        )}
+      {pipWindow && (
+        <PipPortal pipWindow={pipWindow} theme={resolvedTheme}>
+          {screen === "keyboard" ? <OutgoingScreen /> : callScreens}
+        </PipPortal>
+      )}
     </>
   );
 }
