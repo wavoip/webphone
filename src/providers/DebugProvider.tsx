@@ -10,6 +10,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useS
 import { useMiddleware } from "@/middleware/react/hooks";
 
 type CallLike = {
+  id: string;
   on(event: "iceDiagnostics", cb: (diag: IceDiagnostics) => void): Unsubscribe;
   on(event: "connectivityIssue", cb: (issue: ConnectivityIssue) => void): Unsubscribe;
 };
@@ -18,29 +19,43 @@ function asCallLike(call: Offer | CallOutgoing | CallActive): CallLike {
   return call as unknown as CallLike;
 }
 
-const MAX_ISSUE_HISTORY = 20;
+const MAX_HISTORY = 20;
 
 export type IssueRecord = {
   at: number;
+  callId: string;
   issue: ConnectivityIssue;
 };
 
+export type IceRecord = {
+  at: number;
+  callId: string;
+  diag: IceDiagnostics;
+};
+
 type DebugInfo = {
-  lastIceDiagnostics: IceDiagnostics | null;
   recentIssues: IssueRecord[];
+  recentIceDiagnostics: IceRecord[];
 };
 
 const DebugContext = createContext<DebugInfo | undefined>(undefined);
 
 export function DebugProvider({ children }: { children: ReactNode }) {
   const middleware = useMiddleware();
-  const [lastIceDiagnostics, setLastIceDiagnostics] = useState<IceDiagnostics | null>(null);
   const [recentIssues, setRecentIssues] = useState<IssueRecord[]>([]);
+  const [recentIceDiagnostics, setRecentIceDiagnostics] = useState<IceRecord[]>([]);
 
-  const pushIssue = useCallback((issue: ConnectivityIssue) => {
+  const pushIssue = useCallback((callId: string, issue: ConnectivityIssue) => {
     setRecentIssues((prev) => {
-      const next = [...prev, { at: Date.now(), issue }];
-      return next.slice(Math.max(0, next.length - MAX_ISSUE_HISTORY));
+      const next = [...prev, { at: Date.now(), callId, issue }];
+      return next.slice(Math.max(0, next.length - MAX_HISTORY));
+    });
+  }, []);
+
+  const pushIce = useCallback((callId: string, diag: IceDiagnostics) => {
+    setRecentIceDiagnostics((prev) => {
+      const next = [...prev, { at: Date.now(), callId, diag }];
+      return next.slice(Math.max(0, next.length - MAX_HISTORY));
     });
   }, []);
 
@@ -48,8 +63,8 @@ export function DebugProvider({ children }: { children: ReactNode }) {
     const wireCall = (call: Offer | CallOutgoing | CallActive | undefined): (() => void) => {
       if (!call) return () => {};
       const c = asCallLike(call);
-      const unsubDiag = c.on("iceDiagnostics", (diag) => setLastIceDiagnostics(diag));
-      const unsubIssue = c.on("connectivityIssue", (issue) => pushIssue(issue));
+      const unsubDiag = c.on("iceDiagnostics", (diag) => pushIce(c.id, diag));
+      const unsubIssue = c.on("connectivityIssue", (issue) => pushIssue(c.id, issue));
       return () => {
         unsubDiag?.();
         unsubIssue?.();
@@ -102,9 +117,9 @@ export function DebugProvider({ children }: { children: ReactNode }) {
       for (const cleanup of activeOffers.values()) cleanup();
       activeOffers = new Map();
     };
-  }, [middleware, pushIssue]);
+  }, [middleware, pushIssue, pushIce]);
 
-  return <DebugContext.Provider value={{ lastIceDiagnostics, recentIssues }}>{children}</DebugContext.Provider>;
+  return <DebugContext.Provider value={{ recentIssues, recentIceDiagnostics }}>{children}</DebugContext.Provider>;
 }
 
 export function useDebugInfo(): DebugInfo {

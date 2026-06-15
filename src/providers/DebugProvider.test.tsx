@@ -45,21 +45,24 @@ describe("DebugProvider", () => {
 
   it("starts with empty diagnostics and issues", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
-    expect(result.current.lastIceDiagnostics).toBeNull();
+    expect(result.current.recentIceDiagnostics).toEqual([]);
     expect(result.current.recentIssues).toEqual([]);
   });
 
-  it("captures iceDiagnostics emitted by an incoming offer", () => {
+  it("captures iceDiagnostics emitted by an incoming offer with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
     const offer = new FakeOffer("offer-1", "tok-1");
     act(() => addOffer(middleware, offer));
     act(() => offer.emitEvent("iceDiagnostics", sampleDiag));
 
-    expect(result.current.lastIceDiagnostics).toEqual(sampleDiag);
+    expect(result.current.recentIceDiagnostics).toHaveLength(1);
+    expect(result.current.recentIceDiagnostics[0].callId).toBe("offer-1");
+    expect(result.current.recentIceDiagnostics[0].diag).toEqual(sampleDiag);
+    expect(result.current.recentIceDiagnostics[0].at).toBeTypeOf("number");
   });
 
-  it("captures connectivityIssue emitted by an active call", () => {
+  it("captures connectivityIssue emitted by an active call with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
     const active = new FakeCallActive("call-1", "tok-1");
@@ -68,11 +71,13 @@ describe("DebugProvider", () => {
       active.emitEvent("connectivityIssue", "STUN_UNREACHABLE" satisfies ConnectivityIssue);
     });
 
-    expect(result.current.recentIssues.map((i) => i.issue)).toContain("STUN_UNREACHABLE");
+    expect(result.current.recentIssues).toHaveLength(1);
+    expect(result.current.recentIssues[0].callId).toBe("call-1");
+    expect(result.current.recentIssues[0].issue).toBe("STUN_UNREACHABLE");
     expect(result.current.recentIssues[0].at).toBeTypeOf("number");
   });
 
-  it("captures connectivityIssue emitted by an outgoing call", () => {
+  it("captures connectivityIssue emitted by an outgoing call with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
     const outgoing = new FakeCallOutgoing("call-2", "tok-1");
@@ -81,7 +86,8 @@ describe("DebugProvider", () => {
       outgoing.emitEvent("connectivityIssue", "ICE_CONNECTION_FAILED" satisfies ConnectivityIssue);
     });
 
-    expect(result.current.recentIssues.map((i) => i.issue)).toContain("ICE_CONNECTION_FAILED");
+    expect(result.current.recentIssues[0].callId).toBe("call-2");
+    expect(result.current.recentIssues[0].issue).toBe("ICE_CONNECTION_FAILED");
   });
 
   it("caps the issue ring buffer at 20 entries", () => {
@@ -95,6 +101,19 @@ describe("DebugProvider", () => {
     });
 
     expect(result.current.recentIssues).toHaveLength(20);
+  });
+
+  it("caps the ICE diagnostics ring buffer at 20 entries", () => {
+    const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
+
+    const active = new FakeCallActive("call-3b", "tok-1");
+    act(() => middleware.store.getState().setActive(active));
+
+    act(() => {
+      for (let i = 0; i < 25; i++) active.emitEvent("iceDiagnostics", sampleDiag);
+    });
+
+    expect(result.current.recentIceDiagnostics).toHaveLength(20);
   });
 
   it("unsubscribes from a call after it leaves the store", () => {

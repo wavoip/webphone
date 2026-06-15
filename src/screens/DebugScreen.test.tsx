@@ -77,7 +77,7 @@ describe("DebugScreen", () => {
     });
     const payload = JSON.parse(writeText.mock.calls[0][0] as string);
     expect(payload).toHaveProperty("system");
-    expect(payload).toHaveProperty("lastIceDiagnostics");
+    expect(payload).toHaveProperty("recentIceDiagnostics");
     expect(payload).toHaveProperty("recentIssues");
   });
 });

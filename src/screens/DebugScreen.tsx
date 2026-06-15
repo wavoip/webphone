@@ -46,7 +46,7 @@ export function DebugScreen() {
       generatedAt: new Date().toISOString(),
       system,
       stunResults,
-      lastIceDiagnostics: debug.lastIceDiagnostics,
+      recentIceDiagnostics: debug.recentIceDiagnostics,
       recentIssues: debug.recentIssues,
     };
     await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -111,10 +111,30 @@ export function DebugScreen() {
           )}
         </Card>
 
-        <Card title="ICE">
-          <pre className="wv:text-xs wv:font-mono wv:whitespace-pre-wrap wv:break-all wv:text-foreground">
-            {debug.lastIceDiagnostics ? JSON.stringify(debug.lastIceDiagnostics, null, 2) : "—"}
-          </pre>
+        <Card title={t("Recent ICE diagnostics")}>
+          {debug.recentIceDiagnostics.length === 0 ? (
+            <p className="wv:text-xs wv:text-muted-foreground">—</p>
+          ) : (
+            <ul className="wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-2">
+              {debug.recentIceDiagnostics
+                .slice()
+                .reverse()
+                .map((r) => (
+                  <li
+                    key={`${r.at}-${r.callId}`}
+                    className="wv:flex wv:flex-col wv:gap-1 wv:rounded wv:bg-muted/40 wv:p-2"
+                  >
+                    <div className="wv:flex wv:gap-2">
+                      <span className="wv:text-muted-foreground">{new Date(r.at).toISOString()}</span>
+                      <span className="wv:text-foreground">call: {r.callId}</span>
+                    </div>
+                    <pre className="wv:whitespace-pre-wrap wv:break-all wv:text-foreground">
+                      {JSON.stringify(r.diag, null, 2)}
+                    </pre>
+                  </li>
+                ))}
+            </ul>
+          )}
         </Card>
 
         <Card title={t("Recent issues")}>
@@ -122,12 +142,16 @@ export function DebugScreen() {
             <p className="wv:text-xs wv:text-muted-foreground">—</p>
           ) : (
             <ul className="wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
-              {debug.recentIssues.map((r, idx) => (
-                <li key={`${r.at}-${idx}`} className="wv:flex wv:gap-2">
-                  <span className="wv:text-muted-foreground">{new Date(r.at).toISOString()}</span>
-                  <span className="wv:text-red-500">{r.issue}</span>
-                </li>
-              ))}
+              {debug.recentIssues
+                .slice()
+                .reverse()
+                .map((r, idx) => (
+                  <li key={`${r.at}-${idx}`} className="wv:flex wv:gap-2">
+                    <span className="wv:text-muted-foreground">{new Date(r.at).toISOString()}</span>
+                    <span className="wv:text-foreground">call: {r.callId}</span>
+                    <span className="wv:text-red-500">{r.issue}</span>
+                  </li>
+                ))}
             </ul>
           )}
         </Card>
