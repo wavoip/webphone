@@ -20,3 +20,4 @@
 ## Customização
 
 * [Cores e tema](customizacao/cores.md)
+* [Preferências do usuário](customizacao/preferencias.md)

@@ -48,3 +48,13 @@
 - Always on Brazillian Portuguese
 - Documentation lives in docs/
 - Refer to [Gitbook Skill](./gitbook.md) on how to structure the documentation
+
+## When to update docs
+
+Any change that affects how an end user interacts with the webphone MUST update `docs/` in the same change. This includes:
+- New or renamed tabs / menus / dialogs in the UI
+- New or changed user-facing settings, controls, themes, languages
+- New or changed public APIs (`window.wavoip.*`, exports from the package)
+- New or changed user-facing events, banners, notifications, tooltips
+- Schema changes to any payload the user copies, exports, or sees (e.g. the diagnostics report JSON)
+- Breaking changes in initialization (`render(config)`), config shape, or default behavior
