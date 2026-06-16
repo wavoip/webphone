@@ -17,7 +17,7 @@ const LANGUAGES: { value: Language; label: string }[] = [
   { value: "es", label: "Español" },
 ];
 
-export function AppearanceConfig() {
+export function PreferencesConfig() {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
   const { wavoip } = useWavoip();

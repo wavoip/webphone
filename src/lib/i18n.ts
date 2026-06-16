@@ -60,7 +60,7 @@ export type TranslationKey =
   | "Numbers"
   | "Enter the token"
   // troubleshooting
-  | "Appearance"
+  | "Preferences"
   | "Theme"
   | "Language"
   | "Light"
@@ -141,7 +141,7 @@ const ptBR: LocaleResource = {
   "Point your phone camera": "Aponte a câmera do celular",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
-  Appearance: "Aparência",
+  Preferences: "Preferências",
   Theme: "Tema",
   Language: "Idioma",
   Light: "Claro",
@@ -219,7 +219,7 @@ const es: LocaleResource = {
   "Point your phone camera": "Apunta la cámara del móvil",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
-  Appearance: "Apariencia",
+  Preferences: "Preferencias",
   Theme: "Tema",
   Language: "Idioma",
   Light: "Claro",
@@ -252,6 +252,34 @@ a18n.addLocaleResource("es", es);
 
 export const t = (key: TranslationKey): string => a18n(key);
 
-export const setLanguage = (lang: Language): void => a18n.setLocale(lang);
+const localeSubscribers = new Set<() => void>();
+
+export const setLanguage = (lang: Language): void => {
+  a18n.setLocale(lang);
+  for (const cb of localeSubscribers) cb();
+};
 
 export const getLanguage = (): string => a18n.getLocale();
+
+const SUPPORTED_LANGUAGES: readonly Language[] = ["en", "pt-BR", "es"];
+
+/**
+ * Map an arbitrary BCP-47 tag (e.g. "en-US", "pt", "es-419") to one of the
+ * languages we ship translations for. Falls back to "en".
+ */
+export const normalizeLanguage = (raw: string | null | undefined): Language => {
+  if (!raw) return "en";
+  const exact = SUPPORTED_LANGUAGES.find((l) => l === raw);
+  if (exact) return exact;
+  const base = raw.toLowerCase().split("-")[0];
+  if (base === "pt") return "pt-BR";
+  if (base === "es") return "es";
+  return "en";
+};
+
+export const subscribeLocale = (cb: () => void): (() => void) => {
+  localeSubscribers.add(cb);
+  return () => {
+    localeSubscribers.delete(cb);
+  };
+};

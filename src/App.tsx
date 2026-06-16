@@ -1,5 +1,7 @@
 import type { Wavoip } from "@wavoip/wavoip-api";
+import { useSyncExternalStore } from "react";
 import { WebPhone } from "@/components/WebPhone";
+import { getLanguage, normalizeLanguage, subscribeLocale } from "@/lib/i18n";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
@@ -19,6 +21,15 @@ type Props = {
 };
 
 export function App({ shadowRoot, root, config, wavoip }: Props) {
+  // Subscribe at the topmost component so a language change re-renders App,
+  // recreates the children JSX, and bypasses React's element-identity bailout
+  // through intermediate providers. Re-rendering is what lets every `t()`
+  // call deep in the tree pick up the new locale.
+  useSyncExternalStore(
+    subscribeLocale,
+    () => normalizeLanguage(getLanguage()),
+    () => normalizeLanguage(config.language),
+  );
   return (
     <ShadowProvider shadowRoot={shadowRoot} root={root}>
       <SettingsProvider config={config}>

@@ -1,11 +1,11 @@
-import { GearIcon, MicrophoneIcon, PaintBrushIcon, PhoneIcon, StethoscopeIcon } from "@phosphor-icons/react";
+import { GearIcon, MicrophoneIcon, PhoneIcon, SlidersIcon, StethoscopeIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
-import { AppearanceConfig } from "@/components/layout/settings/AppearanceConfig";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
+import { PreferencesConfig } from "@/components/layout/settings/PreferencesConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
 import {
@@ -112,9 +112,9 @@ export const SettingsModal = forwardRef(() => {
                     Audio
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="appearance" className="wv:gap-2 wv:max-sm:min-h-9">
-                  <PaintBrushIcon className="wv:size-4" weight="duotone" />
-                  {t("Appearance")}
+                <TabsTrigger value="preferences" className="wv:gap-2 wv:max-sm:min-h-9">
+                  <SlidersIcon className="wv:size-4" weight="duotone" />
+                  {t("Preferences")}
                 </TabsTrigger>
                 <TabsTrigger value="diagnostics" className="wv:gap-2 wv:max-sm:min-h-9">
                   <StethoscopeIcon className="wv:size-4" weight="duotone" />
@@ -186,8 +186,8 @@ export const SettingsModal = forwardRef(() => {
                 </TabsContent>
               )}
 
-              <TabsContent value="appearance" className="wv:flex-1 wv:overflow-auto wv:px-6 wv:py-4 wv:max-sm:px-4">
-                <AppearanceConfig />
+              <TabsContent value="preferences" className="wv:flex-1 wv:overflow-auto wv:px-6 wv:py-4 wv:max-sm:px-4">
+                <PreferencesConfig />
               </TabsContent>
 
               <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-hidden">
