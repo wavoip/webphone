@@ -40,10 +40,10 @@ export function CallDiagnosticsDialog({ call, children }: Props) {
       <DialogContent
         container={root}
         onClick={(e) => e.stopPropagation()}
-        className="wv:flex wv:flex-col wv:gap-3 wv:max-w-md wv:p-6"
+        className="wv:flex wv:flex-col wv:gap-3 wv:max-w-md wv:p-6 wv:text-foreground"
       >
         <DialogHeader>
-          <DialogTitle>{t("Call diagnostics")}</DialogTitle>
+          <DialogTitle className="wv:text-foreground">{t("Call diagnostics")}</DialogTitle>
           <DialogDescription className="wv:text-xs wv:font-mono">{`call: ${call.id}`}</DialogDescription>
         </DialogHeader>
 

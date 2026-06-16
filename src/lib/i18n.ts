@@ -67,6 +67,7 @@ export type TranslationKey =
   | "Network"
   | "Audio devices"
   | "STUN reachability"
+  | "Tested at"
   | "Recent issues"
   | "Recent ICE diagnostics"
   | "Call diagnostics"
@@ -137,6 +138,7 @@ const ptBR: LocaleResource = {
   Network: "Rede",
   "Audio devices": "Áudio",
   "STUN reachability": "Reachability STUN",
+  "Tested at": "Testado em",
   "Recent issues": "Problemas recentes",
   "Recent ICE diagnostics": "Diagnósticos ICE recentes",
   "Call diagnostics": "Diagnóstico da chamada",
@@ -204,6 +206,7 @@ const es: LocaleResource = {
   Network: "Red",
   "Audio devices": "Audio",
   "STUN reachability": "Alcance STUN",
+  "Tested at": "Probado a las",
   "Recent issues": "Problemas recientes",
   "Recent ICE diagnostics": "Diagnósticos ICE recientes",
   "Call diagnostics": "Diagnóstico de la llamada",
