@@ -69,14 +69,12 @@ export function Ping({ call }: Props) {
   if (connectionStatus === "disconnected") {
     const style = STRENGTH_STYLES[ConnectionStrength.none];
     return (
-      <CallDiagnosticsDialog call={call}>
-        <button
-          type="button"
-          className={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text}`}
-        >
-          <WifiXIcon className="wv:size-4" />
-          <span className="wv:text-[11px] wv:font-medium">offline</span>
-        </button>
+      <CallDiagnosticsDialog
+        call={call}
+        triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text}`}
+      >
+        <WifiXIcon className="wv:size-4" />
+        <span className="wv:text-[11px] wv:font-medium">offline</span>
       </CallDiagnosticsDialog>
     );
   }
@@ -85,16 +83,14 @@ export function Ping({ call }: Props) {
   const style = STRENGTH_STYLES[strength];
 
   return (
-    <CallDiagnosticsDialog call={call}>
-      <button
-        type="button"
-        className={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text} ${isPending ? "wv:animate-pulse" : ""}`}
-      >
-        <SignalIcon strength={strength} className="wv:size-4" />
-        <span className="wv:text-[11px] wv:font-medium wv:tabular-nums wv:whitespace-nowrap">
-          {ping !== null ? `${ping.toFixed(0)} ms` : "—"}
-        </span>
-      </button>
+    <CallDiagnosticsDialog
+      call={call}
+      triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text} ${isPending ? "wv:animate-pulse" : ""}`}
+    >
+      <SignalIcon strength={strength} className="wv:size-4" />
+      <span className="wv:text-[11px] wv:font-medium wv:tabular-nums wv:whitespace-nowrap">
+        {ping !== null ? `${ping.toFixed(0)} ms` : "—"}
+      </span>
     </CallDiagnosticsDialog>
   );
 }

@@ -81,6 +81,7 @@ export type TranslationKey =
   | "Recent issues"
   | "Recent ICE diagnostics"
   | "Call diagnostics"
+  | "Realtime stats"
   | "STUN unreachable"
   | "ICE gathering timed out"
   | "Connection failed"
@@ -162,6 +163,7 @@ const ptBR: LocaleResource = {
   "Recent issues": "Problemas recentes",
   "Recent ICE diagnostics": "Diagnósticos ICE recentes",
   "Call diagnostics": "Diagnóstico da chamada",
+  "Realtime stats": "Estatísticas em tempo real",
   "STUN unreachable": "STUN inacessível — confira firewall/proxy.",
   "ICE gathering timed out": "Tempo de coleta ICE esgotado — a chamada seguiu com os candidatos disponíveis.",
   "Connection failed": "Conexão de mídia falhou.",
@@ -240,6 +242,7 @@ const es: LocaleResource = {
   "Recent issues": "Problemas recientes",
   "Recent ICE diagnostics": "Diagnósticos ICE recientes",
   "Call diagnostics": "Diagnóstico de la llamada",
+  "Realtime stats": "Estadísticas en tiempo real",
   "STUN unreachable": "STUN inalcanzable — revisa firewall/proxy.",
   "ICE gathering timed out": "Tiempo de recolección ICE agotado — la llamada continuó con los candidatos disponibles.",
   "Connection failed": "La conexión de medios falló.",
