@@ -36,8 +36,6 @@ type Props = {
  */
 export function LanguageProvider({ children, initial }: Props) {
   useEffect(() => {
-    // Ensure the runtime locale matches one of our shipped languages so the
-    // Preferences tab has an active option on first render.
     const resolved = normalizeLanguage(initial ?? getLanguage());
     if (resolved !== getLanguage()) applyLanguage(resolved);
   }, [initial]);

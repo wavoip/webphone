@@ -21,10 +21,6 @@ type Props = {
 };
 
 export function App({ shadowRoot, root, config, wavoip }: Props) {
-  // Subscribe at the topmost component so a language change re-renders App,
-  // recreates the children JSX, and bypasses React's element-identity bailout
-  // through intermediate providers. Re-rendering is what lets every `t()`
-  // call deep in the tree pick up the new locale.
   useSyncExternalStore(
     subscribeLocale,
     () => normalizeLanguage(getLanguage()),

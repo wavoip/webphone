@@ -25,9 +25,6 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
   const [stats, setStats] = useState<CallStats | null>(null);
   const [serverStats, setServerStats] = useState<ServerCallStats | null>(null);
 
-  // ICE diagnostics and connectivity issues are buffered globally by
-  // DebugProvider so we can read everything that fired during call setup,
-  // not just the events emitted after this dialog mounted.
   const lastIce = useMemo(() => {
     const own = debug.recentIceDiagnostics.filter((r) => r.callId === call.id);
     return own.length ? own[own.length - 1].diag : null;

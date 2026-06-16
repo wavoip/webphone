@@ -42,12 +42,6 @@ export function DebugScreen() {
     };
   }, []);
 
-  // Radix Dialog's react-remove-scroll listens for wheel events on document
-  // and preventDefaults them when the target isn't inside its locked subtree.
-  // Inside a (closed) shadow root the event target retargets to the shadow
-  // host, so the locked subtree check fails and native wheel scrolling is
-  // killed even inside this scroll container. Re-apply the scroll manually
-  // when that happens.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
