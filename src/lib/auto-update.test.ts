@@ -14,18 +14,12 @@ function seedLoadingScript(version: string, extra: Record<string, string> = {}) 
   const attrs = Object.entries({ ...extra, [MARKER]: version })
     .map(([k, v]) => `${k}="${v}"`)
     .join(" ");
-  document.head.insertAdjacentHTML(
-    "beforeend",
-    `<script src="${umdSrc(version)}" ${attrs}></script>`,
-  );
+  document.head.insertAdjacentHTML("beforeend", `<script src="${umdSrc(version)}" ${attrs}></script>`);
 }
 
 function fakeInject() {
   return vi.fn(async (version: string) => {
-    document.head.insertAdjacentHTML(
-      "beforeend",
-      `<script src="${umdSrc(version)}" ${MARKER}="${version}"></script>`,
-    );
+    document.head.insertAdjacentHTML("beforeend", `<script src="${umdSrc(version)}" ${MARKER}="${version}"></script>`);
   });
 }
 

@@ -45,8 +45,8 @@ importers:
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wavoip/wavoip-api':
-        specifier: ^2.4.3
-        version: 2.4.3
+        specifier: ^2.5.0
+        version: 2.5.0
       a18n:
         specifier: ^1.12.4
         version: 1.12.4
@@ -1639,8 +1639,8 @@ packages:
   '@vue/shared@3.5.21':
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
-  '@wavoip/wavoip-api@2.4.3':
-    resolution: {integrity: sha512-MinP5HEY7jp7EKFn8Y/20W4H8xE2JSziBiyLvjSDvE1AmqGNfLLsiTLC5nItIODsB1jaNghVXpX1znnkq+bRzA==}
+  '@wavoip/wavoip-api@2.5.0':
+    resolution: {integrity: sha512-oc3FC4Mh1cqZWOhT18n1hYqG6YpMroWjlfSx3stPFhVivyryJhzLUOb4NViUE8wAdQ/nzVgoMF7Q+1L2tkz4PQ==}
 
   a18n@1.12.4:
     resolution: {integrity: sha512-CvDcw/b7+u8iyLSN6008iEKR36oAnAF6RgprHZy3Tiw8bQuSVm0q2daYwnjIeM92TZktxkgfL+uYwwdsJXDVCA==}
@@ -4581,7 +4581,7 @@ snapshots:
 
   '@vue/shared@3.5.21': {}
 
-  '@wavoip/wavoip-api@2.4.3':
+  '@wavoip/wavoip-api@2.5.0':
     dependencies:
       a18n: 1.12.4
       axios: 1.17.0

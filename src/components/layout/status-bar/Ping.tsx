@@ -1,6 +1,7 @@
 import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
 import type { CallActive, TransportStatus, Unsubscribe } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
+import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
 type Props = {
   call: CallActive;
@@ -68,12 +69,13 @@ export function Ping({ call }: Props) {
   if (connectionStatus === "disconnected") {
     const style = STRENGTH_STYLES[ConnectionStrength.none];
     return (
-      <div
-        className={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors ${style.bg} ${style.ring} ${style.text}`}
+      <CallDiagnosticsDialog
+        call={call}
+        triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text}`}
       >
         <WifiXIcon className="wv:size-4" />
         <span className="wv:text-[11px] wv:font-medium">offline</span>
-      </div>
+      </CallDiagnosticsDialog>
     );
   }
 
@@ -81,14 +83,15 @@ export function Ping({ call }: Props) {
   const style = STRENGTH_STYLES[strength];
 
   return (
-    <div
-      className={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 ${style.bg} ${style.ring} ${style.text} ${isPending ? "wv:animate-pulse" : ""}`}
+    <CallDiagnosticsDialog
+      call={call}
+      triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text} ${isPending ? "wv:animate-pulse" : ""}`}
     >
       <SignalIcon strength={strength} className="wv:size-4" />
       <span className="wv:text-[11px] wv:font-medium wv:tabular-nums wv:whitespace-nowrap">
         {ping !== null ? `${ping.toFixed(0)} ms` : "—"}
       </span>
-    </div>
+    </CallDiagnosticsDialog>
   );
 }
 

@@ -1,8 +1,10 @@
 import "@testing-library/jest-dom/vitest";
-import { beforeEach } from "vitest";
+import { beforeEach, vi } from "vitest";
 import { setLanguage } from "@/lib/i18n";
 
 setLanguage("pt-BR");
+
+vi.stubGlobal("__WEBPHONE_VERSION__", "0.0.0-test");
 
 // happy-dom 20 does not provide AudioContext or AudioWorkletNode; the wavoip
 // SDK constructs an AudioContext during `new Wavoip(...)` so stub a minimal
