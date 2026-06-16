@@ -1,4 +1,4 @@
-import { PhoneIcon, PhoneXIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
+import { PhoneIcon, PhoneXIcon, QrCodeIcon, SpinnerIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -162,6 +162,16 @@ function DeviceStatus({
           </span>
         </StatusLine>
       </div>
+    );
+  }
+
+  if (status === "BUILDING") {
+    return (
+      <StatusLine icon={<SpinnerIcon size={18} className="wv:text-foreground wv:animate-spin" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+          {t("Device is building")}
+        </span>
+      </StatusLine>
     );
   }
 

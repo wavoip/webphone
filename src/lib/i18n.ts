@@ -13,6 +13,7 @@ export type TranslationKey =
   | "Disable device"
   | "Disconnected"
   | "Waiting to link WhatsApp"
+  | "Device is building"
   | "Failed"
   | "Show QR Code"
   | "Delete this device?"
@@ -101,6 +102,7 @@ const ptBR: LocaleResource = {
   "Disable device": "Desativar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Aguardando vincular Whatsapp",
+  "Device is building": "Dispositivo está sendo construído",
   Failed: "Falha",
   "Show QR Code": "Mostrar QRCode",
   "Delete this device?": "Deseja excluir esse dispositivo?",
@@ -180,6 +182,7 @@ const es: LocaleResource = {
   "Disable device": "Desactivar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Esperando vincular WhatsApp",
+  "Device is building": "El dispositivo se está construyendo",
   Failed: "Fallo",
   "Show QR Code": "Mostrar código QR",
   "Delete this device?": "¿Eliminar este dispositivo?",
