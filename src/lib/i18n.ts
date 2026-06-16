@@ -60,6 +60,14 @@ export type TranslationKey =
   | "Numbers"
   | "Enter the token"
   // troubleshooting
+  | "Appearance"
+  | "Theme"
+  | "Language"
+  | "Light"
+  | "Dark"
+  | "System"
+  | "Pick light, dark, or follow the system"
+  | "Switch the webphone interface language"
   | "Diagnostics"
   | "Open diagnostics"
   | "Close"
@@ -133,6 +141,14 @@ const ptBR: LocaleResource = {
   "Point your phone camera": "Aponte a câmera do celular",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
+  Appearance: "Aparência",
+  Theme: "Tema",
+  Language: "Idioma",
+  Light: "Claro",
+  Dark: "Escuro",
+  System: "Sistema",
+  "Pick light, dark, or follow the system": "Escolha claro, escuro ou siga o sistema",
+  "Switch the webphone interface language": "Trocar idioma da interface do webphone",
   Diagnostics: "Diagnóstico",
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Fechar",
@@ -203,6 +219,14 @@ const es: LocaleResource = {
   "Point your phone camera": "Apunta la cámara del móvil",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
+  Appearance: "Apariencia",
+  Theme: "Tema",
+  Language: "Idioma",
+  Light: "Claro",
+  Dark: "Oscuro",
+  System: "Sistema",
+  "Pick light, dark, or follow the system": "Elige claro, oscuro o seguir el sistema",
+  "Switch the webphone interface language": "Cambiar el idioma de la interfaz del webphone",
   Diagnostics: "Diagnóstico",
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Cerrar",

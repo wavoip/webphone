@@ -1,9 +1,10 @@
-import { GearIcon, MicrophoneIcon, PhoneIcon, StethoscopeIcon } from "@phosphor-icons/react";
+import { GearIcon, MicrophoneIcon, PaintBrushIcon, PhoneIcon, StethoscopeIcon } from "@phosphor-icons/react";
 import { PlusIcon } from "lucide-react";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { AppearanceConfig } from "@/components/layout/settings/AppearanceConfig";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
 import { Button } from "@/components/ui/button";
@@ -66,7 +67,10 @@ export const SettingsModal = forwardRef(() => {
         setOpen(open);
       }}
     >
-      <DialogTrigger className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2">
+      <DialogTrigger
+        aria-label={t("Settings")}
+        className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2 wv:focus-visible:outline-none wv:focus-visible:ring-2 wv:focus-visible:ring-ring"
+      >
         <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
       <DialogContent
@@ -92,20 +96,27 @@ export const SettingsModal = forwardRef(() => {
             </DialogHeader>
 
             <Tabs defaultValue="devices" className="wv:flex wv:flex-1 wv:flex-col wv:gap-0 wv:overflow-hidden">
-              <TabsList className="wv:mx-6 wv:mt-4 wv:h-10 wv:w-auto wv:justify-start wv:max-sm:mx-4">
+              <TabsList
+                aria-label={t("Settings")}
+                className="wv:mx-6 wv:mt-4 wv:h-10 wv:w-auto wv:justify-start wv:max-sm:mx-4 wv:max-sm:w-auto wv:max-sm:overflow-x-auto"
+              >
                 {showDevices && (
-                  <TabsTrigger value="devices" className="wv:gap-2">
+                  <TabsTrigger value="devices" className="wv:gap-2 wv:max-sm:min-h-9">
                     <PhoneIcon className="wv:size-4" weight="duotone" />
                     {t("Numbers")}
                   </TabsTrigger>
                 )}
                 {showAudio && (
-                  <TabsTrigger value="settings" disabled className="wv:gap-2">
+                  <TabsTrigger value="settings" disabled className="wv:gap-2 wv:max-sm:min-h-9">
                     <MicrophoneIcon className="wv:size-4" weight="duotone" />
                     Audio
                   </TabsTrigger>
                 )}
-                <TabsTrigger value="diagnostics" className="wv:gap-2">
+                <TabsTrigger value="appearance" className="wv:gap-2 wv:max-sm:min-h-9">
+                  <PaintBrushIcon className="wv:size-4" weight="duotone" />
+                  {t("Appearance")}
+                </TabsTrigger>
+                <TabsTrigger value="diagnostics" className="wv:gap-2 wv:max-sm:min-h-9">
                   <StethoscopeIcon className="wv:size-4" weight="duotone" />
                   {t("Diagnostics")}
                 </TabsTrigger>
@@ -117,18 +128,26 @@ export const SettingsModal = forwardRef(() => {
                   className="wv:flex-1 wv:overflow-auto wv:flex wv:flex-col wv:gap-3 wv:px-6 wv:py-4 wv:max-sm:px-4"
                 >
                   {showAddDevice && (
-                    <div className="wv:flex wv:items-center wv:gap-2 wv:sticky wv:top-0 wv:bg-background wv:pb-2 wv:z-10">
+                    <div className="wv:flex wv:items-center wv:gap-2 wv:sticky wv:top-0 wv:bg-background/95 wv:backdrop-blur wv:pb-2 wv:z-10">
                       <Input
+                        aria-label="Token"
                         placeholder={error ? error : "Token"}
                         value={token}
                         onChange={(e) => {
                           setToken(e.target.value);
                           if (error) setError("");
                         }}
-                        className={`wv:focus-visible:ring-0 wv:flex-1 ${error ? "wv:border-red-500" : ""}`}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && token.trim()) {
+                            addDevice(token);
+                            setToken("");
+                          }
+                        }}
+                        className={`wv:focus-visible:ring-0 wv:flex-1 wv:max-sm:h-10 ${error ? "wv:border-red-500" : ""}`}
                       />
                       <Button
                         type="button"
+                        aria-label={t("Enter the token")}
                         onClick={() => {
                           if (!token.trim()) {
                             setError(t("Enter the token"));
@@ -137,23 +156,27 @@ export const SettingsModal = forwardRef(() => {
                           addDevice(token);
                           setToken("");
                         }}
-                        className="wv:bg-green-500 wv:hover:bg-green-600 wv:h-9 wv:aspect-square wv:p-0 wv:hover:cursor-pointer"
+                        className="wv:bg-green-500 wv:hover:bg-green-600 wv:h-9 wv:aspect-square wv:p-0 wv:hover:cursor-pointer wv:max-sm:h-10"
                       >
                         <PlusIcon className="wv:size-4" />
                       </Button>
                     </div>
                   )}
 
-                  <div className="wv:flex wv:flex-col wv:gap-2">
-                    {devicesSorted.map((device) => (
-                      <DeviceInfo
-                        key={device.token}
-                        settings={{ showEnable: showEnableDevice, showRemove: showRemoveDevice }}
-                        device={device}
-                        setShowQRCode={setQrcode}
-                      />
-                    ))}
-                  </div>
+                  {devicesSorted.length === 0 ? (
+                    <p className="wv:text-xs wv:text-muted-foreground wv:italic wv:py-4 wv:text-center">—</p>
+                  ) : (
+                    <div className="wv:flex wv:flex-col wv:gap-2">
+                      {devicesSorted.map((device) => (
+                        <DeviceInfo
+                          key={device.token}
+                          settings={{ showEnable: showEnableDevice, showRemove: showRemoveDevice }}
+                          device={device}
+                          setShowQRCode={setQrcode}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </TabsContent>
               )}
 
@@ -162,6 +185,10 @@ export const SettingsModal = forwardRef(() => {
                   <AudioConfig />
                 </TabsContent>
               )}
+
+              <TabsContent value="appearance" className="wv:flex-1 wv:overflow-auto wv:px-6 wv:py-4 wv:max-sm:px-4">
+                <AppearanceConfig />
+              </TabsContent>
 
               <TabsContent value="diagnostics" className="wv:flex-1 wv:overflow-hidden">
                 <DebugScreen />
