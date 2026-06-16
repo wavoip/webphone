@@ -9,6 +9,8 @@ export type TranslationKey =
   | "Restricted"
   // device status
   | "Power on device"
+  | "Enable device"
+  | "Disable device"
   | "Disconnected"
   | "Waiting to link WhatsApp"
   | "Failed"
@@ -86,6 +88,8 @@ const ptBR: LocaleResource = {
   "Restriction lifted": "Restrição removida",
   Restricted: "Restrito",
   "Power on device": "Ligar Dispositivo",
+  "Enable device": "Ativar dispositivo",
+  "Disable device": "Desativar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Aguardando vincular Whatsapp",
   Failed: "Falha",
@@ -154,6 +158,8 @@ const es: LocaleResource = {
   "Restriction lifted": "Restricción levantada",
   Restricted: "Restringido",
   "Power on device": "Encender dispositivo",
+  "Enable device": "Activar dispositivo",
+  "Disable device": "Desactivar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Esperando vincular WhatsApp",
   Failed: "Fallo",
