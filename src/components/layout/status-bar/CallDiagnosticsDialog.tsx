@@ -73,13 +73,21 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
                   </StatGroup>
                   <StatGroup label="TX">
                     <KV k="pkt" v={String(stats.tx.total)} />
-                    <KV k="kB" v={(stats.tx.total_bytes / 1024).toFixed(1)} />
+                    <KV k="B" v={String(stats.tx.total_bytes)} />
+                    <KV k="kbps" v={stats.tx.bitrate_kbps.toFixed(1)} />
+                    <KV k="lvl" v={stats.tx.audio_level.toFixed(2)} />
                     <KV k="loss" v={`${(stats.tx.loss * 100).toFixed(1)}%`} />
                   </StatGroup>
                   <StatGroup label="RX">
                     <KV k="pkt" v={String(stats.rx.total)} />
-                    <KV k="kB" v={(stats.rx.total_bytes / 1024).toFixed(1)} />
+                    <KV k="B" v={String(stats.rx.total_bytes)} />
+                    <KV k="kbps" v={stats.rx.bitrate_kbps.toFixed(1)} />
+                    <KV k="lvl" v={stats.rx.audio_level.toFixed(2)} />
+                    <KV k="jitter" v={`${stats.rx.jitter_ms.toFixed(1)} ms`} />
                     <KV k="loss" v={`${(stats.rx.loss * 100).toFixed(1)}%`} />
+                  </StatGroup>
+                  <StatGroup label="audio">
+                    <KV k="out lat" v={`${stats.audio_context.output_latency_ms.toFixed(1)} ms`} />
                   </StatGroup>
                 </>
               )}
