@@ -1,8 +1,16 @@
+import { createRequire } from "node:module";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
+
+const require = createRequire(import.meta.url);
+const pkg = require("./package.json") as { version: string };
+
+// WEBPHONE_VERSION_OVERRIDE lets the POC pretend to be an older
+// published version so the auto-update path can be exercised locally.
+const version = process.env.WEBPHONE_VERSION_OVERRIDE ?? pkg.version;
 
 export default defineConfig({
   plugins: [
@@ -10,6 +18,9 @@ export default defineConfig({
     tailwindcss(),
     dts({ insertTypesEntry: true, tsconfigPath: "./tsconfig.app.json", rollupTypes: true }),
   ],
+  define: {
+    __WEBPHONE_VERSION__: JSON.stringify(version),
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

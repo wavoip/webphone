@@ -1,13 +1,19 @@
-import type { CallActive, CallOutgoing, Device, Offer, Wavoip } from "@wavoip/wavoip-api";
-import React, { createContext, type ReactNode, useContext, useEffect, useState } from "react";
-import { type CallStatus, useCallManager } from "@/hooks/useCallManager";
-import { useDeviceManager } from "@/hooks/useDeviceManager";
-import { mergeToAPI } from "@/lib/webphone-api/api";
-import type { CallOfferProps } from "@/lib/webphone-api/WebphoneAPI";
+import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
+import React, { createContext, type ReactNode, useContext, useEffect, useMemo } from "react";
+import { toast } from "sonner";
+import { OfferNotification } from "@/components/OfferNotification";
+import type { Middleware } from "@/middleware/Middleware";
+import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
+import type { CallStatus } from "@/middleware/store/slices/callSlice";
+import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
+import { useSettings } from "@/providers/settings/Provider";
+import { useWidget } from "@/providers/WidgetProvider";
+
+type StartCall = Middleware["controllers"]["call"]["start"];
 
 interface WavoipContextProps {
   wavoip: Wavoip;
-  devices: (Device & { enable: boolean })[];
+  devices: DeviceStateEntry[];
   offers: Offer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
@@ -17,98 +23,55 @@ interface WavoipContextProps {
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
   disableDevice: (token: string) => void;
-  startCall: ReturnType<typeof useCallManager>["start"];
+  startCall: StartCall;
 }
 
 const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
 
-interface WavoipProviderProps {
-  children: ReactNode;
-  wavoip: Wavoip;
-}
+type RootProps = { children: ReactNode };
 
-export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip }) => {
-  const {
-    devices,
-    add: addDevice,
-    remove: removeDevice,
-    disable: disableDevice,
-    enable: enableDevice,
-  } = useDeviceManager({ wavoip: wavoip });
+export const WavoipProvider: React.FC<RootProps> = ({ children }) => {
+  return <WavoipBridge>{children}</WavoipBridge>;
+};
 
-  const [onOffer, setOnOffer] = useState<(offer: CallOfferProps) => void>(() => () => {});
+function WavoipBridge({ children }: { children: ReactNode }) {
+  const middleware = useMiddleware();
+  const devices = useDevices();
+  const offers = useOffers();
+  const { outgoing, active, callStatus, peerMuted } = useCallState();
+  const { isClosed, setIsClosed, open: openWidget } = useWidget();
+  const { callSettings } = useSettings();
 
-  const {
-    offers,
-    outgoing: callOutgoing,
-    active: callActive,
-    start: startCall,
-    callStatus,
-    peerMuted,
-  } = useCallManager({ wavoip, devices, onOffer });
+  const startCall: StartCall = useMemo(
+    () => (to, config) => middleware.controllers.call.start(to, config),
+    [middleware],
+  );
 
-  useEffect(() => {
-    return () => {
-      delete window.wavoip;
-    };
-  }, []);
+  const addDevice = useMemo(
+    () => (token: string, persist?: boolean) => middleware.controllers.device.add(token, persist),
+    [middleware],
+  );
+  const removeDevice = useMemo(() => (token: string) => middleware.controllers.device.remove(token), [middleware]);
+  const enableDevice = useMemo(() => (token: string) => middleware.controllers.device.enable(token), [middleware]);
+  const disableDevice = useMemo(() => (token: string) => middleware.controllers.device.disable(token), [middleware]);
 
-  useEffect(() => {
-    mergeToAPI({
-      call: {
-        start: (...args) => startCall(...args),
-        startCall: (to, fromTokens) => startCall(to, fromTokens ? { fromTokens } : {}), // Deprecated
-        getCallActive: () => {
-          if (!callActive) return undefined;
-          const { id, type, status, device_token, direction, peer } = callActive;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getCallOutgoing: () => {
-          if (!callOutgoing) return undefined;
-          const { id, type, status, device_token, direction, peer } = callOutgoing;
-          return { id, type, status, device_token, direction, peer };
-        },
-        getOffers: () => {
-          return offers.map(({ id, type, status, device_token, direction, peer }) => ({
-            id,
-            type,
-            status,
-            device_token,
-            direction,
-            peer,
-          }));
-        },
-        onOffer: (cb) => {
-          setOnOffer(() => cb);
-        },
-      },
-      device: {
-        getDevices: () => {
-          return devices;
-        },
-        get: () => {
-          return devices;
-        },
-        addDevice: (...args) => addDevice(...args),
-        add: (...args) => addDevice(...args),
-        removeDevice: (...args) => removeDevice(...args),
-        remove: (...args) => removeDevice(...args),
-        enableDevice: (...args) => enableDevice(...args),
-        enable: (...args) => enableDevice(...args),
-        disableDevice: (...args) => disableDevice(...args),
-        disable: (...args) => disableDevice(...args),
-      },
-    });
-  }, [devices, disableDevice, enableDevice, removeDevice, addDevice, startCall, offers, callOutgoing, callActive]);
+  // Register a one-time displayName offer middleware when configured.
+  // Limitation: there is no unregister yet (Stage 9 deals with this), so we
+  // guard against double-registration with a module-scoped flag per middleware.
+  useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
+
+  useToastBridge(middleware);
+  useWidgetCache(middleware, isClosed, setIsClosed, openWidget);
+  usePictureInPictureSync(middleware);
 
   return (
     <WavoipContext.Provider
       value={{
-        wavoip,
+        wavoip: middleware.wavoip,
         devices,
         offers,
-        callOutgoing,
-        callActive,
+        callOutgoing: outgoing,
+        callActive: active,
         callStatus,
         peerMuted,
         startCall,
@@ -121,7 +84,7 @@ export const WavoipProvider: React.FC<WavoipProviderProps> = ({ children, wavoip
       {children}
     </WavoipContext.Provider>
   );
-};
+}
 
 export const useWavoip = () => {
   const context = useContext(WavoipContext);
@@ -130,3 +93,86 @@ export const useWavoip = () => {
   }
   return context;
 };
+
+const displayNameRegistered = new WeakSet<Middleware>();
+
+function useDisplayNameOfferMiddleware(middleware: Middleware, displayName?: string) {
+  useEffect(() => {
+    if (!displayName) return;
+    if (displayNameRegistered.has(middleware)) return;
+    displayNameRegistered.add(middleware);
+    middleware.registry.use("offer", (offer, next) => {
+      offer.peer.displayName = displayName;
+      offer.peer.phone = displayName;
+      next();
+    });
+  }, [middleware, displayName]);
+
+  // Outgoing call: mutate the live CallOutgoing peer once it lands in the store.
+  useEffect(() => {
+    if (!displayName) return;
+    return middleware.store.subscribe(
+      (s) => s.outgoing,
+      (outgoing) => {
+        if (!outgoing) return;
+        outgoing.peer.displayName = displayName;
+        outgoing.peer.phone = displayName;
+      },
+    );
+  }, [middleware, displayName]);
+}
+
+function useToastBridge(middleware: Middleware) {
+  useEffect(() => {
+    return middleware.store.subscribe(
+      (s) => s.offers,
+      (current, previous) => {
+        for (const offer of current) {
+          if (previous.some((p) => p.id === offer.id)) continue;
+          toast(<OfferNotification offer={offer} />, {
+            id: offer.id,
+            duration: 100_000,
+            className: "wv:max-w-[400px] wv:!w-full",
+          });
+        }
+        for (const offer of previous) {
+          if (current.some((c) => c.id === offer.id)) continue;
+          setTimeout(() => toast.dismiss(offer.id), 2000);
+        }
+      },
+    );
+  }, [middleware]);
+}
+
+function useWidgetCache(
+  middleware: Middleware,
+  isClosed: boolean,
+  setIsClosed: (closed: boolean) => void,
+  openWidget: () => void,
+) {
+  const closedCache = React.useRef<boolean | null>(null);
+
+  useEffect(() => {
+    return middleware.store.subscribe(
+      (s) => Boolean(s.active || s.outgoing),
+      (inCall) => {
+        if (inCall) {
+          if (closedCache.current === null) closedCache.current = isClosed;
+          openWidget();
+        } else if (closedCache.current !== null) {
+          if (closedCache.current) setIsClosed(true);
+          closedCache.current = null;
+        }
+      },
+    );
+  }, [middleware, isClosed, setIsClosed, openWidget]);
+}
+
+function usePictureInPictureSync(middleware: Middleware) {
+  useEffect(() => {
+    return middleware.store.subscribe(
+      (s) => s.active ?? s.outgoing,
+      () => {},
+    );
+  }, [middleware]);
+}

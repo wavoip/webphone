@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 // import { Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebPhone } from "@/components/WebPhone";
-import { LoginScreen } from "@/screens/LoginScreen";
 
 export default function TabBar() {
     return (

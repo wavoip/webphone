@@ -1,130 +1,48 @@
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { mergeToAPI } from "@/lib/webphone-api/api";
+import { type ReactNode, useMemo } from "react";
+import { useStore } from "zustand";
+import { newId } from "@/middleware/controllers/NotificationsController";
+import { useMiddleware } from "@/middleware/react/hooks";
+import type { Notification, NotificationInput } from "@/middleware/store/slices/notificationsSlice";
 
-export type NotificationsType = {
-  id: Date;
-  type: "INFO" | "CALL_FAILED";
-  message: string;
-  detail: string;
-  token: string;
-  isRead: boolean;
-  isHidden: boolean;
-  created_at: Date;
-};
+export type NotificationsType = Notification;
 
-type NotificationsContextType = {
-  notifications: NotificationsType[];
-  getNotifications: () => void;
-  addNotification: (notification: NotificationsType) => void;
-  removeNotification: (id: Date) => void;
-  readNotifications: () => void;
-  clearNotifications: () => void;
-};
+const MAX_NOTIFICATIONS = 100;
 
-const STORAGE_KEY = "webphone_notifications";
-
-const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
-
+/**
+ * Thin compatibility wrapper: notifications now live in the middleware store
+ * and are managed by {@link NotificationsController}. Provider is a no-op so
+ * existing tree structure stays intact while consumers migrate.
+ */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
-  const [_notifications, setNotifications] = useState<NotificationsType[]>([]);
-
-  const getNotifications = useCallback(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as NotificationsType[]) : [];
-  }, []);
-
-  const clearNotifications = useCallback(() => {
-    setNotifications(
-      _notifications.map((notification) => ({
-        ...notification,
-        isHidden: true,
-      })),
-    );
-
-    setTimeout(() => {
-      setNotifications([]);
-    }, 1000);
-
-    localStorage.removeItem(STORAGE_KEY);
-  }, [_notifications]);
-
-  const addNotification = useCallback(
-    (notification: NotificationsType) => {
-      if (_notifications.length > 100) {
-        clearNotifications();
-      }
-      notification.id = new Date();
-      notification.created_at = new Date();
-      const notifications = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") || [];
-      notifications.unshift(notification);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-      setNotifications(notifications);
-    },
-    [_notifications, clearNotifications],
-  );
-
-  const removeNotification = useCallback(
-    (id: Date) => {
-      const notifications = _notifications.filter((notification) => notification.id !== id);
-
-      setNotifications(notifications);
-
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-    },
-    [_notifications],
-  );
-
-  const readNotifications = useCallback(() => {
-    const notifications = _notifications.map((notification) => ({
-      ...notification,
-      isRead: true,
-    }));
-
-    setNotifications(notifications);
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
-  }, [_notifications]);
-
-  useEffect(() => {
-    const notifications = getNotifications();
-    setNotifications(notifications);
-  }, [getNotifications]);
-
-  useEffect(() => {
-    mergeToAPI({
-      notifications: {
-        getNotifications: () => getNotifications(),
-        get: () => getNotifications(),
-        clearNotifications: () => clearNotifications(),
-        clear: () => clearNotifications(),
-        addNotification: (...args) => addNotification(...args),
-        add: (...args) => addNotification(...args),
-        removeNotification: (...args) => removeNotification(...args),
-        remove: (...args) => removeNotification(...args),
-        readNotifications: () => readNotifications(),
-        read: () => readNotifications(),
-      },
-    });
-  }, [readNotifications, removeNotification, getNotifications, clearNotifications, addNotification]);
-
-  return (
-    <NotificationsContext.Provider
-      value={{
-        notifications: _notifications,
-        getNotifications,
-        addNotification,
-        removeNotification,
-        readNotifications,
-        clearNotifications,
-      }}
-    >
-      {children}
-    </NotificationsContext.Provider>
-  );
+  return <>{children}</>;
 }
 
+/**
+ * Returns the same shape as the legacy NotificationsContext but backed by the
+ * middleware store + {@link NotificationsController}. Callers do not need to
+ * change.
+ */
 export function useNotificationManager() {
-  const ctx = useContext(NotificationsContext);
-  if (!ctx) throw new Error("useNotificationManager deve ser usado dentro de <NotificationsProvider>");
-  return ctx;
+  const middleware = useMiddleware();
+  const notifications = useStore(middleware.store, (s) => s.notifications);
+  const controller = middleware.controllers.notifications;
+
+  return useMemo(
+    () => ({
+      notifications,
+      getNotifications: () => middleware.store.getState().notifications,
+      addNotification: (input: NotificationInput): Notification => {
+        if (middleware.store.getState().notifications.length > MAX_NOTIFICATIONS) {
+          controller.clear();
+        }
+        const stamped: Notification = { ...input, id: newId(), created_at: new Date() };
+        controller.add(stamped);
+        return stamped;
+      },
+      removeNotification: (id: string) => controller.remove(id),
+      readNotifications: () => controller.markAllRead(),
+      clearNotifications: () => controller.clear(),
+    }),
+    [notifications, middleware, controller],
+  );
 }

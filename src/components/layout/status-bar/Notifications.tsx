@@ -1,137 +1,126 @@
-import { BellIcon, PhoneOutgoingIcon, XIcon } from "@phosphor-icons/react";
-import { useMemo, useState } from "react";
+import { BellIcon, CheckCircleIcon, PhoneIncomingIcon, PhoneXIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { t } from "@/lib/i18n";
+import { relativeTime } from "@/lib/relative-time";
+import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 
-// @ts-expect-error
-import "moment/dist/locale/pt-br";
-import moment from "moment";
+const typeLabel = (type: Notification["type"]): string => {
+  if (type === "MISSED_CALL") return t("Missed call");
+  if (type === "CALL_FAILED") return t("Call failed");
+  if (type === "DEVICE_RESTRICTED") return t("Device restricted");
+  if (type === "DEVICE_RESTRICTION_LIFTED") return t("Restriction lifted");
+  return t("Notice");
+};
+
+function TypeIcon({ type }: { type: Notification["type"] }) {
+  if (type === "MISSED_CALL") return <PhoneIncomingIcon size={14} weight="fill" />;
+  if (type === "CALL_FAILED") return <PhoneXIcon size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTED") return <WarningIcon size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircleIcon size={14} weight="fill" />;
+  return <BellIcon size={14} weight="fill" />;
+}
+
+function buildSecondary(n: Notification): string {
+  if (n.type === "MISSED_CALL") {
+    if (n.detail && n.detail !== n.message) return `${n.message} · ${n.detail}`;
+    return n.message;
+  }
+  return n.message;
+}
 
 export function Notifications() {
   const { notifications, readNotifications, clearNotifications, removeNotification } = useNotificationManager();
 
-  const [items, setItems] = useState(3);
-
-  const handleSeeMore = () => {
-    setItems(items + 5);
-  };
-
-  const notificationsVisible = useMemo(
-    () => notifications.filter((n) => !n.isHidden).sort((a) => (!a.isRead ? -1 : 1)),
+  const visible = useMemo(
+    () => notifications.filter((n) => !n.isHidden).sort((a, b) => Number(a.isRead) - Number(b.isRead)),
     [notifications],
   );
-
-  const hasNotification = !!notificationsVisible.length;
-
-  const notificationsToRead = useMemo(
-    () => notificationsVisible.filter((notification) => !notification.isRead).length,
-    [notificationsVisible],
-  );
+  const unreadCount = useMemo(() => visible.filter((n) => !n.isRead).length, [visible]);
+  const hasAny = visible.length > 0;
 
   return (
     <Popover>
       <PopoverTrigger
+        aria-label={t("Notifications")}
         className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
-        onClick={() => {
-          readNotifications();
-        }}
+        onClick={() => readNotifications()}
       >
-        <BellIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none " />
-        {notificationsToRead > 0 && (
+        <BellIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
+        {unreadCount > 0 && (
           <Badge
             className="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
             variant="destructive"
           >
-            {notificationsToRead}
+            {unreadCount}
           </Badge>
         )}
       </PopoverTrigger>
-      <PopoverContent className="wv:flex wv:flex-col wv:max-h-[200px] wv:w-[400px] wv:overflow-y-scroll wv:p-2">
-        <div className="wv:flex wv:flex-col">
-          {hasNotification &&
-            notificationsVisible.slice(0, items).map((notification) => (
-              <div
-                className={`wv:bg-background  ${notification.isHidden ? " notification exit" : "wv:flex notification"}  wv:flex-col wv:p-1 wv:gap-2`}
-                key={`notification_${notification.id}`}
-              >
-                <div className="wv:flex wv:flex-row wv:gap-2 wv:full">
-                  <div className="wv:bg-background/50 wv:relative wv:flex wv:flex-row wv:w-8 wv:h-8 wv:justify-center wv:items-center wv:rounded-full ">
-                    <PhoneOutgoingIcon size={15} />
-                    <Badge
-                      className="wv:absolute wv:bottom-0 wv:right-0 wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-red-400"
-                      variant="destructive"
-                    >
-                      <XIcon size={20} />
-                    </Badge>
-                  </div>
+      <PopoverContent className="wv:flex wv:flex-col wv:max-h-[320px] wv:w-[320px] wv:overflow-y-auto wv:p-0">
+        {!hasAny && <p className="wv:text-center wv:py-6 wv:text-xs wv:text-foreground/60">{t("No notifications")}</p>}
 
-                  <div className="wv:flex wv:flex-col wv:flex-grow wv:gap-1">
-                    {notification.type === "CALL_FAILED" && (
-                      <p className="wv:text-[14px] wv:leading-none">Ligação falhou</p>
+        {hasAny && (
+          <ul className="wv:flex wv:flex-col wv:divide-y wv:divide-foreground/10">
+            {visible.map((n) => (
+              <li
+                key={`notification_${n.id}`}
+                data-notification-id={n.id}
+                className="wv:flex wv:flex-row wv:items-start wv:gap-2 wv:px-2 wv:py-1.5 wv:hover:bg-foreground/5"
+              >
+                <span className="wv:flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:bg-foreground/10 wv:text-foreground wv:shrink-0 wv:mt-0.5">
+                  <TypeIcon type={n.type} />
+                </span>
+
+                <div className="wv:flex wv:flex-col wv:flex-grow wv:min-w-0">
+                  <div className="wv:flex wv:items-center wv:gap-1.5">
+                    {!n.isRead && (
+                      <output
+                        aria-label={t("Unread")}
+                        className="wv:size-1.5 wv:rounded-full wv:bg-blue-500 wv:shrink-0"
+                      />
                     )}
-
-                    <p className="wv:text-[10px] wv:truncate wv:max-w-[100px]">{notification.token}</p>
+                    <p className="wv:text-[12px] wv:font-medium wv:leading-tight wv:text-foreground wv:truncate">
+                      {typeLabel(n.type)}
+                    </p>
                   </div>
-
-                  <div className="wv:flex wv:flex-row wv:justify-start wv:items-start">
-                    <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-1">
-                      {!notification.isRead && (
-                        <Badge
-                          className={`${notification.isRead ? " notificationView exit" : "wv:flex notificationView "}  wv:h-2 wv:w-2 wv:rounded-full wv:px-[1px] wv:bg-blue-500`}
-                          variant="destructive"
-                        />
-                      )}
-
-                      <p className="wv:text-[12px] wv:opacity-90 wv:truncate wv:max-w-[100px]">
-                        {moment(notification.created_at).locale("pt-br").fromNow()}
-                      </p>
-                      <Button
-                        type="button"
-                        variant={"ghost"}
-                        className=" wv:[&_svg:not([class*=size-])]:size-2  wv:!p-0.5 wv:aspect-square wv:w-4 wv:h-4"
-                        onClick={() => removeNotification(notification.id)}
-                      >
-                        <XIcon size={2} />
-                      </Button>
-                    </div>
-                  </div>
+                  <p className="wv:text-[11px] wv:leading-tight wv:text-foreground/60 wv:truncate">
+                    {buildSecondary(n)}
+                  </p>
                 </div>
 
-                <div className="wv:flex wv:flex-col">
-                  <p className="wv:text-[12px] wv:opacity-50 wv:break-all ">{notification.detail}</p>
-                  <p className="wv:text-[12px] wv:opacity-50 wv:break-all ">{notification.message}</p>
+                <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
+                  <span className="wv:text-[10px] wv:text-foreground/50 wv:whitespace-nowrap">
+                    {relativeTime(n.created_at)}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    aria-label={t("Remove notification")}
+                    className="wv:p-0 wv:size-4 wv:rounded-full wv:hover:bg-foreground/10 wv:text-foreground/60"
+                    onClick={() => removeNotification(n.id)}
+                  >
+                    <XIcon size={10} />
+                  </Button>
                 </div>
-              </div>
+              </li>
             ))}
+          </ul>
+        )}
 
-          {!hasNotification && <p className="wv:text-center wv:p-2 wv:font-bold wv:text-sm">Nenhuma notificação</p>}
-
-          <div className="wv:flex wv:gap-2 wv:justify-center wv:items-center">
-            {items < notifications.length && (
-              <Button
-                variant="link"
-                onClick={handleSeeMore}
-                className="wv:text-xs wv:select-none wv:p-1"
-                disabled={items >= notifications.length}
-              >
-                <p>Ver mais</p>
-              </Button>
-            )}
-
-            {hasNotification && (
-              <Button
-                variant="link"
-                onClick={clearNotifications}
-                className="wv:text-xs wv:select-none wv:p-1"
-                disabled={!hasNotification}
-              >
-                <p>Limpar</p>
-              </Button>
-            )}
+        {hasAny && (
+          <div className="wv:flex wv:justify-end wv:border-t wv:border-foreground/10 wv:px-2 wv:py-1">
+            <Button
+              variant="link"
+              onClick={clearNotifications}
+              className="wv:text-[11px] wv:select-none wv:p-0 wv:h-auto"
+            >
+              {t("Clear")}
+            </Button>
           </div>
-        </div>
+        )}
       </PopoverContent>
     </Popover>
   );

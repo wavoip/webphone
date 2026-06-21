@@ -1,7 +1,19 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
-import type { DeviceState } from "@/hooks/useDeviceManager";
+import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
+import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
+import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
+import type { NotificationInput } from "@/middleware/store/slices/notificationsSlice";
 import type { NotificationsType } from "@/providers/NotificationsProvider";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
+
+/**
+ * Public Express-style middleware callback. Call `next()` to forward the
+ * payload to subsequent middleware (and ultimately the UI); omit it to block.
+ */
+export type PublicMiddleware<E extends MiddlewareEvent> = (
+  payload: MiddlewareEventMap[E],
+  next: () => void,
+) => void | Promise<void>;
 
 export type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
 export type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
@@ -18,6 +30,15 @@ export type CallAPI = {
     | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
     | { call: { id: string; peer: CallPeer }; err: null }
   >;
+  /**
+   * @deprecated Use {@link CallAPI.start} instead. `startCall` will be removed in a future major release.
+   *
+   * @example
+   * // Before
+   * window.wavoip.call.startCall("5511999999999", ["token-a"]);
+   * // After
+   * window.wavoip.call.start("5511999999999", { fromTokens: ["token-a"] });
+   */
   startCall: (
     to: string,
     fromTokens: string[] | null,
@@ -33,29 +54,48 @@ export type CallAPI = {
 };
 
 export type DeviceAPI = {
-  getDevices: () => DeviceState[];
   get: () => DeviceState[];
-  addDevice: (token: string, persist: boolean) => void;
   add: (token: string, persist: boolean) => void;
-  removeDevice: (token: string) => void;
   remove: (token: string) => void;
-  enableDevice: (token: string) => void;
   enable: (token: string) => void;
-  disableDevice: (token: string) => void;
   disable: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.get} instead. */
+  getDevices: () => DeviceState[];
+  /** @deprecated Use {@link DeviceAPI.add} instead. */
+  addDevice: (token: string, persist: boolean) => void;
+  /** @deprecated Use {@link DeviceAPI.remove} instead. */
+  removeDevice: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.enable} instead. */
+  enableDevice: (token: string) => void;
+  /** @deprecated Use {@link DeviceAPI.disable} instead. */
+  disableDevice: (token: string) => void;
 };
 
 export type NotificationsAPI = {
-  getNotifications: () => NotificationsType[];
   get: () => NotificationsType[];
-  addNotification: (notification: NotificationsType) => void;
-  add: (notification: NotificationsType) => void;
-  removeNotification: (id: Date) => void;
-  remove: (id: Date) => void;
-  clearNotifications: () => void;
+  /**
+   * Stamps `id` and `created_at` and inserts the notification. Returns the
+   * stored notification so callers can reference its generated `id` (e.g. for
+   * later `remove`).
+   */
+  add: (notification: NotificationInput) => NotificationsType;
+  remove: (id: string) => void;
   clear: () => void;
-  readNotifications: () => void;
   read: () => void;
+  /** Current browser permission for OS-level offer notifications. */
+  permission: () => NotificationPermission;
+  /** Prompts the browser for OS notification permission. Must be invoked from a user gesture. */
+  requestPermission: () => Promise<NotificationPermission>;
+  /** @deprecated Use {@link NotificationsAPI.get} instead. */
+  getNotifications: () => NotificationsType[];
+  /** @deprecated Use {@link NotificationsAPI.add} instead. */
+  addNotification: (notification: NotificationInput) => NotificationsType;
+  /** @deprecated Use {@link NotificationsAPI.remove} instead. */
+  removeNotification: (id: string) => void;
+  /** @deprecated Use {@link NotificationsAPI.clear} instead. */
+  clearNotifications: () => void;
+  /** @deprecated Use {@link NotificationsAPI.read} instead. */
+  readNotifications: () => void;
 };
 
 export type WidgetAPI = {
@@ -72,6 +112,7 @@ export type WidgetAPI = {
 export type ThemeAPI = {
   value: Theme;
   set: (theme: Theme) => void;
+  /** @deprecated Use {@link ThemeAPI.set} instead. */
   setTheme: (theme: Theme) => void;
 };
 
@@ -105,16 +146,6 @@ export type WebphoneAPI = {
   theme: ThemeAPI;
   position: PositionAPI;
   settings: SettingsAPI;
+  on: <K extends WebphoneEventName>(event: K, cb: (payload: WebphoneEventMap[K]) => void) => () => void;
+  use: <E extends MiddlewareEvent>(event: E, fn: PublicMiddleware<E>) => void;
 };
-
-type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: T[P] extends Record<string, unknown>
-        ? T[P] extends { x: number; y: number }
-          ? T[P]
-          : DeepPartial<T[P]>
-        : T[P];
-    }
-  : T;
-
-export type WebphoneAPIPartial = DeepPartial<WebphoneAPI>;

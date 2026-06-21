@@ -1,217 +1,228 @@
-import { ArrowClockwiseIcon, ArrowCounterClockwiseIcon, QrCodeIcon, TrashIcon } from "@phosphor-icons/react";
-import { PowerIcon, SpinnerGapIcon } from "@phosphor-icons/react/dist/ssr";
-import type { Device } from "@wavoip/wavoip-api";
-import { parsePhoneNumber } from "libphonenumber-js";
+import { PhoneIcon, PhoneXIcon, QrCodeIcon, SpinnerIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
+import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { t } from "@/lib/i18n";
+import { useMiddleware } from "@/middleware/react/hooks";
+import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
-  settings: { showEnable: boolean; showRemove: boolean };
-  device: Device & { enable: boolean };
+  settings: {
+    showEnable: boolean;
+    showRemove: boolean;
+  };
+  device: DeviceStateEntry;
   setShowQRCode: React.Dispatch<React.SetStateAction<null | string>>;
 };
 
-function formatPhone(raw: string | undefined | null): string | null {
-  if (!raw) return null;
-  try {
-    return parsePhoneNumber(`+${raw.replace(/\D/g, "")}`).formatInternational();
-  } catch {
-    return raw;
-  }
-}
-
-type StatusStyle = { label: string; border: string; pill: string };
-
-function getStatusStyle(device: Device & { enable: boolean }): StatusStyle {
-  switch (device.status) {
-    case "open":
-    case "UP":
-      return {
-        label: "Conectado",
-        border: "wv:border-l-green-500",
-        pill: "wv:bg-green-100 wv:text-green-700",
-      };
-    case "connecting":
-      return {
-        label: "Aguardando QR Code",
-        border: "wv:border-l-amber-400",
-        pill: "wv:bg-amber-100 wv:text-amber-700",
-      };
-    case "disconnected":
-      // API is already attempting to reconnect automatically
-      return {
-        label: "Reconectando...",
-        border: "wv:border-l-amber-400",
-        pill: "wv:bg-amber-100 wv:text-amber-700",
-      };
-    case "restarting":
-      return {
-        label: "Reiniciando...",
-        border: "wv:border-l-amber-400",
-        pill: "wv:bg-amber-100 wv:text-amber-700",
-      };
-    case "close":
-      return {
-        label: "Desconectado",
-        border: "wv:border-l-red-400",
-        pill: "wv:bg-red-100 wv:text-red-600",
-      };
-    case "hibernating":
-      return {
-        label: "Hibernando",
-        border: "wv:border-l-blue-400",
-        pill: "wv:bg-blue-100 wv:text-blue-600",
-      };
-    case "BUILDING":
-      return {
-        label: "Configurando...",
-        border: "wv:border-l-blue-400",
-        pill: "wv:bg-blue-100 wv:text-blue-600",
-      };
-    case "WAITING_PAYMENT":
-      return {
-        label: "Pagamento pendente",
-        border: "wv:border-l-orange-400",
-        pill: "wv:bg-orange-100 wv:text-orange-700",
-      };
-    case "EXTERNAL_INTEGRATION_ERROR":
-      return {
-        label: "Token inválido",
-        border: "wv:border-l-red-500",
-        pill: "wv:bg-red-100 wv:text-red-600",
-      };
-    case "error":
-      return {
-        label: "Erro",
-        border: "wv:border-l-red-500",
-        pill: "wv:bg-red-100 wv:text-red-600",
-      };
-    default:
-      return {
-        label: device.status,
-        border: "wv:border-l-border",
-        pill: "wv:bg-muted wv:text-muted-foreground",
-      };
-  }
-}
-
 export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const middleware = useMiddleware();
+  const { root } = useShadowRoot();
   const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [wakingUp, setWakingUp] = useState(false);
-
-  const phone = formatPhone(device.contact?.phone);
-  const { label, border, pill } = getStatusStyle(device);
-  const isConnected = ["open", "UP"].includes(device.status);
-  const canWakeUp = ["hibernating", "close"].includes(device.status);
-  const tokenShort = device.token.length > 24 ? `${device.token.slice(0, 24)}…` : device.token;
-
-  async function handleWakeUp() {
-    setWakingUp(true);
-    await device.wakeUp();
-    setWakingUp(false);
-  }
 
   return (
     <div
-      className={`wv:relative wv:flex wv:items-center wv:gap-3 wv:p-3 wv:bg-muted wv:rounded-lg wv:border-l-4 wv:overflow-hidden ${border}`}
+      data-enable={device.enable}
+      className="wv:relative wv:flex wv:justify-between wv:items-center wv:gap-4 wv:flex-wrap wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors"
     >
-      {/* Info */}
-      <div className="wv:flex wv:flex-col wv:min-w-0 wv:flex-1 wv:gap-1">
-        <p className="wv:text-sm wv:font-medium wv:text-foreground wv:truncate wv:leading-tight">
-          {phone ?? tokenShort}
-        </p>
-        <span
-          className={`wv:self-start wv:text-[10px] wv:font-medium wv:px-1.5 wv:py-0.5 wv:rounded-full wv:leading-none ${pill}`}
+      <div className="wv:flex wv:flex-col wv:gap-1 wv:min-w-0">
+        <DeviceStatus device={device} root={root} onWake={() => middleware.controllers.device.wakeUp(device.token)} />
+
+        {device.restricted && (
+          <StatusLine icon={<WarningIcon size={18} weight="fill" className="wv:text-amber-500" />}>
+            <span className="wv:font-medium wv:text-amber-500">{t("Restricted")}</span>
+          </StatusLine>
+        )}
+
+        <p
+          data-enable={device.enable}
+          title={device.token}
+          className="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[12rem]"
         >
-          {label}
-        </span>
-        {phone && (
-          <p className="wv:text-[10px] wv:font-mono wv:text-muted-foreground wv:truncate">{tokenShort}</p>
-        )}
+          {device.token}
+        </p>
       </div>
 
-      {/* Actions */}
-      <div className="wv:flex wv:items-center wv:shrink-0 wv:gap-0.5">
-        {canWakeUp && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="wv:size-7 wv:rounded-full wv:text-muted-foreground wv:hover:text-foreground wv:hover:bg-background wv:cursor-pointer"
-            onClick={handleWakeUp}
-            disabled={wakingUp}
-          >
-            {wakingUp
-              ? <SpinnerGapIcon className="wv:size-3.5 wv:animate-spin" />
-              : device.status === "close"
-                ? <ArrowClockwiseIcon className="wv:size-3.5" />
-                : <PowerIcon className="wv:size-3.5" />
-            }
-          </Button>
-        )}
-        {device.qrCode && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="wv:size-7 wv:rounded-full wv:text-amber-500 wv:hover:text-amber-600 wv:hover:bg-amber-50 wv:cursor-pointer"
-            onClick={() => setShowQRCode(device.qrCode ?? null)}
-          >
-            <QrCodeIcon className="wv:size-3.5" />
-          </Button>
-        )}
+      <div className="wv:flex wv:gap-2 wv:items-center">
         {showEnable && (
-          <Switch
-            className="wv:cursor-pointer wv:scale-75 wv:origin-right"
-            checked={device.enable}
-            onCheckedChange={(checked) =>
-              checked ? enableDevice(device.token) : disableDevice(device.token)
-            }
-            disabled={!isConnected}
-          />
+          <Tooltip>
+            <TooltipTrigger>
+              <Switch
+                aria-label={device.enable ? "disable device" : "enable device"}
+                className="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
+                checked={device.enable}
+                onCheckedChange={(checked) => (checked ? enableDevice(device.token) : disableDevice(device.token))}
+                disabled={!["open", "CONNECTED"].includes(device.status as string)}
+              />
+            </TooltipTrigger>
+            <TooltipContent container={root}>
+              <p>{device.enable ? t("Disable device") : t("Enable device")}</p>
+            </TooltipContent>
+          </Tooltip>
         )}
+
+        {device.qrCode && (
+          <Tooltip>
+            <TooltipTrigger
+              aria-label={t("Show QR Code")}
+              className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer"
+              onClick={() => setShowQRCode(device.qrCode ?? null)}
+            >
+              <QrCodeIcon className="wv:size-5" />
+            </TooltipTrigger>
+            <TooltipContent container={root}>
+              <p>{t("Show QR Code")}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+
         {showRemove && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="wv:size-7 wv:rounded-full wv:text-muted-foreground wv:hover:text-red-500 wv:hover:bg-red-50 wv:cursor-pointer"
-            onClick={() => setConfirmDelete(true)}
-          >
-            <TrashIcon className="wv:size-3.5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger
+              aria-label={t("Delete")}
+              className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:bg-destructive wv:text-destructive-foreground wv:hover:bg-destructive/90 wv:hover:cursor-pointer"
+              onClick={() => setConfirmDelete(true)}
+            >
+              <TrashIcon className="wv:size-5" />
+            </TooltipTrigger>
+            <TooltipContent container={root}>
+              <p>{t("Delete")}</p>
+            </TooltipContent>
+          </Tooltip>
         )}
       </div>
 
-      {/* Confirm Delete Overlay */}
       {confirmDelete && (
-        <div className="wv:absolute wv:inset-0 wv:flex wv:items-center wv:justify-between wv:gap-2 wv:px-3 wv:bg-red-500 wv:rounded-lg">
-          <div className="wv:flex wv:items-center wv:gap-1.5 wv:min-w-0">
-            <ArrowCounterClockwiseIcon className="wv:size-3 wv:text-white wv:shrink-0" />
-            <p className="wv:text-white wv:text-xs wv:font-medium wv:select-none wv:truncate">
-              Remover dispositivo?
-            </p>
-          </div>
-          <div className="wv:flex wv:gap-1.5 wv:shrink-0">
+        <div
+          role="alertdialog"
+          aria-label={t("Delete this device?")}
+          className="wv:absolute wv:inset-0 wv:flex wv:items-center wv:justify-between wv:gap-3 wv:px-4 wv:bg-destructive wv:rounded-lg wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:justify-center wv:max-sm:py-3"
+        >
+          <p className="wv:font-medium wv:text-destructive-foreground wv:select-none">{t("Delete this device?")}</p>
+          <div className="wv:flex wv:flex-row wv:gap-2 wv:max-sm:justify-end">
             <Button
-              size="sm"
-              className="wv:h-6 wv:px-2.5 wv:text-[11px] wv:bg-white wv:text-red-600 wv:hover:bg-red-50 wv:font-semibold wv:cursor-pointer wv:rounded-md"
+              variant="outline"
+              aria-label={t("Delete")}
+              className="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
               onClick={() => removeDevice(device.token)}
             >
-              Remover
+              {t("Delete")}
             </Button>
             <Button
-              size="sm"
-              variant="ghost"
-              className="wv:h-6 wv:px-2 wv:text-[11px] wv:text-white wv:hover:bg-red-400 wv:hover:text-white wv:cursor-pointer"
+              variant="outline"
+              aria-label={t("Cancel")}
+              className="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
               onClick={() => setConfirmDelete(false)}
             >
-              Cancelar
+              {t("Cancel")}
             </Button>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function DeviceStatus({
+  device,
+  onWake,
+  root,
+}: {
+  device: DeviceStateEntry;
+  onWake: () => void;
+  root: HTMLDivElement;
+}) {
+  const status = device.status;
+  if (!status) return null;
+
+  if (status === "disconnected" || status === "hibernating") {
+    return (
+      <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center">
+        <Tooltip>
+          <TooltipTrigger
+            aria-label={t("Power on device")}
+            className="wv:inline-flex wv:items-center wv:justify-center wv:size-7 wv:rounded-md wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
+            onClick={onWake}
+          >
+            <PowerIcon className="wv:size-4" />
+          </TooltipTrigger>
+          <TooltipContent container={root}>
+            <p>{t("Power on device")}</p>
+          </TooltipContent>
+        </Tooltip>
+        <StatusLine icon={<PhoneIcon size={18} className="wv:text-red-500" />}>
+          <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+            {device.contact?.phone ?? t("Disconnected")}
+          </span>
+        </StatusLine>
+      </div>
+    );
+  }
+
+  if (status === "BUILDING") {
+    return (
+      <StatusLine icon={<SpinnerIcon size={18} className="wv:text-foreground wv:animate-spin" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+          {t("Device is building")}
+        </span>
+      </StatusLine>
+    );
+  }
+
+  if (status === "connecting" || device.qrCode) {
+    return (
+      <StatusLine icon={<QrCodeIcon size={18} className="wv:text-foreground" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+          {t("Waiting to link WhatsApp")}
+        </span>
+      </StatusLine>
+    );
+  }
+
+  if (status === "close") {
+    return (
+      <StatusLine icon={<PhoneXIcon size={18} className="wv:text-red-500" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+          {t("Disconnected")}
+        </span>
+      </StatusLine>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <StatusLine icon={<PhoneXIcon size={18} className="wv:text-red-500" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:data-[enable=false]:text-muted-foreground">
+          {t("Failed")}
+        </span>
+      </StatusLine>
+    );
+  }
+
+  if (status === "open" || status === "UP") {
+    return (
+      <StatusLine icon={<PhoneIcon size={18} className="wv:text-green-500" />}>
+        <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
+          {device.contact?.phone}
+        </span>
+      </StatusLine>
+    );
+  }
+
+  return null;
+}
+
+function StatusLine({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="wv:flex wv:flex-row wv:gap-1.5 wv:items-center wv:min-w-0">
+      {icon}
+      <div className="wv:truncate">{children}</div>
     </div>
   );
 }

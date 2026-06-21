@@ -1,0 +1,60 @@
+## Code style
+
+- Functions: 4-20 lines. Split if longer.
+- Files: under 500 lines. Split by responsibility.
+- One thing per function, one responsibility per module (SRP).
+- Names: specific and unique. Avoid `data`, `handler`, `Manager`.
+  Prefer names that return <5 grep hits in the codebase.
+- Types: explicit. No `any`, no `Dict`, no untyped functions.
+- No code duplication. Extract shared logic into a function/module.
+- Early returns over nested ifs. Max 2 levels of indentation.
+- Exception messages must include the offending value and expected shape.
+
+## Comments
+
+- Keep your own comments. Don't strip them on refactor — they carry
+  intent and provenance.
+- Write WHY, not WHAT. Skip `// increment counter` above `i++`.
+- Docstrings on public functions: intent + one usage example.
+- Reference issue numbers / commit SHAs when a line exists because
+  of a specific bug or upstream constraint.
+
+## Tests
+
+- Tests run with a single command: `pnpm test`.
+- Every new function gets a test. Bug fixes get a regression test.
+- Mock external I/O (API, DB, filesystem) with named fake classes,
+  not inline stubs.
+- Tests must be F.I.R.S.T: fast, independent, repeatable,
+  self-validating, timely.
+
+
+## Structure
+
+- Prefer small focused modules over god files.
+- Predictable paths: controller/model/view, src/lib/test, etc.
+
+## Formatting
+
+- Use the language default formatter (`biome`). Don't discuss style beyond that.
+
+## Logging
+
+- Structured JSON when logging for debugging / observability.
+- Plain text only for user-facing CLI output.
+
+# Docs
+
+- Always on Brazillian Portuguese
+- Documentation lives in docs/
+- Refer to [Gitbook Skill](./gitbook.md) on how to structure the documentation
+
+## When to update docs
+
+Any change that affects how an end user interacts with the webphone MUST update `docs/` in the same change. This includes:
+- New or renamed tabs / menus / dialogs in the UI
+- New or changed user-facing settings, controls, themes, languages
+- New or changed public APIs (`window.wavoip.*`, exports from the package)
+- New or changed user-facing events, banners, notifications, tooltips
+- Schema changes to any payload the user copies, exports, or sees (e.g. the diagnostics report JSON)
+- Breaking changes in initialization (`render(config)`), config shape, or default behavior

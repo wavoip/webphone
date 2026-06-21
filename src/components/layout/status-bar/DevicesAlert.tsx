@@ -2,6 +2,7 @@ import { WarningIcon } from "@phosphor-icons/react";
 import { Badge } from "lucide-react";
 import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { t } from "@/lib/i18n";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 export function DevicesAlert() {
@@ -31,7 +32,7 @@ export function DevicesAlert() {
       <TooltipContent className="wv:flex wv:flex-col wv:items-center wv:gap-1">
         {!!disconnectedDevices.length && (
           <div className="wv:flex wv:flex-col wv:items-start wv:justify-center">
-            <p>Dispositivos desconectados</p>
+            <p>{t("Disconnected devices")}</p>
             <div className="wv:flex wv:gap-1">
               {disconnectedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
@@ -41,7 +42,7 @@ export function DevicesAlert() {
         )}
         {!!qrcodeDevices.length && (
           <div className="wv:flex wv:flex-col wv:items-start">
-            <p>Dispositivos para ler QRCode</p>
+            <p>{t("Devices waiting for QR code")}</p>
             <div className="wv:flex wv:gap-1">
               {qrcodeDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
@@ -51,7 +52,7 @@ export function DevicesAlert() {
         )}
         {!!closedDevices.length && (
           <div className="wv:flex wv:flex-col wv:items-start">
-            <p>Dispositivos fechados</p>
+            <p>{t("Closed devices")}</p>
             <div className="wv:flex wv:gap-1">
               {closedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
@@ -61,7 +62,7 @@ export function DevicesAlert() {
         )}
         {!!hibernatedDevices.length && (
           <div className="wv:flex wv:flex-col wv:items-start">
-            <p>Dispositivos hibernando</p>
+            <p>{t("Hibernating devices")}</p>
             <div className="wv:flex wv:gap-1">
               {hibernatedDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>
@@ -71,7 +72,7 @@ export function DevicesAlert() {
         )}
         {!!errorDevices.length && (
           <div className="wv:flex wv:flex-col wv:items-start">
-            <p>Dispositivos com erro</p>
+            <p>{t("Devices with errors")}</p>
             <div className="wv:flex wv:gap-1">
               {errorDevices.map((device) => (
                 <Badge key={device.token}>{device.token}</Badge>

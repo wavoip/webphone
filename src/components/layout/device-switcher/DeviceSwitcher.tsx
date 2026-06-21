@@ -3,7 +3,7 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import * as React from "react";
 import { parsePhoneNumber } from "libphonenumber-js";
-import type { DeviceState } from "@/hooks/useDeviceManager";
+import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
 import {
     DropdownMenu,
     DropdownMenuContent,
