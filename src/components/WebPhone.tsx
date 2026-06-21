@@ -6,7 +6,6 @@ import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
-import OutgoingScreen from "@/screens/OutgoingScreen";
 
 function DeviceValidator() {
   const { devices } = useWavoip();
@@ -67,12 +66,11 @@ export function WebPhone() {
       <StatusBar />
       <div
         role="application"
-        className="wv:flex wv:flex-1 wv:relative wv:size-full wv:px-4"
+        className="wv:flex wv:flex-col wv:w-full wv:relative wv:px-4"
         onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
       >
-        {screen === "outgoing" && <OutgoingScreen />}
-        {screen === "call" && <CallScreen />}
+        {(screen === "call" || screen === "outgoing") && <CallScreen />}
         {screen === "keyboard" && <KeyboardScreen />}
         <p
           className="wv:text-neutral-500 wv:pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]"

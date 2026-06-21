@@ -1,8 +1,19 @@
-import { CaretUpIcon, MicrophoneIcon, MicrophoneSlashIcon, SpeakerHighIcon, SpeakerLowIcon, SpeakerNoneIcon } from "@phosphor-icons/react";
+import { CaretUpIcon, MicrophoneIcon, MicrophoneSlashIcon, SpeakerHighIcon, SpeakerLowIcon, SpeakerNoneIcon, XIcon } from "@phosphor-icons/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import MuteSound from "@/assets/sounds/mute.mp3";
+import UnmuteSound from "@/assets/sounds/unmute.mp3";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
+
+const _mute_sound = new Audio(MuteSound);
+const _unmute_sound = new Audio(UnmuteSound);
+
+function playMuteSound(willMute: boolean) {
+  const sound = willMute ? _mute_sound : _unmute_sound;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+}
 
 // ─── Module-level mic singleton ───────────────────────────────────────────────
 // AudioContext and RAF loop live at module scope — never touched by React or
@@ -214,7 +225,7 @@ function AudioPopoverContent({
           </span>
           {!isOutput && (
             <button
-              onClick={() => onMutedChange?.(!muted)}
+              onClick={() => { playMuteSound(!muted); onMutedChange?.(!muted); }}
               className={`wv:ml-auto wv:flex wv:items-center wv:gap-1 wv:rounded wv:px-1.5 wv:py-0.5 wv:text-[10px] wv:font-medium wv:transition-colors wv:cursor-pointer wv:border-0 ${muted ? "wv:bg-red-100 wv:text-red-600" : "wv:bg-muted wv:text-muted-foreground wv:hover:bg-red-100 wv:hover:text-red-500"}`}
             >
               {muted ? "Mutado" : "Mutar"}
@@ -234,8 +245,11 @@ function AudioPopoverContent({
           max={100}
           value={muted ? 0 : volume}
           onChange={(e) => {
+            const v = Number(e.target.value);
             onMutedChange?.(false);
-            onVolumeChange?.(Number(e.target.value));
+            onVolumeChange?.(v);
+            if (isOutput) wavoip.setSpeakerVolume(v / 100);
+            else wavoip.setMicrophoneVolume(v / 100);
           }}
           disabled={muted}
           className="wv:w-full wv:accent-blue-500 wv:cursor-pointer wv:disabled:opacity-40 wv:disabled:cursor-not-allowed"
@@ -254,12 +268,8 @@ function AudioPopoverContent({
             onChange={(e) => {
               const deviceId = e.target.value;
               setSelectedDeviceId(deviceId);
-              try {
-                if (isOutput) wavoip.setAudioOutputDevice(deviceId);
-                else wavoip.setAudioInputDevice(deviceId);
-              } catch (err) {
-                console.error("[AudioPopover] Failed to switch audio device:", err);
-              }
+              if (isOutput) wavoip.setSpeaker(deviceId);
+              else wavoip.setMicrophone(deviceId);
             }}
             className="wv:w-full wv:rounded-md wv:border wv:border-input wv:bg-background wv:px-2 wv:py-1.5 wv:text-xs wv:text-foreground wv:outline-none wv:focus:ring-1 wv:focus:ring-ring wv:cursor-pointer"
           >
@@ -362,7 +372,7 @@ function MicWaveBars({ deviceId }: { deviceId: string }) {
   );
 }
 
-export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "audioinput"; className?: string }) {
+export function AudioMiniPopover({ kind, className, muted: mutedProp }: { kind: "audiooutput" | "audioinput"; className?: string; muted?: boolean }) {
   const isOutput = kind === "audiooutput";
   const [volume, setVolume] = usePersistedState<number>(isOutput ? "wavoip:speaker-volume" : "wavoip:mic-volume", 80);
   const [muted, setMuted] = usePersistedState<boolean>("wavoip:mic-muted", false);
@@ -372,7 +382,7 @@ export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "a
     "default",
   );
   const { wavoip } = useWavoip();
-  const shadowRoot = useShadowRoot();
+  const { root: shadowRoot } = useShadowRoot();
 
   useEffect(() => {
     async function loadDevices() {
@@ -396,7 +406,7 @@ export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "a
           type="button"
           className={`wv:flex wv:items-center wv:justify-center wv:size-[20px] wv:rounded-full wv:bg-muted wv:hover:bg-muted-foreground/30 wv:cursor-pointer wv:border wv:border-border wv:text-foreground/50 wv:transition-colors wv:shadow-sm ${className ?? ""}`}
         >
-          {isOutput ? <CaretUpIcon size={9} weight="bold" /> : <MicWaveBars deviceId={selectedDeviceId} />}
+          {isOutput ? <CaretUpIcon size={9} weight="bold" /> : mutedProp ? <XIcon size={9} weight="bold" style={{ color: "#ef4444" }} /> : <MicWaveBars deviceId={selectedDeviceId} />}
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -427,7 +437,7 @@ export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "a
             </span>
             {!isOutput && (
               <button
-                onClick={() => setMuted(!muted)}
+                onClick={() => { playMuteSound(!muted); setMuted(!muted); }}
                 className={`wv:ml-auto wv:flex wv:items-center wv:gap-1 wv:rounded wv:px-1.5 wv:py-0.5 wv:text-[10px] wv:font-medium wv:transition-colors wv:cursor-pointer wv:border-0 ${muted ? "wv:bg-red-100 wv:text-red-600" : "wv:bg-muted wv:text-muted-foreground wv:hover:bg-red-100 wv:hover:text-red-500"}`}
               >
                 {muted ? "Mutado" : "Mutar"}
@@ -447,8 +457,11 @@ export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "a
             max={100}
             value={muted ? 0 : volume}
             onChange={(e) => {
+              const v = Number(e.target.value);
               setMuted(false);
-              setVolume(Number(e.target.value));
+              setVolume(v);
+              if (isOutput) wavoip.setSpeakerVolume(v / 100);
+              else wavoip.setMicrophoneVolume(v / 100);
             }}
             disabled={muted}
             className="wv:w-full wv:accent-blue-500 wv:cursor-pointer wv:disabled:opacity-40 wv:disabled:cursor-not-allowed"
@@ -465,12 +478,8 @@ export function AudioMiniPopover({ kind, className }: { kind: "audiooutput" | "a
               onChange={(e) => {
                 const deviceId = e.target.value;
                 setSelectedDeviceId(deviceId);
-                try {
-                  if (isOutput) wavoip.setAudioOutputDevice(deviceId);
-                  else wavoip.setAudioInputDevice(deviceId);
-                } catch (err) {
-                  console.error("[AudioMiniPopover] Failed to switch audio device:", err);
-                }
+                if (isOutput) wavoip.setSpeaker(deviceId);
+                else wavoip.setMicrophone(deviceId);
               }}
               className="wv:w-full wv:rounded-md wv:border wv:border-input wv:bg-background wv:px-2 wv:py-1.5 wv:text-xs wv:text-foreground wv:outline-none wv:focus:ring-1 wv:focus:ring-ring wv:cursor-pointer"
             >

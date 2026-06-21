@@ -225,7 +225,7 @@ export function WidgetProvider({ children }: Props) {
       <div
         ref={divRef}
         data-closed={isClosed}
-        className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
+        className="wv:fixed wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         style={{
           left: position.x,
           top: position.y,

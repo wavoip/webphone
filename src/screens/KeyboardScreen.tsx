@@ -23,15 +23,23 @@ import { getSpeakerVolume } from "@/lib/device-settings";
 import { mergeToAPI } from "@/lib/webphone-api/api";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { useSelectedDevice } from "@/providers/SelectedDeviceProvider";
-import { useSettings } from "@/providers/settings/Provider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const SOUND_URLS: Record<string, string> = {
-  "1": SoundDTMF1, "2": SoundDTMF2, "3": SoundDTMF3,
-  "4": SoundDTMF4, "5": SoundDTMF5, "6": SoundDTMF6,
-  "7": SoundDTMF7, "8": SoundDTMF8, "9": SoundDTMF9,
-  "*": SoundDTMFStar, "0": SoundDTMF0, "#": SoundDTMFHash,
+  "1": SoundDTMF1,
+  "2": SoundDTMF2,
+  "3": SoundDTMF3,
+  "4": SoundDTMF4,
+  "5": SoundDTMF5,
+  "6": SoundDTMF6,
+  "7": SoundDTMF7,
+  "8": SoundDTMF8,
+  "9": SoundDTMF9,
+  "*": SoundDTMFStar,
+  "0": SoundDTMF0,
+  "#": SoundDTMFHash,
   backspace: SoundBackspace,
 };
 
@@ -51,7 +59,7 @@ async function preloadSounds() {
       const res = await fetch(url);
       const buf = await res.arrayBuffer();
       _buffers.set(key, await ctx.decodeAudioData(buf));
-    })
+    }),
   );
 }
 
@@ -89,25 +97,73 @@ function getDeviceByToken(token: string | null, devices: ReturnType<typeof useWa
 }
 
 const DDD_STATE: Record<string, string> = {
-  "11": "São Paulo", "12": "São Paulo", "13": "São Paulo", "14": "São Paulo",
-  "15": "São Paulo", "16": "São Paulo", "17": "São Paulo", "18": "São Paulo", "19": "São Paulo",
-  "21": "Rio de Janeiro", "22": "Rio de Janeiro", "24": "Rio de Janeiro",
-  "27": "Espírito Santo", "28": "Espírito Santo",
-  "31": "Minas Gerais", "32": "Minas Gerais", "33": "Minas Gerais", "34": "Minas Gerais",
-  "35": "Minas Gerais", "37": "Minas Gerais", "38": "Minas Gerais",
-  "41": "Paraná", "42": "Paraná", "43": "Paraná", "44": "Paraná", "45": "Paraná", "46": "Paraná",
-  "47": "Santa Catarina", "48": "Santa Catarina", "49": "Santa Catarina",
-  "51": "Rio Grande do Sul", "53": "Rio Grande do Sul", "54": "Rio Grande do Sul", "55": "Rio Grande do Sul",
-  "61": "Distrito Federal", "62": "Goiás", "64": "Goiás",
-  "63": "Tocantins", "65": "Mato Grosso", "66": "Mato Grosso",
-  "67": "Mato Grosso do Sul", "68": "Acre", "69": "Rondônia",
-  "71": "Bahia", "73": "Bahia", "74": "Bahia", "75": "Bahia", "77": "Bahia",
-  "79": "Sergipe", "81": "Pernambuco", "87": "Pernambuco",
-  "82": "Alagoas", "83": "Paraíba", "84": "Rio Grande do Norte",
-  "85": "Ceará", "88": "Ceará", "86": "Piauí", "89": "Piauí",
-  "91": "Pará", "93": "Pará", "94": "Pará",
-  "92": "Amazonas", "97": "Amazonas",
-  "95": "Roraima", "96": "Amapá", "98": "Maranhão", "99": "Maranhão",
+  "11": "São Paulo",
+  "12": "São Paulo",
+  "13": "São Paulo",
+  "14": "São Paulo",
+  "15": "São Paulo",
+  "16": "São Paulo",
+  "17": "São Paulo",
+  "18": "São Paulo",
+  "19": "São Paulo",
+  "21": "Rio de Janeiro",
+  "22": "Rio de Janeiro",
+  "24": "Rio de Janeiro",
+  "27": "Espírito Santo",
+  "28": "Espírito Santo",
+  "31": "Minas Gerais",
+  "32": "Minas Gerais",
+  "33": "Minas Gerais",
+  "34": "Minas Gerais",
+  "35": "Minas Gerais",
+  "37": "Minas Gerais",
+  "38": "Minas Gerais",
+  "41": "Paraná",
+  "42": "Paraná",
+  "43": "Paraná",
+  "44": "Paraná",
+  "45": "Paraná",
+  "46": "Paraná",
+  "47": "Santa Catarina",
+  "48": "Santa Catarina",
+  "49": "Santa Catarina",
+  "51": "Rio Grande do Sul",
+  "53": "Rio Grande do Sul",
+  "54": "Rio Grande do Sul",
+  "55": "Rio Grande do Sul",
+  "61": "Distrito Federal",
+  "62": "Goiás",
+  "64": "Goiás",
+  "63": "Tocantins",
+  "65": "Mato Grosso",
+  "66": "Mato Grosso",
+  "67": "Mato Grosso do Sul",
+  "68": "Acre",
+  "69": "Rondônia",
+  "71": "Bahia",
+  "73": "Bahia",
+  "74": "Bahia",
+  "75": "Bahia",
+  "77": "Bahia",
+  "79": "Sergipe",
+  "81": "Pernambuco",
+  "87": "Pernambuco",
+  "82": "Alagoas",
+  "83": "Paraíba",
+  "84": "Rio Grande do Norte",
+  "85": "Ceará",
+  "88": "Ceará",
+  "86": "Piauí",
+  "89": "Piauí",
+  "91": "Pará",
+  "93": "Pará",
+  "94": "Pará",
+  "92": "Amazonas",
+  "97": "Amazonas",
+  "95": "Roraima",
+  "96": "Amapá",
+  "98": "Maranhão",
+  "99": "Maranhão",
 };
 
 function getCountryCode(token: string | null, devices: ReturnType<typeof useWavoip>["devices"]): string | null {
@@ -158,12 +214,10 @@ export default function KeyboardScreen() {
   const { addNotification } = useNotificationManager();
   const { selectedToken } = useSelectedDevice();
   const { devices: devicesSettings } = useSettings();
-  const shadowRoot = useShadowRoot();
+  const { root: shadowRoot } = useShadowRoot();
 
   const hasDevices = devices.some((d) => d.enable);
-  const selectedDevice = selectedToken
-    ? devices.find((d) => d.token === selectedToken)
-    : devices.find((d) => d.enable);
+  const selectedDevice = selectedToken ? devices.find((d) => d.token === selectedToken) : devices.find((d) => d.enable);
   const isDeviceDisconnected = hasDevices && (selectedDevice ? selectedDevice.status !== "open" : false);
 
   const callDisabled = callIsLoading || isDeviceDisconnected || !hasDevices;
@@ -173,7 +227,9 @@ export default function KeyboardScreen() {
       ? "Seu número de Whatsapp está desconectado, conecte para continuar"
       : null;
 
-  useEffect(() => { preloadSounds(); }, []);
+  useEffect(() => {
+    preloadSounds();
+  }, []);
 
   useEffect(() => {
     if (countryTimerRef.current) clearTimeout(countryTimerRef.current);
@@ -183,7 +239,9 @@ export default function KeyboardScreen() {
     setCountryCode(code);
     const name = selectedToken
       ? getLocationName(selectedToken, devices)
-      : code ? new Intl.DisplayNames(["pt-BR"], { type: "region" }).of(code) ?? null : null;
+      : code
+        ? (new Intl.DisplayNames(["pt-BR"], { type: "region" }).of(code) ?? null)
+        : null;
     if (!name) {
       setCountryName(null);
       return;
@@ -238,9 +296,8 @@ export default function KeyboardScreen() {
         e.preventDefault();
         handleCall();
       }}
-      className="wv:flex wv:flex-col wv:size-full wv:items-center wv:px-2 wv:overflow-hidden"
+      className="wv:flex wv:flex-col wv:w-full wv:items-center wv:px-2 wv:pb-4"
     >
-      <div className="wv:flex-[0.3] wv:min-h-0" />
 
       <div className="wv:text-center wv:shrink-0">
         <div className="wv:overflow-hidden">
@@ -290,10 +347,9 @@ export default function KeyboardScreen() {
             </p>
           ) : null}
         </div>
-
       </div>
 
-      <div className="wv:flex-[2] wv:min-h-0" />
+      <div className="wv:h-7" />
 
       <div className="wv:flex wv:flex-col wv:gap-2 wv:shrink-0">
         <div className="wv:relative wv:flex wv:max-w-[300px] wv:w-full wv:gap-2">
@@ -301,7 +357,7 @@ export default function KeyboardScreen() {
             <AudioInputPopover />
             <AudioOutputPopover />
           </div>
-          <div className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-2 wv:[&>*]:select-none wv:[&>*]:max-w-[72px] wv:[&>*]:max-h-[72px] wv:justify-items-center">
+          <div className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-2 wv:[&>*]:select-none wv:[&>*]:max-w-[64px] wv:[&>*]:max-h-[64px] wv:justify-items-center">
             {Object.entries(buttons).map(([key, { digit, letters }]) => (
               <Button
                 key={`webphone-keyboard-${key}`}
@@ -323,7 +379,7 @@ export default function KeyboardScreen() {
         </div>
 
         <div className="wv:flex wv:max-w-[300px] wv:w-full">
-          <div className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-2 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[72px] wv:[&>*]:max-h-[72px] wv:justify-items-center wv:items-center">
+          <div className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-2 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[64px] wv:[&>*]:max-h-[64px] wv:justify-items-center wv:items-center">
             <Button
               type="button"
               variant={"secondary"}
@@ -359,7 +415,7 @@ export default function KeyboardScreen() {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="wv:aspect-square wv:size-full wv:max-w-[72px] wv:max-h-[72px]">
+                <span className="wv:aspect-square wv:size-full wv:max-w-[64px] wv:max-h-[64px]">
                   <Button
                     type="submit"
                     size={"icon"}
@@ -371,7 +427,11 @@ export default function KeyboardScreen() {
                 </span>
               </TooltipTrigger>
               {callTooltip && (
-                <TooltipContent side="right" container={shadowRoot} className="wv:max-w-[180px] wv:text-center wv:[&_svg]:hidden wv:bg-surface wv:text-foreground">
+                <TooltipContent
+                  side="right"
+                  container={shadowRoot}
+                  className="wv:max-w-[180px] wv:text-center wv:[&_svg]:hidden wv:bg-surface wv:text-foreground"
+                >
                   {callTooltip}
                 </TooltipContent>
               )}
@@ -380,7 +440,6 @@ export default function KeyboardScreen() {
         </div>
       </div>
 
-      <div className="wv:flex-[1] wv:min-h-0" />
     </form>
   );
 }

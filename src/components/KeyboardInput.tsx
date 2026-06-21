@@ -131,7 +131,7 @@ export const KeyboardInput = ({ value, onChange, callIsLoading, country }: { val
         <div className="wv:flex wv:flex-col wv:items-center wv:w-full wv:max-w-md wv:mx-auto">
             <div
                 ref={containerRef}
-                className="wv:relative wv:w-full wv:overflow-x-auto wv:overflow-y-hidden wv:whitespace-nowrap wv:scrollbar-hide wv:py-2 wv:px-4 wv:flex wv:items-center wv:justify-center no-number-scroll"
+                className="wv:relative wv:w-full wv:overflow-x-auto wv:overflow-y-hidden wv:whitespace-nowrap wv:scrollbar-hide wv:pt-2 wv:pb-1 wv:px-4 wv:flex wv:items-center wv:justify-center no-number-scroll"
                 style={{
                     msOverflowStyle: "none",
                     scrollbarWidth: "none",
@@ -207,7 +207,7 @@ export const KeyboardInput = ({ value, onChange, callIsLoading, country }: { val
                     }}
                     onScroll={handleScroll}
                     placeholder="Digite..."
-                    className="wv:pl-1 wv:bg-transparent wv:text-center wv:outline-none wv:transition-all wv:duration-150 wv:min-w-full wv:text-foreground wv:placeholder:text-muted-400"
+                    className="wv:pl-1 wv:bg-transparent wv:text-center wv:outline-none wv:transition-all wv:duration-150 wv:min-w-full wv:text-foreground wv:placeholder:text-neutral-400"
                     style={{
                         fontSize: MAX_FONT,
                     }}

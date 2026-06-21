@@ -30,7 +30,7 @@ function normalizePhone(raw: string): { national: string; international: string 
 }
 
 function getRawPhone(device: DeviceState): string | null {
-    return device.contact?.official?.phone ?? device.contact?.unofficial?.phone ?? null;
+    return device.contact?.phone ?? null;
 }
 
 function getDeviceLabel(device: DeviceState): string {
@@ -62,7 +62,7 @@ function StatusDot({ status }: { status: DeviceState["status"] }) {
 
 export const DeviceSwitcher = React.forwardRef(() => {
     const { devices } = useWavoip();
-    const shadowRoot = useShadowRoot();
+    const { root } = useShadowRoot();
     const { selectedToken, setSelectedToken } = useSelectedDevice();
     const selectedDevice = React.useMemo(() => {
         if (!selectedToken) return null;
@@ -88,7 +88,7 @@ export const DeviceSwitcher = React.forwardRef(() => {
             <DropdownMenuContent
                 className="wv:w-(--radix-dropdown-menu-trigger-width) wv:min-w-[180px]"
                 align="start"
-                container={shadowRoot}
+                container={root}
             >
                 <DropdownMenuItem onSelect={() => setSelectedToken(null)}>
                     <span className="wv:flex-1">Padrão</span>
@@ -106,7 +106,7 @@ export const DeviceSwitcher = React.forwardRef(() => {
                         </DropdownMenuItem>
                         <TooltipContent
                             side="right"
-                            container={shadowRoot}
+                            container={root}
                             sideOffset={8}
                             className="wv:bg-surface wv:text-foreground wv:[&_svg]:hidden"
                         >

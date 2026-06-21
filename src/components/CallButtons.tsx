@@ -11,8 +11,19 @@ import {
 } from "@phosphor-icons/react";
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import { useState } from "react";
+import MuteSound from "@/assets/sounds/mute.mp3";
+import UnmuteSound from "@/assets/sounds/unmute.mp3";
 import { AudioMiniPopover } from "@/components/AudioPopover";
 import { Button } from "@/components/ui/button";
+
+const _mute_sound = new Audio(MuteSound);
+const _unmute_sound = new Audio(UnmuteSound);
+
+function playMuteSound(willMute: boolean) {
+  const sound = willMute ? _mute_sound : _unmute_sound;
+  sound.currentTime = 0;
+  sound.play().catch(() => {});
+}
 
 type Props = {
   call?: CallActive | CallOutgoing;
@@ -68,13 +79,14 @@ export function CallButtons({ call }: Props) {
               type="button"
               variant="secondary"
               className={btnBase}
-              onClick={() => call?.unmute().then(() => setMuted(false))}
+              onClick={() => { playMuteSound(false); call?.unmute().then(() => setMuted(false)); }}
               disabled={actionMade}
             >
               <MicrophoneSlashIcon size={32} weight="fill" className="wv:text-red-500" />
             </Button>
             <AudioMiniPopover
               kind="audioinput"
+              muted={true}
               className="wv:absolute wv:-bottom-1 wv:-right-1"
             />
           </div>
@@ -87,13 +99,14 @@ export function CallButtons({ call }: Props) {
               type="button"
               variant="secondary"
               className={btnBase}
-              onClick={() => call?.mute().then(() => setMuted(true))}
+              onClick={() => { playMuteSound(true); call?.mute().then(() => setMuted(true)); }}
               disabled={actionMade}
             >
               <MicrophoneIcon size={32} weight="fill" />
             </Button>
             <AudioMiniPopover
               kind="audioinput"
+              muted={false}
               className="wv:absolute wv:-bottom-1 wv:-right-1"
             />
           </div>

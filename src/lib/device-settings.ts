@@ -19,6 +19,13 @@ export function getSettings() {
   return new Map<string, DeviceSettings>(deviceSettings.map((settings) => [settings.token, settings]));
 }
 
+export function getSpeakerVolume(): number {
+  const stored = localStorage.getItem("wavoip:speaker-volume");
+  if (stored === null) return 0.8;
+  const v = Number(stored);
+  return Number.isNaN(v) ? 0.8 : v / 100;
+}
+
 export function saveSettings(devices: DeviceSettings[]) {
   const storageItem = devices
     .filter((device) => device.persist)

@@ -15,7 +15,7 @@ class WebPhoneComponent {
 
     this.container = document.createElement("div");
     this.container.id = "webphone";
-    (container ?? document.body).appendChild(this.container);
+    document.body.appendChild(this.container);
 
     const shadowRoot = this.container.attachShadow({ mode: "closed" });
 

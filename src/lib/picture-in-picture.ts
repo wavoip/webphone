@@ -184,7 +184,7 @@ export function drawSoundwave(
 
     // log scaling
     const log = Math.pow(avg / 255, 0.6);
-    const targetHeight = Math.max(log * height, 3);
+    const targetHeight = Math.max(log * height, barWidth);
 
     // easing
     smooth[k] = smooth[k] * 0.75 + targetHeight * 0.25;
@@ -193,7 +193,7 @@ export function drawSoundwave(
     const barX = x + center * (barWidth + gap) + offset * (barWidth + gap);
     const barY = y + (height - barHeight) / 2;
 
-    drawRoundedRect(ctx, barX, barY, barWidth, barHeight, 3);
+    drawRoundedRect(ctx, barX, barY, barWidth, barHeight, Math.min(barWidth, barHeight) / 2);
   }
 }
 function drawRoundedRect(
