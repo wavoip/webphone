@@ -40,6 +40,8 @@ export type TranslationKey =
   | "Rejected by the app"
   | "Timed out"
   | "Unknown"
+  // call
+  | "Reconnecting"
   // keyboard / outgoing
   | "Calling from"
   | "No device available"
@@ -127,6 +129,7 @@ const ptBR: LocaleResource = {
   "Rejected by the app": "Rejeitada pelo aplicativo",
   "Timed out": "Tempo limite",
   Unknown: "Desconhecido",
+  Reconnecting: "Reconectando",
   "Calling from": "Ligando de",
   "No device available": "Nenhum dispositivo está disponível",
   "Number does not exist": "Número não existe",
@@ -208,6 +211,7 @@ const es: LocaleResource = {
   "Rejected by the app": "Rechazada por la aplicación",
   "Timed out": "Tiempo agotado",
   Unknown: "Desconocido",
+  Reconnecting: "Reconectando",
   "Calling from": "Llamando desde",
   "No device available": "Ningún dispositivo disponible",
   "Number does not exist": "El número no existe",

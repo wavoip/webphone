@@ -77,12 +77,20 @@ describe("callSlice", () => {
     expect(store.getState().peerMuted).toBe(false);
   });
 
+  it("setCallFailReason stores and clears the reason", () => {
+    store.getState().setCallFailReason("PEER_BUSY");
+    expect(store.getState().callFailReason).toBe("PEER_BUSY");
+    store.getState().setCallFailReason(undefined);
+    expect(store.getState().callFailReason).toBeUndefined();
+  });
+
   it("resetCall returns to initial call state but keeps other slices", () => {
     store.getState().addOffer(makeOffer("a"));
     store.getState().setOutgoing(makeOutgoing("o"));
     store.getState().setActive(makeActive("c"));
     store.getState().setCallStatus("ACTIVE");
     store.getState().setPeerMuted(true);
+    store.getState().setCallFailReason("WHATEVER");
 
     store.getState().resetCall();
 
@@ -92,5 +100,6 @@ describe("callSlice", () => {
     expect(s.active).toBeUndefined();
     expect(s.callStatus).toBe("idle");
     expect(s.peerMuted).toBe(false);
+    expect(s.callFailReason).toBeUndefined();
   });
 });

@@ -7,6 +7,7 @@ import { DeviceController } from "@/middleware/controllers/DeviceController";
 import { MissedCallController } from "@/middleware/controllers/MissedCallController";
 import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { beforeUnloadEffect } from "@/middleware/effects/beforeUnload";
+import { callFailedNotificationEffect } from "@/middleware/effects/callFailedNotification";
 import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { offerNotificationEffect } from "@/middleware/effects/offerNotification";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
@@ -99,6 +100,7 @@ export class Middleware {
         events: this.events,
       }),
       callLifecycleEventsEffect({ store: this.store, events: this.events }),
+      callFailedNotificationEffect({ store: this.store, notifications: this.controllers.notifications }),
       persistDevicesEffect({ store: this.store }),
       resetCallTimerEffect({ store: this.store }),
       ringtoneEffect({ store: this.store, ringtone: this.ringtone, vibration: this.vibration }),
