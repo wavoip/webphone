@@ -86,7 +86,7 @@ Quando há uma chamada ativa, o canto inferior esquerdo exibe um botão **Ping**
 
 | Seção                       | Conteúdo                                                                                                                                                                                                         |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Estatísticas em tempo real** | Atualizadas a cada novo evento `stats` e `serverStats`: RTT mín/méd/máx (ms), TX/RX em pacotes / kB / perda %, e RTT do servidor separado em `client` (servidor↔cliente) e `whatsapp` (servidor↔WhatsApp). |
+| **Estatísticas em tempo real** | Pull a cada 500 ms via `call.getStats()` (a partir do `@wavoip/wavoip-api` 2.6 — os eventos `stats` / `serverStats` foram depreciados). RTT mín/méd/máx (ms); TX/RX com pacotes, kB, perda %, bitrate (kbps) e nível de áudio; jitter de RX (ms); e latência de saída do `audio_context` (ms). Para chamadas `UNOFFICIAL`, o snapshot já mescla os campos do servidor (RTT cliente/WhatsApp). |
 | **ICE**                     | Último payload `iceDiagnostics` recebido para a chamada. Graças ao replay-on-subscribe do `@wavoip/wavoip-api`, o estado completo aparece mesmo abrindo o diálogo após a chamada já ter conectado.                |
 | **Problemas recentes**      | Lista de `connectivityIssue` da chamada atual, com timestamp formatado.                                                                                                                                          |
 
