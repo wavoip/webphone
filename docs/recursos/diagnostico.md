@@ -82,11 +82,12 @@ O botão **Copiar relatório** copia um JSON com a forma:
 
 ## Diagnóstico por chamada
 
-Quando há uma chamada ativa, o canto inferior esquerdo exibe um botão **Ping** com o RTT estimado e a força do sinal. Clicar nele abre o diálogo **Diagnóstico da chamada** com três seções, todas filtradas pelo `id` da chamada atual:
+Quando há uma chamada ativa, o canto inferior esquerdo exibe um botão **Ping** com o RTT estimado e a força do sinal. Clicar nele abre o diálogo **Diagnóstico da chamada** com quatro seções, todas filtradas pelo `id` da chamada atual:
 
 | Seção                       | Conteúdo                                                                                                                                                                                                         |
 | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Estatísticas em tempo real** | Atualizadas a cada novo evento `stats` e `serverStats`: RTT mín/méd/máx (ms), TX/RX em pacotes / kB / perda %, e RTT do servidor separado em `client` (servidor↔cliente) e `whatsapp` (servidor↔WhatsApp). |
+| **Estatísticas em tempo real** | Pull a cada 200 ms via `call.getStats()` (a partir do `@wavoip/wavoip-api` 2.6 — os eventos `stats` / `serverStats` foram depreciados). RTT mín/méd/máx (ms); TX/RX com pacotes, kB, perda %, bitrate (kbps); jitter de RX (ms); e latência de saída do `audio_context` (ms). Para chamadas `UNOFFICIAL`, o snapshot já mescla os campos do servidor (RTT cliente/WhatsApp). |
+| **Níveis de áudio**         | Barras TX (microfone) e RX (alto-falante) animadas via `requestAnimationFrame` lendo `call.audioAnalyserOut` e `call.audioAnalyserIn` diretamente — sem custo de `getStats()`. RMS do `getFloatTimeDomainData` mapeado a 0–100%. |
 | **ICE**                     | Último payload `iceDiagnostics` recebido para a chamada. Graças ao replay-on-subscribe do `@wavoip/wavoip-api`, o estado completo aparece mesmo abrindo o diálogo após a chamada já ter conectado.                |
 | **Problemas recentes**      | Lista de `connectivityIssue` da chamada atual, com timestamp formatado.                                                                                                                                          |
 

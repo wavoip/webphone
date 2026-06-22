@@ -1,7 +1,9 @@
 import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, TransportStatus, Unsubscribe } from "@wavoip/wavoip-api";
+import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
+
+const PING_POLL_MS = 500;
 
 type Props = {
   call: CallActive;
@@ -50,19 +52,26 @@ export function Ping({ call }: Props) {
       setStrength(getPingLevel(ms));
     };
 
-    const unsubs: Unsubscribe[] = [
-      call.on("stats", (s) => applyPing(s.rtt.avg)),
-      call.on("serverStats", (s) => applyPing(s.rtt.client.avg)),
-      call.on("connectionStatus", (status) => {
-        setConnectionStatus(status);
-        if (status === "connected")
-          setStrength((prev) => (prev === ConnectionStrength.none ? ConnectionStrength.high : prev));
-        if (status === "disconnected") setStrength(ConnectionStrength.none);
-      }),
-    ];
+    let cancelled = false;
+    const pull = () => {
+      call.getStats().then((s) => {
+        if (!cancelled) applyPing(s.rtt.avg);
+      });
+    };
+    pull();
+    const id = setInterval(pull, PING_POLL_MS);
+
+    const unsubConnection = call.on("connectionStatus", (status) => {
+      setConnectionStatus(status);
+      if (status === "connected")
+        setStrength((prev) => (prev === ConnectionStrength.none ? ConnectionStrength.high : prev));
+      if (status === "disconnected") setStrength(ConnectionStrength.none);
+    });
 
     return () => {
-      for (const unsub of unsubs) unsub();
+      cancelled = true;
+      clearInterval(id);
+      unsubConnection();
     };
   }, [call]);
 

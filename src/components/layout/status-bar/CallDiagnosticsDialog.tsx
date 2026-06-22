@@ -1,5 +1,6 @@
-import type { CallActive, CallStats, ServerCallStats, Unsubscribe } from "@wavoip/wavoip-api";
+import type { CallActive, CallStats } from "@wavoip/wavoip-api";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { AudioLevelBar } from "@/components/layout/status-bar/AudioLevelBar";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +13,8 @@ import { t } from "@/lib/i18n";
 import { useDebugInfo } from "@/providers/DebugProvider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
+const STATS_POLL_MS = 200;
+
 type Props = {
   call: CallActive;
   triggerClassName?: string;
@@ -23,26 +26,28 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
   const debug = useDebugInfo();
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<CallStats | null>(null);
-  const [serverStats, setServerStats] = useState<ServerCallStats | null>(null);
 
   const lastIce = useMemo(() => {
     const own = debug.recentIceDiagnostics.filter((r) => r.callId === call.id);
     return own.length ? own[own.length - 1].diag : null;
   }, [debug.recentIceDiagnostics, call.id]);
-  const issues = useMemo(
-    () => debug.recentIssues.filter((r) => r.callId === call.id),
-    [debug.recentIssues, call.id],
-  );
+  const issues = useMemo(() => debug.recentIssues.filter((r) => r.callId === call.id), [debug.recentIssues, call.id]);
 
   useEffect(() => {
-    const unsubs: Unsubscribe[] = [
-      call.on("stats", (s) => setStats(s)),
-      call.on("serverStats", (s) => setServerStats(s)),
-    ];
-    return () => {
-      for (const unsub of unsubs) unsub();
+    if (!open) return;
+    let cancelled = false;
+    const pull = () => {
+      call.getStats().then((s) => {
+        if (!cancelled) setStats(s);
+      });
     };
-  }, [call]);
+    pull();
+    const id = setInterval(pull, STATS_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [call, open]);
 
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
@@ -60,38 +65,43 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
         </DialogHeader>
 
         <Section title={t("Realtime stats")}>
-          {stats == null && serverStats == null ? (
+          {stats == null ? (
             <Empty />
           ) : (
             <div className="wv:grid wv:grid-cols-2 wv:gap-2 wv:text-xs wv:font-mono">
-              {stats && (
-                <>
-                  <StatGroup label="RTT (ms)">
-                    <KV k="min" v={stats.rtt.min.toFixed(0)} />
-                    <KV k="avg" v={stats.rtt.avg.toFixed(0)} />
-                    <KV k="max" v={stats.rtt.max.toFixed(0)} />
-                  </StatGroup>
-                  <StatGroup label="TX">
-                    <KV k="pkt" v={String(stats.tx.total)} />
-                    <KV k="kB" v={(stats.tx.total_bytes / 1024).toFixed(1)} />
-                    <KV k="loss" v={`${(stats.tx.loss * 100).toFixed(1)}%`} />
-                  </StatGroup>
-                  <StatGroup label="RX">
-                    <KV k="pkt" v={String(stats.rx.total)} />
-                    <KV k="kB" v={(stats.rx.total_bytes / 1024).toFixed(1)} />
-                    <KV k="loss" v={`${(stats.rx.loss * 100).toFixed(1)}%`} />
-                  </StatGroup>
-                </>
-              )}
-              {serverStats && (
-                <StatGroup label="server RTT (ms)">
-                  <KV k="client" v={serverStats.rtt.client.avg.toFixed(0)} />
-                  <KV k="whatsapp" v={serverStats.rtt.whatsapp.avg.toFixed(0)} />
-                </StatGroup>
-              )}
+              <StatGroup label="RTT (ms)">
+                <KV k="min" v={stats.rtt.min.toFixed(0)} />
+                <KV k="avg" v={stats.rtt.avg.toFixed(0)} />
+                <KV k="max" v={stats.rtt.max.toFixed(0)} />
+              </StatGroup>
+              <StatGroup label="TX">
+                <KV k="pkt" v={String(stats.tx.total)} />
+                <KV k="kB" v={(stats.tx.total_bytes / 1024).toFixed(1)} />
+                <KV k="loss" v={`${(stats.tx.loss * 100).toFixed(1)}%`} />
+                <KV k="kbps" v={stats.tx.bitrate_kbps.toFixed(1)} />
+              </StatGroup>
+              <StatGroup label="RX">
+                <KV k="pkt" v={String(stats.rx.total)} />
+                <KV k="kB" v={(stats.rx.total_bytes / 1024).toFixed(1)} />
+                <KV k="loss" v={`${(stats.rx.loss * 100).toFixed(1)}%`} />
+                <KV k="kbps" v={stats.rx.bitrate_kbps.toFixed(1)} />
+                <KV k="jitter" v={stats.rx.jitter_ms.toFixed(1)} />
+              </StatGroup>
+              <StatGroup label="audio">
+                <KV k="out lat" v={`${stats.audio_context.output_latency_ms.toFixed(0)}ms`} />
+              </StatGroup>
             </div>
           )}
         </Section>
+
+        {open && (
+          <Section title={t("Audio levels")}>
+            <div className="wv:flex wv:flex-col wv:gap-2">
+              <AudioLevelBar analyser={call.audioAnalyserOut} label="TX (mic)" />
+              <AudioLevelBar analyser={call.audioAnalyserIn} label="RX (speaker)" />
+            </div>
+          </Section>
+        )}
 
         <Section title="ICE">
           <pre className="wv:text-xs wv:font-mono wv:whitespace-pre-wrap wv:break-all wv:rounded wv:bg-muted/40 wv:p-2">
