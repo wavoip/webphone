@@ -3,7 +3,7 @@ import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
-const PING_POLL_MS = 1000 / 60;
+const PING_POLL_MS = 500;
 
 type Props = {
   call: CallActive;
