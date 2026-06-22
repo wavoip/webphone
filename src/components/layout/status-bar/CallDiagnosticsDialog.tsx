@@ -12,7 +12,7 @@ import { t } from "@/lib/i18n";
 import { useDebugInfo } from "@/providers/DebugProvider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
-const STATS_POLL_MS = 500;
+const STATS_POLL_MS = 1000 / 60;
 
 type Props = {
   call: CallActive;
