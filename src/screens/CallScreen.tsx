@@ -1,5 +1,5 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
@@ -19,16 +19,19 @@ export default function CallScreen() {
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
 
-  const status =
-    callStatus === "ENDED"
-      ? "Chamada encerrada"
-      : callStatus === "DISCONNECTED"
-        ? "Reconectando"
-        : callStatus === "FAILED"
-          ? callFailReason
-            ? `${t("The call failed")}: ${callFailReason}`
-            : t("The call failed")
-          : null;
+  const status = useMemo(
+    () =>
+      callStatus === "ENDED"
+        ? t("Call ended")
+        : callStatus === "DISCONNECTED"
+          ? t("Reconnecting")
+          : callStatus === "FAILED"
+            ? callFailReason
+              ? `${t("The call failed")}: ${callFailReason}`
+              : t("The call failed")
+            : null,
+    [callStatus, callFailReason],
+  );
 
   useEffect(() => {
     if (callStatus === "ENDED" || callStatus === "FAILED") {

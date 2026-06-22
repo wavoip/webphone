@@ -1,7 +1,6 @@
 import type { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
-import type { CallStatus } from "@/middleware/store/slices/callSlice";
 
 type Deps = { store: MiddlewareStoreApi; notifications: NotificationsController };
 export type Unsubscribe = () => void;
@@ -17,7 +16,7 @@ export function callFailedNotificationEffect({ store, notifications }: Deps): Un
   return store.subscribe(
     (s) => s.callStatus,
     (status, previous) => {
-      if (status !== ("FAILED" satisfies CallStatus)) return;
+      if (status !== "FAILED") return;
       if (previous === "FAILED") return;
       const state = store.getState();
       const call = state.active ?? state.outgoing;
@@ -27,8 +26,8 @@ export function callFailedNotificationEffect({ store, notifications }: Deps): Un
         type: "CALL_FAILED",
         created_at: new Date(),
         message: state.callFailReason ?? "",
-        detail: `${call.device_token} -> ${call.peer.phone}`,
-        token: call.device_token,
+        detail: `${call.deviceToken} -> ${call.peer.phone}`,
+        token: call.deviceToken,
         isHidden: false,
         isRead: false,
       });
