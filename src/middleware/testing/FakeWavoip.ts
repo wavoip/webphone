@@ -4,6 +4,7 @@ import type {
   CallOutgoing,
   CallOutgoingEvents,
   CallPeer,
+  CallStats,
   Contact,
   Device,
   DeviceEvents,
@@ -12,6 +13,15 @@ import type {
   OfferEvents,
   Wavoip,
 } from "@wavoip/wavoip-api";
+
+function makeEmptyCallStats(): CallStats {
+  return {
+    rtt: { min: 0, max: 0, avg: 0 },
+    tx: { total: 0, total_bytes: 0, loss: 0, bitrate_kbps: 0, audio_level: 0 },
+    rx: { total: 0, total_bytes: 0, loss: 0, bitrate_kbps: 0, audio_level: 0, jitter_ms: 0 },
+    audio_context: { output_latency_ms: 0 },
+  };
+}
 
 type Listener = (...args: unknown[]) => void;
 
@@ -108,6 +118,7 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
   mute = async () => ({ err: null });
   unmute = async () => ({ err: null });
   end = async () => ({ err: null });
+  getStats = async () => makeEmptyCallStats();
   onError() {}
   onPeerMute() {}
   onPeerUnmute() {}
