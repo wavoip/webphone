@@ -54,12 +54,14 @@ export class FakeOffer extends FakeEmitter<OfferEvents> implements Offer {
   acceptResult: { call: CallActive | null; err: string | null } = { call: null, err: "not-set" };
   rejectResult: { err: string | null } = { err: null };
   readonly id: string;
+  readonly deviceToken: string;
   readonly device_token: string;
   peer: CallPeer;
 
   constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
+    this.deviceToken = device_token;
     this.device_token = device_token;
     this.peer = peer;
   }
@@ -78,12 +80,14 @@ export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements
   direction = "OUTGOING" as const;
   status = "CALLING" as const;
   readonly id: string;
+  readonly deviceToken: string;
   readonly device_token: string;
   peer: CallPeer;
 
   constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
+    this.deviceToken = device_token;
     this.device_token = device_token;
     this.peer = peer;
   }
@@ -102,15 +106,20 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
   status = "ACTIVE" as const;
+  connectionStatus = "connected" as const;
   connection_status = "connected" as const;
+  audioAnalyserIn = Promise.resolve({} as AnalyserNode);
+  audioAnalyserOut = Promise.resolve({} as AnalyserNode);
   audio_analyser = Promise.resolve({} as AnalyserNode);
   readonly id: string;
+  readonly deviceToken: string;
   readonly device_token: string;
   peer: CallPeer;
 
   constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
+    this.deviceToken = device_token;
     this.device_token = device_token;
     this.peer = peer;
   }

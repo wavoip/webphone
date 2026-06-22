@@ -13,14 +13,14 @@ export function WaveSound({ call }: Props) {
   const animationIDRef = useRef<number | null>(null);
 
   useEffect(() => {
-    call?.audio_analyser?.then((analyser) => {
+    call?.audioAnalyserIn?.then((analyser) => {
       if (!canvasRef.current) {
         return;
       }
 
       draw(canvasRef.current, analyser, animationIDRef, theme);
     });
-  }, [call?.audio_analyser, theme]);
+  }, [call?.audioAnalyserIn, theme]);
 
   useEffect(() => {
     return () => {
