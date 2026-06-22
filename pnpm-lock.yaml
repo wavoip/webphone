@@ -45,8 +45,8 @@ importers:
         specifier: ^1.2.8
         version: 1.2.8(@types/react-dom@19.1.7(@types/react@19.1.10))(@types/react@19.1.10)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wavoip/wavoip-api':
-        specifier: ^2.5.0
-        version: 2.5.0
+        specifier: github:wavoip/wavoip-api#refactor/transport
+        version: https://codeload.github.com/wavoip/wavoip-api/tar.gz/f1a870c6319abc7fa39da96f51877921fe682dc3
       a18n:
         specifier: ^1.12.4
         version: 1.12.4
@@ -1639,8 +1639,9 @@ packages:
   '@vue/shared@3.5.21':
     resolution: {integrity: sha512-+2k1EQpnYuVuu3N7atWyG3/xoFWIVJZq4Mz8XNOdScFI0etES75fbny/oU4lKWk/577P1zmg0ioYvpGEDZ3DLw==}
 
-  '@wavoip/wavoip-api@2.5.0':
-    resolution: {integrity: sha512-oc3FC4Mh1cqZWOhT18n1hYqG6YpMroWjlfSx3stPFhVivyryJhzLUOb4NViUE8wAdQ/nzVgoMF7Q+1L2tkz4PQ==}
+  '@wavoip/wavoip-api@https://codeload.github.com/wavoip/wavoip-api/tar.gz/f1a870c6319abc7fa39da96f51877921fe682dc3':
+    resolution: {tarball: https://codeload.github.com/wavoip/wavoip-api/tar.gz/f1a870c6319abc7fa39da96f51877921fe682dc3}
+    version: 2.5.0
 
   a18n@1.12.4:
     resolution: {integrity: sha512-CvDcw/b7+u8iyLSN6008iEKR36oAnAF6RgprHZy3Tiw8bQuSVm0q2daYwnjIeM92TZktxkgfL+uYwwdsJXDVCA==}
@@ -1657,8 +1658,8 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  acorn@8.16.0:
-    resolution: {integrity: sha512-UVJyE9MttOsBQIDKw1skb9nAwQuR5wuGD3+82K6JgJlm/Y+KI92oNsMNGZCYdDsVtRHSak0pcV5Dno5+4jh9sw==}
+  acorn@8.17.0:
+    resolution: {integrity: sha512-xRQbDb9BnwDafYNn6Vwl839DYVjqXYb1XVGtWAZ1kcDc6iwAL4hg3B1dZlRiuENFeO2H53gFG3in621AdERVAg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -3204,7 +3205,7 @@ snapshots:
       '@babel/traverse': 7.28.3
       '@babel/types': 7.28.2
       convert-source-map: 2.0.0
-      debug: 4.4.1
+      debug: 4.4.3
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -4581,7 +4582,7 @@ snapshots:
 
   '@vue/shared@3.5.21': {}
 
-  '@wavoip/wavoip-api@2.5.0':
+  '@wavoip/wavoip-api@https://codeload.github.com/wavoip/wavoip-api/tar.gz/f1a870c6319abc7fa39da96f51877921fe682dc3':
     dependencies:
       a18n: 1.12.4
       axios: 1.17.0
@@ -4610,13 +4611,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  acorn-jsx@5.3.2(acorn@8.16.0):
+  acorn-jsx@5.3.2(acorn@8.17.0):
     dependencies:
-      acorn: 8.16.0
+      acorn: 8.17.0
 
   acorn@8.15.0: {}
 
-  acorn@8.16.0: {}
+  acorn@8.17.0: {}
 
   agent-base@6.0.2:
     dependencies:
@@ -5000,8 +5001,8 @@ snapshots:
 
   espree@10.4.0:
     dependencies:
-      acorn: 8.16.0
-      acorn-jsx: 5.3.2(acorn@8.16.0)
+      acorn: 8.17.0
+      acorn-jsx: 5.3.2(acorn@8.17.0)
       eslint-visitor-keys: 4.2.1
 
   esprima@4.0.1: {}

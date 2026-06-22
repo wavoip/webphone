@@ -43,7 +43,7 @@
     "@radix-ui/react-switch": "^1.2.6",
     "@radix-ui/react-tabs": "^1.1.13",
     "@radix-ui/react-tooltip": "^1.2.8",
-    "@wavoip/wavoip-api": "^2.5.0",
+    "@wavoip/wavoip-api": "github:wavoip/wavoip-api#refactor/transport",
     "a18n": "^1.12.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -84,6 +84,7 @@
     "onlyBuiltDependencies": [
       "@parcel/watcher",
       "@tailwindcss/oxide",
+      "@wavoip/wavoip-api",
       "esbuild"
     ]
   }
