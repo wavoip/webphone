@@ -14,7 +14,7 @@ calling_sound.preload = "auto";
 const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
-  const { callOutgoing, callStatus } = useWavoip();
+  const { callOutgoing, callStatus, callFailReason } = useWavoip();
 
   const status = useMemo(() => {
     switch (callStatus) {
@@ -23,7 +23,7 @@ export default function OutgoingScreen() {
       case "RINGING":
         return t("Calling...");
       case "FAILED":
-        return t("The call failed");
+        return callFailReason ? `${t("The call failed")}: ${callFailReason}` : t("The call failed");
       case "REJECTED":
         return t("Call rejected");
       case "NOT_ANSWERED":
@@ -33,7 +33,7 @@ export default function OutgoingScreen() {
       default:
         return null;
     }
-  }, [callStatus]);
+  }, [callStatus, callFailReason]);
 
   useEffect(() => {
     if (callStatus === "RINGING") {

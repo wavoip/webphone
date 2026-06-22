@@ -37,6 +37,7 @@ export function useCallState() {
     outgoing: s.outgoing,
     active: s.active,
     peerMuted: s.peerMuted,
+    callFailReason: s.callFailReason,
   }));
 }
 
