@@ -21,6 +21,8 @@ export type TranslationKey =
   | "Hibernating"
   | "Connecting"
   | "Building"
+  | "Restarting"
+  | "Closed"
   // device status
   | "Power on device"
   | "Enable device"
@@ -134,6 +136,8 @@ const ptBR: LocaleResource = {
   Hibernating: "Hibernando",
   Connecting: "Conectando",
   Building: "Construindo",
+  Restarting: "Reiniciando",
+  Closed: "Fechado",
   "Power on device": "Ligar Dispositivo",
   "Enable device": "Ativar dispositivo",
   "Disable device": "Desativar dispositivo",
@@ -235,6 +239,8 @@ const es: LocaleResource = {
   Hibernating: "Hibernando",
   Connecting: "Conectando",
   Building: "Construyendo",
+  Restarting: "Reiniciando",
+  Closed: "Cerrado",
   "Power on device": "Encender dispositivo",
   "Enable device": "Activar dispositivo",
   "Disable device": "Desactivar dispositivo",

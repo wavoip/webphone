@@ -26,7 +26,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const needsWake = device.status === "disconnected" || device.status === "hibernating";
+  const needsWake = device.status === "hibernating";
 
   return (
     <div
@@ -50,7 +50,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                 </TooltipContent>
               </Tooltip>
             )}
-            <StatusDot status={device.status} hasQrCode={!!device.qrCode} />
+            <StatusDot status={device.status} connectionStatus={device.connectionStatus} hasQrCode={!!device.qrCode} />
           </div>
 
           {device.contact?.phone && <PhoneLine phone={device.contact.phone} />}
@@ -103,25 +103,44 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   );
 }
 
-type StatusVisual = { label: TranslationKey; dot: string };
+type StatusVisual = { label: TranslationKey; dot: string; pulse: boolean };
 
-function statusVisual(status: DeviceStateEntry["status"], hasQrCode: boolean): StatusVisual {
-  if (status === "open" || status === "UP") return { label: "Connected", dot: "wv:bg-green-500" };
-  if (status === "BUILDING") return { label: "Building", dot: "wv:bg-foreground/40" };
-  if (status === "connecting" || hasQrCode) return { label: "Connecting", dot: "wv:bg-blue-500" };
-  if (status === "hibernating") return { label: "Hibernating", dot: "wv:bg-foreground/40" };
-  if (status === "error") return { label: "Failed", dot: "wv:bg-red-500" };
-  return { label: "Disconnected", dot: "wv:bg-red-500" };
+function statusVisual(
+  status: DeviceStateEntry["status"],
+  connectionStatus: DeviceStateEntry["connectionStatus"],
+  hasQrCode: boolean,
+): StatusVisual {
+  // Transport state takes priority — until WS is connected, account status is stale.
+  if (connectionStatus === "disconnected") return { label: "Disconnected", dot: "wv:bg-red-500", pulse: false };
+  if (connectionStatus === "reconnecting") return { label: "Reconnecting", dot: "wv:bg-amber-500", pulse: true };
+
+  if (status === "open" || status === "UP") return { label: "Connected", dot: "wv:bg-green-500", pulse: false };
+  if (status === "BUILDING") return { label: "Building", dot: "wv:bg-foreground/40", pulse: true };
+  if (status === "connecting" || hasQrCode) return { label: "Connecting", dot: "wv:bg-blue-500", pulse: true };
+  if (status === "restarting") return { label: "Restarting", dot: "wv:bg-blue-500", pulse: true };
+  if (status === "hibernating") return { label: "Hibernating", dot: "wv:bg-foreground/40", pulse: false };
+  if (status === "close") return { label: "Closed", dot: "wv:bg-foreground/40", pulse: false };
+  if (status === "error") return { label: "Failed", dot: "wv:bg-red-500", pulse: false };
+  return { label: "Disconnected", dot: "wv:bg-red-500", pulse: false };
 }
 
-function StatusDot({ status, hasQrCode }: { status: DeviceStateEntry["status"]; hasQrCode: boolean }) {
+function StatusDot({
+  status,
+  connectionStatus,
+  hasQrCode,
+}: {
+  status: DeviceStateEntry["status"];
+  connectionStatus: DeviceStateEntry["connectionStatus"];
+  hasQrCode: boolean;
+}) {
   if (!status) return null;
-  const v = statusVisual(status, hasQrCode);
-  const pulse = status === "connecting" || hasQrCode || status === "BUILDING";
+  const v = statusVisual(status, connectionStatus, hasQrCode);
   return (
     <span className="wv:inline-flex wv:items-center wv:gap-1.5 wv:text-[12px] wv:font-medium wv:text-muted-foreground">
       <span className={`wv:relative wv:inline-flex wv:size-2 wv:rounded-full ${v.dot}`}>
-        {pulse && <span className={`wv:absolute wv:inset-0 wv:rounded-full wv:animate-ping wv:opacity-60 ${v.dot}`} />}
+        {v.pulse && (
+          <span className={`wv:absolute wv:inset-0 wv:rounded-full wv:animate-ping wv:opacity-60 ${v.dot}`} />
+        )}
       </span>
       {t(v.label)}
     </span>

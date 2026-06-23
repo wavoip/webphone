@@ -65,6 +65,9 @@ export class DeviceController {
       const patch = status === "open" ? { status, enable: true } : { status };
       store.getState().updateDeviceState(device.token, patch);
     });
+    device.on("connectionStatusChanged", (connectionStatus) => {
+      store.getState().updateDeviceState(device.token, { connectionStatus });
+    });
     device.on("restrictedChanged", (restricted, restrictedUntil) => {
       const prev = store.getState().devices.find((d) => d.token === device.token)?.restricted ?? false;
       store.getState().updateDeviceState(device.token, { restricted, restrictedUntil });
@@ -92,6 +95,7 @@ export class DeviceController {
     return {
       token: device.token,
       status: device.status,
+      connectionStatus: device.connectionStatus,
       qrCode: device.qrCode,
       contact: device.contact,
       restricted: device.restricted,

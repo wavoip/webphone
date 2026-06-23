@@ -8,7 +8,10 @@ import { useWavoip } from "@/providers/WavoipProvider";
 export function DevicesAlert() {
   const { devices } = useWavoip();
 
-  const disconnectedDevices = useMemo(() => devices.filter(({ status }) => status === "disconnected"), [devices]);
+  const disconnectedDevices = useMemo(
+    () => devices.filter(({ connectionStatus }) => connectionStatus === "disconnected"),
+    [devices],
+  );
   const qrcodeDevices = useMemo(() => devices.filter(({ status }) => status === "connecting"), [devices]);
   const closedDevices = useMemo(() => devices.filter(({ status }) => status === "close"), [devices]);
   const hibernatedDevices = useMemo(() => devices.filter(({ status }) => status === "hibernating"), [devices]);

@@ -5,7 +5,8 @@ import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 function makeDevice(token: string, overrides: Partial<DeviceStateEntry> = {}): DeviceStateEntry {
   return {
     token,
-    status: "disconnected",
+    status: "BUILDING",
+    connectionStatus: "disconnected",
     qrCode: undefined,
     contact: undefined,
     restricted: false,
@@ -41,7 +42,7 @@ describe("deviceSlice", () => {
   });
 
   it("upsertDevice replaces an existing device by token", () => {
-    store.getState().upsertDevice(makeDevice("a", { status: "disconnected" }));
+    store.getState().upsertDevice(makeDevice("a", { status: "close" }));
     store.getState().upsertDevice(makeDevice("a", { status: "open", enable: true }));
     const [device] = store.getState().devices;
     expect(device.status).toBe("open");
@@ -60,13 +61,21 @@ describe("deviceSlice", () => {
     const [a, b] = store.getState().devices;
     expect(a.status).toBe("open");
     expect(a.qrCode).toBe("QR");
-    expect(b.status).toBe("disconnected");
+    expect(b.status).toBe("BUILDING");
   });
 
   it("updateDeviceState on unknown token is a no-op", () => {
     store.getState().setDevices([makeDevice("a")]);
     store.getState().updateDeviceState("z", { status: "open" });
-    expect(store.getState().devices[0].status).toBe("disconnected");
+    expect(store.getState().devices[0].status).toBe("BUILDING");
+  });
+
+  it("updateDeviceState patches connectionStatus", () => {
+    store.getState().setDevices([makeDevice("a")]);
+    store.getState().updateDeviceState("a", { connectionStatus: "connected" });
+    expect(store.getState().devices[0].connectionStatus).toBe("connected");
+    store.getState().updateDeviceState("a", { connectionStatus: "reconnecting" });
+    expect(store.getState().devices[0].connectionStatus).toBe("reconnecting");
   });
 
   it("setDeviceEnable flips only the enable flag", () => {
