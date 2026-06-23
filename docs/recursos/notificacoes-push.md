@@ -122,7 +122,7 @@ console.log(failed[0]);
 // {
 //   id: "<uuid>",
 //   type: "CALL_FAILED",
-//   message: "<motivo retornado pela SDK, ex: PEER_UNAVAILABLE>",
+//   message: "Sem áudio do contato",       // motivo já traduzido para o idioma ativo
 //   detail: "<device_token> -> <telefone>",
 //   token: "<device_token>",
 //   isRead: false,
@@ -130,7 +130,22 @@ console.log(failed[0]);
 // }
 ```
 
-O texto exibido em tela segue o padrão `A ligação falhou: <motivo>`. Quando a SDK não fornece motivo (caso típico de chamadas que falham antes do peer aceitar), apenas `A ligação falhou` aparece e o campo `message` da notificação fica vazio.
+O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O Webphone consulta uma tabela interna que mapeia cada código da SDK para uma `TranslationKey`. Motivos desconhecidos (códigos novos que ainda não foram mapeados) caem pelo passthrough e aparecem como o código bruto.
+
+### Motivos mapeados
+
+| Código da SDK         | Etiqueta (en)         | Observações                                             |
+| --------------------- | --------------------- | ------------------------------------------------------- |
+| `PEER_TX_TIMEOUT`     | Peer audio timeout    | Servidor parou de receber áudio do contato.            |
+| `PEER_RX_TIMEOUT`     | User audio timeout    | Servidor parou de receber áudio do usuário.            |
+| `AUDIO_TIMEOUT`       | User audio timeout    | Alias obsoleto de `PEER_RX_TIMEOUT` — mantido por retrocompatibilidade. |
+| `CORRUPTED_KEYS`      | Corrupted keys        | Falha de integração ao decodificar o ACK de oferta.    |
+| `CONNECTION_TIMEOUT`  | Connection timeout    | Timeout de ping cliente↔servidor.                       |
+| `ACCOUNT_RESTRICTED`  | Account restricted    | Conta bloqueada pelo WhatsApp.                          |
+| `NO_CALL_PERMISSION`  | No call permission    | Integração sem permissão para chamada.                  |
+| `INTERNAL_ERROR`      | Internal error        | Erro genérico do servidor.                              |
+
+Quando a SDK não fornece motivo (caso típico de chamadas que falham antes do peer aceitar), apenas `A ligação falhou` aparece e o campo `message` da notificação fica vazio.
 
 {% hint style="info" %}
 Entradas `CALL_FAILED` são persistidas em `localStorage` junto com as notificações adicionadas via API pública, então sobrevivem a reload.

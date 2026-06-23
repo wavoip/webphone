@@ -90,7 +90,15 @@ export type TranslationKey =
   | "ICE gathering timed out"
   | "Connection failed"
   | "No host candidates"
-  | "Symmetric NAT suspected";
+  | "Symmetric NAT suspected"
+  // call fail reasons
+  | "Peer audio timeout"
+  | "User audio timeout"
+  | "Corrupted keys"
+  | "Connection timeout"
+  | "Account restricted"
+  | "No call permission"
+  | "Internal error";
 
 type LocaleResource = Record<TranslationKey, string>;
 
@@ -176,6 +184,13 @@ const ptBR: LocaleResource = {
   "Connection failed": "Conexão de mídia falhou.",
   "No host candidates": "Nenhum candidato local — verifique mDNS/VPN.",
   "Symmetric NAT suspected": "NAT simétrico suspeito — pode bloquear a chamada.",
+  "Peer audio timeout": "Sem áudio do contato",
+  "User audio timeout": "Sem áudio do usuário",
+  "Corrupted keys": "Chaves corrompidas",
+  "Connection timeout": "Tempo de conexão esgotado",
+  "Account restricted": "Conta restrita",
+  "No call permission": "Sem permissão para chamada",
+  "Internal error": "Erro interno",
 };
 
 const es: LocaleResource = {
@@ -258,6 +273,13 @@ const es: LocaleResource = {
   "Connection failed": "La conexión de medios falló.",
   "No host candidates": "Sin candidatos locales — revisa mDNS/VPN.",
   "Symmetric NAT suspected": "NAT simétrico sospechado — puede bloquear la llamada.",
+  "Peer audio timeout": "Sin audio del contacto",
+  "User audio timeout": "Sin audio del usuario",
+  "Corrupted keys": "Claves corruptas",
+  "Connection timeout": "Tiempo de conexión agotado",
+  "Account restricted": "Cuenta restringida",
+  "No call permission": "Sin permiso para llamar",
+  "Internal error": "Error interno",
 };
 
 a18n.addLocaleResource("pt-BR", ptBR);

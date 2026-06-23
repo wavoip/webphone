@@ -1,3 +1,4 @@
+import { translateCallFailReason } from "@/lib/callFailReasonLabel";
 import type { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
@@ -25,7 +26,7 @@ export function callFailedNotificationEffect({ store, notifications }: Deps): Un
         id: newId(),
         type: "CALL_FAILED",
         created_at: new Date(),
-        message: state.callFailReason ?? "",
+        message: state.callFailReason ? translateCallFailReason(state.callFailReason) : "",
         detail: `${call.deviceToken} -> ${call.peer.phone}`,
         token: call.deviceToken,
         isHidden: false,
