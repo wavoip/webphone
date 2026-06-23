@@ -94,6 +94,7 @@ export type TranslationKey =
   // call fail reasons (SDK codes used directly as keys)
   | "PEER_TX_TIMEOUT"
   | "PEER_RX_TIMEOUT"
+  | "AUDIO_TIMEOUT"
   | "CORRUPTED_KEYS"
   | "CONNECTION_TIMEOUT"
   | "ACCOUNT_RESTRICTED"
@@ -186,6 +187,7 @@ const ptBR: LocaleResource = {
   "Symmetric NAT suspected": "NAT simétrico suspeito — pode bloquear a chamada.",
   PEER_TX_TIMEOUT: "O contato parou de enviar áudio",
   PEER_RX_TIMEOUT: "O usuário parou de enviar áudio",
+  AUDIO_TIMEOUT: "O usuário parou de enviar áudio",
   CORRUPTED_KEYS: "Não foi possível estabelecer a chamada com segurança",
   CONNECTION_TIMEOUT: "A chamada perdeu contato com o servidor",
   ACCOUNT_RESTRICTED: "Conta do WhatsApp restrita",
@@ -275,6 +277,7 @@ const es: LocaleResource = {
   "Symmetric NAT suspected": "NAT simétrico sospechado — puede bloquear la llamada.",
   PEER_TX_TIMEOUT: "El contacto dejó de enviar audio",
   PEER_RX_TIMEOUT: "El usuario dejó de enviar audio",
+  AUDIO_TIMEOUT: "El usuario dejó de enviar audio",
   CORRUPTED_KEYS: "No se pudo establecer la llamada de forma segura",
   CONNECTION_TIMEOUT: "La llamada perdió contacto con el servidor",
   ACCOUNT_RESTRICTED: "Cuenta de WhatsApp restringida",
@@ -287,6 +290,7 @@ const es: LocaleResource = {
 const enOverrides: Partial<LocaleResource> = {
   PEER_TX_TIMEOUT: "The contact stopped sending audio",
   PEER_RX_TIMEOUT: "The user stopped sending audio",
+  AUDIO_TIMEOUT: "The user stopped sending audio",
   CORRUPTED_KEYS: "The call could not be established securely",
   CONNECTION_TIMEOUT: "The call lost contact with the server",
   ACCOUNT_RESTRICTED: "WhatsApp account is restricted",

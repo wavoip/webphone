@@ -5,8 +5,7 @@ import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import MarqueeText from "@/components/MarqueeText";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { translateCallFailReason } from "@/lib/callFailReasonLabel";
-import { t } from "@/lib/i18n";
+import { type TranslationKey, t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -25,7 +24,7 @@ export default function OutgoingScreen() {
         return t("Calling...");
       case "FAILED":
         return callFailReason
-          ? `${t("The call failed")}: ${translateCallFailReason(callFailReason)}`
+          ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
           : t("The call failed");
       case "REJECTED":
         return t("Call rejected");

@@ -130,7 +130,7 @@ console.log(failed[0]);
 // }
 ```
 
-O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O código da SDK é usado diretamente como chave de tradução — cada idioma define um texto amigável para cada código. Motivos desconhecidos (códigos novos que ainda não foram mapeados) caem pelo passthrough e aparecem como o código bruto.
+O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O código da SDK é usado diretamente como chave de tradução: o Webphone passa o código para `t()` e cada idioma define um texto amigável. Motivos desconhecidos (códigos novos ainda não traduzidos) caem pelo passthrough do `a18n` e aparecem como o código bruto.
 
 ### Motivos mapeados
 
