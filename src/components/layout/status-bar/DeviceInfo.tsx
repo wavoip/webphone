@@ -1,23 +1,13 @@
-import {
-  EyeIcon,
-  EyeSlashIcon,
-  PhoneIcon,
-  PhoneXIcon,
-  QrCodeIcon,
-  SpinnerIcon,
-  TrashIcon,
-  WarningIcon,
-} from "@phosphor-icons/react";
+import { CopyIcon, EyeIcon, EyeSlashIcon, PhoneIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
-import { useState } from "react";
-import { CopyableText } from "@/components/CopyableText";
+import { type KeyboardEvent, useContext, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { ShadowRootContext, useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -41,31 +31,32 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="wv:relative wv:flex wv:flex-row wv:justify-between wv:items-center wv:gap-3 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3"
+      className="wv:relative wv:flex wv:flex-row wv:justify-between wv:items-start wv:gap-4 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3"
     >
       <div className="wv:flex wv:flex-col wv:gap-2 wv:min-w-0 wv:flex-1">
-        <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:flex-wrap">
+        <div className="wv:flex wv:flex-row wv:items-center wv:gap-2">
           {needsWake && (
             <Tooltip>
               <TooltipTrigger
                 aria-label={t("Power on device")}
-                className="wv:inline-flex wv:items-center wv:justify-center wv:size-7 wv:rounded-md wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
+                className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
                 onClick={() => middleware.controllers.device.wakeUp(device.token)}
               >
-                <PowerIcon className="wv:size-4" />
+                <PowerIcon className="wv:size-3.5" />
               </TooltipTrigger>
               <TooltipContent container={root}>
                 <p>{t("Power on device")}</p>
               </TooltipContent>
             </Tooltip>
           )}
-          <StatusBadge status={device.status} hasQrCode={!!device.qrCode} />
-          {device.restricted && <RestrictionBadge until={device.restrictedUntil} />}
+          <StatusDot status={device.status} hasQrCode={!!device.qrCode} />
         </div>
 
-        {device.contact?.phone && <PhonePill phone={device.contact.phone} enable={device.enable} />}
+        {device.contact?.phone && <PhoneLine phone={device.contact.phone} />}
 
-        <TokenPill token={device.token} enable={device.enable} />
+        <TokenLine token={device.token} />
+
+        {device.restricted && <RestrictionBar until={device.restrictedUntil} />}
       </div>
 
       <ActionCluster
@@ -110,113 +101,84 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   );
 }
 
-type StatusVisual = {
-  label: TranslationKey;
-  icon: React.ReactNode;
-  tone: string;
-};
+type StatusVisual = { label: TranslationKey; dot: string };
 
 function statusVisual(status: DeviceStateEntry["status"], hasQrCode: boolean): StatusVisual {
-  if (status === "open" || status === "UP") {
-    return {
-      label: "Connected",
-      icon: <PhoneIcon size={14} weight="fill" />,
-      tone: "wv:bg-green-500/15 wv:text-green-600 wv:border-l-4 wv:border-green-500",
-    };
-  }
-  if (status === "BUILDING") {
-    return {
-      label: "Building",
-      icon: <SpinnerIcon size={14} className="wv:animate-spin" />,
-      tone: "wv:bg-foreground/10 wv:text-foreground wv:border-l-4 wv:border-foreground/30",
-    };
-  }
-  if (status === "connecting" || hasQrCode) {
-    return {
-      label: "Connecting",
-      icon: <QrCodeIcon size={14} weight="fill" />,
-      tone: "wv:bg-blue-500/15 wv:text-blue-500 wv:border-l-4 wv:border-blue-500",
-    };
-  }
-  if (status === "hibernating") {
-    return {
-      label: "Hibernating",
-      icon: <SpinnerIcon size={14} />,
-      tone: "wv:bg-foreground/10 wv:text-muted-foreground wv:border-l-4 wv:border-foreground/30",
-    };
-  }
-  if (status === "error") {
-    return {
-      label: "Failed",
-      icon: <PhoneXIcon size={14} weight="fill" />,
-      tone: "wv:bg-red-500/15 wv:text-red-500 wv:border-l-4 wv:border-red-500",
-    };
-  }
-  return {
-    label: "Disconnected",
-    icon: <PhoneXIcon size={14} weight="fill" />,
-    tone: "wv:bg-red-500/15 wv:text-red-500 wv:border-l-4 wv:border-red-500",
-  };
+  if (status === "open" || status === "UP") return { label: "Connected", dot: "wv:bg-green-500" };
+  if (status === "BUILDING") return { label: "Building", dot: "wv:bg-foreground/40" };
+  if (status === "connecting" || hasQrCode) return { label: "Connecting", dot: "wv:bg-blue-500" };
+  if (status === "hibernating") return { label: "Hibernating", dot: "wv:bg-foreground/40" };
+  if (status === "error") return { label: "Failed", dot: "wv:bg-red-500" };
+  return { label: "Disconnected", dot: "wv:bg-red-500" };
 }
 
-function StatusBadge({ status, hasQrCode }: { status: DeviceStateEntry["status"]; hasQrCode: boolean }) {
+function StatusDot({ status, hasQrCode }: { status: DeviceStateEntry["status"]; hasQrCode: boolean }) {
   if (!status) return null;
   const v = statusVisual(status, hasQrCode);
+  const pulse = status === "connecting" || hasQrCode || status === "BUILDING";
   return (
-    <span
-      className={`wv:inline-flex wv:items-center wv:gap-1 wv:rounded wv:px-1.5 wv:py-0.5 wv:text-[12px] wv:font-semibold ${v.tone}`}
-    >
-      {v.icon}
+    <span className="wv:inline-flex wv:items-center wv:gap-1.5 wv:text-[12px] wv:font-medium wv:text-muted-foreground">
+      <span className={`wv:relative wv:inline-flex wv:size-2 wv:rounded-full ${v.dot}`}>
+        {pulse && <span className={`wv:absolute wv:inset-0 wv:rounded-full wv:animate-ping wv:opacity-60 ${v.dot}`} />}
+      </span>
       {t(v.label)}
     </span>
   );
 }
 
-function PhonePill({ phone, enable }: { phone: string; enable: boolean }) {
+function PhoneLine({ phone }: { phone: string }) {
   return (
-    <CopyableText value={phone} ariaLabel={t("Copy phone")} className="wv:self-start">
-      <span
-        data-enable={enable}
-        className="wv:inline-flex wv:items-center wv:gap-1.5 wv:rounded-full wv:bg-foreground/5 wv:border wv:border-border/60 wv:px-3 wv:py-1 wv:text-sm wv:font-medium wv:text-foreground"
-      >
-        <PhoneIcon size={14} weight="fill" className="wv:text-green-500" />
-        {phone}
+    <Copyable value={phone} ariaLabel={t("Copy phone")}>
+      <span className="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
+        <PhoneIcon size={16} weight="fill" className="wv:text-green-500" />
+        <span className="wv:truncate">{phone}</span>
       </span>
-    </CopyableText>
+    </Copyable>
   );
 }
 
-const TOKEN_MASK = "••••••••••••••••";
+const TOKEN_MASK = "••••••••••••";
 
-function TokenPill({ token, enable }: { token: string; enable: boolean }) {
+function TokenLine({ token }: { token: string }) {
   const [visible, setVisible] = useState(false);
-  const display = visible ? token : TOKEN_MASK;
   const { root } = useShadowRoot();
 
   return (
-    <div className="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:self-start wv:max-w-full wv:min-w-0">
-      <CopyableText value={token} ariaLabel={t("Copy token")} className="wv:min-w-0">
-        <span
-          data-enable={enable}
-          title={visible ? token : undefined}
-          className="wv:inline-block wv:rounded-full wv:bg-foreground/5 wv:border wv:border-border/60 wv:px-3 wv:py-1 wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[10rem]"
-        >
-          {display}
-        </span>
-      </CopyableText>
+    <div className="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:min-w-0">
+      <span
+        title={visible ? token : undefined}
+        className="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[10rem]"
+      >
+        {visible ? token : TOKEN_MASK}
+      </span>
       <Tooltip>
         <TooltipTrigger
           type="button"
           aria-label={visible ? t("Hide token") : t("Show token")}
-          className="wv:inline-flex wv:items-center wv:justify-center wv:size-7 wv:rounded-md wv:text-muted-foreground wv:hover:bg-accent wv:hover:text-foreground wv:hover:cursor-pointer"
+          className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
           onClick={() => setVisible((v) => !v)}
         >
-          {visible ? <EyeSlashIcon className="wv:size-4" /> : <EyeIcon className="wv:size-4" />}
+          {visible ? <EyeSlashIcon className="wv:size-3.5" /> : <EyeIcon className="wv:size-3.5" />}
         </TooltipTrigger>
         <TooltipContent container={root}>
           <p>{visible ? t("Hide token") : t("Show token")}</p>
         </TooltipContent>
       </Tooltip>
+      <CopyIconButton value={token} ariaLabel={t("Copy token")} />
+    </div>
+  );
+}
+
+function RestrictionBar({ until }: { until: Date | null }) {
+  return (
+    <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:mt-1 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
+      <WarningIcon size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
+      <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
+      {until && (
+        <span className="wv:text-[11px] wv:text-foreground/70 wv:ml-auto wv:truncate">
+          {t("Lifted on")} {formatRestrictionDate(until)}
+        </span>
+      )}
     </div>
   );
 }
@@ -246,10 +208,10 @@ function ActionCluster({
   const switchDisabled = !["open", "CONNECTED"].includes(device.status as string);
 
   return (
-    <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0 wv:rounded-lg wv:bg-background/40 wv:border wv:border-border/60 wv:p-1 wv:max-sm:justify-end wv:max-sm:self-end">
+    <div className="wv:flex wv:items-center wv:gap-3 wv:shrink-0 wv:max-sm:justify-end wv:max-sm:self-end">
       {showEnable && (
         <Tooltip>
-          <TooltipTrigger className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer wv:disabled:opacity-50">
+          <TooltipTrigger asChild>
             <Switch
               aria-label={device.enable ? "disable device" : "enable device"}
               className="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
@@ -264,16 +226,14 @@ function ActionCluster({
         </Tooltip>
       )}
 
-      {showEnable && (device.qrCode || showRemove) && <span className="wv:w-px wv:h-6 wv:bg-border" />}
-
       {device.qrCode && (
         <Tooltip>
           <TooltipTrigger
             aria-label={t("Show QR Code")}
-            className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer"
+            className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer wv:text-muted-foreground wv:hover:text-foreground"
             onClick={onShowQRCode}
           >
-            <QrCodeIcon className="wv:size-5" />
+            <QrCodeIcon className="wv:size-4" />
           </TooltipTrigger>
           <TooltipContent container={root}>
             <p>{t("Show QR Code")}</p>
@@ -281,16 +241,14 @@ function ActionCluster({
         </Tooltip>
       )}
 
-      {device.qrCode && showRemove && <span className="wv:w-px wv:h-6 wv:bg-border" />}
-
       {showRemove && (
         <Tooltip>
           <TooltipTrigger
             aria-label={t("Delete")}
-            className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:bg-destructive wv:text-destructive-foreground wv:hover:bg-destructive/90 wv:hover:cursor-pointer"
+            className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:text-destructive wv:hover:bg-destructive/10 wv:hover:cursor-pointer"
             onClick={onConfirmDelete}
           >
-            <TrashIcon className="wv:size-5" />
+            <TrashIcon className="wv:size-4" />
           </TooltipTrigger>
           <TooltipContent container={root}>
             <p>{t("Delete")}</p>
@@ -301,22 +259,105 @@ function ActionCluster({
   );
 }
 
-function RestrictionBadge({ until }: { until: Date | null }) {
+function formatRestrictionDate(date: Date): string {
+  return new Intl.DateTimeFormat(getLanguage(), { dateStyle: "short", timeStyle: "short" }).format(date);
+}
+
+const FEEDBACK_MS = 1500;
+
+function Copyable({ value, ariaLabel, children }: { value: string; ariaLabel: string; children: React.ReactNode }) {
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shadow = useContext(ShadowRootContext);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    setCopied(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), FEEDBACK_MS);
+  };
+  const onKey = (e: KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    void copy();
+  };
+
   return (
-    <div className="wv:flex wv:flex-row wv:items-center wv:gap-1.5 wv:flex-wrap">
-      <span className="wv:inline-flex wv:items-center wv:gap-1 wv:rounded wv:px-1.5 wv:py-0.5 wv:bg-amber-500/15 wv:border-l-4 wv:border-amber-500">
-        <WarningIcon size={14} weight="fill" className="wv:text-amber-500" />
-        <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
-      </span>
-      {until && (
-        <span className="wv:rounded-full wv:bg-amber-500 wv:text-white wv:px-2 wv:py-0.5 wv:text-[11px] wv:font-semibold">
-          {t("Lifted on")} {formatRestrictionDate(until)}
+    <Tooltip open={copied}>
+      <TooltipTrigger asChild>
+        {/* biome-ignore lint/a11y/useSemanticElements: child may be block, invalid inside <button>. */}
+        <span
+          role="button"
+          tabIndex={0}
+          aria-label={ariaLabel}
+          onClick={copy}
+          onKeyDown={onKey}
+          className="wv:cursor-pointer wv:select-none wv:rounded wv:transition-colors wv:hover:bg-foreground/5 wv:active:bg-foreground/10 wv:px-1 wv:-mx-1 wv:inline-flex wv:max-w-full wv:min-w-0"
+        >
+          {children}
         </span>
-      )}
-    </div>
+      </TooltipTrigger>
+      <TooltipContent container={shadow?.root} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
+        {t("Copied")}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
-function formatRestrictionDate(date: Date): string {
-  return new Intl.DateTimeFormat(getLanguage(), { dateStyle: "short", timeStyle: "short" }).format(date);
+function CopyIconButton({ value, ariaLabel }: { value: string; ariaLabel: string }) {
+  const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shadow = useContext(ShadowRootContext);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    },
+    [],
+  );
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (e) {
+      console.error(e);
+      return;
+    }
+    setCopied(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setCopied(false), FEEDBACK_MS);
+  };
+
+  return (
+    <Tooltip open={copied || undefined}>
+      <TooltipTrigger
+        type="button"
+        aria-label={ariaLabel}
+        onClick={copy}
+        className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
+      >
+        <CopyIcon className="wv:size-3.5" />
+      </TooltipTrigger>
+      <TooltipContent
+        container={shadow?.root}
+        side="top"
+        sideOffset={4}
+        className={copied ? "wv:bg-green-600 wv:text-white" : ""}
+      >
+        <p>{copied ? t("Copied") : ariaLabel}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
