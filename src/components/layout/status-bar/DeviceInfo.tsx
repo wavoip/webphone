@@ -1,13 +1,14 @@
 import { CopyIcon, EyeIcon, EyeSlashIcon, PhoneIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
-import { type KeyboardEvent, useContext, useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import { CopyableText } from "@/components/CopyableText";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { ShadowRootContext, useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -149,12 +150,12 @@ function StatusDot({
 
 function PhoneLine({ phone }: { phone: string }) {
   return (
-    <Copyable value={phone} ariaLabel={t("Copy phone")}>
+    <CopyableText value={phone} ariaLabel={t("Copy phone")}>
       <span className="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
         <PhoneIcon size={16} weight="fill" className="wv:text-green-500" />
         <span className="wv:truncate">{phone}</span>
       </span>
-    </Copyable>
+    </CopyableText>
   );
 }
 
@@ -185,7 +186,11 @@ function TokenLine({ token }: { token: string }) {
           <p>{visible ? t("Hide token") : t("Show token")}</p>
         </TooltipContent>
       </Tooltip>
-      <CopyIconButton value={token} ariaLabel={t("Copy token")} />
+      <CopyableText value={token} ariaLabel={t("Copy token")}>
+        <span className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:text-muted-foreground wv:hover:text-foreground">
+          <CopyIcon className="wv:size-3.5" />
+        </span>
+      </CopyableText>
     </div>
   );
 }
@@ -284,103 +289,4 @@ function ActionCluster({
 
 function formatRestrictionDate(date: Date): string {
   return new Intl.DateTimeFormat(getLanguage(), { dateStyle: "short", timeStyle: "short" }).format(date);
-}
-
-const FEEDBACK_MS = 1500;
-
-function Copyable({ value, ariaLabel, children }: { value: string; ariaLabel: string; children: React.ReactNode }) {
-  const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shadow = useContext(ShadowRootContext);
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    [],
-  );
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (e) {
-      console.error(e);
-      return;
-    }
-    setCopied(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), FEEDBACK_MS);
-  };
-  const onKey = (e: KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key !== "Enter" && e.key !== " ") return;
-    e.preventDefault();
-    void copy();
-  };
-
-  return (
-    <Tooltip open={copied}>
-      <TooltipTrigger asChild>
-        {/* biome-ignore lint/a11y/useSemanticElements: child may be block, invalid inside <button>. */}
-        <span
-          role="button"
-          tabIndex={0}
-          aria-label={ariaLabel}
-          onClick={copy}
-          onKeyDown={onKey}
-          className="wv:cursor-pointer wv:select-none wv:rounded wv:transition-colors wv:hover:bg-foreground/5 wv:active:bg-foreground/10 wv:px-1 wv:-mx-1 wv:inline-flex wv:max-w-full wv:min-w-0"
-        >
-          {children}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent container={shadow?.root} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
-        {t("Copied")}
-      </TooltipContent>
-    </Tooltip>
-  );
-}
-
-function CopyIconButton({ value, ariaLabel }: { value: string; ariaLabel: string }) {
-  const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shadow = useContext(ShadowRootContext);
-
-  useEffect(
-    () => () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    },
-    [],
-  );
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch (e) {
-      console.error(e);
-      return;
-    }
-    setCopied(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), FEEDBACK_MS);
-  };
-
-  return (
-    <Tooltip open={copied || undefined}>
-      <TooltipTrigger
-        type="button"
-        aria-label={ariaLabel}
-        onClick={copy}
-        className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
-      >
-        <CopyIcon className="wv:size-3.5" />
-      </TooltipTrigger>
-      <TooltipContent
-        container={shadow?.root}
-        side="top"
-        sideOffset={4}
-        className={copied ? "wv:bg-green-600 wv:text-white" : ""}
-      >
-        <p>{copied ? t("Copied") : ariaLabel}</p>
-      </TooltipContent>
-    </Tooltip>
-  );
 }
