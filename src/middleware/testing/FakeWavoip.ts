@@ -140,8 +140,10 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
 export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
   qrCode?: string;
   contact?: Contact;
-  status: DeviceStatus = "disconnected";
+  status: DeviceStatus = "BUILDING";
+  connectionStatus: "connected" | "disconnected" | "reconnecting" = "disconnected";
   restricted = false;
+  restrictedUntil: Date | null = null;
   readonly token: string;
 
   constructor(token: string) {

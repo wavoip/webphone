@@ -7,6 +7,22 @@ export type TranslationKey =
   | "Device restricted"
   | "Restriction lifted"
   | "Restricted"
+  | "Restricted until"
+  | "Lifted on"
+  // clipboard
+  | "Copied"
+  | "Copy token"
+  | "Copy phone"
+  // token visibility
+  | "Show token"
+  | "Hide token"
+  // device status labels
+  | "Connected"
+  | "Hibernating"
+  | "Connecting"
+  | "Building"
+  | "Restarting"
+  | "Closed"
   // device status
   | "Power on device"
   | "Enable device"
@@ -60,6 +76,11 @@ export type TranslationKey =
   | "Settings"
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
+  | "Back"
+  | "Link a WhatsApp number"
+  | "Open WhatsApp on your phone"
+  | "Tap menu, then Linked devices"
+  | "Point your camera at the code below"
   | "Numbers"
   | "Enter the token"
   // troubleshooting
@@ -109,6 +130,19 @@ const ptBR: LocaleResource = {
   "Device restricted": "Dispositivo restrito",
   "Restriction lifted": "Restrição removida",
   Restricted: "Restrito",
+  "Restricted until": "Restrito até",
+  "Lifted on": "Será removida em",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construindo",
+  Restarting: "Reiniciando",
+  Closed: "Fechado",
   "Power on device": "Ligar Dispositivo",
   "Enable device": "Ativar dispositivo",
   "Disable device": "Desativar dispositivo",
@@ -155,6 +189,11 @@ const ptBR: LocaleResource = {
   Settings: "Configurações",
   "Here you can configure the entire webphone": "Aqui você pode configurar todo webphone",
   "Point your phone camera": "Aponte a câmera do celular",
+  Back: "Voltar",
+  "Link a WhatsApp number": "Vincular um número do WhatsApp",
+  "Open WhatsApp on your phone": "Abra o WhatsApp no seu celular",
+  "Tap menu, then Linked devices": "Toque no menu e depois em Aparelhos conectados",
+  "Point your camera at the code below": "Aponte a câmera para o QR code abaixo",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
   Preferences: "Preferências",
@@ -199,6 +238,19 @@ const es: LocaleResource = {
   "Device restricted": "Dispositivo restringido",
   "Restriction lifted": "Restricción levantada",
   Restricted: "Restringido",
+  "Restricted until": "Restringido hasta",
+  "Lifted on": "Se eliminará el",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construyendo",
+  Restarting: "Reiniciando",
+  Closed: "Cerrado",
   "Power on device": "Encender dispositivo",
   "Enable device": "Activar dispositivo",
   "Disable device": "Desactivar dispositivo",
@@ -245,6 +297,11 @@ const es: LocaleResource = {
   Settings: "Configuración",
   "Here you can configure the entire webphone": "Aquí puedes configurar todo el webphone",
   "Point your phone camera": "Apunta la cámara del móvil",
+  Back: "Volver",
+  "Link a WhatsApp number": "Vincular un número de WhatsApp",
+  "Open WhatsApp on your phone": "Abre WhatsApp en tu móvil",
+  "Tap menu, then Linked devices": "Toca el menú y luego Dispositivos vinculados",
+  "Point your camera at the code below": "Apunta la cámara al código de abajo",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
   Preferences: "Preferencias",
