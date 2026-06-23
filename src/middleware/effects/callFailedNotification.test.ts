@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { setLanguage } from "@/lib/i18n";
 import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { callFailedNotificationEffect } from "@/middleware/effects/callFailedNotification";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
@@ -67,5 +68,19 @@ describe("callFailedNotificationEffect", () => {
   it("does not fire when there is no call in flight", () => {
     store.getState().setCallStatus("FAILED");
     expect(store.getState().notifications).toHaveLength(0);
+  });
+
+  it("translates known fail reasons before storing them in the notification", () => {
+    setLanguage("pt-BR");
+    try {
+      const active = new FakeCallActive("c1", "tok-1");
+      store.getState().setActive(active);
+      store.getState().setCallStatus("ACTIVE");
+      store.getState().setCallFailReason("PEER_TX_TIMEOUT");
+      store.getState().setCallStatus("FAILED");
+      expect(store.getState().notifications[0].message).toBe("O contato parou de enviar áudio");
+    } finally {
+      setLanguage("en");
+    }
   });
 });

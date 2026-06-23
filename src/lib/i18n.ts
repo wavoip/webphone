@@ -90,7 +90,16 @@ export type TranslationKey =
   | "ICE gathering timed out"
   | "Connection failed"
   | "No host candidates"
-  | "Symmetric NAT suspected";
+  | "Symmetric NAT suspected"
+  // call fail reasons (SDK codes used directly as keys)
+  | "PEER_TX_TIMEOUT"
+  | "PEER_RX_TIMEOUT"
+  | "AUDIO_TIMEOUT"
+  | "CORRUPTED_KEYS"
+  | "CONNECTION_TIMEOUT"
+  | "ACCOUNT_RESTRICTED"
+  | "NO_CALL_PERMISSION"
+  | "INTERNAL_ERROR";
 
 type LocaleResource = Record<TranslationKey, string>;
 
@@ -176,6 +185,14 @@ const ptBR: LocaleResource = {
   "Connection failed": "Conexão de mídia falhou.",
   "No host candidates": "Nenhum candidato local — verifique mDNS/VPN.",
   "Symmetric NAT suspected": "NAT simétrico suspeito — pode bloquear a chamada.",
+  PEER_TX_TIMEOUT: "O contato parou de enviar áudio",
+  PEER_RX_TIMEOUT: "O usuário parou de enviar áudio",
+  AUDIO_TIMEOUT: "O usuário parou de enviar áudio",
+  CORRUPTED_KEYS: "Não foi possível estabelecer a chamada com segurança",
+  CONNECTION_TIMEOUT: "A chamada perdeu contato com o servidor",
+  ACCOUNT_RESTRICTED: "Conta do WhatsApp restrita",
+  NO_CALL_PERMISSION: "Conta sem permissão para realizar chamadas",
+  INTERNAL_ERROR: "Algo deu errado no servidor",
 };
 
 const es: LocaleResource = {
@@ -258,10 +275,32 @@ const es: LocaleResource = {
   "Connection failed": "La conexión de medios falló.",
   "No host candidates": "Sin candidatos locales — revisa mDNS/VPN.",
   "Symmetric NAT suspected": "NAT simétrico sospechado — puede bloquear la llamada.",
+  PEER_TX_TIMEOUT: "El contacto dejó de enviar audio",
+  PEER_RX_TIMEOUT: "El usuario dejó de enviar audio",
+  AUDIO_TIMEOUT: "El usuario dejó de enviar audio",
+  CORRUPTED_KEYS: "No se pudo establecer la llamada de forma segura",
+  CONNECTION_TIMEOUT: "La llamada perdió contacto con el servidor",
+  ACCOUNT_RESTRICTED: "Cuenta de WhatsApp restringida",
+  NO_CALL_PERMISSION: "Cuenta sin permiso para realizar llamadas",
+  INTERNAL_ERROR: "Algo salió mal en el servidor",
+};
+
+// Source locale ("en") falls back to the key itself for human-readable English
+// strings. The SDK reason codes are not human-readable, so override just those.
+const enOverrides: Partial<LocaleResource> = {
+  PEER_TX_TIMEOUT: "The contact stopped sending audio",
+  PEER_RX_TIMEOUT: "The user stopped sending audio",
+  AUDIO_TIMEOUT: "The user stopped sending audio",
+  CORRUPTED_KEYS: "The call could not be established securely",
+  CONNECTION_TIMEOUT: "The call lost contact with the server",
+  ACCOUNT_RESTRICTED: "WhatsApp account is restricted",
+  NO_CALL_PERMISSION: "Account is not allowed to place calls",
+  INTERNAL_ERROR: "Something went wrong on the server",
 };
 
 a18n.addLocaleResource("pt-BR", ptBR);
 a18n.addLocaleResource("es", es);
+a18n.addLocaleResource("en", enOverrides as LocaleResource);
 
 export const t = (key: TranslationKey): string => a18n(key);
 

@@ -6,7 +6,7 @@ import { CallButtons } from "@/components/CallButtons";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
-import { t } from "@/lib/i18n";
+import { type TranslationKey, t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -27,7 +27,7 @@ export default function CallScreen() {
           ? t("Reconnecting")
           : callStatus === "FAILED"
             ? callFailReason
-              ? `${t("The call failed")}: ${callFailReason}`
+              ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
               : t("The call failed")
             : null,
     [callStatus, callFailReason],
