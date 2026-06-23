@@ -31,44 +31,46 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="wv:relative wv:flex wv:flex-row wv:justify-between wv:items-start wv:gap-4 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3"
+      className="wv:relative wv:flex wv:flex-col wv:gap-3 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors"
     >
-      <div className="wv:flex wv:flex-col wv:gap-2 wv:min-w-0 wv:flex-1">
-        <div className="wv:flex wv:flex-row wv:items-center wv:gap-2">
-          {needsWake && (
-            <Tooltip>
-              <TooltipTrigger
-                aria-label={t("Power on device")}
-                className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
-                onClick={() => middleware.controllers.device.wakeUp(device.token)}
-              >
-                <PowerIcon className="wv:size-3.5" />
-              </TooltipTrigger>
-              <TooltipContent container={root}>
-                <p>{t("Power on device")}</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
-          <StatusDot status={device.status} hasQrCode={!!device.qrCode} />
+      <div className="wv:flex wv:flex-row wv:justify-between wv:items-start wv:gap-4 wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3">
+        <div className="wv:flex wv:flex-col wv:gap-2 wv:min-w-0 wv:flex-1">
+          <div className="wv:flex wv:flex-row wv:items-center wv:gap-2">
+            {needsWake && (
+              <Tooltip>
+                <TooltipTrigger
+                  aria-label={t("Power on device")}
+                  className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
+                  onClick={() => middleware.controllers.device.wakeUp(device.token)}
+                >
+                  <PowerIcon className="wv:size-3.5" />
+                </TooltipTrigger>
+                <TooltipContent container={root}>
+                  <p>{t("Power on device")}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+            <StatusDot status={device.status} hasQrCode={!!device.qrCode} />
+          </div>
+
+          {device.contact?.phone && <PhoneLine phone={device.contact.phone} />}
+
+          <TokenLine token={device.token} />
         </div>
 
-        {device.contact?.phone && <PhoneLine phone={device.contact.phone} />}
-
-        <TokenLine token={device.token} />
-
-        {device.restricted && <RestrictionBar until={device.restrictedUntil} />}
+        <ActionCluster
+          showEnable={showEnable}
+          showRemove={showRemove}
+          device={device}
+          root={root}
+          onEnable={() => enableDevice(device.token)}
+          onDisable={() => disableDevice(device.token)}
+          onShowQRCode={() => setShowQRCode(device.qrCode ?? null)}
+          onConfirmDelete={() => setConfirmDelete(true)}
+        />
       </div>
 
-      <ActionCluster
-        showEnable={showEnable}
-        showRemove={showRemove}
-        device={device}
-        root={root}
-        onEnable={() => enableDevice(device.token)}
-        onDisable={() => disableDevice(device.token)}
-        onShowQRCode={() => setShowQRCode(device.qrCode ?? null)}
-        onConfirmDelete={() => setConfirmDelete(true)}
-      />
+      {device.restricted && <RestrictionBar until={device.restrictedUntil} />}
 
       {confirmDelete && (
         <div
@@ -171,7 +173,7 @@ function TokenLine({ token }: { token: string }) {
 
 function RestrictionBar({ until }: { until: Date | null }) {
   return (
-    <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:mt-1 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
+    <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
       <WarningIcon size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
       <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
       {until && (
