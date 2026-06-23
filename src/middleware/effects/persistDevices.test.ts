@@ -17,8 +17,8 @@ describe("persistDevicesEffect", () => {
   it("writes persisted devices to localStorage on change", () => {
     const unsub = persistDevicesEffect({ store });
     store.getState().setDevices([
-      { token: "a", status: "open", restricted: false, enable: true, persist: true },
-      { token: "b", status: "open", restricted: false, enable: false, persist: false },
+      { token: "a", status: "open", restricted: false, restrictedUntil: null, enable: true, persist: true },
+      { token: "b", status: "open", restricted: false, restrictedUntil: null, enable: false, persist: false },
     ]);
 
     expect(localStorage.getItem(STORAGE_KEY)).toBe("a:true:true");
@@ -27,7 +27,7 @@ describe("persistDevicesEffect", () => {
 
   it("ignores devices with persist=false", () => {
     const unsub = persistDevicesEffect({ store });
-    store.getState().setDevices([{ token: "a", status: "open", restricted: false, enable: true, persist: false }]);
+    store.getState().setDevices([{ token: "a", status: "open", restricted: false, restrictedUntil: null, enable: true, persist: false }]);
 
     expect(localStorage.getItem(STORAGE_KEY)).toBe("");
     unsub();
@@ -35,10 +35,10 @@ describe("persistDevicesEffect", () => {
 
   it("unsub stops further writes", () => {
     const unsub = persistDevicesEffect({ store });
-    store.getState().setDevices([{ token: "a", status: "open", restricted: false, enable: true, persist: true }]);
+    store.getState().setDevices([{ token: "a", status: "open", restricted: false, restrictedUntil: null, enable: true, persist: true }]);
     unsub();
 
-    store.getState().setDevices([{ token: "b", status: "open", restricted: false, enable: true, persist: true }]);
+    store.getState().setDevices([{ token: "b", status: "open", restricted: false, restrictedUntil: null, enable: true, persist: true }]);
     expect(localStorage.getItem(STORAGE_KEY)).toBe("a:true:true");
   });
 

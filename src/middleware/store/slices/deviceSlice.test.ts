@@ -9,6 +9,7 @@ function makeDevice(token: string, overrides: Partial<DeviceStateEntry> = {}): D
     qrCode: undefined,
     contact: undefined,
     restricted: false,
+    restrictedUntil: null,
     enable: false,
     persist: false,
     ...overrides,
@@ -88,5 +89,14 @@ describe("deviceSlice", () => {
     expect(store.getState().devices[0].restricted).toBe(true);
     store.getState().updateDeviceState("a", { restricted: false });
     expect(store.getState().devices[0].restricted).toBe(false);
+  });
+
+  it("updateDeviceState patches restrictedUntil", () => {
+    store.getState().setDevices([makeDevice("a")]);
+    const until = new Date("2030-01-15T12:34:56.000Z");
+    store.getState().updateDeviceState("a", { restrictedUntil: until });
+    expect(store.getState().devices[0].restrictedUntil).toEqual(until);
+    store.getState().updateDeviceState("a", { restrictedUntil: null });
+    expect(store.getState().devices[0].restrictedUntil).toBe(null);
   });
 });

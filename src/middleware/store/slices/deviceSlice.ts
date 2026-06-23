@@ -8,6 +8,7 @@ export type DeviceStateEntry = {
   qrCode?: string;
   contact?: Contact;
   restricted: boolean;
+  restrictedUntil: Date | null;
   enable: boolean;
   persist: boolean;
 };

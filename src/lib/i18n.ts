@@ -7,6 +7,7 @@ export type TranslationKey =
   | "Device restricted"
   | "Restriction lifted"
   | "Restricted"
+  | "Restricted until"
   // device status
   | "Power on device"
   | "Enable device"
@@ -109,6 +110,7 @@ const ptBR: LocaleResource = {
   "Device restricted": "Dispositivo restrito",
   "Restriction lifted": "Restrição removida",
   Restricted: "Restrito",
+  "Restricted until": "Restrito até",
   "Power on device": "Ligar Dispositivo",
   "Enable device": "Ativar dispositivo",
   "Disable device": "Desativar dispositivo",
@@ -199,6 +201,7 @@ const es: LocaleResource = {
   "Device restricted": "Dispositivo restringido",
   "Restriction lifted": "Restricción levantada",
   Restricted: "Restringido",
+  "Restricted until": "Restringido hasta",
   "Power on device": "Encender dispositivo",
   "Enable device": "Activar dispositivo",
   "Disable device": "Desactivar dispositivo",

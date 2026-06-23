@@ -142,6 +142,7 @@ export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
   contact?: Contact;
   status: DeviceStatus = "disconnected";
   restricted = false;
+  restrictedUntil: Date | null = null;
   readonly token: string;
 
   constructor(token: string) {

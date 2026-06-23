@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { t } from "@/lib/i18n";
+import { getLanguage, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
@@ -36,7 +36,11 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
 
         {device.restricted && (
           <StatusLine icon={<WarningIcon size={18} weight="fill" className="wv:text-amber-500" />}>
-            <span className="wv:font-medium wv:text-amber-500">{t("Restricted")}</span>
+            <span className="wv:font-medium wv:text-amber-500">
+              {device.restrictedUntil
+                ? `${t("Restricted until")} ${formatRestrictionDate(device.restrictedUntil)}`
+                : t("Restricted")}
+            </span>
           </StatusLine>
         )}
 
@@ -216,6 +220,10 @@ function DeviceStatus({
   }
 
   return null;
+}
+
+function formatRestrictionDate(date: Date): string {
+  return new Intl.DateTimeFormat(getLanguage(), { dateStyle: "short", timeStyle: "short" }).format(date);
 }
 
 function StatusLine({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
