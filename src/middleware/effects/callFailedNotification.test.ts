@@ -78,7 +78,7 @@ describe("callFailedNotificationEffect", () => {
       store.getState().setCallStatus("ACTIVE");
       store.getState().setCallFailReason("PEER_TX_TIMEOUT");
       store.getState().setCallStatus("FAILED");
-      expect(store.getState().notifications[0].message).toBe("Sem áudio do contato");
+      expect(store.getState().notifications[0].message).toBe("O contato parou de enviar áudio");
     } finally {
       setLanguage("en");
     }

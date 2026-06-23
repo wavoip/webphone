@@ -130,20 +130,20 @@ console.log(failed[0]);
 // }
 ```
 
-O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O Webphone consulta uma tabela interna que mapeia cada código da SDK para uma `TranslationKey`. Motivos desconhecidos (códigos novos que ainda não foram mapeados) caem pelo passthrough e aparecem como o código bruto.
+O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O código da SDK é usado diretamente como chave de tradução — cada idioma define um texto amigável para cada código. Motivos desconhecidos (códigos novos que ainda não foram mapeados) caem pelo passthrough e aparecem como o código bruto.
 
 ### Motivos mapeados
 
-| Código da SDK         | Etiqueta (en)         | Observações                                             |
-| --------------------- | --------------------- | ------------------------------------------------------- |
-| `PEER_TX_TIMEOUT`     | Peer audio timeout    | Servidor parou de receber áudio do contato.            |
-| `PEER_RX_TIMEOUT`     | User audio timeout    | Servidor parou de receber áudio do usuário.            |
-| `AUDIO_TIMEOUT`       | User audio timeout    | Alias obsoleto de `PEER_RX_TIMEOUT` — mantido por retrocompatibilidade. |
-| `CORRUPTED_KEYS`      | Corrupted keys        | Falha de integração ao decodificar o ACK de oferta.    |
-| `CONNECTION_TIMEOUT`  | Connection timeout    | Timeout de ping cliente↔servidor.                       |
-| `ACCOUNT_RESTRICTED`  | Account restricted    | Conta bloqueada pelo WhatsApp.                          |
-| `NO_CALL_PERMISSION`  | No call permission    | Integração sem permissão para chamada.                  |
-| `INTERNAL_ERROR`      | Internal error        | Erro genérico do servidor.                              |
+| Código da SDK         | Significado (pt-BR)                                       |
+| --------------------- | --------------------------------------------------------- |
+| `PEER_TX_TIMEOUT`     | O contato parou de enviar áudio.                          |
+| `PEER_RX_TIMEOUT`     | O usuário parou de enviar áudio.                          |
+| `AUDIO_TIMEOUT`       | Alias obsoleto de `PEER_RX_TIMEOUT` — mesma mensagem.     |
+| `CORRUPTED_KEYS`      | Não foi possível estabelecer a chamada com segurança.     |
+| `CONNECTION_TIMEOUT`  | A chamada perdeu contato com o servidor.                  |
+| `ACCOUNT_RESTRICTED`  | Conta do WhatsApp restrita.                               |
+| `NO_CALL_PERMISSION`  | Conta sem permissão para realizar chamadas.               |
+| `INTERNAL_ERROR`      | Algo deu errado no servidor.                              |
 
 Quando a SDK não fornece motivo (caso típico de chamadas que falham antes do peer aceitar), apenas `A ligação falhou` aparece e o campo `message` da notificação fica vazio.
 

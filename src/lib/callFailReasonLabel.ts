@@ -1,25 +1,22 @@
 import { type TranslationKey, t } from "@/lib/i18n";
 
 /**
- * Map known call failure reasons emitted by `@wavoip/wavoip-api` (server-side
- * codes from `Helper.mapError`) to translation keys. `AUDIO_TIMEOUT` is the
- * deprecated alias for `PEER_RX_TIMEOUT` and shares the same label.
- *
- * Unknown reasons fall through to the raw string so future server-side codes
- * remain visible to the user without forcing a webphone bump.
+ * Known SDK reason codes mirror `Helper.mapError` server-side. `AUDIO_TIMEOUT`
+ * is the deprecated alias for `PEER_RX_TIMEOUT` — both resolve to the same
+ * translated label.
  */
-const REASON_KEYS: Record<string, TranslationKey> = {
-  AUDIO_TIMEOUT: "User audio timeout",
-  PEER_RX_TIMEOUT: "User audio timeout",
-  PEER_TX_TIMEOUT: "Peer audio timeout",
-  CORRUPTED_KEYS: "Corrupted keys",
-  CONNECTION_TIMEOUT: "Connection timeout",
-  ACCOUNT_RESTRICTED: "Account restricted",
-  NO_CALL_PERMISSION: "No call permission",
-  INTERNAL_ERROR: "Internal error",
+const KNOWN_REASONS: Record<string, TranslationKey> = {
+  PEER_TX_TIMEOUT: "PEER_TX_TIMEOUT",
+  PEER_RX_TIMEOUT: "PEER_RX_TIMEOUT",
+  AUDIO_TIMEOUT: "PEER_RX_TIMEOUT",
+  CORRUPTED_KEYS: "CORRUPTED_KEYS",
+  CONNECTION_TIMEOUT: "CONNECTION_TIMEOUT",
+  ACCOUNT_RESTRICTED: "ACCOUNT_RESTRICTED",
+  NO_CALL_PERMISSION: "NO_CALL_PERMISSION",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
 };
 
 export const translateCallFailReason = (reason: string): string => {
-  const key = REASON_KEYS[reason];
+  const key = KNOWN_REASONS[reason];
   return key ? t(key) : reason;
 };
