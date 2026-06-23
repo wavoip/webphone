@@ -8,6 +8,11 @@ export type TranslationKey =
   | "Restriction lifted"
   | "Restricted"
   | "Restricted until"
+  | "Lifted on"
+  // clipboard
+  | "Copied"
+  | "Copy token"
+  | "Copy phone"
   // device status
   | "Power on device"
   | "Enable device"
@@ -111,6 +116,10 @@ const ptBR: LocaleResource = {
   "Restriction lifted": "Restrição removida",
   Restricted: "Restrito",
   "Restricted until": "Restrito até",
+  "Lifted on": "Será removida em",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
   "Power on device": "Ligar Dispositivo",
   "Enable device": "Ativar dispositivo",
   "Disable device": "Desativar dispositivo",
@@ -202,6 +211,10 @@ const es: LocaleResource = {
   "Restriction lifted": "Restricción levantada",
   Restricted: "Restringido",
   "Restricted until": "Restringido hasta",
+  "Lifted on": "Se eliminará el",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
   "Power on device": "Encender dispositivo",
   "Enable device": "Activar dispositivo",
   "Disable device": "Desactivar dispositivo",

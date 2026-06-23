@@ -1,6 +1,7 @@
 import { PhoneIcon, PhoneXIcon, QrCodeIcon, SpinnerIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
 import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState } from "react";
+import { CopyableText } from "@/components/CopyableText";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -29,31 +30,25 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   return (
     <div
       data-enable={device.enable}
-      className="wv:relative wv:flex wv:justify-between wv:items-center wv:gap-4 wv:flex-wrap wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors"
+      className="wv:relative wv:flex wv:flex-row wv:justify-between wv:items-center wv:gap-3 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3"
     >
-      <div className="wv:flex wv:flex-col wv:gap-1 wv:min-w-0">
+      <div className="wv:flex wv:flex-col wv:gap-1.5 wv:min-w-0 wv:flex-1">
         <DeviceStatus device={device} root={root} onWake={() => middleware.controllers.device.wakeUp(device.token)} />
 
-        {device.restricted && (
-          <StatusLine icon={<WarningIcon size={18} weight="fill" className="wv:text-amber-500" />}>
-            <span className="wv:font-medium wv:text-amber-500">
-              {device.restrictedUntil
-                ? `${t("Restricted until")} ${formatRestrictionDate(device.restrictedUntil)}`
-                : t("Restricted")}
-            </span>
-          </StatusLine>
-        )}
+        {device.restricted && <RestrictionBadge until={device.restrictedUntil} />}
 
-        <p
-          data-enable={device.enable}
-          title={device.token}
-          className="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[12rem]"
-        >
-          {device.token}
-        </p>
+        <CopyableText value={device.token} ariaLabel={t("Copy token")} className="wv:max-w-full wv:min-w-0">
+          <span
+            data-enable={device.enable}
+            title={device.token}
+            className="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:block wv:max-w-[18rem] wv:max-sm:max-w-[10rem]"
+          >
+            {device.token}
+          </span>
+        </CopyableText>
       </div>
 
-      <div className="wv:flex wv:gap-2 wv:items-center">
+      <div className="wv:flex wv:gap-2 wv:items-center wv:shrink-0 wv:max-sm:justify-end">
         {showEnable && (
           <Tooltip>
             <TooltipTrigger>
@@ -161,9 +156,7 @@ function DeviceStatus({
           </TooltipContent>
         </Tooltip>
         <StatusLine icon={<PhoneIcon size={18} className="wv:text-red-500" />}>
-          <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-            {device.contact?.phone ?? t("Disconnected")}
-          </span>
+          <PhoneLabel phone={device.contact?.phone} enable={device.enable} fallback={t("Disconnected")} />
         </StatusLine>
       </div>
     );
@@ -212,14 +205,45 @@ function DeviceStatus({
   if (status === "open" || status === "UP") {
     return (
       <StatusLine icon={<PhoneIcon size={18} className="wv:text-green-500" />}>
-        <span data-enable={device.enable} className="wv:font-medium wv:text-foreground">
-          {device.contact?.phone}
-        </span>
+        <PhoneLabel phone={device.contact?.phone} enable={device.enable} />
       </StatusLine>
     );
   }
 
   return null;
+}
+
+function PhoneLabel({ phone, enable, fallback }: { phone?: string; enable: boolean; fallback?: string }) {
+  if (!phone) {
+    return (
+      <span data-enable={enable} className="wv:font-medium wv:text-foreground">
+        {fallback}
+      </span>
+    );
+  }
+  return (
+    <CopyableText value={phone} ariaLabel={t("Copy phone")}>
+      <span data-enable={enable} className="wv:font-medium wv:text-foreground">
+        {phone}
+      </span>
+    </CopyableText>
+  );
+}
+
+function RestrictionBadge({ until }: { until: Date | null }) {
+  return (
+    <div className="wv:flex wv:flex-row wv:items-center wv:gap-1.5 wv:flex-wrap">
+      <span className="wv:inline-flex wv:items-center wv:gap-1 wv:rounded wv:px-1.5 wv:py-0.5 wv:bg-amber-500/15 wv:border-l-4 wv:border-amber-500">
+        <WarningIcon size={14} weight="fill" className="wv:text-amber-500" />
+        <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
+      </span>
+      {until && (
+        <span className="wv:rounded-full wv:bg-amber-500 wv:text-white wv:px-2 wv:py-0.5 wv:text-[11px] wv:font-semibold">
+          {t("Lifted on")} {formatRestrictionDate(until)}
+        </span>
+      )}
+    </div>
+  );
 }
 
 function formatRestrictionDate(date: Date): string {
