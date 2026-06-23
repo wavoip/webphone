@@ -13,6 +13,14 @@ export type TranslationKey =
   | "Copied"
   | "Copy token"
   | "Copy phone"
+  // token visibility
+  | "Show token"
+  | "Hide token"
+  // device status labels
+  | "Connected"
+  | "Hibernating"
+  | "Connecting"
+  | "Building"
   // device status
   | "Power on device"
   | "Enable device"
@@ -120,6 +128,12 @@ const ptBR: LocaleResource = {
   Copied: "Copiado",
   "Copy token": "Copiar token",
   "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construindo",
   "Power on device": "Ligar Dispositivo",
   "Enable device": "Ativar dispositivo",
   "Disable device": "Desativar dispositivo",
@@ -215,6 +229,12 @@ const es: LocaleResource = {
   Copied: "Copiado",
   "Copy token": "Copiar token",
   "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construyendo",
   "Power on device": "Encender dispositivo",
   "Enable device": "Activar dispositivo",
   "Disable device": "Desactivar dispositivo",
