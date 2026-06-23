@@ -64,6 +64,14 @@ export const SettingsModal = forwardRef(() => {
     }
   }, [open, wavoip]);
 
+  // Auto-close the QR view once the device finishes pairing (qrCode cleared
+  // upstream by `device:open`). Falls back to the device list.
+  useEffect(() => {
+    if (!qrcode) return;
+    const stillPending = devices.some((d) => d.qrCode === qrcode);
+    if (!stillPending) setQrcode(null);
+  }, [devices, qrcode]);
+
   return (
     <Dialog
       modal
