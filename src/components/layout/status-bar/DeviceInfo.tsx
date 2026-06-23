@@ -212,13 +212,15 @@ function ActionCluster({
       {showEnable && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Switch
-              aria-label={device.enable ? "disable device" : "enable device"}
-              className="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
-              checked={device.enable}
-              onCheckedChange={(checked) => (checked ? onEnable() : onDisable())}
-              disabled={switchDisabled}
-            />
+            <span className="wv:inline-flex">
+              <Switch
+                aria-label={device.enable ? "disable device" : "enable device"}
+                className="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
+                checked={device.enable}
+                onCheckedChange={(checked) => (checked ? onEnable() : onDisable())}
+                disabled={switchDisabled}
+              />
+            </span>
           </TooltipTrigger>
           <TooltipContent container={root}>
             <p>{device.enable ? t("Disable device") : t("Enable device")}</p>
