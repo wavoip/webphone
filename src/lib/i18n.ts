@@ -76,6 +76,11 @@ export type TranslationKey =
   | "Settings"
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
+  | "Back"
+  | "Link a WhatsApp number"
+  | "Open WhatsApp on your phone"
+  | "Tap menu, then Linked devices"
+  | "Point your camera at the code below"
   | "Numbers"
   | "Enter the token"
   // troubleshooting
@@ -184,6 +189,11 @@ const ptBR: LocaleResource = {
   Settings: "Configurações",
   "Here you can configure the entire webphone": "Aqui você pode configurar todo webphone",
   "Point your phone camera": "Aponte a câmera do celular",
+  Back: "Voltar",
+  "Link a WhatsApp number": "Vincular um número do WhatsApp",
+  "Open WhatsApp on your phone": "Abra o WhatsApp no seu celular",
+  "Tap menu, then Linked devices": "Toque no menu e depois em Aparelhos conectados",
+  "Point your camera at the code below": "Aponte a câmera para o QR code abaixo",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
   Preferences: "Preferências",
@@ -287,6 +297,11 @@ const es: LocaleResource = {
   Settings: "Configuración",
   "Here you can configure the entire webphone": "Aquí puedes configurar todo el webphone",
   "Point your phone camera": "Apunta la cámara del móvil",
+  Back: "Volver",
+  "Link a WhatsApp number": "Vincular un número de WhatsApp",
+  "Open WhatsApp on your phone": "Abre WhatsApp en tu móvil",
+  "Tap menu, then Linked devices": "Toca el menú y luego Dispositivos vinculados",
+  "Point your camera at the code below": "Apunta la cámara al código de abajo",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
   Preferences: "Preferencias",
