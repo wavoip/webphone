@@ -1,8 +1,9 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
+import { useStore } from "zustand";
+import { useMiddleware } from "@/middleware/react/hooks";
 
 type PipContextType = {
   pipWindow: Window | null;
-  isPipActive: boolean;
   togglePip: () => void;
 };
 
@@ -13,8 +14,13 @@ type Props = {
   children: ReactNode;
 };
 
+
+
+
 export function PipProvider({ shadowRoot, children }: Props) {
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
+
+
 
   const togglePip = useCallback(async () => {
     if (pipWindow) {
@@ -26,6 +32,7 @@ export function PipProvider({ shadowRoot, children }: Props) {
       console.warn("Picture-in-Picture not supported in this browser.");
       return;
     }
+
 
     // @ts-expect-error
     const newPipWindow = await window.documentPictureInPicture.requestWindow({
@@ -51,7 +58,10 @@ export function PipProvider({ shadowRoot, children }: Props) {
     });
 
     const pipStyle = document.createElement("style");
-    pipStyle.textContent = `html, body { height: 100vh; overflow: hidden; }`;
+    pipStyle.textContent = `
+      html, body { height: 100vh; overflow: hidden; }
+      [data-slot="call-type"] { justify-content: center; }
+    `;
     newPipWindow.document.head.appendChild(pipStyle);
 
     newPipWindow.addEventListener("pagehide", () => {
@@ -61,9 +71,7 @@ export function PipProvider({ shadowRoot, children }: Props) {
     setPipWindow(newPipWindow);
   }, [pipWindow, shadowRoot]);
 
-  return (
-    <PipContext.Provider value={{ pipWindow, isPipActive: !!pipWindow, togglePip }}>{children}</PipContext.Provider>
-  );
+  return <PipContext.Provider value={{ pipWindow, togglePip }}>{children}</PipContext.Provider>;
 }
 
 export function usePip() {

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 import { useStore } from "zustand";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { PipPortal } from "@/components/PipPortal";
@@ -16,7 +15,7 @@ export function WebPhone() {
   const screen = useStore(middleware.store, (s) => s.screen);
   const { startDrag, stopDrag, setIsClosed } = useWidget();
   const { root } = useShadowRoot();
-  const { pipWindow, isPipActive } = usePip();
+  const { pipWindow } = usePip();
   const resolvedTheme = root.classList.contains("dark") ? "dark" : "light";
 
   const prevScreenRef = useRef(screen);
@@ -29,18 +28,16 @@ export function WebPhone() {
   }, [screen, pipWindow]);
 
   useEffect(() => {
-    setIsClosed(isPipActive);
-  }, [isPipActive, setIsClosed]);
+    setIsClosed(!!pipWindow);
+  }, [pipWindow, setIsClosed]);
 
-  const handleMouseUp = useCallback(() => stopDrag(), [stopDrag]);
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target !== e.currentTarget) return;
       document.body.style.userSelect = "unset";
       startDrag(e);
-    },
-    [startDrag],
+    }, [startDrag],
   );
 
   const callScreens = (
@@ -56,7 +53,7 @@ export function WebPhone() {
       <div
         role="application"
         className="wv:flex wv:flex-1 wv:relative wv:px-7"
-        onMouseUp={handleMouseUp}
+        onMouseUp={stopDrag}
         onMouseDown={handleMouseDown}
       >
         {screen === "keyboard" && <KeyboardScreen />}

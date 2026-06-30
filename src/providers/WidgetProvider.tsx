@@ -43,7 +43,7 @@ export function WidgetProvider({ children }: Props) {
   const middleware = useMiddleware();
   const { theme } = useTheme();
   const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
-  const { isPipActive } = usePip();
+  const { pipWindow } = usePip();
 
   const { isClosed, position, buttonPosition, showWidget } = useStore(
     middleware.store,
@@ -161,7 +161,7 @@ export function WidgetProvider({ children }: Props) {
         toggle: toggleWidget,
       }}
     >
-      {showWidget && !isPipActive && (
+      {showWidget && !pipWindow && (
         <Button
           type="button"
           onClick={openWidget}
