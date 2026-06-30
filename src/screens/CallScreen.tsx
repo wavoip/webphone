@@ -6,11 +6,8 @@ import { CallButtons } from "@/components/CallButtons";
 import { ContactAvatar } from "@/components/ContactAvatar";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
-<<<<<<< HEAD
-=======
 import { type TranslationKey, t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
->>>>>>> main
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
