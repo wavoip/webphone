@@ -1,13 +1,15 @@
-import type { Contact, DeviceStatus } from "@wavoip/wavoip-api";
+import type { ConnectionStatus, Contact, DeviceStatus } from "@wavoip/wavoip-api";
 import type { StateCreator } from "zustand";
 import type { MiddlewareStore } from "@/middleware/store/types";
 
 export type DeviceStateEntry = {
   token: string;
   status: DeviceStatus;
+  connectionStatus: ConnectionStatus;
   qrCode?: string;
   contact?: Contact;
   restricted: boolean;
+  restrictedUntil: Date | null;
   enable: boolean;
   persist: boolean;
 };

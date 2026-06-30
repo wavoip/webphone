@@ -7,10 +7,29 @@ export type TranslationKey =
   | "Device restricted"
   | "Restriction lifted"
   | "Restricted"
+  | "Restricted until"
+  | "Lifted on"
+  // clipboard
+  | "Copied"
+  | "Copy token"
+  | "Copy phone"
+  // token visibility
+  | "Show token"
+  | "Hide token"
+  // device status labels
+  | "Connected"
+  | "Hibernating"
+  | "Connecting"
+  | "Building"
+  | "Restarting"
+  | "Closed"
   // device status
   | "Power on device"
+  | "Enable device"
+  | "Disable device"
   | "Disconnected"
   | "Waiting to link WhatsApp"
+  | "Device is building"
   | "Failed"
   | "Show QR Code"
   | "Delete this device?"
@@ -37,6 +56,8 @@ export type TranslationKey =
   | "Rejected by the app"
   | "Timed out"
   | "Unknown"
+  // call
+  | "Reconnecting"
   // keyboard / outgoing
   | "Calling from"
   | "No device available"
@@ -55,8 +76,51 @@ export type TranslationKey =
   | "Settings"
   | "Here you can configure the entire webphone"
   | "Point your phone camera"
+  | "Back"
+  | "Link a WhatsApp number"
+  | "Open WhatsApp on your phone"
+  | "Tap menu, then Linked devices"
+  | "Point your camera at the code below"
   | "Numbers"
-  | "Enter the token";
+  | "Enter the token"
+  // troubleshooting
+  | "Preferences"
+  | "Theme"
+  | "Language"
+  | "Light"
+  | "Dark"
+  | "System"
+  | "Pick light, dark, or follow the system"
+  | "Switch the webphone interface language"
+  | "Diagnostics"
+  | "Open diagnostics"
+  | "Close"
+  | "Copy report"
+  | "Test STUN"
+  | "Browser"
+  | "Network"
+  | "Audio devices"
+  | "STUN reachability"
+  | "Tested at"
+  | "Recent issues"
+  | "Recent ICE diagnostics"
+  | "Call diagnostics"
+  | "Realtime stats"
+  | "Audio levels"
+  | "STUN unreachable"
+  | "ICE gathering timed out"
+  | "Connection failed"
+  | "No host candidates"
+  | "Symmetric NAT suspected"
+  // call fail reasons (SDK codes used directly as keys)
+  | "PEER_TX_TIMEOUT"
+  | "PEER_RX_TIMEOUT"
+  | "AUDIO_TIMEOUT"
+  | "CORRUPTED_KEYS"
+  | "CONNECTION_TIMEOUT"
+  | "ACCOUNT_RESTRICTED"
+  | "NO_CALL_PERMISSION"
+  | "INTERNAL_ERROR";
 
 type LocaleResource = Record<TranslationKey, string>;
 
@@ -66,9 +130,25 @@ const ptBR: LocaleResource = {
   "Device restricted": "Dispositivo restrito",
   "Restriction lifted": "Restrição removida",
   Restricted: "Restrito",
+  "Restricted until": "Restrito até",
+  "Lifted on": "Será removida em",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construindo",
+  Restarting: "Reiniciando",
+  Closed: "Fechado",
   "Power on device": "Ligar Dispositivo",
+  "Enable device": "Ativar dispositivo",
+  "Disable device": "Desativar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Aguardando vincular Whatsapp",
+  "Device is building": "Dispositivo está sendo construído",
   Failed: "Falha",
   "Show QR Code": "Mostrar QRCode",
   "Delete this device?": "Deseja excluir esse dispositivo?",
@@ -92,6 +172,7 @@ const ptBR: LocaleResource = {
   "Rejected by the app": "Rejeitada pelo aplicativo",
   "Timed out": "Tempo limite",
   Unknown: "Desconhecido",
+  Reconnecting: "Reconectando",
   "Calling from": "Ligando de",
   "No device available": "Nenhum dispositivo está disponível",
   "Number does not exist": "Número não existe",
@@ -108,17 +189,74 @@ const ptBR: LocaleResource = {
   Settings: "Configurações",
   "Here you can configure the entire webphone": "Aqui você pode configurar todo webphone",
   "Point your phone camera": "Aponte a câmera do celular",
+  Back: "Voltar",
+  "Link a WhatsApp number": "Vincular um número do WhatsApp",
+  "Open WhatsApp on your phone": "Abra o WhatsApp no seu celular",
+  "Tap menu, then Linked devices": "Toque no menu e depois em Aparelhos conectados",
+  "Point your camera at the code below": "Aponte a câmera para o QR code abaixo",
   Numbers: "Números",
   "Enter the token": "Informe o Token",
+  Preferences: "Preferências",
+  Theme: "Tema",
+  Language: "Idioma",
+  Light: "Claro",
+  Dark: "Escuro",
+  System: "Sistema",
+  "Pick light, dark, or follow the system": "Escolha claro, escuro ou siga o sistema",
+  "Switch the webphone interface language": "Trocar idioma da interface do webphone",
+  Diagnostics: "Diagnóstico",
+  "Open diagnostics": "Abrir diagnóstico",
+  Close: "Fechar",
+  "Copy report": "Copiar relatório",
+  "Test STUN": "Testar STUN",
+  Browser: "Navegador",
+  Network: "Rede",
+  "Audio devices": "Áudio",
+  "STUN reachability": "Reachability STUN",
+  "Tested at": "Testado em",
+  "Recent issues": "Problemas recentes",
+  "Recent ICE diagnostics": "Diagnósticos ICE recentes",
+  "Call diagnostics": "Diagnóstico da chamada",
+  "Realtime stats": "Estatísticas em tempo real",
+  "Audio levels": "Níveis de áudio",
+  "STUN unreachable": "STUN inacessível — confira firewall/proxy.",
+  "ICE gathering timed out": "Tempo de coleta ICE esgotado — a chamada seguiu com os candidatos disponíveis.",
+  "Connection failed": "Conexão de mídia falhou.",
+  "No host candidates": "Nenhum candidato local — verifique mDNS/VPN.",
+  "Symmetric NAT suspected": "NAT simétrico suspeito — pode bloquear a chamada.",
+  PEER_TX_TIMEOUT: "O contato parou de enviar áudio",
+  PEER_RX_TIMEOUT: "O usuário parou de enviar áudio",
+  AUDIO_TIMEOUT: "O usuário parou de enviar áudio",
+  CORRUPTED_KEYS: "Não foi possível estabelecer a chamada com segurança",
+  CONNECTION_TIMEOUT: "A chamada perdeu contato com o servidor",
+  ACCOUNT_RESTRICTED: "Conta do WhatsApp restrita",
+  NO_CALL_PERMISSION: "Conta sem permissão para realizar chamadas",
+  INTERNAL_ERROR: "Algo deu errado no servidor",
 };
 
 const es: LocaleResource = {
   "Device restricted": "Dispositivo restringido",
   "Restriction lifted": "Restricción levantada",
   Restricted: "Restringido",
+  "Restricted until": "Restringido hasta",
+  "Lifted on": "Se eliminará el",
+  Copied: "Copiado",
+  "Copy token": "Copiar token",
+  "Copy phone": "Copiar número",
+  "Show token": "Mostrar token",
+  "Hide token": "Ocultar token",
+  Connected: "Conectado",
+  Hibernating: "Hibernando",
+  Connecting: "Conectando",
+  Building: "Construyendo",
+  Restarting: "Reiniciando",
+  Closed: "Cerrado",
   "Power on device": "Encender dispositivo",
+  "Enable device": "Activar dispositivo",
+  "Disable device": "Desactivar dispositivo",
   Disconnected: "Desconectado",
   "Waiting to link WhatsApp": "Esperando vincular WhatsApp",
+  "Device is building": "El dispositivo se está construyendo",
   Failed: "Fallo",
   "Show QR Code": "Mostrar código QR",
   "Delete this device?": "¿Eliminar este dispositivo?",
@@ -142,6 +280,7 @@ const es: LocaleResource = {
   "Rejected by the app": "Rechazada por la aplicación",
   "Timed out": "Tiempo agotado",
   Unknown: "Desconocido",
+  Reconnecting: "Reconectando",
   "Calling from": "Llamando desde",
   "No device available": "Ningún dispositivo disponible",
   "Number does not exist": "El número no existe",
@@ -158,15 +297,98 @@ const es: LocaleResource = {
   Settings: "Configuración",
   "Here you can configure the entire webphone": "Aquí puedes configurar todo el webphone",
   "Point your phone camera": "Apunta la cámara del móvil",
+  Back: "Volver",
+  "Link a WhatsApp number": "Vincular un número de WhatsApp",
+  "Open WhatsApp on your phone": "Abre WhatsApp en tu móvil",
+  "Tap menu, then Linked devices": "Toca el menú y luego Dispositivos vinculados",
+  "Point your camera at the code below": "Apunta la cámara al código de abajo",
   Numbers: "Números",
   "Enter the token": "Introduce el token",
+  Preferences: "Preferencias",
+  Theme: "Tema",
+  Language: "Idioma",
+  Light: "Claro",
+  Dark: "Oscuro",
+  System: "Sistema",
+  "Pick light, dark, or follow the system": "Elige claro, oscuro o seguir el sistema",
+  "Switch the webphone interface language": "Cambiar el idioma de la interfaz del webphone",
+  Diagnostics: "Diagnóstico",
+  "Open diagnostics": "Abrir diagnóstico",
+  Close: "Cerrar",
+  "Copy report": "Copiar informe",
+  "Test STUN": "Probar STUN",
+  Browser: "Navegador",
+  Network: "Red",
+  "Audio devices": "Audio",
+  "STUN reachability": "Alcance STUN",
+  "Tested at": "Probado a las",
+  "Recent issues": "Problemas recientes",
+  "Recent ICE diagnostics": "Diagnósticos ICE recientes",
+  "Call diagnostics": "Diagnóstico de la llamada",
+  "Realtime stats": "Estadísticas en tiempo real",
+  "Audio levels": "Niveles de audio",
+  "STUN unreachable": "STUN inalcanzable — revisa firewall/proxy.",
+  "ICE gathering timed out": "Tiempo de recolección ICE agotado — la llamada continuó con los candidatos disponibles.",
+  "Connection failed": "La conexión de medios falló.",
+  "No host candidates": "Sin candidatos locales — revisa mDNS/VPN.",
+  "Symmetric NAT suspected": "NAT simétrico sospechado — puede bloquear la llamada.",
+  PEER_TX_TIMEOUT: "El contacto dejó de enviar audio",
+  PEER_RX_TIMEOUT: "El usuario dejó de enviar audio",
+  AUDIO_TIMEOUT: "El usuario dejó de enviar audio",
+  CORRUPTED_KEYS: "No se pudo establecer la llamada de forma segura",
+  CONNECTION_TIMEOUT: "La llamada perdió contacto con el servidor",
+  ACCOUNT_RESTRICTED: "Cuenta de WhatsApp restringida",
+  NO_CALL_PERMISSION: "Cuenta sin permiso para realizar llamadas",
+  INTERNAL_ERROR: "Algo salió mal en el servidor",
+};
+
+// Source locale ("en") falls back to the key itself for human-readable English
+// strings. The SDK reason codes are not human-readable, so override just those.
+const enOverrides: Partial<LocaleResource> = {
+  PEER_TX_TIMEOUT: "The contact stopped sending audio",
+  PEER_RX_TIMEOUT: "The user stopped sending audio",
+  AUDIO_TIMEOUT: "The user stopped sending audio",
+  CORRUPTED_KEYS: "The call could not be established securely",
+  CONNECTION_TIMEOUT: "The call lost contact with the server",
+  ACCOUNT_RESTRICTED: "WhatsApp account is restricted",
+  NO_CALL_PERMISSION: "Account is not allowed to place calls",
+  INTERNAL_ERROR: "Something went wrong on the server",
 };
 
 a18n.addLocaleResource("pt-BR", ptBR);
 a18n.addLocaleResource("es", es);
+a18n.addLocaleResource("en", enOverrides as LocaleResource);
 
 export const t = (key: TranslationKey): string => a18n(key);
 
-export const setLanguage = (lang: Language): void => a18n.setLocale(lang);
+const localeSubscribers = new Set<() => void>();
+
+export const setLanguage = (lang: Language): void => {
+  a18n.setLocale(lang);
+  for (const cb of localeSubscribers) cb();
+};
 
 export const getLanguage = (): string => a18n.getLocale();
+
+const SUPPORTED_LANGUAGES: readonly Language[] = ["en", "pt-BR", "es"];
+
+/**
+ * Map an arbitrary BCP-47 tag (e.g. "en-US", "pt", "es-419") to one of the
+ * languages we ship translations for. Falls back to "en".
+ */
+export const normalizeLanguage = (raw: string | null | undefined): Language => {
+  if (!raw) return "en";
+  const exact = SUPPORTED_LANGUAGES.find((l) => l === raw);
+  if (exact) return exact;
+  const base = raw.toLowerCase().split("-")[0];
+  if (base === "pt") return "pt-BR";
+  if (base === "es") return "es";
+  return "en";
+};
+
+export const subscribeLocale = (cb: () => void): (() => void) => {
+  localeSubscribers.add(cb);
+  return () => {
+    localeSubscribers.delete(cb);
+  };
+};

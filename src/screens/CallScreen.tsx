@@ -1,26 +1,43 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import { ContactAvatar } from "@/components/ContactAvatar";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
+<<<<<<< HEAD
+=======
+import { type TranslationKey, t } from "@/lib/i18n";
+import { getFullnameLetters } from "@/lib/utils";
+>>>>>>> main
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
-  const { callActive, callStatus, peerMuted } = useWavoip();
+  const { callActive, callStatus, peerMuted, callFailReason } = useWavoip();
 
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
 
-  const status = callStatus === "ENDED" ? "Chamada encerrada" : callStatus === "DISCONNECTED" ? "Reconectando" : null;
+  const status = useMemo(
+    () =>
+      callStatus === "ENDED"
+        ? t("Call ended")
+        : callStatus === "DISCONNECTED"
+          ? t("Reconnecting")
+          : callStatus === "FAILED"
+            ? callFailReason
+              ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
+              : t("The call failed")
+            : null,
+    [callStatus, callFailReason],
+  );
 
   useEffect(() => {
-    if (callStatus === "ENDED") {
+    if (callStatus === "ENDED" || callStatus === "FAILED") {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();

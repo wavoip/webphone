@@ -26,6 +26,7 @@ export class CallController {
 
     this.bindOutgoing(call);
     const { store } = this.deps;
+    store.getState().setCallFailReason(undefined);
     store.getState().setOutgoing(call);
     store.getState().setCallStatus("CALLING");
 
@@ -123,6 +124,10 @@ export class CallController {
     call.on("peerMute", () => store.getState().setPeerMuted(true));
     call.on("peerUnmute", () => store.getState().setPeerMuted(false));
     call.on("status", (status) => store.getState().setCallStatus(status));
+    // wavoip-api maps the `call:failed` socket reason payload to the
+    // CallActive `error` event. Persist it so the UI can render the cause
+    // and the CALL_FAILED notification effect can include it.
+    call.on("error", (reason) => store.getState().setCallFailReason(reason));
   }
 
   private enabledTokens(): string[] {

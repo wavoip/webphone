@@ -109,6 +109,48 @@ window.wavoip.notifications.read();
 
 `read()` marca **todas** as notificações como lidas. Para granularidade por item, leia via `get()` e use o `id` para distinguir.
 
+## Falhas de chamada
+
+Quando uma chamada em andamento entra em estado `FAILED` (rejeitada pelo transporte, ICE falhou, peer indisponível mid-call, etc.), o Webphone:
+
+1. Persiste o motivo recebido do `@wavoip/wavoip-api` em uma entrada `CALL_FAILED` na lista de notificações.
+2. Exibe o motivo na tela ativa (`OutgoingScreen` ou `CallScreen`) logo abaixo do nome/telefone do peer.
+
+```ts
+const failed = window.wavoip.notifications.get().filter((n) => n.type === "CALL_FAILED");
+console.log(failed[0]);
+// {
+//   id: "<uuid>",
+//   type: "CALL_FAILED",
+//   message: "Sem áudio do contato",       // motivo já traduzido para o idioma ativo
+//   detail: "<device_token> -> <telefone>",
+//   token: "<device_token>",
+//   isRead: false,
+//   ...
+// }
+```
+
+O texto exibido em tela e no `message` da notificação é o motivo **traduzido**. O código da SDK é usado diretamente como chave de tradução: o Webphone passa o código para `t()` e cada idioma define um texto amigável. Motivos desconhecidos (códigos novos ainda não traduzidos) caem pelo passthrough do `a18n` e aparecem como o código bruto.
+
+### Motivos mapeados
+
+| Código da SDK         | Significado (pt-BR)                                       |
+| --------------------- | --------------------------------------------------------- |
+| `PEER_TX_TIMEOUT`     | O contato parou de enviar áudio.                          |
+| `PEER_RX_TIMEOUT`     | O usuário parou de enviar áudio.                          |
+| `AUDIO_TIMEOUT`       | Alias obsoleto de `PEER_RX_TIMEOUT` — mesma mensagem.     |
+| `CORRUPTED_KEYS`      | Não foi possível estabelecer a chamada com segurança.     |
+| `CONNECTION_TIMEOUT`  | A chamada perdeu contato com o servidor.                  |
+| `ACCOUNT_RESTRICTED`  | Conta do WhatsApp restrita.                               |
+| `NO_CALL_PERMISSION`  | Conta sem permissão para realizar chamadas.               |
+| `INTERNAL_ERROR`      | Algo deu errado no servidor.                              |
+
+Quando a SDK não fornece motivo (caso típico de chamadas que falham antes do peer aceitar), apenas `A ligação falhou` aparece e o campo `message` da notificação fica vazio.
+
+{% hint style="info" %}
+Entradas `CALL_FAILED` são persistidas em `localStorage` junto com as notificações adicionadas via API pública, então sobrevivem a reload.
+{% endhint %}
+
 ## Limitações conhecidas
 
 - **iOS Safari**: a API `Notification` só funciona em PWAs instaladas, mesmo com a aba aberta. Em Safari tradicional no iOS, nada é exibido.

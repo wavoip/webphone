@@ -22,6 +22,7 @@ export type CallSliceState = {
   active?: CallActive;
   callStatus: CallStatus;
   peerMuted: boolean;
+  callFailReason?: string;
   lastOfferOutcomes: Record<string, OfferOutcome>;
 };
 
@@ -32,6 +33,7 @@ export type CallSliceActions = {
   setActive: (call: CallActive | undefined) => void;
   setCallStatus: (status: CallStatus) => void;
   setPeerMuted: (muted: boolean) => void;
+  setCallFailReason: (reason: string | undefined) => void;
   markOfferOutcome: (id: string, outcome: OfferOutcome) => void;
   resetCall: () => void;
 };
@@ -44,6 +46,7 @@ const initialCallState: CallSliceState = {
   active: undefined,
   callStatus: "idle",
   peerMuted: false,
+  callFailReason: undefined,
   lastOfferOutcomes: {},
 } as const;
 
@@ -55,6 +58,7 @@ export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> =
   setActive: (active) => set({ active }),
   setCallStatus: (callStatus) => set({ callStatus }),
   setPeerMuted: (peerMuted) => set({ peerMuted }),
+  setCallFailReason: (callFailReason) => set({ callFailReason }),
   markOfferOutcome: (id, outcome) =>
     set((state) => ({ lastOfferOutcomes: { ...state.lastOfferOutcomes, [id]: outcome } })),
   resetCall: () => set({ ...initialCallState, lastOfferOutcomes: {} }),

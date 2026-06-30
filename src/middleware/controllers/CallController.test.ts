@@ -31,8 +31,24 @@ describe("CallController", () => {
     it("derives fromTokens from enabled devices when not provided", async () => {
       wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
       store.getState().setDevices([
-        { token: "tok-on", status: "open", restricted: false, enable: true, persist: false },
-        { token: "tok-off", status: "open", restricted: false, enable: false, persist: false },
+        {
+          token: "tok-on",
+          status: "open",
+          restricted: false,
+          restrictedUntil: null,
+          connectionStatus: "connected",
+          enable: true,
+          persist: false,
+        },
+        {
+          token: "tok-off",
+          status: "open",
+          restricted: false,
+          restrictedUntil: null,
+          connectionStatus: "connected",
+          enable: false,
+          persist: false,
+        },
       ]);
       await controller.start("5511");
       expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-on"]);
@@ -103,6 +119,24 @@ describe("CallController", () => {
       expect(store.getState().peerMuted).toBe(true);
       active.emitEvent("peerUnmute");
       expect(store.getState().peerMuted).toBe(false);
+    });
+
+    it("active error event captures fail reason in store", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      outgoing.emitEvent("peerAccept", active);
+      active.emitEvent("error", "PEER_NETWORK_LOST");
+      expect(store.getState().callFailReason).toBe("PEER_NETWORK_LOST");
+    });
+
+    it("start clears any stale callFailReason from a prior call", async () => {
+      store.getState().setCallFailReason("OLD_REASON");
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      expect(store.getState().callFailReason).toBeUndefined();
     });
 
     it("active status DISCONNECTED → 'reconnecting'", async () => {

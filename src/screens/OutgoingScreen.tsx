@@ -6,7 +6,7 @@ import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
 import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
-import { t } from "@/lib/i18n";
+import { type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useWavoip } from "@/providers/WavoipProvider";
 
@@ -15,7 +15,7 @@ calling_sound.preload = "auto";
 const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
-  const { callOutgoing, callStatus } = useWavoip();
+  const { callOutgoing, callStatus, callFailReason } = useWavoip();
   const middleware = useMiddleware();
   const keyboardInput = useStore(middleware.store, (s) => s.keyboardInput);
 
@@ -29,7 +29,9 @@ export default function OutgoingScreen() {
       case "RINGING":
         return t("Calling...");
       case "FAILED":
-        return t("The call failed");
+        return callFailReason
+          ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
+          : t("The call failed");
       case "REJECTED":
         return t("Call rejected");
       case "NOT_ANSWERED":
@@ -39,7 +41,7 @@ export default function OutgoingScreen() {
       default:
         return null;
     }
-  }, [callStatus, callOutgoing, keyboardInput]);
+  }, [callStatus, callOutgoing, keyboardInput, callFailReason]);
 
   useEffect(() => {
     if (callStatus === "RINGING") {

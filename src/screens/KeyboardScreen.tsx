@@ -17,7 +17,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { t } from "@/lib/i18n";
+import { type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { usePip } from "@/providers/PipProvider";
@@ -85,10 +85,22 @@ export default function KeyboardScreen() {
         return;
       }
 
+      if (error_message === "NO_DEVICES_FOUND") {
+        setError(t("No device available"));
+        setStatus("");
+        setCallIsLoading(false);
+
+        setTimeout(() => {
+          setError("");
+        }, 4000);
+
+        return;
+      }
+
       addNotification({
         type: "CALL_FAILED",
         detail: `${device} -> ${number}`,
-        message: error_message,
+        message: t(error_message as TranslationKey),
         token: device,
         isRead: false,
         isHidden: false,
