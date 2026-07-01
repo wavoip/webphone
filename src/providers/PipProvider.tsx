@@ -1,6 +1,4 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
-import { useStore } from "zustand";
-import { useMiddleware } from "@/middleware/react/hooks";
 
 type PipContextType = {
   pipWindow: Window | null;
@@ -16,6 +14,7 @@ type Props = {
 
 export function PipProvider({ shadowRoot, children }: Props) {
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
+
   const togglePip = useCallback(async () => {
     if (pipWindow) {
       pipWindow.close();

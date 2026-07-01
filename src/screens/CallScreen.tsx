@@ -7,7 +7,6 @@ import { ContactAvatar } from "@/components/ContactAvatar";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
-import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
