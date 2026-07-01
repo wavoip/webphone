@@ -74,7 +74,10 @@ export default function CallScreen() {
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
       <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
-        <div data-slot="call-type" className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground ">
+        <div
+          data-slot="call-type"
+          className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground "
+        >
           <WhatsappLogoIcon size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>

@@ -31,13 +31,13 @@ export function WebPhone() {
     setIsClosed(!!pipWindow);
   }, [pipWindow, setIsClosed]);
 
-
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target !== e.currentTarget) return;
       document.body.style.userSelect = "unset";
       startDrag(e);
-    }, [startDrag],
+    },
+    [startDrag],
   );
 
   const callScreens = (

@@ -26,12 +26,7 @@ export function WaveSound({ call }: Props) {
 
   return (
     <div className="text-center">
-      <canvas
-        ref={canvasRef}
-        width={75}
-        height={35}
-        style={{ width: "75px", height: "50px", display: "block" }}
-      />
+      <canvas ref={canvasRef} width={75} height={35} style={{ width: "75px", height: "50px", display: "block" }} />
     </div>
   );
 }
@@ -58,13 +53,7 @@ function draw(
   drawBars(ctx, dataArray, canvas.width, canvas.height, theme === "dark" ? "#00ff66" : "#008000");
 }
 
-function drawBars(
-  ctx: CanvasRenderingContext2D,
-  dataArray: Uint8Array,
-  width: number,
-  height: number,
-  color: string,
-) {
+function drawBars(ctx: CanvasRenderingContext2D, dataArray: Uint8Array, width: number, height: number, color: string) {
   ctx.fillStyle = color;
 
   const step = Math.floor(dataArray.length / BARS);
@@ -80,7 +69,7 @@ function drawBars(
     let sum = 0;
     for (let j = 0; j < step; j++) sum += dataArray[index * step + j];
 
-    const targetHeight = Math.max(((sum / step) / 255) ** 0.6 * height, 3);
+    const targetHeight = Math.max((sum / step / 255) ** 0.6 * height, 3);
     smooth[k] = smooth[k] * 0.75 + targetHeight * 0.25;
 
     const barX = center * (barWidth + GAP) + offset * (barWidth + GAP);

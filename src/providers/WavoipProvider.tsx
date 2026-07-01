@@ -177,7 +177,7 @@ function usePictureInPictureSync(middleware: Middleware) {
   useEffect(() => {
     return middleware.store.subscribe(
       (s) => s.active ?? s.outgoing,
-      () => { },
+      () => {},
     );
   }, [middleware]);
 }

@@ -14,32 +14,22 @@ type Props = {
   children: ReactNode;
 };
 
-
-
-
 export function PipProvider({ shadowRoot, children }: Props) {
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
-
-
-
   const togglePip = useCallback(async () => {
     if (pipWindow) {
       pipWindow.close();
       return;
     }
-
     if (!("documentPictureInPicture" in window)) {
       console.warn("Picture-in-Picture not supported in this browser.");
       return;
     }
-
-
     // @ts-expect-error
     const newPipWindow = await window.documentPictureInPicture.requestWindow({
       width: 320,
       height: 450,
     });
-
     newPipWindow.document.body.style.margin = "0";
     newPipWindow.document.body.style.overflow = "hidden";
     newPipWindow.document.body.style.backgroundColor = "#1a1b1e";

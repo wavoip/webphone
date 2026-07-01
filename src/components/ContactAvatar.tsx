@@ -14,9 +14,7 @@ export function ContactAvatar({ src, displayName, className }: Props) {
   return (
     <Avatar className={className}>
       <AvatarImage src={src || undefined} />
-      <AvatarFallback>
-        {initials !== null ? initials : <UserIcon size={20} />}
-      </AvatarFallback>
+      <AvatarFallback>{initials !== null ? initials : <UserIcon size={20} />}</AvatarFallback>
     </Avatar>
   );
 }
