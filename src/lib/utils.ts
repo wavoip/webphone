@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getFullnameLetters(fullName: string | undefined | null) {
-  if (!fullName) return "?";
+export function getFullnameLetters(fullName: string | undefined | null): string | null {
+  if (!fullName) return null;
 
   const parts = fullName.trim().split(/\s+/);
 

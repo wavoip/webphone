@@ -3,11 +3,10 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
+import { ContactAvatar } from "@/components/ContactAvatar";
 import { CopyablePeer } from "@/components/CopyablePeer";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
-import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const hang_up_sound = new Audio(HangUp);
@@ -74,16 +73,20 @@ export default function CallScreen() {
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
       <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
-        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground ">
+        <div
+          data-slot="call-type"
+          className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground "
+        >
           <WhatsappLogoIcon size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>
 
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
-          <Avatar className="wv:size-[50px] wv:rounded-xl">
-            <AvatarImage src={callActive?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callActive?.peer?.displayName)}</AvatarFallback>
-          </Avatar>
+          <ContactAvatar
+            className="wv:size-[50px] wv:rounded-xl"
+            src={callActive?.peer.profilePicture}
+            displayName={callActive?.peer?.displayName}
+          />
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start wv:overflow-hidden">
             <p className="wv:text-foreground wv:opacity-75 wv:text-[14px]">
               {status || formatDuration(durationSeconds)}
