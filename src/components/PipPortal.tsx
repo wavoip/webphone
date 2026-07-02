@@ -14,10 +14,6 @@ export function PipPortal({ pipWindow, theme, children }: Props) {
     >
       <div
         className="wv:h-full wv:w-full wv:flex wv:flex-col wv:px-8"
-        wv:text-sm
-        wv:font-medium
-        wv:text-foreground
-        wv:select-none
       >
         {children}
       </div>
