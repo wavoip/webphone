@@ -15,9 +15,18 @@ export type PublicMiddleware<E extends MiddlewareEvent> = (
   next: () => void,
 ) => void | Promise<void>;
 
-export type CallActiveProps = Pick<CallActive, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
-export type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
-export type CallOfferProps = Pick<Offer, "id" | "type" | "device_token" | "direction" | "status" | "peer">;
+// Webphone's public API exposes `device_token` (snake_case) for backward compat;
+// it is sourced from the lib's `deviceToken` at projection time, so the type is
+// decoupled from the deprecated `CallActive.device_token` alias.
+export type CallActiveProps = Pick<CallActive, "id" | "type" | "direction" | "status" | "peer"> & {
+  device_token: string;
+};
+export type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "direction" | "status" | "peer"> & {
+  device_token: string;
+};
+export type CallOfferProps = Pick<Offer, "id" | "type" | "direction" | "status" | "peer"> & {
+  device_token: string;
+};
 
 export type CallAPI = {
   start: (

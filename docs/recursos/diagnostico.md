@@ -91,6 +91,15 @@ Quando há uma chamada ativa, o canto inferior esquerdo exibe um botão **Ping**
 | **ICE**                     | Último payload `iceDiagnostics` recebido para a chamada. Graças ao replay-on-subscribe do `@wavoip/wavoip-api`, o estado completo aparece mesmo abrindo o diálogo após a chamada já ter conectado.                |
 | **Problemas recentes**      | Lista de `connectivityIssue` da chamada atual, com timestamp formatado.                                                                                                                                          |
 
+## Indicador de reconexão
+
+Durante uma chamada ativa, se a perna de mídia do WhatsApp cair temporariamente, o `@wavoip/wavoip-api` emite o evento `status` com o valor `"DISCONNECTED"`. Nesse momento a tela de chamada:
+
+* substitui o cronômetro pelo texto **Reconectando** (traduzido em pt-BR / en / es); e
+* toca um som de reconexão em loop (com 3 s de intervalo entre repetições).
+
+Quando a mídia se restabelece (`status === "ACTIVE"`), o texto volta a exibir a duração e o som para. A chamada **não** é encerrada durante a queda — é uma condição transitória de transporte, distinta do indicador de **Ping** (que reflete o transporte local do próprio cliente).
+
 ## Catálogo de problemas
 
 Para a descrição detalhada de cada `connectivityIssue` (`STUN_UNREACHABLE`, `ICE_GATHERING_TIMEOUT`, `ICE_CONNECTION_FAILED`, `NO_HOST_CANDIDATES`, `SYMMETRIC_NAT_SUSPECTED`), consulte a página [Solução de Problemas](https://wavoip.github.io/wavoip-api/troubleshooting) do `@wavoip/wavoip-api`.

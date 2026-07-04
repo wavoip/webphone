@@ -29,7 +29,7 @@ export class MissedCallController {
       created_at: new Date(),
       message: peerLabel(offer),
       detail: offer.peer.phone,
-      token: offer.device_token,
+      token: offer.deviceToken,
       isHidden: false,
       isRead: false,
     };

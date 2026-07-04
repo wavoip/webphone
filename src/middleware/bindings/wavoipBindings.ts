@@ -24,6 +24,6 @@ export function bindWavoipEvents({ wavoip, registry, callController, events }: D
 }
 
 function projectOffer(offer: Offer) {
-  const { id, type, status, device_token, direction, peer } = offer;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = offer;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }
