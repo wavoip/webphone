@@ -165,17 +165,17 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
 
 function projectActive(call: CallActive | undefined): CallActiveProps | undefined {
   if (!call) return undefined;
-  const { id, type, status, device_token, direction, peer } = call;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = call;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
 function projectOutgoing(call: CallOutgoing | undefined): CallOutgoingProps | undefined {
   if (!call) return undefined;
-  const { id, type, status, device_token, direction, peer } = call;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = call;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
 function projectOffer(offer: Offer): CallOfferProps {
-  const { id, type, status, device_token, direction, peer } = offer;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = offer;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }

@@ -61,11 +61,11 @@ function subscribeEndedFromStatus(store: MiddlewareStoreApi, events: EventBus<We
 }
 
 function projectOutgoing(call: CallOutgoing) {
-  const { id, type, status, device_token, direction, peer } = call;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = call;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
 function projectActive(call: CallActive) {
-  const { id, type, status, device_token, direction, peer } = call;
-  return { id, type, status, device_token, direction, peer };
+  const { id, type, status, deviceToken, direction, peer } = call;
+  return { id, type, status, device_token: deviceToken, direction, peer };
 }

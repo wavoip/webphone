@@ -9,6 +9,7 @@ import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { getFullnameLetters } from "@/lib/utils";
 import { useWavoip } from "@/providers/WavoipProvider";
+import { useReconnectingSound } from "./useReconnectingSound";
 
 const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
@@ -18,6 +19,8 @@ export default function CallScreen() {
 
   const [durationSeconds, setDurationSeconds] = useState(0);
   const durationRef = useRef<number | null>(null);
+
+  useReconnectingSound(callStatus, reconnecting_sound);
 
   const status = useMemo(
     () =>
@@ -38,24 +41,7 @@ export default function CallScreen() {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
-      reconnecting_sound.onended = null;
-      reconnecting_sound.pause();
-      reconnecting_sound.currentTime = 0;
       if (durationRef.current) clearInterval(durationRef.current);
-    } else if (callStatus === "DISCONNECTED") {
-      reconnecting_sound.pause();
-      reconnecting_sound.currentTime = 0;
-      reconnecting_sound.onended = () => {
-        setTimeout(() => {
-          reconnecting_sound.currentTime = 0;
-          reconnecting_sound.play();
-        }, 3000);
-      };
-      reconnecting_sound.play();
-    } else if (callStatus === "ACTIVE") {
-      reconnecting_sound.onended = null;
-      reconnecting_sound.pause();
-      reconnecting_sound.currentTime = 0;
     }
   }, [callStatus]);
 
