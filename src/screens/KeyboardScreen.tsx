@@ -90,7 +90,10 @@ export default function KeyboardScreen({ compact = false }: props) {
         setStatus("");
         setCallIsLoading(false);
         setTimeout(() => setError(""), 4000);
-        togglePip();
+        setPipContent("keyboard");
+        if (pipWindow) {
+          togglePip();
+        }
         return;
       }
 
@@ -120,7 +123,10 @@ export default function KeyboardScreen({ compact = false }: props) {
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
-        togglePip();
+        setPipContent("keyboard");
+        if (pipWindow) {
+          togglePip();
+        }
         setTimeout(() => setStatus(""), 3000);
       }
     });
@@ -166,7 +172,9 @@ export default function KeyboardScreen({ compact = false }: props) {
       </div>
 
       <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
-        <div className={`wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center`}>
+        <div
+          className={`wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center`}
+        >
           {buttons.map(({ digit, letters, audio }) => (
             <Button
               key={`webphone-keyboard-${digit}`}
@@ -191,7 +199,9 @@ export default function KeyboardScreen({ compact = false }: props) {
       </div>
 
       <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
-        <div className={`wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center wv:items-center`}>
+        <div
+          className={`wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center wv:items-center`}
+        >
           <Button
             type="button"
             variant="secondary"

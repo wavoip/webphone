@@ -11,7 +11,6 @@ type PipContextType = {
 
 const PipContext = createContext<PipContextType | undefined>(undefined);
 
-
 type Props = {
   shadowRoot: ShadowRoot;
   children: ReactNode;
@@ -22,10 +21,6 @@ export function PipProvider({ shadowRoot, children }: Props) {
   const [pipContent, setPipContent] = useState<PipContent>("keyboard");
 
   const togglePip = useCallback(async () => {
-
-
-
-
     if (pipWindow) {
       pipWindow.close();
       return;
@@ -70,7 +65,9 @@ export function PipProvider({ shadowRoot, children }: Props) {
     setPipWindow(newPipWindow);
   }, [pipWindow, shadowRoot]);
 
-  return <PipContext.Provider value={{ pipWindow, togglePip, pipContent, setPipContent }}>{children}</PipContext.Provider>;
+  return (
+    <PipContext.Provider value={{ pipWindow, togglePip, pipContent, setPipContent }}>{children}</PipContext.Provider>
+  );
 }
 
 export function usePip() {

@@ -1,4 +1,4 @@
-import { BackspaceIcon, PhoneIcon, PictureInPictureIcon, XIcon } from "@phosphor-icons/react";
+import { PictureInPictureIcon, XIcon } from "@phosphor-icons/react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
@@ -67,6 +67,6 @@ export default function StatusBar() {
           <XIcon className="wv:max-sm:size-6 wv:pointer-events-none" />
         </Button>
       </div>
-    </div >
+    </div>
   );
 }
