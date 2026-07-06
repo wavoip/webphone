@@ -1,13 +1,14 @@
 import type { CallActive } from "@wavoip/wavoip-api";
-import { useTheme } from "next-themes";
 import { type RefObject, useEffect, useRef } from "react";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 type Props = {
   call?: CallActive;
 };
 
 export function WaveSound({ call }: Props) {
-  const { theme } = useTheme();
+  const { root } = useShadowRoot();
+  const theme = root.classList.contains("dark") ? "dark" : "light";
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationIDRef = useRef<number | null>(null);
 
@@ -47,8 +48,7 @@ function draw(
   analyser.getByteFrequencyData(dataArray);
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
-  ctx.fillStyle = theme === "dark" ? "#1a1b1e" : "white";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   drawBars(ctx, dataArray, canvas.width, canvas.height, theme === "dark" ? "#00ff66" : "#008000");
 }

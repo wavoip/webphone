@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function OfferNotification({ offer }: Props) {
-  const { togglePip } = usePip();
+  const { togglePip, pipWindow, setPipContent } = usePip();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -106,7 +106,10 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              togglePip();
+              setPipContent("call");
+              if (!pipWindow) {
+                togglePip();
+              }
               offer.accept().then((result) => {
                 if (result.err) {
                   setError(result.err);

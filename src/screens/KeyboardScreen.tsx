@@ -40,7 +40,11 @@ const buttons = [
 
 const backspace_audio = new Audio(SoundBackspace);
 
-export default function KeyboardScreen() {
+type props = {
+  compact?: boolean;
+};
+
+export default function KeyboardScreen({ compact = false }: props) {
   const middleware = useMiddleware();
   const number = useStore(middleware.store, (s) => s.keyboardInput);
   const { appendChar, popChar } = useStore(
@@ -57,7 +61,12 @@ export default function KeyboardScreen() {
 
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
-  const { togglePip } = usePip();
+  const { togglePip, pipWindow, setPipContent } = usePip();
+
+  const gridMaxWidth = compact ? "wv:max-w-[210px]" : "wv:max-w-[300px]";
+  const digitButtonSize = compact
+    ? "wv:[&>*]:max-w-[56px] wv:[&>*]:max-h-[56px]"
+    : "wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px]";
 
   const handleCall = async (allDevices: string[]) => {
     const isLast = allDevices.length <= 1;
@@ -124,7 +133,11 @@ export default function KeyboardScreen() {
         if (!number.trim()) return;
         const tokens = devices.filter((device) => device.enable).map((device) => device.token);
         if (!tokens.length) return;
-        togglePip();
+
+        setPipContent("call");
+        if (!pipWindow) {
+          togglePip();
+        }
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
@@ -152,8 +165,8 @@ export default function KeyboardScreen() {
         )}
       </div>
 
-      <div className="wv:flex wv:max-w-[300px] wv:w-full">
-        <div className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center">
+      <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
+        <div className={`wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center`}>
           {buttons.map(({ digit, letters, audio }) => (
             <Button
               key={`webphone-keyboard-${digit}`}
@@ -177,8 +190,8 @@ export default function KeyboardScreen() {
         </div>
       </div>
 
-      <div className="wv:flex wv:max-w-[300px] wv:w-full">
-        <div className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center wv:items-center">
+      <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
+        <div className={`wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center wv:items-center`}>
           <Button
             type="button"
             variant="secondary"

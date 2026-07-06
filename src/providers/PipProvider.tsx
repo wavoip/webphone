@@ -1,11 +1,16 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from "react";
 
+export type PipContent = "keyboard" | "call";
+
 type PipContextType = {
   pipWindow: Window | null;
   togglePip: () => void;
+  pipContent: PipContent;
+  setPipContent: (content: PipContent) => void;
 };
 
 const PipContext = createContext<PipContextType | undefined>(undefined);
+
 
 type Props = {
   shadowRoot: ShadowRoot;
@@ -14,8 +19,13 @@ type Props = {
 
 export function PipProvider({ shadowRoot, children }: Props) {
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
+  const [pipContent, setPipContent] = useState<PipContent>("keyboard");
 
   const togglePip = useCallback(async () => {
+
+
+
+
     if (pipWindow) {
       pipWindow.close();
       return;
@@ -48,9 +58,9 @@ export function PipProvider({ shadowRoot, children }: Props) {
 
     const pipStyle = document.createElement("style");
     pipStyle.textContent = `
-      html, body { height: 100vh; overflow: hidden; }
-      [data-slot="call-type"] { justify-content: center; }
-    `;
+        html, body { height: 100vh; overflow: hidden; }
+        [data-slot="call-type"] { justify-content: center; }
+      `;
     newPipWindow.document.head.appendChild(pipStyle);
 
     newPipWindow.addEventListener("pagehide", () => {
@@ -60,7 +70,7 @@ export function PipProvider({ shadowRoot, children }: Props) {
     setPipWindow(newPipWindow);
   }, [pipWindow, shadowRoot]);
 
-  return <PipContext.Provider value={{ pipWindow, togglePip }}>{children}</PipContext.Provider>;
+  return <PipContext.Provider value={{ pipWindow, togglePip, pipContent, setPipContent }}>{children}</PipContext.Provider>;
 }
 
 export function usePip() {

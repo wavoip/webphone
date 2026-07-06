@@ -15,7 +15,7 @@ export function WebPhone() {
   const screen = useStore(middleware.store, (s) => s.screen);
   const { startDrag, stopDrag, setIsClosed } = useWidget();
   const { root } = useShadowRoot();
-  const { pipWindow } = usePip();
+  const { pipWindow, pipContent, setPipContent } = usePip();
   const resolvedTheme = root.classList.contains("dark") ? "dark" : "light";
 
   const prevScreenRef = useRef(screen);
@@ -26,6 +26,10 @@ export function WebPhone() {
     }
     prevScreenRef.current = screen;
   }, [screen, pipWindow]);
+
+  useEffect(() => {
+    setPipContent(screen === "keyboard" ? "keyboard" : "call");
+  }, [screen, setPipContent]);
 
   useEffect(() => {
     setIsClosed(!!pipWindow);
@@ -69,7 +73,13 @@ export function WebPhone() {
 
       {pipWindow && (
         <PipPortal pipWindow={pipWindow} theme={resolvedTheme}>
-          {screen === "keyboard" ? <OutgoingScreen /> : callScreens}
+          {pipContent === "keyboard" ? (
+            <KeyboardScreen compact />
+          ) : screen === "call" ? (
+            <CallScreen />
+          ) : (
+            <OutgoingScreen />
+          )}
         </PipPortal>
       )}
     </>
