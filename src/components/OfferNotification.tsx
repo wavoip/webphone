@@ -13,7 +13,7 @@ type Props = {
 };
 
 export function OfferNotification({ offer }: Props) {
-  const { togglePip, pipWindow, setPipContent } = usePip();
+  const { openPip, closePip } = usePip();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -106,14 +106,12 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              setPipContent("call");
-              if (!pipWindow) {
-                togglePip();
-              }
+              openPip();
               offer.accept().then((result) => {
                 if (result.err) {
                   setError(result.err);
                   setActionMade(false);
+                  closePip();
                   return;
                 }
                 toast.dismiss(offer.id);

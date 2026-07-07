@@ -42,7 +42,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   const offers = useOffers();
   const { outgoing, active, callStatus, peerMuted, callFailReason } = useCallState();
   const { isClosed, setIsClosed, open: openWidget } = useWidget();
-  const { pipWindow } = usePip();
+  const { isPiP } = usePip();
   const { callSettings } = useSettings();
 
   const startCall: StartCall = useMemo(
@@ -64,7 +64,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
 
   useToastBridge(middleware);
-  useWidgetCache(middleware, isClosed, setIsClosed, openWidget, pipWindow);
+  useWidgetCache(middleware, isClosed, setIsClosed, openWidget, isPiP);
   usePictureInPictureSync(middleware);
 
   return (
@@ -153,9 +153,22 @@ function useWidgetCache(
   isClosed: boolean,
   setIsClosed: (closed: boolean) => void,
   openWidget: () => void,
-  pipWindow: Window | null,
+  isPiP: boolean,
 ) {
   const closedCache = React.useRef<boolean | null>(null);
+
+  // Entering/leaving PiP shares the same "remember, then restore" cache as
+  // call start/end below, so whichever transition fires first consumes the
+  // memory and the other becomes a no-op — no race between the two.
+  useEffect(() => {
+    if (isPiP) {
+      if (closedCache.current === null) closedCache.current = isClosed;
+      setIsClosed(true);
+    } else if (closedCache.current !== null) {
+      setIsClosed(closedCache.current);
+      closedCache.current = null;
+    }
+  }, [isPiP, isClosed, setIsClosed]);
 
   useEffect(() => {
     return middleware.store.subscribe(
@@ -163,14 +176,14 @@ function useWidgetCache(
       (inCall) => {
         if (inCall) {
           if (closedCache.current === null) closedCache.current = isClosed;
-          if (!pipWindow) openWidget();
+          if (!isPiP) openWidget();
         } else if (closedCache.current !== null) {
           if (closedCache.current) setIsClosed(true);
           closedCache.current = null;
         }
       },
     );
-  }, [middleware, isClosed, setIsClosed, openWidget, pipWindow]);
+  }, [middleware, isClosed, setIsClosed, openWidget, isPiP]);
 }
 
 function usePictureInPictureSync(middleware: Middleware) {

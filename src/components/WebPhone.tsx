@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 import { useStore } from "zustand";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { PipPortal } from "@/components/PipPortal";
@@ -13,27 +13,10 @@ import OutgoingScreen from "@/screens/OutgoingScreen";
 export function WebPhone() {
   const middleware = useMiddleware();
   const screen = useStore(middleware.store, (s) => s.screen);
-  const { startDrag, stopDrag, setIsClosed } = useWidget();
+  const { startDrag, stopDrag } = useWidget();
   const { root } = useShadowRoot();
-  const { pipWindow, pipContent, setPipContent } = usePip();
   const resolvedTheme = root.classList.contains("dark") ? "dark" : "light";
-
-  const prevScreenRef = useRef(screen);
-
-  useEffect(() => {
-    if (screen === "keyboard" && prevScreenRef.current !== "keyboard" && pipWindow) {
-      pipWindow.close();
-    }
-    prevScreenRef.current = screen;
-  }, [screen, pipWindow]);
-
-  useEffect(() => {
-    setPipContent(screen === "keyboard" ? "keyboard" : "call");
-  }, [screen, setPipContent]);
-
-  useEffect(() => {
-    setIsClosed(!!pipWindow);
-  }, [pipWindow, setIsClosed]);
+  const { pipWindow, isPiP } = usePip();
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -53,7 +36,7 @@ export function WebPhone() {
 
   return (
     <>
-      {<StatusBar />}
+      <StatusBar />
       <div
         role="application"
         className="wv:flex wv:flex-1 wv:relative wv:px-7"
@@ -61,7 +44,7 @@ export function WebPhone() {
         onMouseDown={handleMouseDown}
       >
         {screen === "keyboard" && <KeyboardScreen />}
-        {!pipWindow && callScreens}
+        {!isPiP && callScreens}
 
         <p
           className="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]"
@@ -73,13 +56,7 @@ export function WebPhone() {
 
       {pipWindow && (
         <PipPortal pipWindow={pipWindow} theme={resolvedTheme}>
-          {pipContent === "keyboard" ? (
-            <KeyboardScreen compact />
-          ) : screen === "call" ? (
-            <CallScreen />
-          ) : (
-            <OutgoingScreen />
-          )}
+          {screen === "keyboard" ? <KeyboardScreen /> : screen === "call" ? <CallScreen /> : <OutgoingScreen />}
         </PipPortal>
       )}
     </>

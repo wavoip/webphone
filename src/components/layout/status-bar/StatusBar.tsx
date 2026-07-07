@@ -14,7 +14,7 @@ import { useWidget } from "@/providers/WidgetProvider";
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
   const { callActive } = useWavoip();
-  const { togglePip, setPipContent, pipContent } = usePip();
+  const { togglePip } = usePip();
 
   const middleware = useMiddleware();
   const { showNotifications, showSettings } = useStore(
@@ -42,12 +42,7 @@ export default function StatusBar() {
           type="button"
           variant={"ghost"}
           className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
-          onClick={() => {
-            if (pipContent !== "call") {
-              setPipContent("keyboard");
-            }
-            togglePip();
-          }}
+          onClick={() => togglePip()}
         >
           <PictureInPictureIcon className="wv:size-5 wv:max-sm:size-8 wv:pointer-events-none" weight="fill" />
         </Button>

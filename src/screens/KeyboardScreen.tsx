@@ -40,11 +40,7 @@ const buttons = [
 
 const backspace_audio = new Audio(SoundBackspace);
 
-type props = {
-  compact?: boolean;
-};
-
-export default function KeyboardScreen({ compact = false }: props) {
+export default function KeyboardScreen() {
   const middleware = useMiddleware();
   const number = useStore(middleware.store, (s) => s.keyboardInput);
   const { appendChar, popChar } = useStore(
@@ -61,12 +57,7 @@ export default function KeyboardScreen({ compact = false }: props) {
 
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
-  const { togglePip, pipWindow, setPipContent } = usePip();
-
-  const gridMaxWidth = compact ? "wv:max-w-[210px]" : "wv:max-w-[300px]";
-  const digitButtonSize = compact
-    ? "wv:[&>*]:max-w-[56px] wv:[&>*]:max-h-[56px]"
-    : "wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px]";
+  const { openPip, closePip } = usePip();
 
   const handleCall = async (allDevices: string[]) => {
     const isLast = allDevices.length <= 1;
@@ -90,10 +81,7 @@ export default function KeyboardScreen({ compact = false }: props) {
         setStatus("");
         setCallIsLoading(false);
         setTimeout(() => setError(""), 4000);
-        setPipContent("keyboard");
-        if (pipWindow) {
-          togglePip();
-        }
+        closePip();
         return;
       }
 
@@ -123,10 +111,7 @@ export default function KeyboardScreen({ compact = false }: props) {
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
-        setPipContent("keyboard");
-        if (pipWindow) {
-          togglePip();
-        }
+        closePip();
         setTimeout(() => setStatus(""), 3000);
       }
     });
@@ -140,10 +125,8 @@ export default function KeyboardScreen({ compact = false }: props) {
         const tokens = devices.filter((device) => device.enable).map((device) => device.token);
         if (!tokens.length) return;
 
-        setPipContent("call");
-        if (!pipWindow) {
-          togglePip();
-        }
+        middleware.store.getState().setScreen("outgoing");
+        openPip();
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
@@ -171,9 +154,10 @@ export default function KeyboardScreen({ compact = false }: props) {
         )}
       </div>
 
-      <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
+      <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
         <div
-          className={`wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center`}
+          data-slot="keyboard-buttons"
+          className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center"
         >
           {buttons.map(({ digit, letters, audio }) => (
             <Button
@@ -198,9 +182,10 @@ export default function KeyboardScreen({ compact = false }: props) {
         </div>
       </div>
 
-      <div className={`wv:flex ${gridMaxWidth} wv:w-full`}>
+      <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
         <div
-          className={`wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none ${digitButtonSize} wv:justify-items-center wv:items-center`}
+          data-slot="keyboard-buttons"
+          className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center wv:items-center"
         >
           <Button
             type="button"
