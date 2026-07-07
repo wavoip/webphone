@@ -121,11 +121,14 @@ export default function KeyboardScreen() {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (!number.trim()) return;
         const tokens = devices.filter((device) => device.enable).map((device) => device.token);
-        if (!tokens.length) return;
+        if (!tokens.length) {
+          setError(t("No device available"));
+          setTimeout(() => setError(""), 4000);
+          return;
+        }
+        if (!number.trim()) return;
 
-        middleware.store.getState().setScreen("outgoing");
         openPip();
         handleCall([...tokens]);
       }}
