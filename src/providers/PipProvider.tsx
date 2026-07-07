@@ -12,6 +12,8 @@ type PipContextType = {
 
 export const PipContext = createContext<PipContextType | undefined>(undefined);
 
+export const PIP_WINDOW_SIZE = { width: 320, height: 450 } as const;
+
 type Props = {
   shadowRoot: ShadowRoot;
   children: ReactNode;
@@ -19,10 +21,7 @@ type Props = {
 
 async function createNewPipWindow(shadowRoot: ShadowRoot): Promise<Window> {
   // @ts-expect-error
-  const newPipWindow = await window.documentPictureInPicture.requestWindow({
-    width: 320,
-    height: 450,
-  });
+  const newPipWindow = await window.documentPictureInPicture.requestWindow(PIP_WINDOW_SIZE);
   newPipWindow.document.body.style.margin = "0";
   newPipWindow.document.body.style.overflow = "hidden";
   newPipWindow.document.body.style.backgroundColor = "#1a1b1e";

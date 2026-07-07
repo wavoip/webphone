@@ -1,29 +1,44 @@
 import type { CallActive } from "@wavoip/wavoip-api";
-import { type RefObject, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 type Props = {
   call?: CallActive;
 };
 
+const BARS = 15;
+const GAP = 2;
+
 export function WaveSound({ call }: Props) {
   const { root } = useShadowRoot();
   const theme = root.classList.contains("dark") ? "dark" : "light";
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animationIDRef = useRef<number | null>(null);
+  const smoothRef = useRef<number[]>(Array(BARS).fill(0));
 
+  // Single effect owns the whole animation-frame lifecycle: any re-run (new
+  // analyser, theme change) or unmount cancels the in-flight loop first, so
+  // there's never more than one loop fighting over smoothRef at a time —
+  // that double-loop race is what made the wave look stuck after mute/unmute.
   useEffect(() => {
-    call?.audioAnalyserIn?.then((analyser) => {
-      if (!canvasRef.current) return;
-      draw(canvasRef.current, analyser, animationIDRef, theme);
+    if (!call?.audioAnalyserIn) return;
+    let animationId: number | null = null;
+    let cancelled = false;
+
+    call.audioAnalyserIn.then((analyser) => {
+      if (cancelled || !canvasRef.current) return;
+      const canvas = canvasRef.current;
+      const loop = () => {
+        animationId = requestAnimationFrame(loop);
+        draw(canvas, analyser, smoothRef.current, theme);
+      };
+      loop();
     });
-  }, [call?.audioAnalyserIn, theme]);
 
-  useEffect(() => {
     return () => {
-      if (animationIDRef.current) cancelAnimationFrame(animationIDRef.current);
+      cancelled = true;
+      if (animationId !== null) cancelAnimationFrame(animationId);
     };
-  }, []);
+  }, [call?.audioAnalyserIn, theme]);
 
   return (
     <div className="text-center">
@@ -32,35 +47,29 @@ export function WaveSound({ call }: Props) {
   );
 }
 
-const BARS = 15;
-const GAP = 2;
-let smooth: number[] = [];
-
-function draw(
-  canvas: HTMLCanvasElement,
-  analyser: AnalyserNode,
-  animationRef: RefObject<number | null>,
-  theme?: string,
-) {
-  animationRef.current = requestAnimationFrame(() => draw(canvas, analyser, animationRef, theme));
-
+function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, smooth: number[], theme?: string) {
   const dataArray = new Uint8Array(analyser.frequencyBinCount);
   analyser.getByteFrequencyData(dataArray);
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  drawBars(ctx, dataArray, canvas.width, canvas.height, theme === "dark" ? "#00ff66" : "#008000");
+  drawBars(ctx, dataArray, canvas.width, canvas.height, smooth, theme === "dark" ? "#00ff66" : "#008000");
 }
 
-function drawBars(ctx: CanvasRenderingContext2D, dataArray: Uint8Array, width: number, height: number, color: string) {
+function drawBars(
+  ctx: CanvasRenderingContext2D,
+  dataArray: Uint8Array,
+  width: number,
+  height: number,
+  smooth: number[],
+  color: string,
+) {
   ctx.fillStyle = color;
 
   const step = Math.floor(dataArray.length / BARS);
   const barWidth = (width - GAP * (BARS - 1)) / BARS;
   const center = Math.floor(BARS / 2);
-
-  if (smooth.length !== BARS) smooth = Array(BARS).fill(0);
 
   for (let k = 0; k < BARS; k++) {
     const offset = k - center;
