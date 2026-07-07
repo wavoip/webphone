@@ -89,6 +89,7 @@ export default function KeyboardScreen() {
         setError(t("No device available"));
         setStatus("");
         setCallIsLoading(false);
+        closePip();
 
         setTimeout(() => {
           setError("");
