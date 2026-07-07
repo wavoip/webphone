@@ -36,6 +36,7 @@ export function useCallState() {
     callStatus: s.callStatus,
     outgoing: s.outgoing,
     active: s.active,
+    activeStartedAt: s.activeStartedAt,
     peerMuted: s.peerMuted,
     callFailReason: s.callFailReason,
   }));

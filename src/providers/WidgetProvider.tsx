@@ -81,7 +81,7 @@ export function WidgetProvider({ children }: Props) {
 
       const rect = divRef.current.getBoundingClientRect();
       if (x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
-      if (y > document.body.clientHeight - rect.height) y = document.body.clientHeight - rect.height;
+      if (y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
 
       setStorePosition({ x, y });
     },

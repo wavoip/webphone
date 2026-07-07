@@ -1,5 +1,5 @@
 import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
 import { CallButtons } from "@/components/CallButtons";
@@ -13,10 +13,9 @@ const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
-  const { callActive, callStatus, peerMuted, callFailReason } = useWavoip();
+  const { callActive, callStatus, peerMuted, callFailReason, callActiveStartedAt } = useWavoip();
 
-  const [durationSeconds, setDurationSeconds] = useState(0);
-  const durationRef = useRef<number | null>(null);
+  const [, forceTick] = useState(0);
 
   const status = useMemo(
     () =>
@@ -40,7 +39,6 @@ export default function CallScreen() {
       reconnecting_sound.onended = null;
       reconnecting_sound.pause();
       reconnecting_sound.currentTime = 0;
-      if (durationRef.current) clearInterval(durationRef.current);
     } else if (callStatus === "DISCONNECTED") {
       reconnecting_sound.pause();
       reconnecting_sound.currentTime = 0;
@@ -59,16 +57,14 @@ export default function CallScreen() {
   }, [callStatus]);
 
   useEffect(() => {
-    durationRef.current = setInterval(() => {
-      setDurationSeconds((prev) => prev + 1);
-    }, 1000) as unknown as number;
+    if (callStatus === "ENDED" || callStatus === "FAILED") return;
+    const id = setInterval(() => forceTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [callStatus]);
 
-    return () => {
-      if (durationRef.current) {
-        clearInterval(durationRef.current);
-      }
-    };
-  }, []);
+  const durationSeconds = callActiveStartedAt
+    ? Math.max(0, Math.floor((Date.now() - callActiveStartedAt) / 1000))
+    : 0;
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">

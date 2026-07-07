@@ -20,6 +20,7 @@ export type CallSliceState = {
   offers: Offer[];
   outgoing?: CallOutgoing;
   active?: CallActive;
+  activeStartedAt?: number;
   callStatus: CallStatus;
   peerMuted: boolean;
   callFailReason?: string;
@@ -44,6 +45,7 @@ const initialCallState: CallSliceState = {
   offers: [],
   outgoing: undefined,
   active: undefined,
+  activeStartedAt: undefined,
   callStatus: "idle",
   peerMuted: false,
   callFailReason: undefined,
@@ -55,7 +57,7 @@ export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> =
   addOffer: (offer) => set((state) => ({ offers: [...state.offers, offer] })),
   removeOffer: (id) => set((state) => ({ offers: state.offers.filter((o) => o.id !== id) })),
   setOutgoing: (outgoing) => set({ outgoing }),
-  setActive: (active) => set({ active }),
+  setActive: (active) => set({ active, activeStartedAt: active ? Date.now() : undefined }),
   setCallStatus: (callStatus) => set({ callStatus }),
   setPeerMuted: (peerMuted) => set({ peerMuted }),
   setCallFailReason: (callFailReason) => set({ callFailReason }),

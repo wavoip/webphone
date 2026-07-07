@@ -18,6 +18,7 @@ interface WavoipContextProps {
   offers: Offer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
+  callActiveStartedAt?: number;
   callStatus: CallStatus;
   peerMuted: boolean;
   callFailReason?: string;
@@ -40,7 +41,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   const middleware = useMiddleware();
   const devices = useDevices();
   const offers = useOffers();
-  const { outgoing, active, callStatus, peerMuted, callFailReason } = useCallState();
+  const { outgoing, active, activeStartedAt, callStatus, peerMuted, callFailReason } = useCallState();
   const { isClosed, setIsClosed, open: openWidget } = useWidget();
   const { isPiP } = usePip();
   const { callSettings } = useSettings();
@@ -75,6 +76,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
         offers,
         callOutgoing: outgoing,
         callActive: active,
+        callActiveStartedAt: activeStartedAt,
         callStatus,
         peerMuted,
         callFailReason,

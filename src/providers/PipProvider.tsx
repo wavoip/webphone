@@ -10,7 +10,7 @@ type PipContextType = {
   closePip: () => void;
 };
 
-const PipContext = createContext<PipContextType | undefined>(undefined);
+export const PipContext = createContext<PipContextType | undefined>(undefined);
 
 type Props = {
   shadowRoot: ShadowRoot;
