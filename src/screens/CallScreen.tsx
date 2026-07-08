@@ -8,6 +8,7 @@ import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useWavoip } from "@/providers/WavoipProvider";
+import { useReconnectingSound } from "./useReconnectingSound";
 
 const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
@@ -18,6 +19,8 @@ export default function CallScreen() {
   const [durationSeconds, setDurationSeconds] = useState(() =>
     callActiveStartedAt ? Math.floor((Date.now() - callActiveStartedAt) / 1000) : 0,
   );
+
+  useReconnectingSound(callStatus, reconnecting_sound);
 
   const status = useMemo(
     () =>
@@ -38,6 +41,7 @@ export default function CallScreen() {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
+      if (durationRef.current) clearInterval(durationRef.current);
       reconnecting_sound.onended = null;
       reconnecting_sound.pause();
       reconnecting_sound.currentTime = 0;

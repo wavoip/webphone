@@ -43,7 +43,7 @@ const STRENGTH_STYLES: Record<ConnectionStrength, { text: string; bg: string; ri
 
 export function Ping({ call }: Props) {
   const [ping, setPing] = useState<number | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connection_status);
+  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connectionStatus);
   const [strength, setStrength] = useState<ConnectionStrength>(ConnectionStrength.high);
 
   useEffect(() => {

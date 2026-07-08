@@ -144,6 +144,7 @@ export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
   connectionStatus: "connected" | "disconnected" | "reconnecting" = "disconnected";
   restricted = false;
   restrictedUntil: Date | null = null;
+  activeCalls = 0;
   readonly token: string;
 
   constructor(token: string) {

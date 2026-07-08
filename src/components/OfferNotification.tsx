@@ -19,21 +19,15 @@ export function OfferNotification({ offer }: Props) {
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    offer.onEnd(() => {
-      setStatus(t("Call ended"));
-    });
-
-    offer.onAcceptedElsewhere(() => {
-      setStatus(t("Accepted by another user"));
-    });
-
-    offer.onRejectedElsewhere(() => {
-      setStatus(t("Rejected by the app"));
-    });
-
-    offer.onUnanswered(() => {
-      setStatus(t("Timed out"));
-    });
+    const unsubs = [
+      offer.on("ended", () => setStatus(t("Call ended"))),
+      offer.on("acceptedElsewhere", () => setStatus(t("Accepted by another user"))),
+      offer.on("rejectedElsewhere", () => setStatus(t("Rejected by the app"))),
+      offer.on("unanswered", () => setStatus(t("Timed out"))),
+    ];
+    return () => {
+      for (const unsub of unsubs) unsub();
+    };
   }, [offer]);
 
   return (
