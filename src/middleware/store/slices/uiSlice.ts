@@ -19,6 +19,9 @@ export type UiSliceState = {
   theme: Theme;
   settings: UiSettings;
   keyboardInput: string;
+  dialStatus: string;
+  dialError: string;
+  dialIsLoading: boolean;
 };
 
 export type UiSliceActions = {
@@ -28,6 +31,9 @@ export type UiSliceActions = {
   setKeyboardInput: (input: string) => void;
   appendKeyboardChar: (ch: string) => void;
   popKeyboardChar: () => void;
+  setDialStatus: (status: string) => void;
+  setDialError: (error: string) => void;
+  setDialIsLoading: (loading: boolean) => void;
 };
 
 export type UiSlice = UiSliceState & UiSliceActions;
@@ -47,10 +53,16 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   theme: "system",
   settings: initialSettings,
   keyboardInput: "",
+  dialStatus: "",
+  dialError: "",
+  dialIsLoading: false,
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
   setSetting: (key, value) => set((state) => ({ settings: { ...state.settings, [key]: value } })),
   setKeyboardInput: (keyboardInput) => set({ keyboardInput }),
   appendKeyboardChar: (ch) => set((state) => ({ keyboardInput: state.keyboardInput + ch })),
   popKeyboardChar: () => set((state) => ({ keyboardInput: state.keyboardInput.slice(0, -1) })),
+  setDialStatus: (dialStatus) => set({ dialStatus }),
+  setDialError: (dialError) => set({ dialError }),
+  setDialIsLoading: (dialIsLoading) => set({ dialIsLoading }),
 });

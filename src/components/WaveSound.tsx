@@ -15,10 +15,6 @@ export function WaveSound({ call }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const smoothRef = useRef<number[]>(Array(BARS).fill(0));
 
-  // Single effect owns the whole animation-frame lifecycle: any re-run (new
-  // analyser, theme change) or unmount cancels the in-flight loop first, so
-  // there's never more than one loop fighting over smoothRef at a time —
-  // that double-loop race is what made the wave look stuck after mute/unmute.
   useEffect(() => {
     if (!call?.audioAnalyserIn) return;
     let animationId: number | null = null;

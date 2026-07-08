@@ -159,9 +159,6 @@ function useWidgetCache(
 ) {
   const closedCache = React.useRef<boolean | null>(null);
 
-  // Entering/leaving PiP shares the same "remember, then restore" cache as
-  // call start/end below, so whichever transition fires first consumes the
-  // memory and the other becomes a no-op — no race between the two.
   useEffect(() => {
     if (isPiP) {
       if (closedCache.current === null) closedCache.current = isClosed;
@@ -192,7 +189,7 @@ function usePictureInPictureSync(middleware: Middleware) {
   useEffect(() => {
     return middleware.store.subscribe(
       (s) => s.active ?? s.outgoing,
-      () => {},
+      () => { },
     );
   }, [middleware]);
 }

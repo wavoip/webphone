@@ -1,5 +1,4 @@
 import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
-import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
@@ -50,17 +49,20 @@ export default function KeyboardScreen() {
       popChar: s.popKeyboardChar,
     })),
   );
-
-  const [status, setStatus] = useState("");
-  const [error, setError] = useState("");
-  const [callIsLoading, setCallIsLoading] = useState(false);
+  const setKeyboardInput = middleware.store.getState().setKeyboardInput;
+  const status = useStore(middleware.store, (s) => s.dialStatus);
+  const error = useStore(middleware.store, (s) => s.dialError);
+  const callIsLoading = useStore(middleware.store, (s) => s.dialIsLoading);
+  const setStatus = middleware.store.getState().setDialStatus;
+  const setError = middleware.store.getState().setDialError;
+  const setCallIsLoading = middleware.store.getState().setDialIsLoading;
 
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
   const { openPip, closePip } = usePip();
 
   const handleCall = async (allDevices: string[]) => {
-    const isLast = allDevices.length <= 1;
+    const isLast = allDevices.length <= 1; ''
     const device = allDevices[0];
 
     setCallIsLoading(true);
@@ -68,8 +70,10 @@ export default function KeyboardScreen() {
     setStatus(`${t("Calling from")} ${device}`);
 
     await startCall(number, { fromTokens: [device] }).then(({ err }) => {
+
       if (!err) {
-        setStatus("Ok");
+        setStatus("");
+        setKeyboardInput("");
         setCallIsLoading(false);
         return;
       }
@@ -151,7 +155,7 @@ export default function KeyboardScreen() {
         {status && (
           <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
             {callIsLoading && (
-              <div className="wv:h-3 wv:w-3 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
+              <div className="wv:h-3 wv:w-3 wv:shrink-0 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
             )}
             <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
           </div>

@@ -15,7 +15,9 @@ const reconnecting_sound = new Audio(Reconnecting);
 export default function CallScreen() {
   const { callActive, callStatus, peerMuted, callFailReason, callActiveStartedAt } = useWavoip();
 
-  const [, forceTick] = useState(0);
+  const [durationSeconds, setDurationSeconds] = useState(() =>
+    callActiveStartedAt ? Math.floor((Date.now() - callActiveStartedAt) / 1000) : 0,
+  );
 
   const status = useMemo(
     () =>
@@ -58,13 +60,9 @@ export default function CallScreen() {
 
   useEffect(() => {
     if (callStatus === "ENDED" || callStatus === "FAILED") return;
-    const id = setInterval(() => forceTick((n) => n + 1), 1000);
+    const id = setInterval(() => setDurationSeconds((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [callStatus]);
-
-  const durationSeconds = callActiveStartedAt
-    ? Math.max(0, Math.floor((Date.now() - callActiveStartedAt) / 1000))
-    : 0;
 
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">

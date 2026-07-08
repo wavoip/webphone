@@ -26,20 +26,9 @@ const FEEDBACK_DURATION_MS = 1500;
 export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Read via raw context (no throwing helper) so unit tests can render
-  // CopyablePeer outside the App tree and still get a working tooltip
-  // (falls back to document.body when there is no ShadowRoot).
   const shadow = useContext(ShadowRootContext);
-  // CallScreen only ever mounts in one place at a time (normal widget XOR
-  // inside the PiP window), so pipWindow here reliably means "this instance
-  // is the one inside the PiP" — portal the tooltip into its own document,
-  // not the (hidden) main document's shadow root.
   const pip = useContext(PipContext);
   const tooltipContainer = pip?.pipWindow?.document.body ?? shadow?.root;
-  // navigator.clipboard checks focus on the document that calls it. Inside
-  // the PiP window that's pipWindow's document, not the (unfocused) main
-  // one — write through pipWindow's own navigator or every copy throws
-  // "Document is not focused".
   const clipboard = pip?.pipWindow?.navigator.clipboard ?? navigator.clipboard;
 
   useEffect(() => {
