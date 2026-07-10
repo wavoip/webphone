@@ -41,7 +41,6 @@ export default function CallScreen() {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
-      if (durationRef.current) clearInterval(durationRef.current);
       reconnecting_sound.onended = null;
       reconnecting_sound.pause();
       reconnecting_sound.currentTime = 0;
