@@ -65,6 +65,16 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
   }, [middleware, config?.offerNotification?.autoRequest]);
 
   useEffect(() => {
+    if (!config?.callSettings?.autoRequestMicrophone) return;
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        for (const track of stream.getTracks()) track.stop();
+      })
+      .catch(() => {});
+  }, [config?.callSettings?.autoRequestMicrophone]);
+
+  useEffect(() => {
     return () => {
       middleware.destroy();
     };

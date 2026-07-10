@@ -195,7 +195,7 @@ export const SettingsModal = forwardRef(() => {
                             setToken("");
                           }
                         }}
-                        className={`wv:focus-visible:ring-0 wv:flex-1 wv:max-sm:h-10 ${error ? "wv:border-red-500" : ""}`}
+                        className={`wv:!text-foreground wv:focus-visible:ring-0 wv:flex-1 wv:max-sm:h-10 ${error ? "wv:border-red-500" : ""}`}
                       />
                       <Button
                         type="button"

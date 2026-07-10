@@ -56,6 +56,7 @@ export type WebphonePosition =
 
 export type CallSettings = {
   displayName?: string;
+  autoRequestMicrophone?: boolean;
 };
 
 export type OfferNotificationSettings = {
