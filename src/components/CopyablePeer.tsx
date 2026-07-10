@@ -82,12 +82,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
           </MarqueeText>
         </span>
       </TooltipTrigger>
-      <TooltipContent
-        container={tooltipContainer}
-        side="top"
-        sideOffset={4}
-        className="wv:bg-green-600 wv:text-white"
-      >
+      <TooltipContent container={tooltipContainer} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
         Copiado
       </TooltipContent>
     </Tooltip>

@@ -64,7 +64,6 @@ export default function KeyboardScreen() {
 
   const handleCall = async (allDevices: string[]) => {
     const isLast = allDevices.length <= 1;
-    ("");
     const device = allDevices[0];
 
     setCallIsLoading(true);
