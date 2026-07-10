@@ -1,8 +1,8 @@
-import { type KeyboardEvent, useContext, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import MarqueeText from "@/components/MarqueeText";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { PipContext } from "@/providers/PipProvider";
-import { ShadowRootContext } from "@/providers/ShadowRootProvider";
+import { usePip } from "@/providers/PipProvider";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 type Props = {
   displayName: string | null | undefined;
@@ -26,10 +26,10 @@ const FEEDBACK_DURATION_MS = 1500;
 export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shadow = useContext(ShadowRootContext);
-  const pip = useContext(PipContext);
-  const tooltipContainer = pip?.pipWindow?.document.body ?? shadow?.root;
-  const clipboard = pip?.pipWindow?.navigator.clipboard ?? navigator.clipboard;
+  const shadow = useShadowRoot();
+  const pip = usePip();
+  const tooltipContainer = pip.pipWindow?.document.body ?? shadow.root;
+  const clipboard = pip.pipWindow?.navigator.clipboard ?? navigator.clipboard;
 
   useEffect(() => {
     return () => {
