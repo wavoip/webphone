@@ -42,6 +42,24 @@ export function useCallState() {
   }));
 }
 
+export function useDialState() {
+  const middleware = useMiddleware();
+  const { dialStatus, dialError, dialIsLoading } = useMiddlewareShallow((s) => ({
+    dialStatus: s.dialStatus,
+    dialError: s.dialError,
+    dialIsLoading: s.dialIsLoading,
+  }));
+
+  return {
+    status: dialStatus,
+    error: dialError,
+    isLoading: dialIsLoading,
+    setStatus: middleware.store.getState().setDialStatus,
+    setError: middleware.store.getState().setDialError,
+    setIsLoading: middleware.store.getState().setDialIsLoading,
+  };
+}
+
 export function useOffers() {
   return useMiddlewareSelector((s) => s.offers);
 }

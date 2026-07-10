@@ -17,7 +17,7 @@ import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { type TranslationKey, t } from "@/lib/i18n";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
 import { usePip } from "@/providers/PipProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -50,19 +50,21 @@ export default function KeyboardScreen() {
     })),
   );
   const setKeyboardInput = middleware.store.getState().setKeyboardInput;
-  const status = useStore(middleware.store, (s) => s.dialStatus);
-  const error = useStore(middleware.store, (s) => s.dialError);
-  const callIsLoading = useStore(middleware.store, (s) => s.dialIsLoading);
-  const setStatus = middleware.store.getState().setDialStatus;
-  const setError = middleware.store.getState().setDialError;
-  const setCallIsLoading = middleware.store.getState().setDialIsLoading;
-
+  const {
+    status,
+    error,
+    isLoading: callIsLoading,
+    setStatus,
+    setError,
+    setIsLoading: setCallIsLoading,
+  } = useDialState();
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
   const { openPip, closePip } = usePip();
 
   const handleCall = async (allDevices: string[]) => {
-    const isLast = allDevices.length <= 1; ''
+    const isLast = allDevices.length <= 1;
+    ("");
     const device = allDevices[0];
 
     setCallIsLoading(true);
@@ -70,7 +72,6 @@ export default function KeyboardScreen() {
     setStatus(`${t("Calling from")} ${device}`);
 
     await startCall(number, { fromTokens: [device] }).then(({ err }) => {
-
       if (!err) {
         setStatus("");
         setKeyboardInput("");
