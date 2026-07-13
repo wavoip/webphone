@@ -2,17 +2,18 @@ import { PhoneIcon, PhoneSlash, WhatsappLogo } from "@phosphor-icons/react";
 import type { Offer } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
-import { getFullnameLetters } from "@/lib/utils";
+import { usePip } from "@/providers/PipProvider";
 
 type Props = {
   offer: Offer;
 };
 
 export function OfferNotification({ offer }: Props) {
+  const { openPip, closePip } = usePip();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -47,10 +48,11 @@ export function OfferNotification({ offer }: Props) {
         </div>
       </div>
       <div className="wv:flex wv:gap-3">
-        <Avatar className="wv:size-[50px] wv:rounded-xl">
-          <AvatarImage src={offer.peer?.profilePicture ?? ""} />
-          <AvatarFallback>{getFullnameLetters(offer.peer?.displayName)}</AvatarFallback>
-        </Avatar>
+        <ContactAvatar
+          className="wv:size-[50px] wv:rounded-xl"
+          src={offer.peer?.profilePicture}
+          displayName={offer.peer?.displayName}
+        />
 
         <div className="wv:flex-grow wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
           {(error ?? status) ? (
@@ -98,10 +100,12 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
+              openPip();
               offer.accept().then((result) => {
                 if (result.err) {
                   setError(result.err);
                   setActionMade(false);
+                  closePip();
                   return;
                 }
                 toast.dismiss(offer.id);

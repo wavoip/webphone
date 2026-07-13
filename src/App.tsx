@@ -6,6 +6,7 @@ import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
+import { PipProvider } from "@/providers/PipProvider";
 import { ShadowProvider } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
@@ -32,15 +33,17 @@ export function App({ shadowRoot, root, config, wavoip }: Props) {
         <MiddlewareRoot wavoip={wavoip} config={config}>
           <LanguageProvider initial={config.language}>
             <ThemeProvider root={root}>
-              <WidgetProvider>
-                <NotificationsProvider>
-                  <WavoipProvider>
-                    <DebugProvider>
-                      <WebPhone />
-                    </DebugProvider>
-                  </WavoipProvider>
-                </NotificationsProvider>
-              </WidgetProvider>
+              <PipProvider shadowRoot={shadowRoot}>
+                <WidgetProvider>
+                  <NotificationsProvider>
+                    <WavoipProvider>
+                      <DebugProvider>
+                        <WebPhone />
+                      </DebugProvider>
+                    </WavoipProvider>
+                  </NotificationsProvider>
+                </WidgetProvider>
+              </PipProvider>
             </ThemeProvider>
           </LanguageProvider>
         </MiddlewareRoot>

@@ -4,7 +4,6 @@ import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { getSettings } from "@/lib/device-settings";
 import { setLanguage as setWebphoneLanguage } from "@/lib/i18n";
-import { disablePiP, pictureInPicture } from "@/lib/picture-in-picture";
 import { setPublicApiBase } from "@/lib/webphone-api/api";
 import { bootstrapStore } from "@/middleware/bootstrap/bootstrapStore";
 import type { FocusTracker } from "@/middleware/browser/focusTracker";
@@ -66,10 +65,18 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
   }, [middleware, config?.offerNotification?.autoRequest]);
 
   useEffect(() => {
+    if (!config?.callSettings?.autoRequestMicrophone) return;
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        for (const track of stream.getTracks()) track.stop();
+      })
+      .catch(() => {});
+  }, [config?.callSettings?.autoRequestMicrophone]);
+
+  useEffect(() => {
     return () => {
       middleware.destroy();
-      pictureInPicture.call = null;
-      disablePiP();
     };
   }, [middleware]);
 

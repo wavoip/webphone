@@ -1,12 +1,13 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
 import { useEffect, useMemo } from "react";
+import { useStore } from "zustand";
 import Calling from "@/assets/sounds/calling.mp3";
 import PostalCode from "@/assets/sounds/postalcode.mp3";
 import { CallButtons } from "@/components/CallButtons";
+import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { type TranslationKey, t } from "@/lib/i18n";
-import { getFullnameLetters } from "@/lib/utils";
+import { useMiddleware } from "@/middleware/react/hooks";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const calling_sound = new Audio(Calling);
@@ -15,8 +16,13 @@ const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
   const { callOutgoing, callStatus, callFailReason } = useWavoip();
+  const middleware = useMiddleware();
+  const keyboardInput = useStore(middleware.store, (s) => s.keyboardInput);
+
+  const displayName = callOutgoing?.peer.displayName || callOutgoing?.peer.phone || keyboardInput;
 
   const status = useMemo(() => {
+    if (!callOutgoing && keyboardInput) return t("Connecting...");
     switch (callStatus) {
       case "CALLING":
         return t("Connecting...");
@@ -35,7 +41,7 @@ export default function OutgoingScreen() {
       default:
         return null;
     }
-  }, [callStatus, callFailReason]);
+  }, [callStatus, callOutgoing, keyboardInput, callFailReason]);
 
   useEffect(() => {
     if (callStatus === "RINGING") {
@@ -67,21 +73,20 @@ export default function OutgoingScreen() {
   return (
     <div className="wv:size-full wv:flex wv:flex-col wv:px-2 wv:pt-4">
       <div className="wv:size-full wv:flex wv:flex-col wv:gap-4">
-        <div className="wv:flex wv:flex-row wv:justify-center wv:items-center wv:gap-2 wv:opacity-50 ">
+        <div
+          data-slot="call-type"
+          className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 "
+        >
           <WhatsappLogoIcon size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>
 
         <div className="wv:flex wv:flex-row wv:justify-start wv:items-start wv:gap-4 wv:overflow-hidden">
-          <Avatar className="wv:size-[50px] wv:rounded-xl">
-            <AvatarImage src={callOutgoing?.peer.profilePicture || undefined} />
-            <AvatarFallback>{getFullnameLetters(callOutgoing?.peer?.displayName)}</AvatarFallback>
-          </Avatar>
-          <div className="wv:hidden  wv:group-hover/title:block">
-            <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-              {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
-            </MarqueeText>
-          </div>
+          <ContactAvatar
+            className="wv:size-[50px] wv:rounded-xl"
+            src={callOutgoing?.peer.profilePicture}
+            displayName={callOutgoing?.peer?.displayName}
+          />
           <div className="wv:flex wv:flex-col wv:justify-center wv:items-start">
             {status && (
               <p className="wv:text-foreground wv:opacity-75 wv:text-[14px] fade-text select-none">{status}</p>
@@ -90,12 +95,12 @@ export default function OutgoingScreen() {
             <div className="wv:relative wv:group/title wv:flex wv:flex-col wv:overflow-hidden wv:font-normal">
               <div className="wv:hidden  wv:group-hover/title:block">
                 <MarqueeText speed={10} className="wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:select-none">
-                  {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                  {displayName}
                 </MarqueeText>
               </div>
 
               <p className="wv:block wv:group-hover/title:hidden wv:text-foreground wv:text-[24px] wv:leading-[28px] wv:font-normal wv:truncate w-48">
-                {callOutgoing?.peer.displayName || callOutgoing?.peer.phone}
+                {displayName}
               </p>
             </div>
           </div>

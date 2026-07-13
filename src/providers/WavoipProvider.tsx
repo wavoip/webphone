@@ -6,6 +6,7 @@ import type { Middleware } from "@/middleware/Middleware";
 import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
+import { usePip } from "@/providers/PipProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWidget } from "@/providers/WidgetProvider";
 
@@ -17,6 +18,7 @@ interface WavoipContextProps {
   offers: Offer[];
   callOutgoing?: CallOutgoing;
   callActive?: CallActive;
+  callActiveStartedAt?: number;
   callStatus: CallStatus;
   peerMuted: boolean;
   callFailReason?: string;
@@ -39,8 +41,9 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   const middleware = useMiddleware();
   const devices = useDevices();
   const offers = useOffers();
-  const { outgoing, active, callStatus, peerMuted, callFailReason } = useCallState();
+  const { outgoing, active, activeStartedAt, callStatus, peerMuted, callFailReason } = useCallState();
   const { isClosed, setIsClosed, open: openWidget } = useWidget();
+  const { isPiP } = usePip();
   const { callSettings } = useSettings();
 
   const startCall: StartCall = useMemo(
@@ -62,7 +65,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
 
   useToastBridge(middleware);
-  useWidgetCache(middleware, isClosed, setIsClosed, openWidget);
+  useWidgetCache(middleware, isClosed, setIsClosed, openWidget, isPiP);
   usePictureInPictureSync(middleware);
 
   return (
@@ -73,6 +76,7 @@ function WavoipBridge({ children }: { children: ReactNode }) {
         offers,
         callOutgoing: outgoing,
         callActive: active,
+        callActiveStartedAt: activeStartedAt,
         callStatus,
         peerMuted,
         callFailReason,
@@ -151,8 +155,19 @@ function useWidgetCache(
   isClosed: boolean,
   setIsClosed: (closed: boolean) => void,
   openWidget: () => void,
+  isPiP: boolean,
 ) {
   const closedCache = React.useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (isPiP) {
+      if (closedCache.current === null) closedCache.current = isClosed;
+      setIsClosed(true);
+    } else if (closedCache.current !== null) {
+      setIsClosed(closedCache.current);
+      closedCache.current = null;
+    }
+  }, [isPiP, isClosed, setIsClosed]);
 
   useEffect(() => {
     return middleware.store.subscribe(
@@ -160,14 +175,14 @@ function useWidgetCache(
       (inCall) => {
         if (inCall) {
           if (closedCache.current === null) closedCache.current = isClosed;
-          openWidget();
+          if (!isPiP) openWidget();
         } else if (closedCache.current !== null) {
           if (closedCache.current) setIsClosed(true);
           closedCache.current = null;
         }
       },
     );
-  }, [middleware, isClosed, setIsClosed, openWidget]);
+  }, [middleware, isClosed, setIsClosed, openWidget, isPiP]);
 }
 
 function usePictureInPictureSync(middleware: Middleware) {

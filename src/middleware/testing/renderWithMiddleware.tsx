@@ -7,6 +7,7 @@ import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
+import { PipProvider } from "@/providers/PipProvider";
 import { ShadowRootContext } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
@@ -79,9 +80,11 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           focus={options.focus}
         >
           <ThemeProvider root={root}>
-            <WidgetProvider>
-              <NotificationsProvider>{options.children ?? null}</NotificationsProvider>
-            </WidgetProvider>
+            <PipProvider shadowRoot={shadowRoot}>
+              <WidgetProvider>
+                <NotificationsProvider>{options.children ?? null}</NotificationsProvider>
+              </WidgetProvider>
+            </PipProvider>
           </ThemeProvider>
         </MiddlewareRoot>
       </SettingsProvider>

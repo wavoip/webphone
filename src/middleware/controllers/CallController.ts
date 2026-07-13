@@ -20,6 +20,7 @@ export class CallController {
 
   async start(to: string, config: { fromTokens?: string[] } = {}): Promise<StartCallResult> {
     const fromTokens = config.fromTokens ?? this.enabledTokens();
+
     const { call, err } = await this.deps.wavoip.startCall({ fromTokens, to });
     if (err) return { call: null, err };
 

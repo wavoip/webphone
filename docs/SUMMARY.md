@@ -16,6 +16,7 @@
 * [Notificações push](recursos/notificacoes-push.md)
 * [Auto-atualização da CDN](recursos/auto-atualizacao.md)
 * [Diagnóstico de chamada](recursos/diagnostico.md)
+* [Picture-in-Picture](recursos/picture-in-picture.md)
 
 ## Customização
 

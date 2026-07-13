@@ -1,7 +1,8 @@
-import { type KeyboardEvent, useContext, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import MarqueeText from "@/components/MarqueeText";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { ShadowRootContext } from "@/providers/ShadowRootProvider";
+import { usePip } from "@/providers/PipProvider";
+import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 type Props = {
   displayName: string | null | undefined;
@@ -25,10 +26,10 @@ const FEEDBACK_DURATION_MS = 1500;
 export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Read shadow root via raw context (no throwing helper) so unit tests can
-  // render CopyablePeer outside the App tree and still get a working tooltip
-  // (falls back to document.body when there is no ShadowRoot).
-  const shadow = useContext(ShadowRootContext);
+  const shadow = useShadowRoot();
+  const pip = usePip();
+  const tooltipContainer = pip.pipWindow?.document.body ?? shadow.root;
+  const clipboard = pip.pipWindow?.navigator.clipboard ?? navigator.clipboard;
 
   useEffect(() => {
     return () => {
@@ -48,7 +49,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
 
   const handleClick = async () => {
     try {
-      await navigator.clipboard.writeText(phone);
+      await clipboard.writeText(phone);
     } catch (e) {
       console.error(e);
       return;
@@ -81,7 +82,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
           </MarqueeText>
         </span>
       </TooltipTrigger>
-      <TooltipContent container={shadow?.root} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
+      <TooltipContent container={tooltipContainer} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
         Copiado
       </TooltipContent>
     </Tooltip>

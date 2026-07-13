@@ -36,9 +36,28 @@ export function useCallState() {
     callStatus: s.callStatus,
     outgoing: s.outgoing,
     active: s.active,
+    activeStartedAt: s.activeStartedAt,
     peerMuted: s.peerMuted,
     callFailReason: s.callFailReason,
   }));
+}
+
+export function useDialState() {
+  const middleware = useMiddleware();
+  const { dialStatus, dialError, dialIsLoading } = useMiddlewareShallow((s) => ({
+    dialStatus: s.dialStatus,
+    dialError: s.dialError,
+    dialIsLoading: s.dialIsLoading,
+  }));
+
+  return {
+    status: dialStatus,
+    error: dialError,
+    isLoading: dialIsLoading,
+    setStatus: middleware.store.getState().setDialStatus,
+    setError: middleware.store.getState().setDialError,
+    setIsLoading: middleware.store.getState().setDialIsLoading,
+  };
 }
 
 export function useOffers() {
