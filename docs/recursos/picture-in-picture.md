@@ -2,25 +2,27 @@
 
 # Picture-in-Picture
 
-Durante uma chamada, o usuário pode destacar o Webphone numa janela flutuante (Document Picture-in-Picture) que fica por cima das outras janelas, permitindo acompanhar a ligação enquanto navega em outra aba ou app.
+Durante uma chamada, o usuário pode destacar o Webphone em uma janela flutuante utilizando a Document Picture-in-Picture API. A janela sobrepõe as demais aplicações do sistema operacional, permitindo a visualização e o controle da ligação enquanto o foco principal do usuário está em outra aba ou aplicativo.
 
-## Como abrir
+## Ciclo de vida da janela
 
-Um botão no `StatusBar` alterna a PiP (`togglePip`). Abrir também acontece automaticamente ao discar pelo `KeyboardScreen`.
+O gerenciamento da janela flutuante segue regras estritas de abertura e fechamento para garantir a sincronia de estado com a aba original.
 
-## Quando a PiP fecha
+| Evento | Comportamento |
+| --- | --- |
+| Abertura manual | Acionada via clique no botão de PiP no componente `StatusBar`. |
+| Abertura automática | Disparada internamente ao iniciar uma nova discagem. |
+| Fechamento pelo usuário | Ocorre quando a janela flutuante é encerrada via controles nativos do SO. A interface principal reassume o estado do sistema. |
+| Fechamento automático | Ocorre na transição de estado da chamada para inativa. |
 
-- O usuário fecha a janela PiP pelo SO.
-- A tela volta para o teclado (`screen === "keyboard"`) — por exemplo, ao encerrar a chamada.
+## Permissão de microfone
 
-## Tamanho da janela
+O prompt de permissão de hardware nativo do navegador é sempre instanciado na **aba de origem**, nunca na janela flutuante gerada pelo Picture-in-Picture.
 
-A janela abre com `320x450`. A largura do conteúdo interno é fixa para evitar que o layout quebre, mas o navegador não oferece nenhuma API para impedir o usuário de redimensionar a janela do SO para algo menor.
+
+Caso a permissão de microfone ainda não tenha sido concedida na origem da aplicação, a interface de chamada permanecerá travada no estado de `Conectando...`. O usuário necessita retornar à aba principal para interagir com o prompt do sistema. Recomenda-se instruir os usuários a persistirem essa permissão no navegador para evitar o bloqueio em chamadas subsequentes.
 
 ## Limitações conhecidas
 
-
-**Suporte de navegador ainda não é universal.** A Document Picture-in-Picture API é suportada nos navegadores Chromium (Chrome, Edge, Opera) e, mais recentemente, no Firefox (a partir da versão 151, maio de 2026). Em navegadores sem suporte, o botão de PiP não faz nada — a ausência é detectada e ignorada silenciosamente (aviso no console).
-
-- **Corrida com o popup de permissão de microfone**: como abrir a PiP move o foco para a nova janela, o popup nativo de pedido de permissão de microfone pode ficar coberto por ela caso apareça depois. Isso pode acontecer em qualquer navegador com suporte a PiP, incluindo Firefox 151+. Peça a permissão antes de chamar `openPip()` para evitar a corrida.
-- **Sem trava de tamanho mínimo**: `Window.resizeTo()` só funciona em janelas abertas via `window.open()`, não em janelas de Document Picture-in-Picture. Não há hoje uma forma de impedir o usuário de encolher a janela do SO abaixo do tamanho ideal.
+- **Suporte de navegador não universal**: Em navegadores que não suportam a Document Picture-in-Picture API, o botão de PiP e os acionamentos automáticos não produzem efeito. O suporte atual compreende Chrome, Edge, Opera e Firefox. Consulte a [tabela de compatibilidade atualizada no MDN](https://developer.mozilla.org/en-US/docs/Web/API/Document_Picture-in-Picture_API#browser_compatibility) para detalhes por versão de software.
+- **Ausência de limite dimensional**: A janela PiP instanciada pode ser redimensionada livremente pelo usuário final via controles do sistema operacional. Não há suporte na API para forçar restrições de tamanho mínimo (`min-width` ou `min-height`), o que pode causar quebra de layout caso o usuário a reduza excessivamente.
