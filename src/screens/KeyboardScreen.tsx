@@ -1,4 +1,5 @@
-import { BackspaceIcon, PhoneIcon } from "@phosphor-icons/react";
+import { BackspaceIcon, CaretDownIcon, PhoneIcon } from "@phosphor-icons/react";
+import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
@@ -42,6 +43,8 @@ const backspace_audio = new Audio(SoundBackspace);
 export default function KeyboardScreen() {
   const middleware = useMiddleware();
   const number = useStore(middleware.store, (s) => s.keyboardInput);
+  const recentNumbers = useStore(middleware.store, (s) => s.recentNumbers);
+  const [recentOpen, setRecentOpen] = useState(false);
   const { appendChar, popChar } = useStore(
     middleware.store,
     useShallow((s) => ({
@@ -72,6 +75,7 @@ export default function KeyboardScreen() {
 
     await startCall(number, { fromTokens: [device] }).then(({ err }) => {
       if (!err) {
+        middleware.store.getState().pushRecentNumber(number);
         setStatus("");
         setKeyboardInput("");
         setCallIsLoading(false);
@@ -140,15 +144,50 @@ export default function KeyboardScreen() {
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
     >
       <div className="wv:text-center">
-        <Input
-          placeholder={t("Type...")}
-          value={number}
-          onChange={(e) => {
-            const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
-            middleware.store.getState().setKeyboardInput(digits);
-          }}
-          className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[24px] wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
-        />
+        <div className="wv:relative">
+          <Input
+            placeholder={t("Type...")}
+            value={number}
+            onFocus={() => setRecentOpen(true)}
+            onBlur={() => setRecentOpen(false)}
+            onChange={(e) => {
+              const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
+              middleware.store.getState().setKeyboardInput(digits);
+            }}
+            className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[32px] wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
+          />
+          <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()} // não rouba o foco do input
+            onClick={() => setRecentOpen((open) => !open)}
+            className="wv:absolute wv:right-0 wv:top-1/2 wv:-translate-y-1/2 wv:p-1 wv:text-muted-400 wv:cursor-pointer"
+          >
+            <CaretDownIcon
+              weight="bold"
+              className={`wv:size-4 wv:transition-transform wv:duration-200 ${recentOpen ? "wv:rotate-180" : ""}`}
+            />
+          </button>
+
+          {recentOpen && recentNumbers.length > 0 && (
+            <ul className="wv:absolute wv:top-full wv:left-0 wv:w-full wv:mt-1 wv:z-50 wv:max-h-48 wv:overflow-y-auto wv:rounded-md wv:border wv:border-border wv:bg-popover wv:text-popover-foreground wv:shadow-md">
+              {recentNumbers.map((recent) => (
+                <li key={recent}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      setKeyboardInput(recent);
+                      setRecentOpen(false);
+                    }}
+                    className="wv:w-full wv:text-center wv:px-2 wv:py-1.5 wv:text-base wv:text-popover-foreground wv:transition-colors wv:outline-none wv:hover:bg-accent wv:hover:text-accent-foreground wv:focus:bg-accent"
+                  >
+                    {recent}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         {error && <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em]">{error}</p>}
 

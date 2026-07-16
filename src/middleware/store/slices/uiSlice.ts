@@ -22,6 +22,7 @@ export type UiSliceState = {
   dialStatus: string;
   dialError: string;
   dialIsLoading: boolean;
+  recentNumbers: string[];
 };
 
 export type UiSliceActions = {
@@ -31,6 +32,8 @@ export type UiSliceActions = {
   setKeyboardInput: (input: string) => void;
   appendKeyboardChar: (ch: string) => void;
   popKeyboardChar: () => void;
+  pushRecentNumber: (num: string) => void;
+  setRecentNumbers: (numbers: string[]) => void;
   setDialStatus: (status: string) => void;
   setDialError: (error: string) => void;
   setDialIsLoading: (loading: boolean) => void;
@@ -56,6 +59,7 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   dialStatus: "",
   dialError: "",
   dialIsLoading: false,
+  recentNumbers: [],
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
   setSetting: (key, value) => set((state) => ({ settings: { ...state.settings, [key]: value } })),
@@ -65,4 +69,7 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   setDialStatus: (dialStatus) => set({ dialStatus }),
   setDialError: (dialError) => set({ dialError }),
   setDialIsLoading: (dialIsLoading) => set({ dialIsLoading }),
+  pushRecentNumber: (num) =>
+    set((state) => ({ recentNumbers: [num, ...state.recentNumbers.filter((n) => n !== num)].slice(0, 8) })),
+  setRecentNumbers: (recentNumbers) => set({ recentNumbers }),
 });
