@@ -17,6 +17,7 @@ import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { RecentNumbersDropdown } from "@/components/ui/recentNumbers";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
@@ -169,96 +170,88 @@ export default function KeyboardScreen() {
           </button>
 
           {recentOpen && recentNumbers.length > 0 && (
-            <ul className="wv:absolute wv:top-full wv:left-0 wv:w-full wv:mt-1 wv:z-50 wv:max-h-48 wv:overflow-y-auto wv:rounded-md wv:border wv:border-border wv:bg-popover wv:text-popover-foreground wv:shadow-md">
-              {recentNumbers.map((recent) => (
-                <li key={recent}>
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={() => {
-                      setKeyboardInput(recent);
-                      setRecentOpen(false);
-                    }}
-                    className="wv:w-full wv:text-center wv:px-2 wv:py-1.5 wv:text-base wv:text-popover-foreground wv:transition-colors wv:outline-none wv:hover:bg-accent wv:hover:text-accent-foreground wv:focus:bg-accent"
-                  >
-                    {recent}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <RecentNumbersDropdown
+              numbers={recentNumbers}
+              onSelect={(recent) => {
+                setKeyboardInput(recent);
+                setRecentOpen(false);
+              }}
+            />
           )}
         </div>
 
         {error && <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em]">{error}</p>}
 
-        {status && (
-          <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
-            {callIsLoading && (
-              <div className="wv:h-3 wv:w-3 wv:shrink-0 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
-            )}
-            <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
-          </div>
-        )}
-      </div>
+          {status && (
+            <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
+              {callIsLoading && (
+                <div className="wv:h-3 wv:w-3 wv:shrink-0 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
+              )}
+              <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
+            </div>
+          )}
+        </div>
 
-      <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
-        <div
-          data-slot="keyboard-buttons"
-          className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center"
-        >
-          {buttons.map(({ digit, letters, audio }) => (
+        <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
+          <div
+            data-slot="keyboard-buttons"
+            className="wv:grid wv:grid-cols-3 wv:grid-rows-4 wv:w-full wv:gap-3 wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center"
+          >
+            {buttons.map(({ digit, letters, audio }) => (
+              <Button
+                key={`webphone-keyboard-${digit}`}
+                type="button"
+                variant="secondary"
+                className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
+                onClick={() => {
+                  appendChar(digit);
+                  audio.pause();
+                  audio.currentTime = 0;
+                  audio.volume = 0.25;
+                  audio.play();
+                }}
+              >
+                <p className="wv:text-[24px] wv:leading-6 wv:font-semibold">{digit}</p>
+                {!!letters && (
+                  <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
+                )}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
+          <div
+            data-slot="keyboard-buttons"
+            className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center wv:items-center"
+          >
             <Button
-              key={`webphone-keyboard-${digit}`}
               type="button"
               variant="secondary"
-              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:cursor-pointer wv:text-foreground wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:transition-colors wv:duration-200 wv:touch-manipulation"
+              size="icon"
               onClick={() => {
-                appendChar(digit);
-                audio.pause();
-                audio.currentTime = 0;
-                audio.volume = 0.25;
-                audio.play();
+                backspace_audio.pause();
+                backspace_audio.currentTime = 0;
+                backspace_audio.play();
+                popChar();
               }}
+              className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
             >
-              <p className="wv:text-[24px] wv:leading-6 wv:font-semibold">{digit}</p>
-              {!!letters && (
-                <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
-              )}
+              <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
             </Button>
-          ))}
-        </div>
-      </div>
 
-      <div data-slot="keyboard-grid" className="wv:flex wv:max-w-[300px] wv:w-full">
-        <div
-          data-slot="keyboard-buttons"
-          className="wv:grid wv:grid-cols-3 wv:grid-rows-1 wv:w-full wv:gap-3 wv:[direction:rtl] wv:[&>*]:select-none wv:[&>*]:max-w-[80px] wv:[&>*]:max-h-[80px] wv:justify-items-center wv:items-center"
-        >
-          <Button
-            type="button"
-            variant="secondary"
-            size="icon"
-            onClick={() => {
-              backspace_audio.pause();
-              backspace_audio.currentTime = 0;
-              backspace_audio.play();
-              popChar();
-            }}
-            className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
-          >
-            <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
-          </Button>
-
-          <Button
-            type="submit"
-            size="icon"
-            className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
-            disabled={callIsLoading}
-          >
-            <PhoneIcon className="wv:size-7" weight="fill" />
-          </Button>
+            <Button
+              type="submit"
+              size="icon"
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+              disabled={callIsLoading}
+            >
+              <PhoneIcon className="wv:size-7" weight="fill" />
+            </Button>
+          </div>
         </div>
-      </div>
     </form>
+
   );
 }
+
