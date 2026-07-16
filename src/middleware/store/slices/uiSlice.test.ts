@@ -64,8 +64,8 @@ describe("uiSlice", () => {
     expect(store.getState().recentNumbers).toEqual(["111", "222"]);
   });
 
-  it("pushRecentNumber caps the list at 4, dropping the oldest", () => {
-    for (const n of ["1", "2", "3", "4", "5"]) store.getState().pushRecentNumber(n);
-    expect(store.getState().recentNumbers).toEqual(["5", "4", "3", "2"]);
+  it("pushRecentNumber caps the list at 8, dropping the oldest", () => {
+    for (const n of ["1", "2", "3", "4", "5", "6", "7", "8", "9"]) store.getState().pushRecentNumber(n);
+    expect(store.getState().recentNumbers).toEqual(["9", "8", "7", "6", "5", "4", "3", "2"]);
   });
 });
