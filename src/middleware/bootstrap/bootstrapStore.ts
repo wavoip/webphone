@@ -1,3 +1,4 @@
+import { loadRecentNumbers } from "@/lib/recent-numbers";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Theme, WebphoneSettings } from "@/providers/settings/settings";
@@ -16,6 +17,12 @@ export function bootstrapStore({ store, config }: Deps): void {
   seedSettings(state.setSetting, config);
   seedTheme(state.setTheme, config.theme);
   seedWidget(state, config);
+  seedRecentNumbers(state.setRecentNumbers);
+}
+
+function seedRecentNumbers(setRecentNumbers: (numbers: string[]) => void): void {
+  const stored = loadRecentNumbers();
+  if (stored.length) setRecentNumbers(stored);
 }
 
 type SetSetting = MiddlewareStoreApi extends { getState: () => infer S }

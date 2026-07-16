@@ -46,4 +46,26 @@ describe("uiSlice", () => {
     expect(s.showSettings).toBe(true);
     expect(s.showWidgetButton).toBe(true);
   });
+
+  it("recentNumbers starts empty", () => {
+    expect(store.getState().recentNumbers).toEqual([]);
+  });
+
+  it("pushRecentNumber prepends most-recent-first", () => {
+    store.getState().pushRecentNumber("111");
+    store.getState().pushRecentNumber("222");
+    expect(store.getState().recentNumbers).toEqual(["222", "111"]);
+  });
+
+  it("pushRecentNumber de-duplicates, moving an existing number to the front", () => {
+    store.getState().pushRecentNumber("111");
+    store.getState().pushRecentNumber("222");
+    store.getState().pushRecentNumber("111");
+    expect(store.getState().recentNumbers).toEqual(["111", "222"]);
+  });
+
+  it("pushRecentNumber caps the list at 8, dropping the oldest", () => {
+    for (const n of ["1", "2", "3", "4", "5", "6", "7", "8", "9"]) store.getState().pushRecentNumber(n);
+    expect(store.getState().recentNumbers).toEqual(["9", "8", "7", "6", "5", "4", "3", "2"]);
+  });
 });
