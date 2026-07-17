@@ -19,7 +19,6 @@ import { Input } from "@/components/ui/input";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/providers/NotificationsProvider";
-import { usePip } from "@/providers/PipProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [
@@ -60,7 +59,6 @@ export default function KeyboardScreen() {
   } = useDialState();
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
-  const { openPip, closePip } = usePip();
 
   const handleCall = async (allDevices: string[]) => {
     const isLast = allDevices.length <= 1;
@@ -85,7 +83,6 @@ export default function KeyboardScreen() {
         setStatus("");
         setCallIsLoading(false);
         setTimeout(() => setError(""), 4000);
-        closePip();
         return;
       }
 
@@ -93,7 +90,6 @@ export default function KeyboardScreen() {
         setError(t("No device available"));
         setStatus("");
         setCallIsLoading(false);
-        closePip();
 
         setTimeout(() => {
           setError("");
@@ -116,7 +112,6 @@ export default function KeyboardScreen() {
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
-        closePip();
         setTimeout(() => setStatus(""), 3000);
       }
     });
@@ -133,8 +128,6 @@ export default function KeyboardScreen() {
           return;
         }
         if (!number.trim()) return;
-
-        openPip();
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
