@@ -10,10 +10,9 @@ O gerenciamento da janela flutuante segue regras estritas de abertura e fechamen
 
 | Evento | Comportamento |
 | --- | --- |
-| Abertura manual | Acionada via clique no botão de PiP no componente `StatusBar`. |
-| Abertura automática | Disparada internamente ao iniciar uma nova discagem. |
+| Abertura | Acionada exclusivamente via clique no botão de PiP no componente `StatusBar`. Não há abertura automática ao discar ou ao aceitar uma chamada recebida. |
 | Fechamento pelo usuário | Ocorre quando a janela flutuante é encerrada via controles nativos do SO. A interface principal reassume o estado do sistema. |
-| Fechamento automático | Ocorre na transição de estado da chamada para inativa. |
+| Fechamento automático | Ocorre na transição de estado da chamada para inativa, caso o PiP já estivesse aberto. |
 
 ## Permissão de microfone
 
@@ -24,5 +23,5 @@ Caso a permissão de microfone ainda não tenha sido concedida na origem da apli
 
 ## Limitações conhecidas
 
-- **Suporte de navegador não universal**: Em navegadores que não suportam a Document Picture-in-Picture API, o botão de PiP e os acionamentos automáticos não produzem efeito. O suporte atual compreende Chrome, Edge, Opera e Firefox. Consulte a [tabela de compatibilidade atualizada no MDN](https://developer.mozilla.org/en-US/docs/Web/API/Document_Picture-in-Picture_API#browser_compatibility) para detalhes por versão de software.
+- **Suporte de navegador não universal**: Em navegadores que não suportam a Document Picture-in-Picture API, o botão de PiP não produz efeito. O suporte atual compreende Chrome, Edge, Opera e Firefox. Consulte a [tabela de compatibilidade atualizada no MDN](https://developer.mozilla.org/en-US/docs/Web/API/Document_Picture-in-Picture_API#browser_compatibility) para detalhes por versão de software.
 - **Ausência de limite dimensional**: A janela PiP instanciada pode ser redimensionada livremente pelo usuário final via controles do sistema operacional. Não há suporte na API para forçar restrições de tamanho mínimo (`min-width` ou `min-height`), o que pode causar quebra de layout caso o usuário a reduza excessivamente.

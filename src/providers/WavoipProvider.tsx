@@ -157,15 +157,16 @@ function useWidgetCache(
   openWidget: () => void,
   isPiP: boolean,
 ) {
-  const closedCache = React.useRef<boolean | null>(null);
+  const closedBeforePip = React.useRef<boolean | null>(null);
+  const closedBeforeCall = React.useRef<boolean | null>(null);
 
   useEffect(() => {
     if (isPiP) {
-      if (closedCache.current === null) closedCache.current = isClosed;
+      if (closedBeforePip.current === null) closedBeforePip.current = isClosed;
       setIsClosed(true);
-    } else if (closedCache.current !== null) {
-      setIsClosed(closedCache.current);
-      closedCache.current = null;
+    } else if (closedBeforePip.current !== null) {
+      setIsClosed(closedBeforePip.current);
+      closedBeforePip.current = null;
     }
   }, [isPiP, isClosed, setIsClosed]);
 
@@ -174,11 +175,11 @@ function useWidgetCache(
       (s) => Boolean(s.active || s.outgoing),
       (inCall) => {
         if (inCall) {
-          if (closedCache.current === null) closedCache.current = isClosed;
+          if (closedBeforeCall.current === null) closedBeforeCall.current = isClosed;
           if (!isPiP) openWidget();
-        } else if (closedCache.current !== null) {
-          if (closedCache.current) setIsClosed(true);
-          closedCache.current = null;
+        } else if (closedBeforeCall.current !== null) {
+          if (closedBeforeCall.current) setIsClosed(true);
+          closedBeforeCall.current = null;
         }
       },
     );

@@ -6,14 +6,12 @@ import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
-import { usePip } from "@/providers/PipProvider";
 
 type Props = {
   offer: Offer;
 };
 
 export function OfferNotification({ offer }: Props) {
-  const { openPip, closePip } = usePip();
   const [actionMade, setActionMade] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -100,12 +98,10 @@ export function OfferNotification({ offer }: Props) {
             disabled={actionMade}
             onClick={() => {
               setActionMade(true);
-              openPip();
               offer.accept().then((result) => {
                 if (result.err) {
                   setError(result.err);
                   setActionMade(false);
-                  closePip();
                   return;
                 }
                 toast.dismiss(offer.id);
