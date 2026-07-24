@@ -11,6 +11,7 @@ import { callFailedNotificationEffect } from "@/middleware/effects/callFailedNot
 import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEvents";
 import { offerNotificationEffect } from "@/middleware/effects/offerNotification";
 import { persistDevicesEffect } from "@/middleware/effects/persistDevices";
+import { persistRecentNumbersEffect } from "@/middleware/effects/persistRecentNumbers";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
 import { type RingtonePlayer, ringtoneEffect } from "@/middleware/effects/ringtone";
 import { screenSyncEffect } from "@/middleware/effects/screenSync";
@@ -102,6 +103,7 @@ export class Middleware {
       callLifecycleEventsEffect({ store: this.store, events: this.events }),
       callFailedNotificationEffect({ store: this.store, notifications: this.controllers.notifications }),
       persistDevicesEffect({ store: this.store }),
+      persistRecentNumbersEffect({ store: this.store }),
       resetCallTimerEffect({ store: this.store }),
       ringtoneEffect({ store: this.store, ringtone: this.ringtone, vibration: this.vibration }),
       screenSyncEffect({ store: this.store }),
