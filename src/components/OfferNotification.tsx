@@ -18,10 +18,10 @@ export function OfferNotification({ offer }: Props) {
 
   useEffect(() => {
     const unsubs = [
-      offer.on("ended", () => setStatus(t("Call ended"))),
-      offer.on("acceptedElsewhere", () => setStatus(t("Accepted by another user"))),
-      offer.on("rejectedElsewhere", () => setStatus(t("Rejected by the app"))),
-      offer.on("unanswered", () => setStatus(t("Timed out"))),
+      offer.on("ended", () => { setStatus(t("Call ended")); setActionMade(true); }),
+      offer.on("acceptedElsewhere", () => { setStatus(t("Accepted by another user")); setActionMade(true); }),
+      offer.on("rejectedElsewhere", () => { setStatus(t("Rejected by the app")); setActionMade(true); }),
+      offer.on("unanswered", () => { setStatus(t("Timed out")); setActionMade(true); }),
     ];
     return () => {
       for (const unsub of unsubs) unsub();
@@ -71,46 +71,46 @@ export function OfferNotification({ offer }: Props) {
             {offer.peer?.displayName || offer.peer?.phone}
           </p>
         </div>
-        <div className="wv:flex wv:flex-row wv:gap-2">
-          <Button
-            type="submit"
-            size={"icon"}
-            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
-            disabled={actionMade}
-            onClick={() => {
-              setActionMade(true);
-              offer.reject().then(({ err }: { err: string | null }) => {
-                if (err) {
-                  setError(err);
-                  setActionMade(false);
-                  return;
-                }
-                toast.dismiss(offer.id);
-              });
-            }}
-          >
-            <PhoneSlash className="wv:size-5" weight="fill" />
-          </Button>
-          <Button
-            type="submit"
-            size={"icon"}
-            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
-            disabled={actionMade}
-            onClick={() => {
-              setActionMade(true);
-              offer.accept().then((result) => {
-                if (result.err) {
-                  setError(result.err);
-                  setActionMade(false);
-                  return;
-                }
-                toast.dismiss(offer.id);
-              });
-            }}
-          >
-            <PhoneIcon className="wv:size-5" weight="fill" />
-          </Button>
-        </div>
+        {!actionMade && (
+          <div className="wv:flex wv:flex-row wv:gap-2">
+            <Button
+              type="submit"
+              size={"icon"}
+              className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
+              onClick={() => {
+                setActionMade(true);
+                offer.reject().then(({ err }: { err: string | null }) => {
+                  if (err) {
+                    setError(err);
+                    setActionMade(false);
+                    return;
+                  }
+                  toast.dismiss(offer.id);
+                });
+              }}
+            >
+              <PhoneSlash className="wv:size-5" weight="fill" />
+            </Button>
+            <Button
+              type="submit"
+              size={"icon"}
+              className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
+              onClick={() => {
+                setActionMade(true);
+                offer.accept().then((result) => {
+                  if (result.err) {
+                    setError(result.err);
+                    setActionMade(false);
+                    return;
+                  }
+                  toast.dismiss(offer.id);
+                });
+              }}
+            >
+              <PhoneIcon className="wv:size-5" weight="fill" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
