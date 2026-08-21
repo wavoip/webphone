@@ -12,16 +12,16 @@ type Props = {
 };
 
 export function OfferNotification({ offer }: Props) {
-  const [actionMade, setActionMade] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubs = [
-      offer.on("ended", () => { setStatus(t("Call ended")); setActionMade(true); }),
-      offer.on("acceptedElsewhere", () => { setStatus(t("Accepted by another user")); setActionMade(true); }),
-      offer.on("rejectedElsewhere", () => { setStatus(t("Rejected by the app")); setActionMade(true); }),
-      offer.on("unanswered", () => { setStatus(t("Timed out")); setActionMade(true); }),
+      offer.on("ended", () => { setStatus(t("Call ended")); setIsVisible(false); }),
+      offer.on("acceptedElsewhere", () => { setStatus(t("Accepted by another user")); setIsVisible(false); }),
+      offer.on("rejectedElsewhere", () => { setStatus(t("Rejected by the app")); setIsVisible(false); }),
+      offer.on("unanswered", () => { setStatus(t("Timed out")); setIsVisible(false); }),
     ];
     return () => {
       for (const unsub of unsubs) unsub();
@@ -71,18 +71,18 @@ export function OfferNotification({ offer }: Props) {
             {offer.peer?.displayName || offer.peer?.phone}
           </p>
         </div>
-        {!actionMade && (
+        {!isVisible && (
           <div className="wv:flex wv:flex-row wv:gap-2">
             <Button
               type="submit"
               size={"icon"}
               className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
               onClick={() => {
-                setActionMade(true);
+                setIsVisible(true);
                 offer.reject().then(({ err }: { err: string | null }) => {
                   if (err) {
                     setError(err);
-                    setActionMade(false);
+                    setIsVisible(false);
                     return;
                   }
                   toast.dismiss(offer.id);
@@ -96,11 +96,11 @@ export function OfferNotification({ offer }: Props) {
               size={"icon"}
               className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
               onClick={() => {
-                setActionMade(true);
+                setIsVisible(true);
                 offer.accept().then((result) => {
                   if (result.err) {
                     setError(result.err);
-                    setActionMade(false);
+                    setIsVisible(false);
                     return;
                   }
                   toast.dismiss(offer.id);
