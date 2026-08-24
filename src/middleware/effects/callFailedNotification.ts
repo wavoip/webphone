@@ -27,7 +27,9 @@ export function callFailedNotificationEffect({ store, notifications }: Deps): Un
         type: "CALL_FAILED",
         created_at: new Date(),
         message: state.callFailReason ? t(state.callFailReason as TranslationKey) : "",
-        detail: `${call.deviceToken} -> ${call.peer.phone}`,
+        // A username call can carry no phone number at all, so the notification names whichever
+        // identity the call actually has — `-> ` with nothing after it tells the user nothing.
+        detail: `${call.deviceToken} -> ${call.peer.username || call.peer.phone}`,
         token: call.deviceToken,
         isHidden: false,
         isRead: false,

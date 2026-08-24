@@ -84,9 +84,15 @@ Quem decide se o destino é número ou username é o dispositivo, não o webphon
 username. Por isso `+55 (11) 99999-9999` continua sendo número e `john.doe_1` continua username
 com a pontuação intacta.
 
-Numa chamada por username, `call.peer.username` traz o username discado e `call.peer.phone` traz
-o número que o WhatsApp resolveu a partir dele. Numa chamada por número, `call.peer.username` é
-`null`.
+Numa chamada por username, `call.peer.username` traz o username discado. Numa chamada por número,
+`call.peer.username` é `null`.
+
+{% hint style="warning" %}
+**`call.peer.phone` pode vir vazio numa chamada por username.** Um username pode resolver para um
+contato sem número de telefone associado — esconder o número é justamente para o que o username
+serve. Nesse caso `phone` é `""` e o `username` é a única identidade do peer. Use `username` como
+fallback em vez de assumir que existe número.
+{% endhint %}
 
 Erros específicos que podem vir em `err.devices[].reason`:
 
