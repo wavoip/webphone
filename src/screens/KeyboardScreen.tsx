@@ -91,6 +91,25 @@ export default function KeyboardScreen() {
         return;
       }
 
+      // Separate from the number case on purpose: the user has to fix a different thing.
+      if (error_message === "USERNAME_DONT_EXIST") {
+        setError(t("Username does not exist"));
+        setStatus("");
+        setCallIsLoading(false);
+        setTimeout(() => setError(""), 4000);
+        return;
+      }
+
+      // WABA devices have no username field at all, so retrying the next device would only
+      // repeat the same refusal when every device is official.
+      if (error_message === "USERNAME_NOT_SUPPORTED_WABA") {
+        setError(t("Username is not supported on this device"));
+        setStatus("");
+        setCallIsLoading(false);
+        setTimeout(() => setError(""), 4000);
+        return;
+      }
+
       if (error_message === "NO_DEVICES_FOUND") {
         setError(t("No device available"));
         setStatus("");
@@ -144,9 +163,10 @@ export default function KeyboardScreen() {
             value={number}
             onFocus={() => setRecentOpen(true)}
             onBlur={() => setRecentOpen(false)}
+            // Free text, not digits: the target may be a username, and the device is what
+            // classifies it. Stripping to `[\d*#]` here made a username untypable.
             onChange={(e) => {
-              const digits = e.target.value.match(/[\d*#]+/g)?.[0] || "";
-              middleware.store.getState().setKeyboardInput(digits);
+              middleware.store.getState().setKeyboardInput(e.target.value);
             }}
             className="wv:border-none wv:border-l-0 wv:border-r-0 wv:border-t-0 wv:shadow-none wv:rounded-none wv:!text-foreground wv:text-center wv:focus-visible:ring-0 wv:text-[32px] wv:max-sm:text-[30px] wv:md:text-[24px] wv:!bg-[transparent]"
           />

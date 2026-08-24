@@ -7,6 +7,8 @@ import { useShadowRoot } from "@/providers/ShadowRootProvider";
 type Props = {
   displayName: string | null | undefined;
   phone: string;
+  /** Set when the call was placed by username rather than by number. */
+  username?: string | null;
   className?: string;
   marqueeSpeed?: number;
 };
@@ -15,15 +17,17 @@ const FEEDBACK_DURATION_MS = 1500;
 
 /**
  * Renders the call peer (displayName preferred, phone as fallback) inside a
- * MarqueeText so long labels scroll on hover. Click copies the *phone number*
- * — never the displayName — to the clipboard and pops a floating "Copiado"
- * tooltip that escapes the active call header's clipping ancestors.
+ * MarqueeText so long labels scroll on hover. Click copies the identity the call
+ * was placed to — the username when there was one, the phone number otherwise —
+ * and never the displayName. Copying what was dialled is what makes the copied
+ * value redial. Pops a floating "Copiado" tooltip that escapes the
+ * active call header's clipping ancestors.
  *
  * The trigger uses a `<span role="button">` instead of `<button>` because the
  * MarqueeText internals are block-level (`<div>`), and `<button><div></div>`
  * is invalid HTML.
  */
-export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
+export function CopyablePeer({ displayName, phone, username, className, marqueeSpeed = 10 }: Props) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shadow = useShadowRoot();
@@ -37,9 +41,10 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
     };
   }, []);
 
-  const label = displayName?.trim() || phone;
+  const label = displayName?.trim() || username?.trim() || phone;
+  const copyValue = username?.trim() || phone;
 
-  if (!phone) {
+  if (!copyValue) {
     return (
       <MarqueeText speed={marqueeSpeed} className={className}>
         {label}
@@ -49,7 +54,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
 
   const handleClick = async () => {
     try {
-      await clipboard.writeText(phone);
+      await clipboard.writeText(copyValue);
     } catch (e) {
       console.error(e);
       return;

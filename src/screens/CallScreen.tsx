@@ -93,6 +93,7 @@ export default function CallScreen() {
               <CopyablePeer
                 displayName={callActive?.peer.displayName}
                 phone={callActive?.peer.phone ?? ""}
+                username={callActive?.peer.username}
                 className="wv:text-foreground wv:text-[24px] wv:leading-[28px]"
               />
             </div>

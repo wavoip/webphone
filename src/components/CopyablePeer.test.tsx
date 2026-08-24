@@ -57,6 +57,34 @@ describe("CopyablePeer", () => {
     expect(clipboard.texts).toEqual(["5511999999999"]);
   });
 
+  // What the user dialled is what redials, so a username call copies the username.
+  it("copies the username instead of the phone when the call went out by username", async () => {
+    await renderWithProviders({
+      children: <CopyablePeer displayName="Maria" phone="5511999999999" username="john.doe_1" />,
+    });
+    const button = screen.getByRole("button", { name: /copiar telefone/i });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(clipboard.texts).toEqual(["john.doe_1"]);
+  });
+
+  it("falls back to the username as the label when there is no displayName", async () => {
+    await renderWithProviders({ children: <CopyablePeer displayName={null} phone="" username="john.doe_1" /> });
+    expect(screen.getByText("john.doe_1")).toBeTruthy();
+  });
+
+  // A username call can arrive with no resolved number to show; the identity dialled is still
+  // copyable, so the trigger must not disappear the way an empty phone makes it.
+  it("stays clickable with an empty phone when a username is present", async () => {
+    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="" username="john.doe_1" /> });
+    const button = screen.getByRole("button", { name: /copiar telefone/i });
+    await act(async () => {
+      fireEvent.click(button);
+    });
+    expect(clipboard.texts).toEqual(["john.doe_1"]);
+  });
+
   it("shows 'Copiado' feedback after a successful copy", async () => {
     await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     await act(async () => {

@@ -41,7 +41,7 @@ Controla o ciclo de vida de chamadas.
 
 ### `start(to, config?)`
 
-Inicia uma chamada para o número informado. Se `config.fromTokens` for omitido, o webphone escolhe automaticamente um dispositivo habilitado.
+Inicia uma chamada para o destino informado — número **ou** username do WhatsApp. Se `config.fromTokens` for omitido, o webphone escolhe automaticamente um dispositivo habilitado.
 
 ```ts
 const { call, err } = await window.wavoip.call.start("5511999999999", {
@@ -60,7 +60,7 @@ console.log("call id:", call.id);
 
 | Parâmetro | Tipo | Descrição |
 | --- | --- | --- |
-| `to` | `string` | Número de destino (somente dígitos, com DDI). |
+| `to` | `string` | Destino da chamada: número (com DDI) ou username. Veja [Chamada por username](#chamada-por-username). |
 | `config.fromTokens` | `string[]` | Lista de tokens de dispositivos permitidos para originar a chamada. |
 | `config.displayName` | `string` | Nome exibido ao destinatário. Sobrescreve `callSettings.displayName`. |
 
@@ -70,6 +70,30 @@ console.log("call id:", call.id);
 | { call: { id: string; peer: CallPeer }; err: null }
 | { call: null; err: { message: string; devices: { token: string; reason: string }[] } }
 ```
+
+#### Chamada por username
+
+`to` aceita o username do WhatsApp em texto simples, **sem `@`**:
+
+```ts
+await window.wavoip.call.start("john.doe");
+```
+
+Quem decide se o destino é número ou username é o dispositivo, não o webphone. A regra: removidos
+`+`, espaços, `-` e parênteses, o que sobrar só com dígitos é número; qualquer outra coisa é
+username. Por isso `+55 (11) 99999-9999` continua sendo número e `john.doe_1` continua username
+com a pontuação intacta.
+
+Numa chamada por username, `call.peer.username` traz o username discado e `call.peer.phone` traz
+o número que o WhatsApp resolveu a partir dele. Numa chamada por número, `call.peer.username` é
+`null`.
+
+Erros específicos que podem vir em `err.devices[].reason`:
+
+| Código | Significado |
+| --- | --- |
+| `USERNAME_DONT_EXIST` | O username não existe ou não pode ser chamado. |
+| `USERNAME_NOT_SUPPORTED_WABA` | O dispositivo é oficial (WABA), que não aceita chamada por username. |
 
 ### ~~`startCall(to, fromTokens)`~~ (depreciado)
 
