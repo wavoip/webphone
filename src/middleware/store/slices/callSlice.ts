@@ -16,6 +16,12 @@ export type CallStatus = WavoipCallStatus | "idle";
  */
 export type OfferOutcome = "accepted" | "rejected" | "elsewhere";
 
+/**
+ * An `Offer` as handed to the UI: the SDK's `accept`/`reject` plus a local-only
+ * `ignore`, which has no server-side equivalent (see `CallController.wrapOffer`).
+ */
+export type IgnorableOffer = Offer & { ignore(): void };
+
 export type CallSliceState = {
   offers: Offer[];
   outgoing?: CallOutgoing;
