@@ -7,6 +7,7 @@ import { ContactAvatar } from "@/components/ContactAvatar";
 import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
+import { isTerminalCallStatus } from "@/middleware/store/callStatus";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { useReconnectingSound } from "./useReconnectingSound";
 

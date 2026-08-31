@@ -20,7 +20,7 @@ async function withOutgoing(outgoing = new FakeCallOutgoing("c1", "tok-1")) {
   return { outgoing };
 }
 
-const hangUp = () => screen.getByRole("button", { name: /cancelar|finalizar/i });
+const hangUp = () => screen.getByRole("button", { name: /cancelar|finalizar/i }) as HTMLButtonElement;
 
 describe("CallButtons hang-up", () => {
   beforeEach(() => {
@@ -30,7 +30,7 @@ describe("CallButtons hang-up", () => {
   it("offers to cancel — not to end — a call that was never answered", async () => {
     await withOutgoing();
 
-    expect(hangUp()).toHaveAccessibleName("Cancelar");
+    expect(hangUp().getAttribute("aria-label")).toBe("Cancelar");
   });
 
   it("cancels the outgoing call and reports progress while the server has not answered", async () => {
@@ -51,13 +51,13 @@ describe("CallButtons hang-up", () => {
 
     fireEvent.click(hangUp());
 
-    await waitFor(() => expect(hangUp()).not.toBeDisabled());
+    await waitFor(() => expect(hangUp().disabled).toBe(false));
   });
 
   it("says 'end', not 'cancel', once the call is connected", async () => {
     const active = new FakeCallActive("c1", "tok-1");
     await renderWithProviders({ children: <CallButtons call={active} /> });
 
-    expect(hangUp()).toHaveAccessibleName("Finalizar");
+    expect(hangUp().getAttribute("aria-label")).toBe("Finalizar");
   });
 });
