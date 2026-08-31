@@ -52,12 +52,29 @@ describe("resetCallTimerEffect", () => {
     unsub();
   });
 
-  it.each(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
+  it.each(["ENDED", "CANCELLED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
     store.getState().setCallStatus(status);
     vi.advanceTimersByTime(3000);
     expect(store.getState().callStatus).toBe("idle");
+    unsub();
+  });
+
+  // Reachable against an instance that has not shipped the propagated cancel result
+  // yet: it acks `call.cancel` with success even when the peer answered in the same
+  // instant, so the status goes terminal and then back to ACTIVE. Leaving the timer
+  // armed wiped a live call three seconds later.
+  it("disarms when the call turns out not to have ended", () => {
+    const unsub = resetCallTimerEffect({ store });
+    store.getState().setActive(new FakeCallActive("c1", "tok"));
+    store.getState().setCallStatus("CANCELLED");
+
+    store.getState().setCallStatus("ACTIVE");
+    vi.advanceTimersByTime(3000);
+
+    expect(store.getState().callStatus).toBe("ACTIVE");
+    expect(store.getState().active).toBeDefined();
     unsub();
   });
 

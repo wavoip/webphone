@@ -12,6 +12,7 @@ import { ShadowRootContext } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
+import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type MountOptions = {
@@ -82,7 +83,11 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           <ThemeProvider root={root}>
             <PipProvider shadowRoot={shadowRoot}>
               <WidgetProvider>
-                <NotificationsProvider>{options.children ?? null}</NotificationsProvider>
+                <NotificationsProvider>
+                  {/* Screens reach the SDK through `useWavoip`, so the bridge has to be
+                      mounted for any of them to render under this helper. */}
+                  <WavoipProvider>{options.children ?? null}</WavoipProvider>
+                </NotificationsProvider>
               </WidgetProvider>
             </PipProvider>
           </ThemeProvider>

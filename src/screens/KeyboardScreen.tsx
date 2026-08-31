@@ -1,4 +1,4 @@
-import { BackspaceIcon, CaretDownIcon, PhoneIcon } from "@phosphor-icons/react";
+import { BackspaceIcon, CaretDownIcon, PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -64,7 +64,24 @@ export default function KeyboardScreen() {
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
 
-  const handleCall = async (allDevices: string[]) => {
+  /**
+   * The dial loop walks the devices one at a time; the token tells a stale loop to
+   * stop. It lives in the store, not in a ref: Picture-in-Picture mounts a second
+   * KeyboardScreen, and a per-instance ref left the abort button the operator can
+   * actually see unable to stop the loop the other instance was running.
+   */
+  const dialToken = () => middleware.store.getState().dialToken;
+
+  const abortDial = () => {
+    middleware.store.getState().bumpDialToken();
+    setCallIsLoading(false);
+    setStatus("");
+  };
+
+  const handleCall = async (allDevices: string[], token = dialToken()) => {
+    // The ack of `call.start` has no timeout, so the abort only lands between
+    // devices — never while the current one is still hanging.
+    if (token !== dialToken()) return;
     const isLast = allDevices.length <= 1;
     const device = allDevices[0];
 
@@ -72,7 +89,16 @@ export default function KeyboardScreen() {
     setError("");
     setStatus(`${t("Calling from")} ${device}`);
 
-    await startCall(number, { fromTokens: [device] }).then(({ err }) => {
+    await startCall(number, { fromTokens: [device] }).then(({ call, err }) => {
+      const startedId = call?.id;
+      // Aborted while this device was being tried: the call, if any, is already
+      // bound to the controller, so hand it the cancellation — by id, so a dial the
+      // operator started in the meantime is not the one that gets cancelled.
+      if (token !== dialToken()) {
+        if (!err) void middleware.controllers.call.cancel(startedId);
+        return;
+      }
+
       if (!err) {
         middleware.store.getState().pushRecentNumber(number);
         setStatus("");
@@ -113,7 +139,7 @@ export default function KeyboardScreen() {
       });
 
       if (!isLast) {
-        handleCall(allDevices.slice(1));
+        handleCall(allDevices.slice(1), token);
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
@@ -133,6 +159,10 @@ export default function KeyboardScreen() {
           return;
         }
         if (!number.trim()) return;
+        // Without this the Enter key starts a second dial: while loading there is no
+        // submit button in the DOM, so the browser no longer blocks implicit submit.
+        if (callIsLoading) return;
+        middleware.store.getState().bumpDialToken();
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
@@ -232,18 +262,30 @@ export default function KeyboardScreen() {
             <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
-          <Button
-            type="submit"
-            size="icon"
-            className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
-            disabled={callIsLoading}
-          >
-            <PhoneIcon className="wv:size-7" weight="fill" />
-          </Button>
+          {/* While dialing, the green button becomes a way out: the loop tries one
+              device at a time and the user had no way to give up. */}
+          {callIsLoading ? (
+            <Button
+              type="button"
+              size="icon"
+              title={t("Abort")}
+              aria-label={t("Abort")}
+              onClick={abortDial}
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:bg-[#e7000b] wv:hover:bg-red-800 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+            >
+              <PhoneSlashIcon className="wv:size-7" weight="fill" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="icon"
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+            >
+              <PhoneIcon className="wv:size-7" weight="fill" />
+            </Button>
+          )}
         </div>
       </div>
     </form>
-
   );
 }
-

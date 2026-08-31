@@ -9,7 +9,9 @@ import {
 } from "@phosphor-icons/react";
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 
 type Props = {
@@ -20,6 +22,21 @@ export function CallButtons({ call }: Props) {
   const middleware = useMiddleware();
   const [actionMade, setActionMade] = useState(false);
   const [muted, setMuted] = useState(false);
+
+  // The same red button serves both screens. On a call that was never answered it
+  // is a cancellation, which can legitimately be refused by the server (the peer
+  // answered in the same instant) — so the button must come back, not lock.
+  const isOutgoing = call?.direction === "OUTGOING" && call.status !== "ACTIVE";
+
+  const hangUpLabel = actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel call") : t("End");
+
+  const hangUp = async () => {
+    setActionMade(true);
+    const { err } = isOutgoing ? await middleware.controllers.call.cancel() : await middleware.controllers.call.end();
+    if (!err) return;
+    setActionMade(false);
+    toast.error(isOutgoing ? t("Could not cancel the call") : t("Could not end the call"));
+  };
 
   return (
     <div className="wv:grid wv:grid-cols-3 wv:grid-rows-2 wv:w-full wv:gap-3 wv:mb-15">
@@ -105,17 +122,19 @@ export function CallButtons({ call }: Props) {
           type="button"
           variant={"secondary"}
           className="wv:aspect-square wv:size-[55px] wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#e7000b]"
-          onClick={() => {
-            setActionMade(true);
-            middleware.controllers.call.end();
-          }}
+          onClick={hangUp}
           disabled={actionMade}
+          title={hangUpLabel}
+          aria-label={hangUpLabel}
+          aria-busy={actionMade && isOutgoing}
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Finalizar</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
+          {hangUpLabel}
+        </p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button

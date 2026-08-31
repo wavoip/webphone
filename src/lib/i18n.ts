@@ -68,6 +68,14 @@ export type TranslationKey =
   | "The call failed"
   | "Call rejected"
   | "Call unanswered"
+  // outgoing-call cancellation
+  | "Call canceled"
+  | "Cancel call"
+  | "Canceling..."
+  | "End"
+  | "Abort"
+  | "Could not cancel the call"
+  | "Could not end the call"
   // settings
   | "Microphone"
   | "Select the microphone to use on calls"
@@ -182,6 +190,13 @@ const ptBR: LocaleResource = {
   "The call failed": "A ligação falhou",
   "Call rejected": "Chamada rejeitada",
   "Call unanswered": "Chamada não atendida",
+  "Call canceled": "Chamada cancelada",
+  "Cancel call": "Cancelar",
+  "Canceling...": "Cancelando...",
+  End: "Finalizar",
+  Abort: "Desistir",
+  "Could not cancel the call": "Não foi possível cancelar a chamada",
+  "Could not end the call": "Não foi possível encerrar a chamada",
   Microphone: "Microfone",
   "Select the microphone to use on calls": "Selecione o microfone que deseja usar na ligação",
   Speaker: "Alto falante",
@@ -290,6 +305,13 @@ const es: LocaleResource = {
   "The call failed": "La llamada falló",
   "Call rejected": "Llamada rechazada",
   "Call unanswered": "Llamada no contestada",
+  "Call canceled": "Llamada cancelada",
+  "Cancel call": "Cancelar",
+  "Canceling...": "Cancelando...",
+  End: "Finalizar",
+  Abort: "Desistir",
+  "Could not cancel the call": "No se pudo cancelar la llamada",
+  "Could not end the call": "No se pudo finalizar la llamada",
   Microphone: "Micrófono",
   "Select the microphone to use on calls": "Selecciona el micrófono que deseas usar en la llamada",
   Speaker: "Altavoz",
