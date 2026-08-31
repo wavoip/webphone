@@ -1,5 +1,5 @@
-import { BackspaceIcon, CaretDownIcon, PhoneIcon } from "@phosphor-icons/react";
-import { useState } from "react";
+import { BackspaceIcon, CaretDownIcon, PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
+import { useRef, useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
@@ -64,7 +64,24 @@ export default function KeyboardScreen() {
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
 
-  const handleCall = async (allDevices: string[]) => {
+  /**
+   * Abort token for the dial loop. A ref and not store state: the loop walks the
+   * devices one at a time, and a boolean shared across invocations would never be
+   * reset — the next dial would abort itself. Each dial gets a fresh token, and a
+   * stale loop compares against it and stops.
+   */
+  const dialToken = useRef(0);
+
+  const abortDial = () => {
+    dialToken.current++;
+    setCallIsLoading(false);
+    setStatus("");
+  };
+
+  const handleCall = async (allDevices: string[], token = dialToken.current) => {
+    // The ack of `call.start` has no timeout, so the abort only lands between
+    // devices — never while the current one is still hanging.
+    if (token !== dialToken.current) return;
     const isLast = allDevices.length <= 1;
     const device = allDevices[0];
 
@@ -73,6 +90,13 @@ export default function KeyboardScreen() {
     setStatus(`${t("Calling from")} ${device}`);
 
     await startCall(number, { fromTokens: [device] }).then(({ err }) => {
+      // Aborted while this device was being tried: the call, if any, is already
+      // bound to the controller, so hand it the cancellation.
+      if (token !== dialToken.current) {
+        if (!err) void middleware.controllers.call.cancel();
+        return;
+      }
+
       if (!err) {
         middleware.store.getState().pushRecentNumber(number);
         setStatus("");
@@ -113,7 +137,7 @@ export default function KeyboardScreen() {
       });
 
       if (!isLast) {
-        handleCall(allDevices.slice(1));
+        handleCall(allDevices.slice(1), token);
       } else {
         setStatus(t("No device available"));
         setCallIsLoading(false);
@@ -133,6 +157,7 @@ export default function KeyboardScreen() {
           return;
         }
         if (!number.trim()) return;
+        dialToken.current++;
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"
@@ -232,18 +257,30 @@ export default function KeyboardScreen() {
             <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
-          <Button
-            type="submit"
-            size="icon"
-            className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
-            disabled={callIsLoading}
-          >
-            <PhoneIcon className="wv:size-7" weight="fill" />
-          </Button>
+          {/* While dialing, the green button becomes a way out: the loop tries one
+              device at a time and the user had no way to give up. */}
+          {callIsLoading ? (
+            <Button
+              type="button"
+              size="icon"
+              title={t("Abort")}
+              aria-label={t("Abort")}
+              onClick={abortDial}
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:bg-[#e7000b] wv:hover:bg-red-800 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+            >
+              <PhoneSlashIcon className="wv:size-7" weight="fill" />
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="icon"
+              className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
+            >
+              <PhoneIcon className="wv:size-7" weight="fill" />
+            </Button>
+          )}
         </div>
       </div>
     </form>
-
   );
 }
-

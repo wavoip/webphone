@@ -102,6 +102,31 @@ if (active) {
 
 Retorna a chamada que está discando (status anterior ao "ativa") ou `undefined`.
 
+### Desistindo de uma chamada
+
+A chamada iniciada por `start` pode ser abandonada em dois momentos, ambos pela interface —
+não há método de cancelamento na API pública.
+
+**Durante a discagem**, enquanto o webphone percorre os dispositivos habilitados um a um, o
+botão verde de discar vira um botão vermelho de desistir. Ele interrompe a fila: os
+dispositivos restantes não são tentados, e uma chamada que chegue a nascer logo depois é
+cancelada. Como o pedido enviado ao dispositivo em curso não tem prazo para responder, a
+desistência só tem efeito **entre** dispositivos.
+
+**Enquanto está chamando**, o botão vermelho da tela de chamada fica rotulado *Cancelar* em
+vez de *Finalizar*, e mostra *Cancelando...* até o servidor confirmar. Cancelar pode ser
+recusado — o caso real é o destinatário atender no exato instante do clique. Nesse caso o
+botão volta a ficar disponível, um aviso aparece, e **a chamada continua com áudio**.
+
+O desfecho chega como o status `CANCELLED`, tanto em [`getCallOutgoing`](#getcalloutgoing)
+quanto no evento [`call:ended`](#eventos-disponiveis).
+
+{% hint style="info" %}
+`CANCELLED` não quer dizer "o operador cancelou": quer dizer que **alguém** desistiu antes do
+atendimento — pode ter sido o destinatário derrubando a chamada. Por isso a tela usa o texto
+neutro "Chamada cancelada".
+{% endhint %}
+
 ### `getOffers()`
 
 Retorna a lista de ofertas (chamadas recebidas pendentes de atender).
@@ -250,12 +275,17 @@ unsubscribe();
 | --- | --- | --- |
 | `call:started` | `CallOutgoingProps` | Logo após `call.start()` — quando a chamada de saída aparece no store. |
 | `call:accepted` | `CallActiveProps` | Peer aceitou a chamada; a outgoing virou active. |
-| `call:ended` | `{ id: string; status: CallStatus }` | Status entrou em estado terminal (`ENDED`, `FAILED`, `REJECTED`, `NOT_ANSWERED`). |
+| `call:ended` | `{ id: string; status: CallStatus }` | Status entrou em estado terminal (`ENDED`, `CANCELLED`, `FAILED`, `REJECTED`, `NOT_ANSWERED`). |
 | `offer:received` | `CallOfferProps` | Uma oferta entrou no store após passar pela cadeia de middleware. |
+
+`CANCELLED` significa que alguém desistiu antes do atendimento — pode ter sido o
+operador clicando em cancelar, ou o destinatário derrubando a chamada. Não existe um
+evento `call:canceled`: o desfecho vem no `status`.
 
 ```ts
 window.wavoip.on("call:ended", ({ id, status }) => {
   if (status === "FAILED") notifyOps(`Falha na chamada ${id}`);
+  if (status === "CANCELLED") metrics.increment("calls.canceled");
 });
 
 window.wavoip.on("offer:received", (offer) => {

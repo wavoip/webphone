@@ -189,12 +189,15 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("ENDED");
     });
 
-    it("flips callStatus to 'ended' on outgoing end when no active call", async () => {
+    // Ending a call that was never answered is cancelling it, and the
+    // outcome now says so. Everything used to collapse to "ENDED".
+    it("delegates to cancel() when only an outgoing call is in flight", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("CALLING");
       await controller.end();
-      expect(store.getState().callStatus).toBe("ENDED");
+      expect(outgoing.cancelCalls).toBe(1);
+      expect(store.getState().callStatus).toBe("CANCELLED");
     });
 
     it("no-ops when no call is in flight", async () => {
@@ -202,6 +205,88 @@ describe("CallController", () => {
       const result = await controller.end();
       expect(result.err).toBeNull();
       expect(store.getState().callStatus).toBe(before);
+    });
+  });
+
+  // Cancelling is giving up before the answer — its own outcome, and one
+  // that can legitimately fail (the peer answered in the same instant). The button
+  // used to lock forever because nobody looked at the error.
+  describe("cancel", () => {
+    it("flips callStatus to CANCELLED optimistically", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+
+      const result = await controller.cancel();
+
+      expect(result.err).toBeNull();
+      expect(outgoing.cancelCalls).toBe(1);
+      expect(store.getState().callStatus).toBe("CANCELLED");
+    });
+
+    it("rolls the status back when the server refuses the cancellation", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.cancelResult = { err: "IS_NOT_OFFER" };
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+
+      const result = await controller.cancel();
+
+      expect(result.err).toBe("IS_NOT_OFFER");
+      expect(store.getState().callStatus).toBe("RINGING");
+    });
+
+    // If the peer answers during the await the status has already moved on by
+    // itself; rolling back blindly would drag it to RINGING and strand the screen
+    // on "Calling..." — RINGING is not terminal and the screen only resets on idle.
+    it("does not clobber a status the server moved on during the await", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.cancelResult = { err: "IS_NOT_OFFER" };
+      outgoing.cancel = async () => {
+        store.getState().setCallStatus("ACTIVE");
+        return outgoing.cancelResult;
+      };
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+
+      await controller.cancel();
+
+      expect(store.getState().callStatus).toBe("ACTIVE");
+    });
+
+    it("no-ops when there is no outgoing call", async () => {
+      const before = store.getState().callStatus;
+
+      const result = await controller.cancel();
+
+      expect(result.err).toBeNull();
+      expect(store.getState().callStatus).toBe(before);
+    });
+  });
+
+  // The SDK's `status` relay already carries the right outcome (ENDED or
+  // CANCELLED); the `ended -> ENDED` handler that used to live here overwrote it.
+  describe("outgoing terminal status", () => {
+    it("keeps CANCELLED when the SDK reports a cancelled ending", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+
+      outgoing.emitEvent("status", "CANCELLED");
+      outgoing.emitEvent("ended");
+
+      expect(store.getState().callStatus).toBe("CANCELLED");
+    });
+
+    it("still reports an ordinary hangup as ENDED", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+
+      outgoing.emitEvent("status", "ENDED");
+      outgoing.emitEvent("ended");
+
+      expect(store.getState().callStatus).toBe("ENDED");
     });
   });
 

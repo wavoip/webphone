@@ -4,7 +4,10 @@ import type { CallStatus } from "@/middleware/store/slices/callSlice";
 type Deps = { store: MiddlewareStoreApi; delayMs?: number };
 export type Unsubscribe = () => void;
 
-const TERMINAL: ReadonlySet<CallStatus> = new Set(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"]);
+// "CANCELLED" is terminal like any other outcome — without it the screen never
+// returns to the keyboard after a cancellation. This Set has a twin in
+// callLifecycleEvents; the two move together.
+const TERMINAL: ReadonlySet<CallStatus> = new Set(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED", "CANCELLED"]);
 const DEFAULT_DELAY_MS = 3000;
 
 export function resetCallTimerEffect({ store, delayMs = DEFAULT_DELAY_MS }: Deps): Unsubscribe {

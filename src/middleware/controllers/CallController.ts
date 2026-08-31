@@ -34,18 +34,43 @@ export class CallController {
   }
 
   /**
-   * Ends the currently active or outgoing call and flips status to "ENDED"
-   * immediately. wavoip-api's call.end() does not emit "ended" locally — it
-   * only fires when the server confirms — so the UI would otherwise stay on
-   * the running duration until the WSS round-trip lands.
+   * Ends the currently active call, or cancels the outgoing one, flipping the
+   * status as soon as the call is handed over. wavoip-api does not emit the
+   * terminal event locally — it only fires when the server confirms — so the UI
+   * would otherwise stay on the running duration until the WSS round-trip lands.
    */
   async end(): Promise<{ err: string | null }> {
     const { store } = this.deps;
     const { active, outgoing } = store.getState();
-    const call = active ?? outgoing;
-    if (!call) return { err: null };
-    const result = await call.end();
+    if (!active) return outgoing ? this.cancel() : { err: null };
+    const result = await active.end();
     store.getState().setCallStatus("ENDED");
+    return result;
+  }
+
+  /**
+   * Gives up an outgoing call before the peer answers. Unlike hanging up an
+   * active call, this can legitimately fail — the peer may answer in the same
+   * instant, and the server then refuses with IS_NOT_OFFER — so the optimistic
+   * status is rolled back and the error handed to the caller.
+   *
+   * The rollback is conditional: a peerAccept/peerReject landing during the
+   * await has already moved the status on, and restoring the captured one would
+   * strand the screen on "Calling..." (RINGING is not terminal, and the screen
+   * only returns to the keyboard on idle).
+   */
+  async cancel(): Promise<{ err: string | null }> {
+    const { store } = this.deps;
+    const { outgoing } = store.getState();
+    if (!outgoing) return { err: null };
+
+    const previous = store.getState().callStatus;
+    store.getState().setCallStatus("CANCELLED");
+
+    const result = await outgoing.cancel();
+    if (result.err !== null && store.getState().callStatus === "CANCELLED") {
+      store.getState().setCallStatus(previous);
+    }
     return result;
   }
 
@@ -114,7 +139,9 @@ export class CallController {
     });
     call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
     call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
-    call.on("ended", () => store.getState().setCallStatus("ENDED"));
+    // No `ended` handler on purpose: the SDK always emits `status` alongside the
+    // terminal event, already carrying which ending it was. Hardcoding "ENDED"
+    // here overwrote "CANCELLED" and made a cancellation look like a hangup.
     call.on("status", (status) => store.getState().setCallStatus(status));
   }
 

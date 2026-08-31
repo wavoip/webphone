@@ -38,6 +38,10 @@ export default function OutgoingScreen() {
         return t("Call unanswered");
       case "ENDED":
         return t("Call ended");
+      // Not necessarily *us* cancelling: the callee dropping the call before
+      // answering lands here too, so the wording stays neutral.
+      case "CANCELLED":
+        return t("Call canceled");
       default:
         return null;
     }
