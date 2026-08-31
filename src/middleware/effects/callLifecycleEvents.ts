@@ -1,16 +1,11 @@
 import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
 import type { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
+import { TERMINAL_CALL_STATUSES as TERMINAL } from "@/middleware/store/callStatus";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
-import type { CallStatus } from "@/middleware/store/slices/callSlice";
 
 type Deps = { store: MiddlewareStoreApi; events: EventBus<WebphoneEventMap> };
 export type Unsubscribe = () => void;
-
-// "CANCELLED" is terminal like any other outcome — without it no public
-// `call:ended` is emitted for a cancellation. This Set has a twin in
-// resetCallTimer; the two move together.
-const TERMINAL: ReadonlySet<CallStatus> = new Set(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED", "CANCELLED"]);
 
 /**
  * Bridges store state transitions to {@link WebphoneEventMap} broadcasts:

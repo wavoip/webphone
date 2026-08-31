@@ -1,5 +1,5 @@
 import { BackspaceIcon, CaretDownIcon, PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import SoundBackspace from "@/assets/sounds/backspace.mp3";
@@ -65,23 +65,23 @@ export default function KeyboardScreen() {
   const { addNotification } = useNotificationManager();
 
   /**
-   * Abort token for the dial loop. A ref and not store state: the loop walks the
-   * devices one at a time, and a boolean shared across invocations would never be
-   * reset — the next dial would abort itself. Each dial gets a fresh token, and a
-   * stale loop compares against it and stops.
+   * The dial loop walks the devices one at a time; the token tells a stale loop to
+   * stop. It lives in the store, not in a ref: Picture-in-Picture mounts a second
+   * KeyboardScreen, and a per-instance ref left the abort button the operator can
+   * actually see unable to stop the loop the other instance was running.
    */
-  const dialToken = useRef(0);
+  const dialToken = () => middleware.store.getState().dialToken;
 
   const abortDial = () => {
-    dialToken.current++;
+    middleware.store.getState().bumpDialToken();
     setCallIsLoading(false);
     setStatus("");
   };
 
-  const handleCall = async (allDevices: string[], token = dialToken.current) => {
+  const handleCall = async (allDevices: string[], token = dialToken()) => {
     // The ack of `call.start` has no timeout, so the abort only lands between
     // devices — never while the current one is still hanging.
-    if (token !== dialToken.current) return;
+    if (token !== dialToken()) return;
     const isLast = allDevices.length <= 1;
     const device = allDevices[0];
 
@@ -89,11 +89,13 @@ export default function KeyboardScreen() {
     setError("");
     setStatus(`${t("Calling from")} ${device}`);
 
-    await startCall(number, { fromTokens: [device] }).then(({ err }) => {
+    await startCall(number, { fromTokens: [device] }).then(({ call, err }) => {
+      const startedId = call?.id;
       // Aborted while this device was being tried: the call, if any, is already
-      // bound to the controller, so hand it the cancellation.
-      if (token !== dialToken.current) {
-        if (!err) void middleware.controllers.call.cancel();
+      // bound to the controller, so hand it the cancellation — by id, so a dial the
+      // operator started in the meantime is not the one that gets cancelled.
+      if (token !== dialToken()) {
+        if (!err) void middleware.controllers.call.cancel(startedId);
         return;
       }
 
@@ -157,7 +159,10 @@ export default function KeyboardScreen() {
           return;
         }
         if (!number.trim()) return;
-        dialToken.current++;
+        // Without this the Enter key starts a second dial: while loading there is no
+        // submit button in the DOM, so the browser no longer blocks implicit submit.
+        if (callIsLoading) return;
+        middleware.store.getState().bumpDialToken();
         handleCall([...tokens]);
       }}
       className="wv:flex wv:flex-col wv:size-full wv:items-center wv:justify-evenly wv:px-2 wv:pb-4"

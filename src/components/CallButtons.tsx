@@ -28,6 +28,8 @@ export function CallButtons({ call }: Props) {
   // answered in the same instant) — so the button must come back, not lock.
   const isOutgoing = call?.direction === "OUTGOING" && call.status !== "ACTIVE";
 
+  const hangUpLabel = actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel call") : t("End");
+
   const hangUp = async () => {
     setActionMade(true);
     const { err } = isOutgoing ? await middleware.controllers.call.cancel() : await middleware.controllers.call.end();
@@ -122,13 +124,16 @@ export function CallButtons({ call }: Props) {
           className="wv:aspect-square wv:size-[55px] wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:bg-[#e7000b]"
           onClick={hangUp}
           disabled={actionMade}
+          title={hangUpLabel}
+          aria-label={hangUpLabel}
+          aria-busy={actionMade && isOutgoing}
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
         <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
-          {actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel call") : t("End")}
+          {hangUpLabel}
         </p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">

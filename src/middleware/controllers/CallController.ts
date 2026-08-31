@@ -1,4 +1,5 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer, Wavoip } from "@wavoip/wavoip-api";
+import { isTerminalCallStatus } from "@/middleware/store/callStatus";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { OfferOutcome } from "@/middleware/store/slices/callSlice";
 
@@ -51,26 +52,28 @@ export class CallController {
   /**
    * Gives up an outgoing call before the peer answers. Unlike hanging up an
    * active call, this can legitimately fail — the peer may answer in the same
-   * instant, and the server then refuses with IS_NOT_OFFER — so the optimistic
-   * status is rolled back and the error handed to the caller.
+   * instant, and the server then refuses with IS_NOT_OFFER.
    *
-   * The rollback is conditional: a peerAccept/peerReject landing during the
-   * await has already moved the status on, and restoring the captured one would
-   * strand the screen on "Calling..." (RINGING is not terminal, and the screen
-   * only returns to the keyboard on idle).
+   * The status is written only once the server confirms. Marking it terminal
+   * up-front and rolling back on failure does not work: a terminal status arms
+   * every terminal effect — the reset timer that wipes the call, the public
+   * `call:ended` broadcast — and a later rollback cannot disarm what already
+   * fired, so a refused cancellation erased a call that was still ringing. The
+   * "cancelling" feedback belongs to the button, not to the call status.
+   *
+   * @example await controllers.call.cancel()          // whatever is outgoing now
+   * @example await controllers.call.cancel(call.id)   // only if it is still that one
    */
-  async cancel(): Promise<{ err: string | null }> {
+  async cancel(callId?: string): Promise<{ err: string | null }> {
     const { store } = this.deps;
     const { outgoing } = store.getState();
     if (!outgoing) return { err: null };
-
-    const previous = store.getState().callStatus;
-    store.getState().setCallStatus("CANCELLED");
+    // A late abort must not cancel whatever happens to be in the store by then —
+    // the operator may already have dialled again.
+    if (callId !== undefined && outgoing.id !== callId) return { err: null };
 
     const result = await outgoing.cancel();
-    if (result.err !== null && store.getState().callStatus === "CANCELLED") {
-      store.getState().setCallStatus(previous);
-    }
+    if (result.err === null) store.getState().setCallStatus("CANCELLED");
     return result;
   }
 
@@ -139,9 +142,16 @@ export class CallController {
     });
     call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
     call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
-    // No `ended` handler on purpose: the SDK always emits `status` alongside the
-    // terminal event, already carrying which ending it was. Hardcoding "ENDED"
-    // here overwrote "CANCELLED" and made a cancellation look like a hangup.
+    // Safety net, not the main path: every server-routed ending arrives as a
+    // `status` settled before the terminal event, and hardcoding "ENDED" here
+    // used to overwrite "CANCELLED" and make a cancellation look like a hangup.
+    // But one path emits `ended` with no status at all — the media handover
+    // failing after `call:answered` — and without this the call would sit
+    // non-terminal forever: screen stuck, no public event, no reset.
+    call.on("ended", () => {
+      const { callStatus } = store.getState();
+      if (!isTerminalCallStatus(callStatus)) store.getState().setCallStatus("ENDED");
+    });
     call.on("status", (status) => store.getState().setCallStatus(status));
   }
 

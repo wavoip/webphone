@@ -52,7 +52,7 @@ describe("resetCallTimerEffect", () => {
     unsub();
   });
 
-  it.each(["ENDED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
+  it.each(["ENDED", "CANCELLED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
     store.getState().setCallStatus(status);

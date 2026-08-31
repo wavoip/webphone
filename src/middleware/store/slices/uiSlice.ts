@@ -22,6 +22,11 @@ export type UiSliceState = {
   dialStatus: string;
   dialError: string;
   dialIsLoading: boolean;
+  /** Bumped on every dial and on every abort. The dial loop compares against it
+   *  before each device, so a stale loop stops. Store state and not a component ref:
+   *  Picture-in-Picture mounts a second KeyboardScreen, and a per-instance ref left
+   *  the visible abort button unable to stop the loop the other instance was running. */
+  dialToken: number;
   recentNumbers: string[];
 };
 
@@ -37,6 +42,7 @@ export type UiSliceActions = {
   setDialStatus: (status: string) => void;
   setDialError: (error: string) => void;
   setDialIsLoading: (loading: boolean) => void;
+  bumpDialToken: () => void;
 };
 
 export type UiSlice = UiSliceState & UiSliceActions;
@@ -59,6 +65,7 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   dialStatus: "",
   dialError: "",
   dialIsLoading: false,
+  dialToken: 0,
   recentNumbers: [],
   setScreen: (screen) => set({ screen }),
   setTheme: (theme) => set({ theme }),
@@ -69,6 +76,7 @@ export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (se
   setDialStatus: (dialStatus) => set({ dialStatus }),
   setDialError: (dialError) => set({ dialError }),
   setDialIsLoading: (dialIsLoading) => set({ dialIsLoading }),
+  bumpDialToken: () => set((state) => ({ dialToken: state.dialToken + 1 })),
   pushRecentNumber: (num) =>
     set((state) => ({ recentNumbers: [num, ...state.recentNumbers.filter((n) => n !== num)].slice(0, 8) })),
   setRecentNumbers: (recentNumbers) => set({ recentNumbers }),

@@ -113,13 +113,18 @@ dispositivos restantes não são tentados, e uma chamada que chegue a nascer log
 cancelada. Como o pedido enviado ao dispositivo em curso não tem prazo para responder, a
 desistência só tem efeito **entre** dispositivos.
 
-**Enquanto está chamando**, o botão vermelho da tela de chamada fica rotulado *Cancelar* em
-vez de *Finalizar*, e mostra *Cancelando...* até o servidor confirmar. Cancelar pode ser
-recusado — o caso real é o destinatário atender no exato instante do clique. Nesse caso o
-botão volta a ficar disponível, um aviso aparece, e **a chamada continua com áudio**.
+**Enquanto está chamando**, o botão vermelho da tela de chamada em progresso fica rotulado
+*Cancelar* em vez de *Finalizar*, e mostra *Cancelando...* até o servidor confirmar. Cancelar
+pode ser recusado — o caso real é o destinatário atender no exato instante do clique. Nesse
+caso o botão volta a ficar disponível, um aviso aparece, e **a chamada continua com áudio**.
 
-O desfecho chega como o status `CANCELLED`, tanto em [`getCallOutgoing`](#getcalloutgoing)
-quanto no evento [`call:ended`](#eventos-disponiveis).
+O desfecho chega como o status `CANCELLED` no evento [`call:ended`](#eventos-disponiveis).
+
+{% hint style="warning" %}
+Não confie em `getCallOutgoing().status` para ler o desfecho: ele reflete o objeto do SDK,
+que não é mutado por um cancelamento vindo do outro lado, e o objeto sai do store poucos
+segundos depois do fim. Use o evento.
+{% endhint %}
 
 {% hint style="info" %}
 `CANCELLED` não quer dizer "o operador cancelou": quer dizer que **alguém** desistiu antes do

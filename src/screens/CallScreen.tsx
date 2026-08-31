@@ -24,20 +24,25 @@ export default function CallScreen() {
 
   const status = useMemo(
     () =>
-      callStatus === "ENDED"
-        ? t("Call ended")
-        : callStatus === "DISCONNECTED"
-          ? t("Reconnecting")
-          : callStatus === "FAILED"
-            ? callFailReason
-              ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
-              : t("The call failed")
-            : null,
+      // A connected call normally ends, but the server owns the outcome and may
+      // report CANCELLED here; treating it as non-terminal left the timer running
+      // with no closing sound and no final text.
+      callStatus === "CANCELLED"
+        ? t("Call canceled")
+        : callStatus === "ENDED"
+          ? t("Call ended")
+          : callStatus === "DISCONNECTED"
+            ? t("Reconnecting")
+            : callStatus === "FAILED"
+              ? callFailReason
+                ? `${t("The call failed")}: ${t(callFailReason as TranslationKey)}`
+                : t("The call failed")
+              : null,
     [callStatus, callFailReason],
   );
 
   useEffect(() => {
-    if (callStatus === "ENDED" || callStatus === "FAILED") {
+    if (isTerminalCallStatus(callStatus)) {
       hang_up_sound.pause();
       hang_up_sound.currentTime = 0;
       hang_up_sound.play();
@@ -62,7 +67,7 @@ export default function CallScreen() {
   }, [callStatus]);
 
   useEffect(() => {
-    if (callStatus === "ENDED" || callStatus === "FAILED") return;
+    if (isTerminalCallStatus(callStatus)) return;
     const id = setInterval(() => setDurationSeconds((s) => s + 1), 1000);
     return () => clearInterval(id);
   }, [callStatus]);

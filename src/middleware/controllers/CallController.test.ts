@@ -212,7 +212,7 @@ describe("CallController", () => {
   // that can legitimately fail (the peer answered in the same instant). The button
   // used to lock forever because nobody looked at the error.
   describe("cancel", () => {
-    it("flips callStatus to CANCELLED optimistically", async () => {
+    it("flips callStatus to CANCELLED once the server confirms", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("RINGING");
@@ -224,7 +224,7 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("CANCELLED");
     });
 
-    it("rolls the status back when the server refuses the cancellation", async () => {
+    it("hands the refusal back to the caller", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
       store.getState().setOutgoing(outgoing);
@@ -233,7 +233,6 @@ describe("CallController", () => {
       const result = await controller.cancel();
 
       expect(result.err).toBe("IS_NOT_OFFER");
-      expect(store.getState().callStatus).toBe("RINGING");
     });
 
     // If the peer answers during the await the status has already moved on by
@@ -252,6 +251,27 @@ describe("CallController", () => {
       await controller.cancel();
 
       expect(store.getState().callStatus).toBe("ACTIVE");
+    });
+
+    // The optimistic write armed every terminal effect — the reset timer among them —
+    // and a rollback cannot disarm what already fired. A refused cancellation wiped a
+    // call that was still ringing three seconds later.
+    it("does not mark the call terminal until the server confirms", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.cancelResult = { err: "IS_NOT_OFFER" };
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+      const seen: string[] = [];
+      const unsub = store.subscribe(
+        (s) => s.callStatus,
+        (status) => seen.push(status),
+      );
+
+      await controller.cancel();
+
+      expect(seen).not.toContain("CANCELLED");
+      expect(store.getState().callStatus).toBe("RINGING");
+      unsub();
     });
 
     it("no-ops when there is no outgoing call", async () => {
