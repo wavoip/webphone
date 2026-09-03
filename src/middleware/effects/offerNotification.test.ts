@@ -1,10 +1,11 @@
-import type { CallActive, Offer } from "@wavoip/wavoip-api";
+import type { CallActive } from "@wavoip/wavoip-api";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { FocusTracker } from "@/middleware/browser/focusTracker";
 import type { BrowserNotifier, NotifyArgs } from "@/middleware/browser/notifier";
 import { MissedCallController } from "@/middleware/controllers/MissedCallController";
 import { OFFER_NOTIFICATION_TAG, offerNotificationEffect } from "@/middleware/effects/offerNotification";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
+import type { IgnorableOffer } from "@/middleware/store/slices/callSlice";
 import { FakeOffer, makePeer } from "@/middleware/testing/FakeWavoip";
 
 class FakeNotifier implements BrowserNotifier {
@@ -32,9 +33,9 @@ class FakeFocus implements FocusTracker {
   isUnfocused = (): boolean => this.unfocused;
 }
 
-function offerWith(id: string, displayName: string | null, phone = "5511999999999"): Offer {
+function offerWith(id: string, displayName: string | null, phone = "5511999999999"): IgnorableOffer {
   const o = new FakeOffer(id, "device-1", { ...makePeer(phone), displayName });
-  return o as unknown as Offer;
+  return o as unknown as IgnorableOffer;
 }
 
 function activeWith(id: string): CallActive {

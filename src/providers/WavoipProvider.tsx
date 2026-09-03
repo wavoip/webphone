@@ -139,6 +139,12 @@ function useToastBridge(middleware: Middleware) {
             id: offer.id,
             duration: 100_000,
             className: "wv:max-w-[400px] wv:!w-full",
+            // Swiping the toast away must behave like the operator ignored the
+            // call: stop the ringtone, not just hide the notification. Also
+            // fires on our own toast.dismiss() calls below and in
+            // OfferNotification's accept/reject handlers — ignore() no-ops in
+            // that case because the offer is no longer pending.
+            onDismiss: () => offer.ignore(),
           });
         }
         for (const offer of previous) {

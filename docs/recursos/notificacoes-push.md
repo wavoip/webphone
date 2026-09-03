@@ -79,9 +79,23 @@ await webphone.render({
 
 Clicar na notificação foca a aba e abre o painel do webphone. A oferta correspondente fica visível na UI. Não há botões "Aceitar/Rejeitar" — isso exigiria Service Worker.
 
+## Ignorar uma chamada
+
+O card exibido dentro do app quando uma oferta chega tem três ações: **Recusar**, **Ignorar** e **Atender**.
+
+| Ação | O que faz | Fala com o servidor? |
+| --- | --- | --- |
+| Recusar | Rejeita a chamada (`offer.reject()`). | Sim |
+| Ignorar | Dispensa o card localmente, sem aceitar nem rejeitar. | Não |
+| Atender | Aceita a chamada (`offer.accept()`). | Sim |
+
+Arrastar o card para o lado (swipe) tem o mesmo efeito de tocar em **Ignorar**: o ringtone para imediatamente e o card some. Antes, o swipe só escondia o card e o ringtone continuava tocando — isso foi corrigido para que arrastar sempre pare o toque.
+
+Como Ignorar não envia nada ao servidor, o outro lado da chamada continua vendo a ligação tocar (ou tocando até o timeout) — do ponto de vista de quem ligou, é equivalente a uma chamada não atendida.
+
 ## Chamadas perdidas
 
-Quando uma oferta sai do store sem ter sido aceita (timeout, rejeição, peer cancelou), uma entrada `MISSED_CALL` é adicionada à lista de notificações in-app:
+Quando uma oferta sai do store sem ter sido aceita (timeout, rejeição, peer cancelou, **ou ignorada**), uma entrada `MISSED_CALL` é adicionada à lista de notificações in-app:
 
 ```ts
 const missed = window.wavoip.notifications.get().filter((n) => n.type === "MISSED_CALL");

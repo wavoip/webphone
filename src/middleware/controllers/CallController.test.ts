@@ -414,5 +414,42 @@ describe("CallController", () => {
       offer.emitEvent("unanswered");
       expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
     });
+
+    it("ignore() removes the offer and does not mark an outcome (counts as missed downstream, like a real phone's 'ignore')", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      stored.ignore();
+      expect(store.getState().offers).toEqual([]);
+      expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
+    });
+
+    it("ignore() does not touch an offer that already left the store via accept()", async () => {
+      // Regression: swiping the toast fires onDismiss -> ignore() even when
+      // the operator already tapped accept/reject moments earlier (sonner's
+      // onDismiss also fires on our own toast.dismiss() cleanup call). If
+      // ignore() blindly reprocessed the offer it could clobber state set by
+      // the real outcome.
+      const offer = new FakeOffer("o1", "tok-1");
+      const active = new FakeCallActive("o1", "tok-1");
+      offer.acceptResult = { call: active, err: null };
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      await stored.accept();
+
+      stored.ignore();
+
+      expect(store.getState().active?.id).toBe("o1");
+      expect(store.getState().lastOfferOutcomes.o1).toBe("accepted");
+    });
+
+    it("ignore() is a no-op when called twice in a row", () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      controller.ingestOffer(offer);
+      const [stored] = store.getState().offers;
+      stored.ignore();
+      expect(() => stored.ignore()).not.toThrow();
+      expect(store.getState().offers).toEqual([]);
+    });
   });
 });

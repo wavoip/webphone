@@ -1,27 +1,27 @@
-import { PhoneIcon, PhoneSlash, WhatsappLogo } from "@phosphor-icons/react";
-import type { Offer } from "@wavoip/wavoip-api";
+import { PhoneIcon, PhoneSlash, WhatsappLogo, XIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
+import type { IgnorableOffer } from "@/middleware/store/slices/callSlice";
 
 type Props = {
-  offer: Offer;
+  offer: IgnorableOffer;
 };
 
 export function OfferNotification({ offer }: Props) {
-  const [actionMade, setActionMade] = useState(false);
+  const [showActions, setShowActions] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubs = [
-      offer.on("ended", () => setStatus(t("Call ended"))),
-      offer.on("acceptedElsewhere", () => setStatus(t("Accepted by another user"))),
-      offer.on("rejectedElsewhere", () => setStatus(t("Rejected by the app"))),
-      offer.on("unanswered", () => setStatus(t("Timed out"))),
+      offer.on("ended", () => { setStatus(t("Call ended")); setShowActions(false); }),
+      offer.on("acceptedElsewhere", () => { setStatus(t("Accepted by another user")); setShowActions(false); }),
+      offer.on("rejectedElsewhere", () => { setStatus(t("Rejected by the app")); setShowActions(false); }),
+      offer.on("unanswered", () => { setStatus(t("Timed out")); setShowActions(false); }),
     ];
     return () => {
       for (const unsub of unsubs) unsub();
@@ -71,46 +71,59 @@ export function OfferNotification({ offer }: Props) {
             {offer.peer?.displayName || offer.peer?.phone}
           </p>
         </div>
-        <div className="wv:flex wv:flex-row wv:gap-2">
-          <Button
-            type="submit"
-            size={"icon"}
-            className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
-            disabled={actionMade}
-            onClick={() => {
-              setActionMade(true);
-              offer.reject().then(({ err }: { err: string | null }) => {
-                if (err) {
-                  setError(err);
-                  setActionMade(false);
-                  return;
-                }
+        {showActions && (
+          <div className="wv:flex wv:flex-row wv:gap-2">
+            <Button
+              type="submit"
+              size={"icon"}
+              className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
+              onClick={() => {
+                setShowActions(false);
+                offer.reject().then(({ err }: { err: string | null }) => {
+                  if (err) {
+                    setError(err);
+                    setShowActions(true);
+                    return;
+                  }
+                  toast.dismiss(offer.id);
+                });
+              }}
+            >
+              <PhoneSlash className="wv:size-5" weight="fill" />
+            </Button>
+            <Button
+              type="submit"
+              size={"icon"}
+              aria-label={t("Ignore")}
+              className="wv:text-muted-foreground wv:p-4 wv:bg-muted wv:hover:bg-accent wv:active:bg-accent/60 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
+              onClick={() => {
+                setShowActions(false);
+                offer.ignore();
                 toast.dismiss(offer.id);
-              });
-            }}
-          >
-            <PhoneSlash className="wv:size-5" weight="fill" />
-          </Button>
-          <Button
-            type="submit"
-            size={"icon"}
-            className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
-            disabled={actionMade}
-            onClick={() => {
-              setActionMade(true);
-              offer.accept().then((result) => {
-                if (result.err) {
-                  setError(result.err);
-                  setActionMade(false);
-                  return;
-                }
-                toast.dismiss(offer.id);
-              });
-            }}
-          >
-            <PhoneIcon className="wv:size-5" weight="fill" />
-          </Button>
-        </div>
+              }}
+            >
+              <XIcon className="wv:size-5" weight="bold" />
+            </Button>
+            <Button
+              type="submit"
+              size={"icon"}
+              className="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
+              onClick={() => {
+                setShowActions(false);
+                offer.accept().then((result) => {
+                  if (result.err) {
+                    setError(result.err);
+                    setShowActions(true);
+                    return;
+                  }
+                  toast.dismiss(offer.id);
+                });
+              }}
+            >
+              <PhoneIcon className="wv:size-5" weight="fill" />
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

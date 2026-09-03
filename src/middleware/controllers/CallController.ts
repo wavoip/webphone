@@ -1,7 +1,7 @@
 import type { CallActive, CallOutgoing, CallPeer, Offer, Wavoip } from "@wavoip/wavoip-api";
 import { isTerminalCallStatus } from "@/middleware/store/callStatus";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
-import type { OfferOutcome } from "@/middleware/store/slices/callSlice";
+import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/callSlice";
 
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
 
@@ -85,7 +85,7 @@ export class CallController {
     offer.on("unanswered", () => this.dropOffer(offer.id));
   }
 
-  private wrapOffer(offer: Offer): Offer {
+  private wrapOffer(offer: Offer): IgnorableOffer {
     const originalAccept = offer.accept.bind(offer);
     const originalReject = offer.reject.bind(offer);
     return new Proxy(offer, {
@@ -107,9 +107,21 @@ export class CallController {
             return result;
           };
         }
+        // "ignore" has no wavoip-api counterpart: it never reaches the server,
+        // it only drops the offer locally (same path "ended"/"unanswered" use)
+        // so the ringtone effect stops and the missed-call detector records it,
+        // same as a real phone treats an ignored call as missed. Guarded so a
+        // late call (e.g. toast cleanup firing after accept/reject already
+        // settled) is a no-op instead of reprocessing a gone offer.
+        if (prop === "ignore") {
+          return () => {
+            const stillPending = this.deps.store.getState().offers.some((o) => o.id === offer.id);
+            if (stillPending) this.dropOffer(offer.id);
+          };
+        }
         return Reflect.get(target, prop, receiver);
       },
-    });
+    }) as IgnorableOffer;
   }
 
   private promoteToActive(call: CallActive, offerId: string): void {

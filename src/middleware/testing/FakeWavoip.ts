@@ -68,6 +68,7 @@ export class FakeOffer extends FakeEmitter<OfferEvents> implements Offer {
 
   accept = async () => this.acceptResult as { call: CallActive; err: null } | { call: null; err: string };
   reject = async () => this.rejectResult;
+  ignore() {}
   onAcceptedElsewhere() {}
   onRejectedElsewhere() {}
   onUnanswered() {}
