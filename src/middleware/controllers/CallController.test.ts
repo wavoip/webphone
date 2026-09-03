@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { CallController } from "@/middleware/controllers/CallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import type { IgnorableOffer } from "@/middleware/store/slices/callSlice";
 import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("CallController", () => {
@@ -314,7 +313,7 @@ describe("CallController", () => {
     it("ignore() removes the offer and does not mark an outcome (counts as missed downstream, like a real phone's 'ignore')", () => {
       const offer = new FakeOffer("o1", "tok-1");
       controller.ingestOffer(offer);
-      const [stored] = store.getState().offers as IgnorableOffer[];
+      const [stored] = store.getState().offers;
       stored.ignore();
       expect(store.getState().offers).toEqual([]);
       expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
@@ -330,7 +329,7 @@ describe("CallController", () => {
       const active = new FakeCallActive("o1", "tok-1");
       offer.acceptResult = { call: active, err: null };
       controller.ingestOffer(offer);
-      const [stored] = store.getState().offers as IgnorableOffer[];
+      const [stored] = store.getState().offers;
       await stored.accept();
 
       stored.ignore();
@@ -342,7 +341,7 @@ describe("CallController", () => {
     it("ignore() is a no-op when called twice in a row", () => {
       const offer = new FakeOffer("o1", "tok-1");
       controller.ingestOffer(offer);
-      const [stored] = store.getState().offers as IgnorableOffer[];
+      const [stored] = store.getState().offers;
       stored.ignore();
       expect(() => stored.ignore()).not.toThrow();
       expect(store.getState().offers).toEqual([]);

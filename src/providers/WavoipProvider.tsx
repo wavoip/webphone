@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { Middleware } from "@/middleware/Middleware";
 import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
-import type { CallStatus, IgnorableOffer } from "@/middleware/store/slices/callSlice";
+import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { usePip } from "@/providers/PipProvider";
 import { useSettings } from "@/providers/settings/Provider";
@@ -135,10 +135,7 @@ function useToastBridge(middleware: Middleware) {
       (current, previous) => {
         for (const offer of current) {
           if (previous.some((p) => p.id === offer.id)) continue;
-          // Offers in the store are always wrapped by CallController.ingestOffer,
-          // which adds `ignore` (see IgnorableOffer) — safe to assert here.
-          const ignorableOffer = offer as IgnorableOffer;
-          toast(<OfferNotification offer={ignorableOffer} />, {
+          toast(<OfferNotification offer={offer} />, {
             id: offer.id,
             duration: 100_000,
             className: "wv:max-w-[400px] wv:!w-full",
@@ -147,7 +144,7 @@ function useToastBridge(middleware: Middleware) {
             // fires on our own toast.dismiss() calls below and in
             // OfferNotification's accept/reject handlers — ignore() no-ops in
             // that case because the offer is no longer pending.
-            onDismiss: () => ignorableOffer.ignore(),
+            onDismiss: () => offer.ignore(),
           });
         }
         for (const offer of previous) {
