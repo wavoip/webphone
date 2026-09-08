@@ -20,6 +20,11 @@ export default defineConfig({
   ],
   define: {
     __WEBPHONE_VERSION__: JSON.stringify(version),
+    // React só troca para o build de produção quando `process.env.NODE_ENV` é
+    // literal no bundle. Feito via `define` (e não por um plugin com hook
+    // `transform`) porque um plugin que devolve string sem sourcemap invalida
+    // o sourcemap do build inteiro.
+    "process.env.NODE_ENV": JSON.stringify("production"),
   },
   resolve: {
     alias: {
@@ -41,14 +46,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
-      plugins: [
-        {
-          name: "replace-process-env",
-          transform(code) {
-            return code.replace(/process\.env\.NODE_ENV/g, '"production"');
-          },
-        },
-      ],
       output: {
         globals: {
           react: "React",
