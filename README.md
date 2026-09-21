@@ -5,12 +5,5 @@ Essa biblioteca foi feita com o intuito de facilitar a realização de ligaçõe
 [Documentação disponível aqui](https://wavoip.gitbook.io/api/webphone)
 
 # Alterando as cores do Webphone
-As cores do webphone podem ser alteradas manualmente.
 
-
-O arquivo a ser editado para customização das cores está em src/assets/index.css.
-<img width="452" height="258" alt="image" src="https://github.com/user-attachments/assets/16012193-65ed-44e7-9fd0-102cb0008403" />    
-Variáveis separadas para tema claro e escuro.
-
-
-Cada variável altera uma série de componentes, como a variável “--background” que altera o plano de fundo de todo o webphone e “--foreground” que altera a cor do texto em cima deste fundo.
+As cores só mudam clonando este repositório e editando `src/assets/index.css`: elas são compiladas dentro do bundle, e o pacote publicado não as expõe. O passo a passo e a lista das variáveis estão em [Cores e tema](docs/customizacao/cores.md).
