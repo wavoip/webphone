@@ -44,7 +44,7 @@ export function CopyableText({ value, ariaLabel, className, children }: Props) {
   return (
     <Tooltip open={copied}>
       <TooltipTrigger asChild>
-        {/* biome-ignore lint/a11y/useSemanticElements: caller may pass block-level children, which would be invalid inside <button>. Span + role=button + keyboard handler preserves semantics. */}
+        {/* biome-ignore lint/a11y/useSemanticElements: quem chama pode passar filhos de bloco, inválidos dentro de <button>; span + role=button + teclado mantêm a semântica. */}
         <span
           role="button"
           tabIndex={0}

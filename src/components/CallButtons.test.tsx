@@ -4,7 +4,6 @@ import { CallButtons } from "@/components/CallButtons";
 import { FakeCallActive, FakeCallOutgoing, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
-/** Puts an outgoing call in the store and renders the buttons bound to it. */
 async function withOutgoing(outgoing = new FakeCallOutgoing("c1", "tok-1")) {
   const wavoip = new FakeWavoip(["tok-1"]);
   wavoip.startCallResult = { call: outgoing, err: null };
@@ -41,9 +40,6 @@ describe("CallButtons hang-up", () => {
     await waitFor(() => expect(outgoing.cancelCalls).toBe(1));
   });
 
-  // The button used to lock on the first click and swallow the result, so a refused
-  // cancellation — the peer answered in the same instant — stranded the operator on a
-  // screen with no way out of a call that was still live.
   it("comes back when the server refuses the cancellation", async () => {
     const outgoing = new FakeCallOutgoing("c1", "tok-1");
     outgoing.cancelResult = { err: "IS_NOT_OFFER" };

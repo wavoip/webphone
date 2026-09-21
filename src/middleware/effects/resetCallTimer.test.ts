@@ -61,10 +61,6 @@ describe("resetCallTimerEffect", () => {
     unsub();
   });
 
-  // Reachable against an instance that has not shipped the propagated cancel result
-  // yet: it acks `call.cancel` with success even when the peer answered in the same
-  // instant, so the status goes terminal and then back to ACTIVE. Leaving the timer
-  // armed wiped a live call three seconds later.
   it("disarms when the call turns out not to have ended", () => {
     const unsub = resetCallTimerEffect({ store });
     store.getState().setActive(new FakeCallActive("c1", "tok"));

@@ -50,7 +50,7 @@ describe("MiddlewarePipeline", () => {
     const pipeline = new MiddlewarePipeline<string>();
     const downstream = vi.fn((_p, next) => next());
     pipeline.use((_p, _next) => {
-      // intentionally skip next()
+      // sem next() de propósito
     });
     pipeline.use(downstream);
 

@@ -150,9 +150,6 @@ describe("CallController", () => {
     });
 
     it("active status ENDED does not clobber a prior 'ended' state", async () => {
-      // Repro: webphone-side hangup sets "ended" synchronously, then wavoip
-      // emits status="ENDED" — old handler mapped that to "active", flashing
-      // the duration back on screen for a split second.
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       const active = new FakeCallActive("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
@@ -189,8 +186,6 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("ENDED");
     });
 
-    // Ending a call that was never answered is cancelling it, and the
-    // outcome now says so. Everything used to collapse to "ENDED".
     it("delegates to cancel() when only an outgoing call is in flight", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
@@ -208,9 +203,6 @@ describe("CallController", () => {
     });
   });
 
-  // Cancelling is giving up before the answer — its own outcome, and one
-  // that can legitimately fail (the peer answered in the same instant). The button
-  // used to lock forever because nobody looked at the error.
   describe("cancel", () => {
     it("flips callStatus to CANCELLED once the server confirms", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
@@ -235,9 +227,8 @@ describe("CallController", () => {
       expect(result.err).toBe("IS_NOT_OFFER");
     });
 
-    // If the peer answers during the await the status has already moved on by
-    // itself; rolling back blindly would drag it to RINGING and strand the screen
-    // on "Calling..." — RINGING is not terminal and the screen only resets on idle.
+    // Se o peer atende durante o await, o status já andou sozinho; desfazer às cegas o
+    // arrastaria para RINGING e prenderia a tela em "Chamando...".
     it("does not clobber a status the server moved on during the await", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
@@ -253,9 +244,6 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("ACTIVE");
     });
 
-    // The optimistic write armed every terminal effect — the reset timer among them —
-    // and a rollback cannot disarm what already fired. A refused cancellation wiped a
-    // call that was still ringing three seconds later.
     it("does not mark the call terminal until the server confirms", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
@@ -284,8 +272,6 @@ describe("CallController", () => {
     });
   });
 
-  // The SDK's `status` relay already carries the right outcome (ENDED or
-  // CANCELLED); the `ended -> ENDED` handler that used to live here overwrote it.
   describe("outgoing terminal status", () => {
     it("keeps CANCELLED when the SDK reports a cancelled ending", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
@@ -425,11 +411,6 @@ describe("CallController", () => {
     });
 
     it("ignore() does not touch an offer that already left the store via accept()", async () => {
-      // Regression: swiping the toast fires onDismiss -> ignore() even when
-      // the operator already tapped accept/reject moments earlier (sonner's
-      // onDismiss also fires on our own toast.dismiss() cleanup call). If
-      // ignore() blindly reprocessed the offer it could clobber state set by
-      // the real outcome.
       const offer = new FakeOffer("o1", "tok-1");
       const active = new FakeCallActive("o1", "tok-1");
       offer.acceptResult = { call: active, err: null };

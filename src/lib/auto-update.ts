@@ -5,10 +5,6 @@ const SCRIPT_LOAD_TIMEOUT_MS = 15_000;
 
 type DistTags = { tags?: { latest?: string } };
 
-/**
- * Returns negative if `a` < `b`, positive if `a` > `b`, 0 if equal.
- * Strips any prerelease suffix (`-beta`, `-rc.1`) before comparing.
- */
 export function compareSemver(a: string, b: string): number {
   const parse = (s: string) =>
     s
@@ -71,9 +67,8 @@ function findLoadingScript(): HTMLScriptElement | null {
   return null;
 }
 
-// Auto-update only fires when the package was loaded via a <script> tag
-// (CDN UMD). When bundled through a consumer's npm install, no such tag
-// exists and we must not hijack their pinned version.
+// Só quem carregou pela tag <script> (UMD da CDN) se atualiza sozinho: quem instalou
+// pelo npm fixou uma versão, e ela não pode ser sequestrada.
 function isAutoUpdateEnabled(): boolean {
   const script = findLoadingScript();
   if (!script) return false;
@@ -99,21 +94,9 @@ export type MaybeUpgradeDeps = {
 };
 
 /**
- * If a newer version is published on jsdelivr, append a `<script>` tag for it
- * and return the new version. The caller is expected to `destroy()` the
- * current instance and re-render against the freshly loaded global before
- * relying on the upgraded build.
- *
- * Returns `null` (without DOM mutation) when:
- * - the package was not loaded via a `<script>` tag (npm consumer),
- * - `data-auto-update="false"` is set on the loading script,
- * - the registry is unreachable, or
- * - the current version already matches or exceeds the published latest.
- *
- * Rejects only when the freshly injected script fails to load or times out.
- *
- * `deps` exists so tests can swap the network fetch and the script-load step
- * without needing a real CDN or a script-loading DOM.
+ * Carregar o script novo não basta: quem chama tem que dar `destroy()` na instância
+ * atual e renderizar de novo contra o global recém-carregado. Registry fora do ar dá
+ * `null`, e não erro — só o script novo falhando rejeita.
  */
 export async function maybeUpgrade(currentVersion: string, deps: MaybeUpgradeDeps = {}): Promise<string | null> {
   if (!isAutoUpdateEnabled()) return null;

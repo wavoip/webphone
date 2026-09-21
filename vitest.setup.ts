@@ -6,9 +6,8 @@ setLanguage("pt-BR");
 
 vi.stubGlobal("__WEBPHONE_VERSION__", "0.0.0-test");
 
-// happy-dom 20 does not provide AudioContext or AudioWorkletNode; the wavoip
-// SDK constructs an AudioContext during `new Wavoip(...)` so stub a minimal
-// version for tests that exercise the real SDK.
+// O happy-dom 20 não tem AudioContext nem AudioWorkletNode, e o SDK cria um AudioContext
+// no `new Wavoip(...)`.
 class FakeAudioContext {
   audioWorklet = { addModule: async () => {} };
   destination = {};
@@ -41,7 +40,7 @@ if (!navigator.mediaDevices) {
   });
 }
 
-// happy-dom 20 ships a stub localStorage without methods; supply a working one.
+// O localStorage do happy-dom 20 é um stub sem métodos.
 class MemoryStorage implements Storage {
   private map = new Map<string, string>();
   get length() {

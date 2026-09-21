@@ -9,17 +9,12 @@ import type { MiddlewareStore } from "@/middleware/store/types";
 export type CallStatus = WavoipCallStatus | "idle";
 
 /**
- * Records how an offer left the store so the missed-call detector can ignore
- * outcomes that are not truly "missed". Absence of an outcome means the offer
- * ended without explicit user action (peer ended, timed out) → counted as
- * missed.
+ * Oferta sem desfecho saiu sem ação de ninguém aqui (o peer desligou, deu timeout) e
+ * conta como perdida.
  */
 export type OfferOutcome = "accepted" | "rejected" | "elsewhere";
 
-/**
- * An `Offer` as handed to the UI: the SDK's `accept`/`reject` plus a local-only
- * `ignore`, which has no server-side equivalent (see `CallController.wrapOffer`).
- */
+/** `ignore` só existe aqui, sem equivalente no servidor (ver `CallController.wrapOffer`). */
 export type IgnorableOffer = Offer & { ignore(): void };
 
 export type CallSliceState = {

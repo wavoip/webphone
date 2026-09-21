@@ -26,7 +26,7 @@ export default function StatusBar() {
   );
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: Needs interaction
+    // biome-ignore lint/a11y/noStaticElementInteractions: precisa de interação
     <div
       onMouseUp={() => {
         stopDrag();

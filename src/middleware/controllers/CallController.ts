@@ -35,10 +35,9 @@ export class CallController {
   }
 
   /**
-   * Ends the currently active call, or cancels the outgoing one, flipping the
-   * status as soon as the call is handed over. wavoip-api does not emit the
-   * terminal event locally — it only fires when the server confirms — so the UI
-   * would otherwise stay on the running duration until the WSS round-trip lands.
+   * O status vira assim que a chamada é entregue: a wavoip-api não emite o evento
+   * terminal localmente, só quando o servidor confirma, e a UI ficaria parada na
+   * duração correndo até a volta do WSS.
    */
   async end(): Promise<{ err: string | null }> {
     const { store } = this.deps;
@@ -50,26 +49,20 @@ export class CallController {
   }
 
   /**
-   * Gives up an outgoing call before the peer answers. Unlike hanging up an
-   * active call, this can legitimately fail — the peer may answer in the same
-   * instant, and the server then refuses with IS_NOT_OFFER.
+   * Diferente de desligar uma chamada ativa, cancelar pode falhar de verdade: o peer
+   * pode atender no mesmo instante, e o servidor recusa com IS_NOT_OFFER.
    *
-   * The status is written only once the server confirms. Marking it terminal
-   * up-front and rolling back on failure does not work: a terminal status arms
-   * every terminal effect — the reset timer that wipes the call, the public
-   * `call:ended` broadcast — and a later rollback cannot disarm what already
-   * fired, so a refused cancellation erased a call that was still ringing. The
-   * "cancelling" feedback belongs to the button, not to the call status.
-   *
-   * @example await controllers.call.cancel()          // whatever is outgoing now
-   * @example await controllers.call.cancel(call.id)   // only if it is still that one
+   * Por isso o status só é gravado depois da confirmação do servidor. Marcar terminal
+   * antes e desfazer na falha não funciona: status terminal arma todos os efeitos
+   * terminais — o timer que apaga a chamada, o `call:ended` público — e desfazer depois
+   * não desarma o que já disparou. O "cancelando" é do botão, e não do status.
    */
   async cancel(callId?: string): Promise<{ err: string | null }> {
     const { store } = this.deps;
     const { outgoing } = store.getState();
     if (!outgoing) return { err: null };
-    // A late abort must not cancel whatever happens to be in the store by then —
-    // the operator may already have dialled again.
+    // Um abort atrasado não pode cancelar o que estiver no store a essa altura — o
+    // operador pode já ter discado de novo.
     if (callId !== undefined && outgoing.id !== callId) return { err: null };
 
     const result = await outgoing.cancel();
@@ -97,9 +90,8 @@ export class CallController {
             return result;
           };
         }
-        // wavoip-api's offer.reject() does not emit "ended" locally — it only
-        // fires when the server confirms. Drop optimistically on success so
-        // the ringtone effect (subscribed to offers.length) stops immediately.
+        // O offer.reject() da wavoip-api não emite "ended" localmente, só quando o
+        // servidor confirma. Tirar a oferta na hora faz o toque parar na hora.
         if (prop === "reject") {
           return async () => {
             const result = await originalReject();
@@ -107,12 +99,11 @@ export class CallController {
             return result;
           };
         }
-        // "ignore" has no wavoip-api counterpart: it never reaches the server,
-        // it only drops the offer locally (same path "ended"/"unanswered" use)
-        // so the ringtone effect stops and the missed-call detector records it,
-        // same as a real phone treats an ignored call as missed. Guarded so a
-        // late call (e.g. toast cleanup firing after accept/reject already
-        // settled) is a no-op instead of reprocessing a gone offer.
+        // "ignore" não existe na wavoip-api e nunca chega ao servidor: tira a oferta
+        // pelo mesmo caminho de "ended"/"unanswered", então ela conta como perdida,
+        // como num telefone de verdade. A guarda cobre uma chamada atrasada (a limpeza
+        // do toast depois de aceitar/recusar), que não pode reprocessar uma oferta que
+        // já saiu.
         if (prop === "ignore") {
           return () => {
             const stillPending = this.deps.store.getState().offers.some((o) => o.id === offer.id);
@@ -154,12 +145,11 @@ export class CallController {
     });
     call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
     call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
-    // Safety net, not the main path: every server-routed ending arrives as a
-    // `status` settled before the terminal event, and hardcoding "ENDED" here
-    // used to overwrite "CANCELLED" and make a cancellation look like a hangup.
-    // But one path emits `ended` with no status at all — the media handover
-    // failing after `call:answered` — and without this the call would sit
-    // non-terminal forever: screen stuck, no public event, no reset.
+    // Rede de segurança, e não o caminho principal: todo fim roteado pelo servidor
+    // chega como `status` antes do evento terminal, e gravar "ENDED" sempre aqui
+    // sobrescrevia "CANCELLED". Mas a falha na passagem de mídia depois do
+    // `call:answered` emite `ended` sem status nenhum, e sem isto a chamada ficaria
+    // não terminal para sempre: tela presa, sem evento público, sem reset.
     call.on("ended", () => {
       const { callStatus } = store.getState();
       if (!isTerminalCallStatus(callStatus)) store.getState().setCallStatus("ENDED");
@@ -173,9 +163,7 @@ export class CallController {
     call.on("peerMute", () => store.getState().setPeerMuted(true));
     call.on("peerUnmute", () => store.getState().setPeerMuted(false));
     call.on("status", (status) => store.getState().setCallStatus(status));
-    // wavoip-api maps the `call:failed` socket reason payload to the
-    // CallActive `error` event. Persist it so the UI can render the cause
-    // and the CALL_FAILED notification effect can include it.
+    // A wavoip-api entrega o motivo do `call:failed` do socket como evento `error`.
     call.on("error", (reason) => store.getState().setCallFailReason(reason));
   }
 

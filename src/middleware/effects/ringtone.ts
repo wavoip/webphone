@@ -30,10 +30,6 @@ export function ringtoneEffect({ store, ringtone, vibration }: Deps): Unsubscrib
   );
 }
 
-/**
- * Wraps an `HTMLAudioElement` in the {@link RingtonePlayer} interface used by
- * {@link ringtoneEffect}. Tests provide a different player.
- */
 export function audioRingtonePlayer(audio: HTMLAudioElement, volume = 0.25): RingtonePlayer {
   return {
     start() {

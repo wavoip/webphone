@@ -59,9 +59,8 @@ function WavoipBridge({ children }: { children: ReactNode }) {
   const enableDevice = useMemo(() => (token: string) => middleware.controllers.device.enable(token), [middleware]);
   const disableDevice = useMemo(() => (token: string) => middleware.controllers.device.disable(token), [middleware]);
 
-  // Register a one-time displayName offer middleware when configured.
-  // Limitation: there is no unregister yet (Stage 9 deals with this), so we
-  // guard against double-registration with a module-scoped flag per middleware.
+  // O registry não tem unregister, então uma flag de módulo por middleware impede o
+  // registro duplo.
   useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
 
   useToastBridge(middleware);
@@ -114,7 +113,6 @@ function useDisplayNameOfferMiddleware(middleware: Middleware, displayName?: str
     });
   }, [middleware, displayName]);
 
-  // Outgoing call: mutate the live CallOutgoing peer once it lands in the store.
   useEffect(() => {
     if (!displayName) return;
     return middleware.store.subscribe(
@@ -139,11 +137,9 @@ function useToastBridge(middleware: Middleware) {
             id: offer.id,
             duration: 100_000,
             className: "wv:max-w-[400px] wv:!w-full",
-            // Swiping the toast away must behave like the operator ignored the
-            // call: stop the ringtone, not just hide the notification. Also
-            // fires on our own toast.dismiss() calls below and in
-            // OfferNotification's accept/reject handlers — ignore() no-ops in
-            // that case because the offer is no longer pending.
+            // Arrastar o toast para longe é ignorar a chamada: para o toque, e não só
+            // esconde a notificação. Também dispara nos nossos toast.dismiss(), onde o
+            // ignore() não faz nada porque a oferta já saiu.
             onDismiss: () => offer.ignore(),
           });
         }

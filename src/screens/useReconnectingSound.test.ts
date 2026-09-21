@@ -34,7 +34,7 @@ describe("useReconnectingSound", () => {
     renderHook(() => useReconnectingSound("DISCONNECTED", asAudio(sound)));
 
     act(() => sound.onended?.());
-    expect(sound.play).toHaveBeenCalledTimes(1); // not yet — scheduled
+    expect(sound.play).toHaveBeenCalledTimes(1); // ainda não — só agendado
     act(() => vi.advanceTimersByTime(3000));
 
     expect(sound.play).toHaveBeenCalledTimes(2);
@@ -46,7 +46,7 @@ describe("useReconnectingSound", () => {
       initialProps: { status: "DISCONNECTED" as CallStatus },
     });
 
-    // Tone ended → 3s replay scheduled, then the call recovers mid-gap.
+    // O tom acabou → repetição em 3s, e a chamada volta no meio do intervalo.
     act(() => sound.onended?.());
     rerender({ status: "ACTIVE" as CallStatus });
     sound.play.mockClear();

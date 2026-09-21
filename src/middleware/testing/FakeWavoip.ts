@@ -95,8 +95,6 @@ export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements
 
   mute = async () => ({ err: null });
   unmute = async () => ({ err: null });
-  /** Spy: the previous `end` was a stub that recorded nothing, so no test could
-   *  assert the cancellation actually reached the SDK. */
   cancelResult: { err: string | null } = { err: null };
   cancelCalls = 0;
   cancel = async () => {

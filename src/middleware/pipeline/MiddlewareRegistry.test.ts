@@ -44,7 +44,7 @@ describe("MiddlewareRegistry", () => {
   it("use() with unknown event throws and lists supported events", () => {
     const registry = new MiddlewareRegistry();
     expect(() =>
-      // @ts-expect-error testing runtime guard with an unsupported event name
+      // @ts-expect-error guarda de runtime com um evento que não existe
       registry.use("nope", () => {}),
     ).toThrowError(/Unknown middleware event "nope".*Supported.*offer/);
   });
@@ -52,7 +52,7 @@ describe("MiddlewareRegistry", () => {
   it("run() with unknown event throws and lists supported events", async () => {
     const registry = new MiddlewareRegistry();
     await expect(
-      // @ts-expect-error testing runtime guard with an unsupported event name
+      // @ts-expect-error guarda de runtime com um evento que não existe
       registry.run("nope", makeOffer("a")),
     ).rejects.toThrowError(/Unknown middleware event "nope".*Supported.*offer/);
   });

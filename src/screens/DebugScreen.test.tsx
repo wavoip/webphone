@@ -82,7 +82,7 @@ describe("DebugScreen", () => {
   });
 });
 
-// Ensure the diagnostics snapshot type stays compatible with what the screen consumes.
+// Quebra a compilação se o tipo do diagnóstico deixar de servir à tela.
 const _diagShape: IceDiagnostics = {
   gatheringDurationMs: 0,
   gatheringTimedOut: false,

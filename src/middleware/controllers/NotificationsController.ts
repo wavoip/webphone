@@ -5,8 +5,7 @@ const STORAGE_KEY = "webphone_notifications";
 
 type Deps = { store: MiddlewareStoreApi };
 
-// Legacy entries stored `id` as a Date (serialized to an ISO string by
-// JSON.stringify). Coerce to a stable string id during hydrate.
+// Entradas antigas guardavam o `id` como Date, que o JSON.stringify vira string ISO.
 type RawNotification = Omit<Notification, "id" | "created_at"> & {
   id: unknown;
   created_at: string | Date;
@@ -15,8 +14,6 @@ type RawNotification = Omit<Notification, "id" | "created_at"> & {
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
 
 function coerceId(raw: unknown): string {
-  // Legacy: id was a Date, JSON-serialized as an ISO string. Migrate to a
-  // stable timestamp string so equality checks work after hydrate.
   if (typeof raw === "string" && ISO_DATE_RE.test(raw)) {
     const t = Date.parse(raw);
     if (!Number.isNaN(t)) return String(t);

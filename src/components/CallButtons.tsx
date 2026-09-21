@@ -23,9 +23,8 @@ export function CallButtons({ call }: Props) {
   const [actionMade, setActionMade] = useState(false);
   const [muted, setMuted] = useState(false);
 
-  // The same red button serves both screens. On a call that was never answered it
-  // is a cancellation, which can legitimately be refused by the server (the peer
-  // answered in the same instant) — so the button must come back, not lock.
+  // Numa chamada ainda não atendida o botão vermelho cancela, e o cancelamento pode ser
+  // recusado (ver CallController.cancel) — por isso o botão volta, e não trava.
   const isOutgoing = call?.direction === "OUTGOING" && call.status !== "ACTIVE";
 
   const hangUpLabel = actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel call") : t("End");

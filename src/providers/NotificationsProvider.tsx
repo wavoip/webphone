@@ -8,20 +8,11 @@ export type NotificationsType = Notification;
 
 const MAX_NOTIFICATIONS = 100;
 
-/**
- * Thin compatibility wrapper: notifications now live in the middleware store
- * and are managed by {@link NotificationsController}. Provider is a no-op so
- * existing tree structure stays intact while consumers migrate.
- */
+/** No-op: as notificações moram no store do middleware. Fica só para não mexer na árvore. */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 
-/**
- * Returns the same shape as the legacy NotificationsContext but backed by the
- * middleware store + {@link NotificationsController}. Callers do not need to
- * change.
- */
 export function useNotificationManager() {
   const middleware = useMiddleware();
   const notifications = useStore(middleware.store, (s) => s.notifications);

@@ -25,9 +25,8 @@ export default function CallScreen() {
 
   const status = useMemo(
     () =>
-      // A connected call normally ends, but the server owns the outcome and may
-      // report CANCELLED here; treating it as non-terminal left the timer running
-      // with no closing sound and no final text.
+      // Chamada conectada normalmente termina em ENDED, mas quem decide é o servidor, e
+      // ele pode mandar CANCELLED aqui.
       callStatus === "CANCELLED"
         ? t("Call canceled")
         : callStatus === "ENDED"

@@ -8,8 +8,7 @@ import dts from "vite-plugin-dts";
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json") as { version: string };
 
-// WEBPHONE_VERSION_OVERRIDE lets the POC pretend to be an older
-// published version so the auto-update path can be exercised locally.
+// Para fingir uma versão publicada mais velha e exercitar a auto-atualização local.
 const version = process.env.WEBPHONE_VERSION_OVERRIDE ?? pkg.version;
 
 export default defineConfig({

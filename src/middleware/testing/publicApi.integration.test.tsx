@@ -42,8 +42,7 @@ describe("public API React-tree integration", () => {
     });
 
     it("merges stored tokens into the injected (empty) Wavoip on mount", async () => {
-      // Regression: dev.tsx passes an empty Wavoip while localStorage has
-      // tokens — those tokens were silently dropped before the merge fix.
+      // Regressão: o dev.tsx passa um Wavoip vazio com tokens no localStorage.
       localStorage.setItem("wavoip:tokens", "tok-stored:true:true");
       const wavoip = new FakeWavoip();
       const { api } = await renderWithMiddleware({ wavoip });

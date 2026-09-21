@@ -1,12 +1,5 @@
 import type { Middleware } from "@/middleware/pipeline/types";
 
-/**
- * Express-style middleware chain.
- *
- * A middleware must call `next()` to pass control downstream. Omitting `next()`
- * blocks the chain — `run()` resolves to `false`. Calling `next()` more than
- * once in the same middleware is an error.
- */
 export class MiddlewarePipeline<T> {
   private readonly chain: Middleware<T>[] = [];
 
@@ -14,7 +7,6 @@ export class MiddlewarePipeline<T> {
     this.chain.push(fn);
   }
 
-  /** Returns `true` if the terminal end of the chain is reached, `false` if blocked. */
   async run(payload: T): Promise<boolean> {
     return this.execute(payload, 0);
   }

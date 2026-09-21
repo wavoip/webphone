@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  prefix: "wv", // 👈 aqui o prefixo real
+  prefix: "wv",
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {

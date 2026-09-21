@@ -43,12 +43,6 @@ export type MiddlewareDeps = {
   offerNotification?: OfferNotificationOpts;
 };
 
-/**
- * Orchestrates the middleware layer: wires the wavoip-api event stream,
- * registry, controllers, store, and browser side-effects. Consumers (React UI
- * or programmatic users) read state from `store` and invoke `controllers` or
- * `registry`. Call {@link init} to start, {@link destroy} to tear down.
- */
 export class Middleware {
   readonly wavoip: Wavoip;
   readonly store: MiddlewareStoreApi;

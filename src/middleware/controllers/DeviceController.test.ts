@@ -47,8 +47,8 @@ describe("DeviceController", () => {
   });
 
   it("hydrate from injected wavoip with merged stored tokens", () => {
-    // Simulates MiddlewareRoot path where caller passes their own (empty)
-    // Wavoip and the runtime calls addDevices(stored) before hydrate.
+    // O caminho do MiddlewareRoot com Wavoip injetado (vazio): addDevices(guardados)
+    // antes do hydrate.
     const uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
     localStorage.setItem("wavoip:tokens", `${uuid}:true:true`);
     wavoip.addDevices([uuid]);

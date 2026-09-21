@@ -8,9 +8,8 @@ const THEME_STORAGE_KEY = "webphone-ui-theme";
 type Deps = { store: MiddlewareStoreApi; config: WebphoneSettings };
 
 /**
- * Seeds the middleware store from the `webphone.render(config)` payload before
- * any React component mounts. Centralizes settings → store mapping so each
- * provider stays a pure reader and timing/mount-order bugs disappear.
+ * Antes de qualquer componente montar, e num lugar só: cada provider fica só lendo, e
+ * some a classe de bug de ordem de montagem.
  */
 export function bootstrapStore({ store, config }: Deps): void {
   const state = store.getState();

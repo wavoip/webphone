@@ -3,7 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* Root CSS variables */
 :host, :root {
   position: fixed;
   z-index: 2147483647; /* max 32-bit int */
@@ -43,7 +42,7 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.723 0.219 149.579);
 
-  /* Starter variables for tailwindcss  */
+  /* Variáveis iniciais do tailwindcss */
   --tw-divide-y-reverse: 0;
   --tw-border-style: solid;
   --tw-font-weight: initial;

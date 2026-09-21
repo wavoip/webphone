@@ -14,14 +14,8 @@ type Props = {
 const FEEDBACK_DURATION_MS = 1500;
 
 /**
- * Renders the call peer (displayName preferred, phone as fallback) inside a
- * MarqueeText so long labels scroll on hover. Click copies the *phone number*
- * — never the displayName — to the clipboard and pops a floating "Copiado"
- * tooltip that escapes the active call header's clipping ancestors.
- *
- * The trigger uses a `<span role="button">` instead of `<button>` because the
- * MarqueeText internals are block-level (`<div>`), and `<button><div></div>`
- * is invalid HTML.
+ * O clique copia o *número*, nunca o displayName. O tooltip flutua para escapar do
+ * recorte dos ancestrais do cabeçalho da chamada.
  */
 export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
   const [copied, setCopied] = useState(false);
@@ -68,7 +62,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
   return (
     <Tooltip open={copied}>
       <TooltipTrigger asChild>
-        {/* biome-ignore lint/a11y/useSemanticElements: MarqueeText renders block-level <div>, which is invalid inside <button>. Span + role=button + keyboard handler preserves semantics. */}
+        {/* biome-ignore lint/a11y/useSemanticElements: o MarqueeText renderiza <div>, que é HTML inválido dentro de <button>; span + role=button + teclado mantêm a semântica. */}
         <span
           role="button"
           tabIndex={0}

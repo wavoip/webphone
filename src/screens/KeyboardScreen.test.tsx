@@ -10,10 +10,7 @@ type StartCallResult =
   | { call: CallOutgoing; err: null }
   | { call: null; err: { message: string; devices: { token: string; reason: string }[] } };
 
-/**
- * Hands the test control over when each `startCall` settles, so the abort can be
- * clicked while a device is still being tried — the only window where it matters.
- */
+/** O abort só importa enquanto um device ainda está sendo tentado. */
 function deferredStartCall(wavoip: FakeWavoip) {
   const attempts: string[] = [];
   const pending: ((result: StartCallResult) => void)[] = [];
@@ -25,8 +22,8 @@ function deferredStartCall(wavoip: FakeWavoip) {
 
   return {
     attempts,
-    // A generic reason on purpose: `PHONE_DONT_EXIST` and `NO_DEVICES_FOUND` end the
-    // queue by design, so neither would exercise the walk to the next device.
+    // Motivo genérico de propósito: `PHONE_DONT_EXIST` e `NO_DEVICES_FOUND` encerram a
+    // fila, e nenhum dos dois exercitaria a passagem ao próximo device.
     failLast: () =>
       pending.pop()?.({ call: null, err: { message: "BUSY", devices: [{ token: "tok-1", reason: "BUSY" }] } }),
     succeedLast: (call: CallOutgoing) => pending.pop()?.({ call, err: null }),
@@ -38,8 +35,8 @@ async function dial(number = "5511999999999") {
   const control = deferredStartCall(wavoip);
   const { rendered, api } = await renderWithProviders({ wavoip, children: <KeyboardScreen /> });
 
-  // The dial loop walks the *store's* enabled devices, not the SDK's — and a device
-  // is only born enabled when its status is already "open".
+  // O loop anda pelos devices habilitados do *store*, e não do SDK — e um device só
+  // nasce habilitado com o status já em "open".
   act(() => {
     for (const token of ["tok-1", "tok-2"]) {
       api.device.add(token, false);
@@ -54,11 +51,6 @@ async function dial(number = "5511999999999") {
   return { wavoip, control, rendered };
 }
 
-/**
- * The dial loop tries the enabled devices one at a time and, until now,
- * offered no way out: the dial button was simply disabled while it ran. With
- * several devices the wait is long enough to matter.
- */
 describe("KeyboardScreen dial abort", () => {
   beforeEach(() => {
     resetPublicApiBetweenTests();
@@ -69,9 +61,9 @@ describe("KeyboardScreen dial abort", () => {
     await waitFor(() => expect(control.attempts).toEqual(["tok-1"]));
 
     fireEvent.click(screen.getByLabelText("Desistir"));
-    // Settling inside `act` drains the promise chain, so a recursion that was
-    // going to happen has already happened by the assertion — otherwise `waitFor`
-    // passes on its first check, before the loop ever had the chance to move on.
+    // Resolver dentro do `act` esvazia a cadeia de promises, então a recursão que ia
+    // acontecer já aconteceu na asserção — senão o `waitFor` passa na primeira checagem,
+    // antes de o loop ter chance de andar.
     await act(async () => {
       control.failLast();
     });
@@ -88,8 +80,6 @@ describe("KeyboardScreen dial abort", () => {
     await waitFor(() => expect(control.attempts).toEqual(["tok-1", "tok-2"]));
   });
 
-  // A call that lands after the abort is already bound to the controller, so
-  // leaving it alone would ring the callee for a dial the user walked away from.
   it("cancels a call that arrives after the abort", async () => {
     const { control } = await dial();
     await waitFor(() => expect(control.attempts).toEqual(["tok-1"]));

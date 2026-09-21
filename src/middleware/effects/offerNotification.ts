@@ -21,12 +21,8 @@ type Deps = {
 export type Unsubscribe = () => void;
 
 /**
- * Renders a single coalesced OS notification while offers are pending. When
- * offers leave the store, recorded missed calls (those that did not transition
- * into an active call) are pushed to the in-memory notifications slice via
- * {@link MissedCallController}. Subscribing to the entire `offers` array gives
- * us add and remove transitions in one place; ringtoneEffect uses `length`
- * because it only cares about the empty/non-empty edge.
+ * Assina o array `offers` inteiro, e não o `length` como o ringtoneEffect, porque
+ * precisa das entradas e das saídas; o toque só liga para vazio/não vazio.
  */
 export function offerNotificationEffect(deps: Deps): Unsubscribe {
   let previous: ReadonlyArray<Offer> = deps.store.getState().offers;

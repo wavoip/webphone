@@ -1,8 +1,6 @@
 /**
- * Typed pub/sub used to expose middleware lifecycle events to programmatic
- * consumers (`window.wavoip.on("call:started", cb)`). Distinct from
- * {@link MiddlewareRegistry}, which runs an Express-style chain on inbound
- * payloads; this bus is fire-and-forget broadcast.
+ * Não confundir com o {@link MiddlewareRegistry}: lá é uma cadeia que pode bloquear o
+ * payload que entra; aqui é aviso que sai, sem volta.
  */
 export class EventBus<TMap extends Record<string, unknown>> {
   private readonly listeners = new Map<keyof TMap, Set<(payload: never) => void>>();

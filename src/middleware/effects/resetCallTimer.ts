@@ -12,11 +12,10 @@ export function resetCallTimerEffect({ store, delayMs = DEFAULT_DELAY_MS }: Deps
   const unsubscribe = store.subscribe(
     (state) => state.callStatus,
     (status) => {
-      // Leaving a terminal status disarms the timer. A call can come back — an
-      // instance that does not propagate the cancel result acks `call.cancel` with
-      // success even when the peer answered in the same instant, so the status goes
-      // terminal and then straight to ACTIVE. Returning early here left the timer
-      // running and wiped a live call three seconds later.
+      // Sair de um status terminal desarma o timer, porque a chamada pode voltar: uma
+      // instance que não propaga o resultado do cancelamento confirma o `call.cancel`
+      // mesmo quando o peer atendeu no mesmo instante, e o status vai de terminal
+      // direto para ACTIVE.
       if (!TERMINAL.has(status)) {
         if (pending) clearTimeout(pending);
         pending = undefined;

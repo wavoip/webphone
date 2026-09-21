@@ -28,11 +28,8 @@ type Props = {
 };
 
 /**
- * Holds the active webphone language. Subscribes to locale changes via
- * `subscribeLocale` so any parent that mounts this provider re-renders on
- * `setLanguage`, cascading fresh `t()` results through the tree. We rely on
- * the parent's re-render (not a key/remount) so unrelated UI state like an
- * open Settings dialog is preserved across a language change.
+ * Troca de língua re-renderiza, e não remonta com `key`: remontar perderia estado de
+ * UI sem relação, como o diálogo de configurações aberto.
  */
 export function LanguageProvider({ children, initial }: Props) {
   useEffect(() => {

@@ -92,7 +92,7 @@ describe("CopyablePeer", () => {
     await act(async () => {
       vi.advanceTimersByTime(1000);
     });
-    // first timer would have fired at 1500ms from first click; restart on second click extends it.
+    // o primeiro timer venceria em 1500ms do primeiro clique; o segundo clique reinicia.
     expect(screen.queryAllByText("Copiado").length).toBeGreaterThan(0);
     await act(async () => {
       vi.advanceTimersByTime(600);

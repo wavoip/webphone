@@ -4,16 +4,10 @@ const MARGIN_WIDGET = 24;
 const MARGIN_BUTTON = 20;
 const BUTTON_SIZE = { width: 56, height: 56 };
 
-// Tailwind defaults applied to the widget container (w-70 h-120).
-// Used as a fallback when no live DOM rect is available (e.g. programmatic
-// `window.wavoip.position.set("center")` before layout).
+// w-70 h-120 do container, para quando ainda não há DOM para medir (ex.:
+// `window.wavoip.position.set("center")` antes do layout).
 const WIDGET_FALLBACK_SIZE = { width: 280, height: 480 };
 
-/**
- * Resolves a {@link WebphonePosition} keyword (or explicit coordinates) into a
- * concrete `{x, y}` pair using the viewport. Accepts an optional `widgetSize`
- * snapshot so callers with a live container ref get pixel-accurate centering.
- */
 export function resolveWebphonePosition(
   position: WebphonePosition,
   widgetSize: { width: number; height: number } = WIDGET_FALLBACK_SIZE,
@@ -50,11 +44,6 @@ export function resolveWebphonePosition(
   }
 }
 
-/**
- * Resolves a {@link WidgetButtonPosition} keyword into concrete `{x, y}`
- * coordinates anchored to the viewport. Button size is fixed so no DOM ref is
- * needed.
- */
 export function resolveWidgetButtonPosition(position: WidgetButtonPosition): { x: number; y: number } {
   if (typeof position === "object") return position;
 

@@ -111,7 +111,7 @@ function statusVisual(
   connectionStatus: DeviceStateEntry["connectionStatus"],
   hasQrCode: boolean,
 ): StatusVisual {
-  // Transport state takes priority — until WS is connected, account status is stale.
+  // O transporte vem primeiro: até o WS conectar, o status da conta está velho.
   if (connectionStatus === "disconnected") return { label: "Disconnected", dot: "wv:bg-red-500", pulse: false };
   if (connectionStatus === "reconnecting") return { label: "Reconnecting", dot: "wv:bg-amber-500", pulse: true };
 
