@@ -22,10 +22,10 @@ export type UiSliceState = {
   dialStatus: string;
   dialError: string;
   dialIsLoading: boolean;
-  /** Bumped on every dial and on every abort. The dial loop compares against it
-   *  before each device, so a stale loop stops. Store state and not a component ref:
-   *  Picture-in-Picture mounts a second KeyboardScreen, and a per-instance ref left
-   *  the visible abort button unable to stop the loop the other instance was running. */
+  /** Muda a cada discagem e a cada abort; o loop compara antes de cada device e para se
+   *  mudou. No store, e não num ref: o Picture-in-Picture monta um segundo
+   *  KeyboardScreen, e com um ref por instância o botão de abortar visível não parava o
+   *  loop da outra. */
   dialToken: number;
   recentNumbers: string[];
 };

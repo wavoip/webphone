@@ -1,10 +1,3 @@
-/**
- * Browser-level wrapper around the `Notification` constructor used by
- * {@link offerNotificationEffect}. Tracks open notifications by tag so the
- * effect can replace or close them deterministically. Tests inject a fake
- * notifier that records calls instead.
- */
-
 export type NotifyArgs = {
   tag: string;
   title: string;

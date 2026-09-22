@@ -1,24 +1,15 @@
 #!/usr/bin/env bash
 #
-# Purga o cache do jsDelivr depois do `npm publish` e verifica que a CDN passou
-# a servir a versão nova.
+# Script, e não inline no publish.yml, para poder ser rodado à mão contra uma versão
+# já publicada.
 #
-# Existe como script (e não inline no publish.yml) para poder ser rodado à mão
-# contra uma versão já publicada:
+# O que não é óbvio no jsDelivr (visto na v1.9.1, #47):
 #
-#   scripts/purge-jsdelivr.sh
-#
-# Três problemas que este script resolve, todos observados na release v1.9.1:
-#
-#   1. Purgar `/npm/<pkg>@latest` não purga nada de útil. O que fica cacheado é
-#      o arquivo — `/npm/<pkg>@latest/dist/index.umd.js`. A versão anterior
-#      deste passo só purgava caminhos de pacote e o `@latest` seguiu servindo
-#      a build antiga.
-#   2. O purge corria contra a propagação do registry. Se o jsDelivr ainda
-#      resolve `latest` para a versão anterior, purgar faz ele recachear o
-#      valor velho — piora em vez de melhorar.
-#   3. O job ficava verde servindo arquivo velho. Sem verificação no fim, uma
-#      regressão nos itens 1 e 2 passa despercebida.
+#   1. Purgar `/npm/<pkg>@latest` não purga nada de útil: o que fica cacheado é o
+#      arquivo, `/npm/<pkg>@latest/dist/index.umd.js`.
+#   2. Purgar antes de o jsDelivr resolver `latest` para a versão nova faz ele
+#      recachear o valor velho.
+#   3. Sem a verificação no fim, o job fica verde servindo o arquivo velho.
 #
 set -euo pipefail
 

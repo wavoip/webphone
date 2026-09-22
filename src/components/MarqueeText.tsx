@@ -32,7 +32,6 @@ export default function MarqueeText({ children, speed = 15, className }: Props) 
 
     observer.observe(textRef?.current);
 
-    // cleanup
     return () => observer.disconnect();
   }, []);
 

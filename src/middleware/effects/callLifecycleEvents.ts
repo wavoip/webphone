@@ -7,11 +7,6 @@ import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 type Deps = { store: MiddlewareStoreApi; events: EventBus<WebphoneEventMap> };
 export type Unsubscribe = () => void;
 
-/**
- * Bridges store state transitions to {@link WebphoneEventMap} broadcasts:
- * outgoing → `call:started`, active → `call:accepted`, terminal status →
- * `call:ended`. De-duplicates per call-id so re-renders never double-fire.
- */
 export function callLifecycleEventsEffect({ store, events }: Deps): Unsubscribe {
   const unsubs = [
     subscribeStartedFromOutgoing(store, events),

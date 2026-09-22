@@ -113,7 +113,6 @@ describe("persistDevicesEffect", () => {
   });
 
   it("end-to-end: persist then hydrate restores the device", () => {
-    // Round 1: add with persist
     const wavoipA = new FakeWavoip();
     const storeA = createMiddlewareStore();
     const notificationsA = new NotificationsController({ store: storeA });
@@ -126,7 +125,7 @@ describe("persistDevicesEffect", () => {
     controllerA.add("tok-y", true);
     unsubA();
 
-    // Round 2: simulate reload — fresh wavoip seeded with stored tokens
+    // Simula o reload
     const stored = localStorage.getItem(STORAGE_KEY);
     expect(stored).toBe("tok-y:false:true");
     const tokens = stored?.split(";").map((entry) => entry.split(":")[0]) ?? [];

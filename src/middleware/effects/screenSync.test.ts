@@ -33,10 +33,8 @@ describe("screenSyncEffect", () => {
   });
 
   it("stays on 'call' when status flips to ENDED while active call is still set", () => {
-    // In real flow CallController.bindActive emits `setCallStatus("ENDED")`
-    // without clearing `active`; the active call only goes undefined when
-    // someone explicitly calls resetCall. The screen must stay on "call" so
-    // the user sees the final status message.
+    // No fluxo real o CallController grava "ENDED" sem limpar `active`; só o resetCall
+    // limpa.
     store.getState().setActive(new FakeCallActive("c1", "tok-1"));
     expect(store.getState().screen).toBe("call");
     store.getState().setCallStatus("ENDED");

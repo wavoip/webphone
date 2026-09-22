@@ -6,11 +6,8 @@ type Deps = { store: MiddlewareStoreApi };
 export type Unsubscribe = () => void;
 
 /**
- * Drives `screen` from call lifecycle state. While a call is active or ringing
- * the screen tracks it; once everything clears and status resets to `idle`,
- * the screen returns to the keyboard. Terminal statuses like `ENDED` / `FAILED`
- * deliberately do NOT bounce back to keyboard so the user sees the final
- * status — `resetCall()` (which sets `idle`) is the explicit "go home" signal.
+ * Status terminal (`ENDED`, `FAILED`…) NÃO volta ao teclado, de propósito, para o
+ * usuário ver como a chamada acabou. Quem volta é o `idle` do `resetCall()`.
  */
 export function screenSyncEffect({ store }: Deps): Unsubscribe {
   return store.subscribe(

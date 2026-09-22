@@ -5,11 +5,7 @@ type Pipelines = {
   [E in MiddlewareEvent]: MiddlewarePipeline<MiddlewareEventMap[E]>;
 };
 
-/**
- * Routes `use(event, fn)` registrations and `run(event, payload)` dispatches
- * to a per-event {@link MiddlewarePipeline}. New events are added by extending
- * {@link MiddlewareEventMap} and registering a pipeline below.
- */
+/** Evento novo: estenda o {@link MiddlewareEventMap} e registre o pipeline aqui. */
 export class MiddlewareRegistry {
   private readonly pipelines: Pipelines = {
     offer: new MiddlewarePipeline(),

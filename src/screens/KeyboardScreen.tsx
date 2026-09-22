@@ -64,12 +64,6 @@ export default function KeyboardScreen() {
   const { startCall, devices } = useWavoip();
   const { addNotification } = useNotificationManager();
 
-  /**
-   * The dial loop walks the devices one at a time; the token tells a stale loop to
-   * stop. It lives in the store, not in a ref: Picture-in-Picture mounts a second
-   * KeyboardScreen, and a per-instance ref left the abort button the operator can
-   * actually see unable to stop the loop the other instance was running.
-   */
   const dialToken = () => middleware.store.getState().dialToken;
 
   const abortDial = () => {
@@ -79,8 +73,8 @@ export default function KeyboardScreen() {
   };
 
   const handleCall = async (allDevices: string[], token = dialToken()) => {
-    // The ack of `call.start` has no timeout, so the abort only lands between
-    // devices — never while the current one is still hanging.
+    // O ack do `call.start` não tem timeout, então o abort só chega entre um device e
+    // outro — nunca enquanto o atual ainda está pendurado.
     if (token !== dialToken()) return;
     const isLast = allDevices.length <= 1;
     const device = allDevices[0];
@@ -91,9 +85,9 @@ export default function KeyboardScreen() {
 
     await startCall(number, { fromTokens: [device] }).then(({ call, err }) => {
       const startedId = call?.id;
-      // Aborted while this device was being tried: the call, if any, is already
-      // bound to the controller, so hand it the cancellation — by id, so a dial the
-      // operator started in the meantime is not the one that gets cancelled.
+      // Abortado enquanto este device era tentado: a chamada, se houver, já está no
+      // controller, então o cancelamento vai para ele — pelo id, para não cancelar uma
+      // discagem que o operador começou nesse meio-tempo.
       if (token !== dialToken()) {
         if (!err) void middleware.controllers.call.cancel(startedId);
         return;
@@ -159,8 +153,8 @@ export default function KeyboardScreen() {
           return;
         }
         if (!number.trim()) return;
-        // Without this the Enter key starts a second dial: while loading there is no
-        // submit button in the DOM, so the browser no longer blocks implicit submit.
+        // Sem isto o Enter começa uma segunda discagem: carregando, não há botão de
+        // submit no DOM, e o navegador deixa de bloquear o submit implícito.
         if (callIsLoading) return;
         middleware.store.getState().bumpDialToken();
         handleCall([...tokens]);
@@ -262,8 +256,7 @@ export default function KeyboardScreen() {
             <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
-          {/* While dialing, the green button becomes a way out: the loop tries one
-              device at a time and the user had no way to give up. */}
+          {/* Discando, o botão verde vira a saída do loop. */}
           {callIsLoading ? (
             <Button
               type="button"

@@ -32,7 +32,7 @@ describe("webphone.render(config) — provider tree integration", () => {
 
     it("buttonPosition keyword resolves to viewport coordinates", async () => {
       const { api } = await renderWithProviders({ config: { buttonPosition: "top-left" } });
-      // Top-left margin = 20px regardless of viewport size.
+      // Margem de 20px no canto, qualquer que seja o viewport.
       expect(api.widget.buttonPosition.value.x).toBe(20);
       expect(api.widget.buttonPosition.value.y).toBe(20);
     });
@@ -40,8 +40,6 @@ describe("webphone.render(config) — provider tree integration", () => {
 
   describe("platform forwarding", () => {
     it("config.platform is forwarded to the Wavoip constructor", async () => {
-      // FakeWavoip just exists to bypass the real ctor; we assert behavior via
-      // the api surface, not by inspecting FakeWavoip directly.
       const wavoip = new FakeWavoip(["tok-1"]);
       const { api } = await renderWithProviders({
         config: { platform: "test-platform" },
@@ -58,12 +56,8 @@ describe("webphone.render(config) — provider tree integration", () => {
         config: { callSettings: { displayName: "Friendly Name" } },
         wavoip,
       });
-      // Direct API path: register a `use("offer")` consumer and emit an offer.
-      // The display-name middleware runs first because WavoipBridge registers
-      // it via useEffect. WavoipBridge is not mounted here, so verify the
-      // settings flow instead: when WavoipBridge IS mounted (full App), it
-      // would mutate the offer. Confirm the settings value reaches the React
-      // context for downstream consumers.
+      // Este teste não confere o displayName na oferta: só que a API sobe com essa
+      // config.
       expect(api).toBeDefined();
     });
   });

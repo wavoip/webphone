@@ -13,11 +13,6 @@ function activeSuffix(): RelativeSuffix {
   return (SUFFIX as Record<string, RelativeSuffix>)[lang] ?? SUFFIX["pt-BR"];
 }
 
-/**
- * Locale-aware compact relative-time formatter used in notifications. Mirrors
- * `moment(...).fromNow(true)` but with abbreviations (`min`, `h`, `d`) and a
- * localized "now" word.
- */
 export function relativeTime(then: Date, now: Date = new Date()): string {
   const s = activeSuffix();
   const diffSec = Math.max(0, Math.floor((now.getTime() - then.getTime()) / 1000));

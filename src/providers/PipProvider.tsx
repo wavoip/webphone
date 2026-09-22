@@ -26,10 +26,9 @@ async function createNewPipWindow(shadowRoot: ShadowRoot): Promise<Window> {
   newPipWindow.document.body.style.overflow = "hidden";
   newPipWindow.document.body.style.backgroundColor = "#1a1b1e";
 
-  // All webphone CSS lives in the ShadowRoot (injected at src/index.tsx), so we only
-  // clone from there. The host document's sheets belong to the client page and are
-  // unused by the PiP content — reading them via styleSheet.cssRules also threw a
-  // SecurityError on cross-origin (jsDelivr CDN) sheets, aborting the PiP open.
+  // Só o CSS do ShadowRoot: as folhas do documento são da página do cliente, e ler
+  // `cssRules` de uma folha de outra origem (a CDN do jsDelivr) lança SecurityError e
+  // aborta a abertura do PiP.
   shadowRoot.querySelectorAll('style, link[rel="stylesheet"]').forEach((el) => {
     newPipWindow.document.head.appendChild(el.cloneNode(true));
   });

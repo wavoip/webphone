@@ -23,13 +23,7 @@ type Props = {
   focus?: FocusTracker;
 };
 
-/**
- * Owns the {@link Middleware} lifecycle and exposes it via
- * {@link MiddlewareProvider} to every descendant. Place this just under
- * `SettingsProvider` so React-side providers (Theme, Widget, Notifications,
- * etc.) can read from / write to the middleware store without re-implementing
- * state.
- */
+/** Abaixo do `SettingsProvider`, que ele lê, e acima dos providers que leem o store dele. */
 export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notifier, focus }: Props) {
   const settings = useSettings();
 
@@ -39,8 +33,8 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
     if (language) setWebphoneLanguage(language);
     const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, language });
     if (injectedWavoip && language) injectedWavoip.setLanguage(language);
-    // When the caller injects a Wavoip we still own device persistence — merge
-    // stored tokens in so hydrate can restore them. `addDevices` dedupes.
+    // Mesmo com Wavoip injetado, a persistência de devices é nossa: os tokens guardados
+    // entram para o hydrate restaurá-los. O `addDevices` tira duplicados.
     if (injectedWavoip && storedTokens.length) injectedWavoip.addDevices(storedTokens);
     const mw = new Middleware({
       wavoip,

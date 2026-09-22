@@ -8,8 +8,8 @@ function umdSrc(version: string) {
   return `https://cdn.jsdelivr.net/npm/${PKG}@${version}/dist/index.umd.min.js`;
 }
 
-// Use insertAdjacentHTML so happy-dom does not attempt to fetch and execute
-// the script (parser-inserted scripts are inert per the HTML spec).
+// insertAdjacentHTML para o happy-dom não baixar e executar o script (script inserido
+// pelo parser é inerte pela especificação do HTML).
 function seedLoadingScript(version: string, extra: Record<string, string> = {}) {
   const attrs = Object.entries({ ...extra, [MARKER]: version })
     .map(([k, v]) => `${k}="${v}"`)

@@ -3,27 +3,22 @@ import a18nGlobal from "a18n";
 export type Language = "en" | "pt-BR" | "es";
 
 export type TranslationKey =
-  // restriction
   | "Device restricted"
   | "Restriction lifted"
   | "Restricted"
   | "Restricted until"
   | "Lifted on"
-  // clipboard
   | "Copied"
   | "Copy token"
   | "Copy phone"
-  // token visibility
   | "Show token"
   | "Hide token"
-  // device status labels
   | "Connected"
   | "Hibernating"
   | "Connecting"
   | "Building"
   | "Restarting"
   | "Closed"
-  // device status
   | "Power on device"
   | "Enable device"
   | "Disable device"
@@ -35,13 +30,11 @@ export type TranslationKey =
   | "Delete this device?"
   | "Delete"
   | "Cancel"
-  // devices alert
   | "Disconnected devices"
   | "Devices waiting for QR code"
   | "Closed devices"
   | "Hibernating devices"
   | "Devices with errors"
-  // notifications
   | "Missed call"
   | "Call failed"
   | "Notice"
@@ -50,16 +43,13 @@ export type TranslationKey =
   | "Unread"
   | "Remove notification"
   | "Clear"
-  // offer / missed call
   | "Call ended"
   | "Accepted by another user"
   | "Rejected by the app"
   | "Timed out"
   | "Unknown"
   | "Ignore"
-  // call
   | "Reconnecting"
-  // keyboard / outgoing
   | "Calling from"
   | "No device available"
   | "Number does not exist"
@@ -69,7 +59,6 @@ export type TranslationKey =
   | "The call failed"
   | "Call rejected"
   | "Call unanswered"
-  // outgoing-call cancellation
   | "Call canceled"
   | "Cancel call"
   | "Canceling..."
@@ -77,7 +66,6 @@ export type TranslationKey =
   | "Abort"
   | "Could not cancel the call"
   | "Could not end the call"
-  // settings
   | "Microphone"
   | "Select the microphone to use on calls"
   | "Speaker"
@@ -92,7 +80,6 @@ export type TranslationKey =
   | "Point your camera at the code below"
   | "Numbers"
   | "Enter the token"
-  // troubleshooting
   | "Preferences"
   | "Theme"
   | "Language"
@@ -121,7 +108,7 @@ export type TranslationKey =
   | "Connection failed"
   | "No host candidates"
   | "Symmetric NAT suspected"
-  // call fail reasons (SDK codes used directly as keys)
+  // Os códigos de falha do SDK são usados direto como chave.
   | "PEER_TX_TIMEOUT"
   | "PEER_RX_TIMEOUT"
   | "AUDIO_TIMEOUT"
@@ -367,8 +354,7 @@ const es: LocaleResource = {
   INTERNAL_ERROR: "Algo salió mal en el servidor",
 };
 
-// Source locale ("en") falls back to the key itself for human-readable English
-// strings. The SDK reason codes are not human-readable, so override just those.
+// Em "en" a própria chave é o texto, mas os códigos do SDK não são legíveis.
 const enOverrides: Partial<LocaleResource> = {
   PEER_TX_TIMEOUT: "The contact stopped sending audio",
   PEER_RX_TIMEOUT: "The user stopped sending audio",
@@ -397,10 +383,6 @@ export const getLanguage = (): string => a18n.getLocale();
 
 const SUPPORTED_LANGUAGES: readonly Language[] = ["en", "pt-BR", "es"];
 
-/**
- * Map an arbitrary BCP-47 tag (e.g. "en-US", "pt", "es-419") to one of the
- * languages we ship translations for. Falls back to "en".
- */
 export const normalizeLanguage = (raw: string | null | undefined): Language => {
   if (!raw) return "en";
   const exact = SUPPORTED_LANGUAGES.find((l) => l === raw);

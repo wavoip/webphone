@@ -1,7 +1,6 @@
 /**
- * Reports whether the page is currently out of focus. `visibilityState` covers
- * minimized windows and background tabs; `hasFocus` covers same-window tabs
- * that did not change visibility. Both checks are needed for full coverage.
+ * As duas checagens são necessárias: `visibilityState` pega janela minimizada e aba em
+ * segundo plano; `hasFocus`, a aba da mesma janela que não mudou de visibilidade.
  */
 export type FocusTracker = {
   isUnfocused: () => boolean;

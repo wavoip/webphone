@@ -10,11 +10,7 @@ function stampNotification(input: NotificationInput): Notification {
   return { ...input, id: newId(), created_at: new Date() };
 }
 
-/**
- * Builds the public `window.wavoip` API from a {@link Middleware} instance.
- * Reads are getters so consumers always see fresh store state; writes route
- * through controllers or store actions.
- */
+/** Leitura é getter para quem integra sempre ver o estado atual do store. */
 export function buildPublicApi(middleware: Middleware): WebphoneAPI {
   const { store, controllers, registry, events } = middleware;
 

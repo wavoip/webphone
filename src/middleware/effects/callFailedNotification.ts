@@ -6,13 +6,7 @@ import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 type Deps = { store: MiddlewareStoreApi; notifications: NotificationsController };
 export type Unsubscribe = () => void;
 
-/**
- * Persists a CALL_FAILED notification when an in-flight call transitions to
- * FAILED. Reason text comes from {@link callSlice.callFailReason} (populated by
- * CallController via the wavoip-api CallActive `error` event). Outgoing calls
- * never receive a reason payload from the SDK, so fall back to a generic label
- * — see CallController.bindOutgoing.
- */
+/** Chamada de saída não recebe motivo do SDK, e a notificação sai com a mensagem vazia. */
 export function callFailedNotificationEffect({ store, notifications }: Deps): Unsubscribe {
   return store.subscribe(
     (s) => s.callStatus,

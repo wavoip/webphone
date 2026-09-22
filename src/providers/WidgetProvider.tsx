@@ -107,9 +107,8 @@ export function WidgetProvider({ children }: Props) {
   useLayoutEffect(() => {
     if (!divRef.current) return;
     const rect = divRef.current.getBoundingClientRect();
-    // When the widget starts closed the container is `display:none`, so its
-    // rect is zeroed — falling back to the resolver's default keeps keyword
-    // positions (e.g. "bottom-left") inside the viewport.
+    // Widget que começa fechado está em `display:none` e mede zero; o tamanho padrão do
+    // resolver mantém as posições por palavra ("bottom-left") dentro do viewport.
     const size = rect.width > 0 && rect.height > 0 ? { width: rect.width, height: rect.height } : undefined;
     setStorePosition(resolveWebphonePosition(positionInitial, size));
     setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));

@@ -5,10 +5,6 @@ let pending = createPending();
 
 const warnedDeprecated = new Set<string>();
 
-/**
- * Emits a console.warn the first time a deprecated public API method is invoked.
- * Subsequent calls for the same method are silent to avoid log spam.
- */
 export function warnDeprecated(method: string, replacement: string): void {
   if (warnedDeprecated.has(method)) return;
   warnedDeprecated.add(method);
@@ -17,30 +13,18 @@ export function warnDeprecated(method: string, replacement: string): void {
   );
 }
 
-/**
- * Returns the shared promise that resolves once {@link setPublicApiBase} is
- * called with a base API instance. Always returns the same promise so callers
- * can subscribe before the base is installed.
- */
+/** Sempre a mesma promise, para quem chama poder esperar antes de a base existir. */
 export function webphoneAPIPromise(): Promise<WebphoneAPI> {
   return pending.promise;
 }
 
-/**
- * Installs the base WebphoneAPI built from the Middleware. First call resolves
- * {@link webphoneAPIPromise}; subsequent calls are no-ops so an already-resolved
- * window.wavoip is never replaced mid-flight.
- */
+/** Só a primeira chamada vale, para um window.wavoip já entregue nunca ser trocado no meio. */
 export function setPublicApiBase(api: WebphoneAPI): void {
   if (base) return;
   base = api;
   pending.resolve(api);
 }
 
-/**
- * Test-only helper: clears base, deprecation warnings and the pending promise
- * so each test starts from a clean slate.
- */
 export function resetForTesting(): void {
   base = null;
   warnedDeprecated.clear();

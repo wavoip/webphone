@@ -24,14 +24,8 @@ type MountOptions = {
 };
 
 /**
- * Mounts the minimum provider tree needed to exercise the public API:
- * `SettingsProvider` + `MiddlewareRoot`. Returns the {@link RenderResult},
- * the {@link FakeWavoip} (if one was not injected) and the resolved public
- * API. Use this to write React-tree integration tests that drive
- * `window.wavoip.*` without spinning up the full `<App>` tree.
- *
- * Call {@link resetPublicApiBetweenTests} in `beforeEach` so module-scoped
- * state in `api.ts` does not bleed across tests.
+ * Chame {@link resetPublicApiBetweenTests} no `beforeEach`: o estado de módulo do
+ * `api.ts` vaza de um teste para o outro.
  */
 export async function renderWithMiddleware(options: MountOptions = {}): Promise<{
   rendered: RenderResult;
@@ -50,16 +44,13 @@ export async function renderWithMiddleware(options: MountOptions = {}): Promise<
   return { rendered, wavoip: fake, api };
 }
 
-/** Resets the singleton public-API state. Call in `beforeEach`. */
 export function resetPublicApiBetweenTests(): void {
   resetForTesting();
 }
 
 /**
- * Mounts the full React provider stack used by `<App>` (minus the shadow DOM
- * boundary) so config-driven seeders inside `ThemeProvider`/`WidgetProvider`
- * etc. actually run. Use this for tests that exercise `webphone.render(config)`
- * behavior end-to-end at the provider level.
+ * A pilha de providers do `<App>`, menos o shadow DOM, para os seeders da config dentro
+ * dos providers rodarem de verdade.
  */
 export async function renderWithProviders(options: MountOptions = {}): Promise<{
   rendered: RenderResult;
@@ -84,8 +75,8 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
             <PipProvider shadowRoot={shadowRoot}>
               <WidgetProvider>
                 <NotificationsProvider>
-                  {/* Screens reach the SDK through `useWavoip`, so the bridge has to be
-                      mounted for any of them to render under this helper. */}
+                  {/* As telas chegam ao SDK pelo `useWavoip`, então sem a ponte nenhuma
+                      renderiza aqui. */}
                   <WavoipProvider>{options.children ?? null}</WavoipProvider>
                 </NotificationsProvider>
               </WidgetProvider>
