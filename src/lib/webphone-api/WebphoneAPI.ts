@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing, CallPeer, Offer } from "@wavoip/wavoip-api";
+import type { ActiveCall, CallPeer, IncomingCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
 import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
@@ -16,14 +16,14 @@ export type PublicMiddleware<E extends MiddlewareEvent> = (
 ) => void | Promise<void>;
 
 // `device_token` em snake_case por compatibilidade. Vem do `deviceToken` da lib, para o
-// tipo não depender do alias `CallActive.device_token`, que está deprecado.
-export type CallActiveProps = Pick<CallActive, "id" | "type" | "direction" | "status" | "peer"> & {
+// tipo não depender do alias `ActiveCall.device_token`, que está deprecado.
+export type CallActiveProps = Pick<ActiveCall, "id" | "type" | "direction" | "status" | "peer"> & {
   device_token: string;
 };
-export type CallOutgoingProps = Pick<CallOutgoing, "id" | "type" | "direction" | "status" | "peer"> & {
+export type CallOutgoingProps = Pick<OutgoingCall, "id" | "type" | "direction" | "status" | "peer"> & {
   device_token: string;
 };
-export type CallOfferProps = Pick<Offer, "id" | "type" | "direction" | "status" | "peer"> & {
+export type CallOfferProps = Pick<IncomingCall, "id" | "type" | "direction" | "status" | "peer"> & {
   device_token: string;
 };
 

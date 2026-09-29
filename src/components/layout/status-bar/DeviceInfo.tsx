@@ -115,7 +115,7 @@ function statusVisual(
   if (connectionStatus === "disconnected") return { label: "Disconnected", dot: "wv:bg-red-500", pulse: false };
   if (connectionStatus === "reconnecting") return { label: "Reconnecting", dot: "wv:bg-amber-500", pulse: true };
 
-  if (status === "open" || status === "UP") return { label: "Connected", dot: "wv:bg-green-500", pulse: false };
+  if (status === "open") return { label: "Connected", dot: "wv:bg-green-500", pulse: false };
   if (status === "BUILDING") return { label: "Building", dot: "wv:bg-foreground/40", pulse: true };
   if (status === "connecting" || hasQrCode) return { label: "Connecting", dot: "wv:bg-blue-500", pulse: true };
   if (status === "restarting") return { label: "Restarting", dot: "wv:bg-blue-500", pulse: true };

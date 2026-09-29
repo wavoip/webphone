@@ -1,4 +1,4 @@
-import type { ConnectionStatus, Contact, DeviceStatus } from "@wavoip/wavoip-api";
+import type { ConnectionStatus, Contact, DeviceStatus } from "@wavoip/wavoip-api/web";
 import type { StateCreator } from "zustand";
 import type { MiddlewareStore } from "@/middleware/store/types";
 

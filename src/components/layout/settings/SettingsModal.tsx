@@ -60,7 +60,7 @@ export const SettingsModal = forwardRef(() => {
 
   useEffect(() => {
     if (wavoip && open) {
-      wavoip.getMultimediaDevices();
+      wavoip.audio.listInputDevices();
     }
   }, [open, wavoip]);
 

@@ -1,4 +1,4 @@
-import { Wavoip } from "@wavoip/wavoip-api";
+import { Wavoip } from "@wavoip/wavoip-api/web";
 import { describe, expect, it } from "vitest";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
 import { NotificationsController } from "@/middleware/controllers/NotificationsController";

@@ -1,4 +1,4 @@
-import { type Wavoip, Wavoip as WavoipCtor } from "@wavoip/wavoip-api";
+import { type Wavoip, Wavoip as WavoipCtor, webRuntime } from "@wavoip/wavoip-api/web";
 import { type ReactNode, useEffect, useState } from "react";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
@@ -31,8 +31,9 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
     const storedTokens = [...getSettings().keys()];
     const language = config?.language;
     if (language) setWebphoneLanguage(language);
-    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, language });
-    if (injectedWavoip && language) injectedWavoip.setLanguage(language);
+    // A v3 não tem idioma: ela só devolve `code`, e quem traduz é o `i18n` daqui.
+    const wavoip =
+      injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, runtime: webRuntime() });
     // Mesmo com Wavoip injetado, a persistência de devices é nossa: os tokens guardados
     // entram para o hydrate restaurá-los. O `addDevices` tira duplicados.
     if (injectedWavoip && storedTokens.length) injectedWavoip.addDevices(storedTokens);

@@ -47,6 +47,8 @@ export type TranslationKey =
   | "Accepted by another user"
   | "Rejected by the app"
   | "Timed out"
+  | "Canceled by the caller"
+  | "Latency (ms)"
   | "Unknown"
   | "Ignore"
   | "Reconnecting"
@@ -164,6 +166,8 @@ const ptBR: LocaleResource = {
   "Remove notification": "Remover notificação",
   Clear: "Limpar",
   "Call ended": "Chamada encerrada",
+  "Canceled by the caller": "Cancelada por quem ligou",
+  "Latency (ms)": "Latência (ms)",
   "Accepted by another user": "Aceita por outro usuário",
   "Rejected by the app": "Rejeitada pelo aplicativo",
   "Timed out": "Tempo limite",
@@ -280,6 +284,8 @@ const es: LocaleResource = {
   "Remove notification": "Eliminar notificación",
   Clear: "Limpiar",
   "Call ended": "Llamada finalizada",
+  "Canceled by the caller": "Cancelada por quien llamó",
+  "Latency (ms)": "Latencia (ms)",
   "Accepted by another user": "Aceptada por otro usuario",
   "Rejected by the app": "Rechazada por la aplicación",
   "Timed out": "Tiempo agotado",

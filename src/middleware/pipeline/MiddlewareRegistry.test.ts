@@ -1,9 +1,9 @@
-import type { Offer } from "@wavoip/wavoip-api";
+import type { IncomingCall } from "@wavoip/wavoip-api/web";
 import { describe, expect, it, vi } from "vitest";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";
 
-function makeOffer(id: string): Offer {
-  return { id } as unknown as Offer;
+function makeOffer(id: string): IncomingCall {
+  return { id } as unknown as IncomingCall;
 }
 
 describe("MiddlewareRegistry", () => {

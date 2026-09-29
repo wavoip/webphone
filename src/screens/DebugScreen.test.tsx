@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import type { IceDiagnostics } from "@wavoip/wavoip-api";
+import type { IceDiagnostics } from "@wavoip/wavoip-api/web";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Middleware } from "@/middleware/Middleware";

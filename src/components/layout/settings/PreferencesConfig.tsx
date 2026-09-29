@@ -3,7 +3,6 @@ import { type Language, t } from "@/lib/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
 import type { Theme } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
-import { useWavoip } from "@/providers/WavoipProvider";
 
 const THEMES: { value: Theme; label: string; icon: React.ReactNode }[] = [
   { value: "light", label: "Light", icon: <SunIcon className="wv:size-4" weight="duotone" /> },
@@ -20,11 +19,9 @@ const LANGUAGES: { value: Language; label: string }[] = [
 export function PreferencesConfig() {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
-  const { wavoip } = useWavoip();
 
   const handleLanguage = (next: Language) => {
     setLanguage(next);
-    wavoip?.setLanguage(next);
   };
 
   return (

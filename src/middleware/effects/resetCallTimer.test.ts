@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetCallTimerEffect } from "@/middleware/effects/resetCallTimer";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeCallActive, FakeCallOutgoing } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeOutgoingCall } from "@/middleware/testing/FakeWavoip";
 
 describe("resetCallTimerEffect", () => {
   let store: MiddlewareStoreApi;
@@ -17,7 +17,7 @@ describe("resetCallTimerEffect", () => {
 
   it("does not reset until 3s after a terminal status", () => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok"));
     store.getState().setCallStatus("ENDED");
 
     vi.advanceTimersByTime(2999);
@@ -31,7 +31,7 @@ describe("resetCallTimerEffect", () => {
 
   it("ignores non-terminal status changes", () => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok"));
     store.getState().setCallStatus("CALLING");
 
     vi.advanceTimersByTime(5000);
@@ -42,7 +42,7 @@ describe("resetCallTimerEffect", () => {
 
   it("clears active and peerMuted after terminal", () => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setActive(new FakeCallActive("c1", "tok"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok"));
     store.getState().setPeerMuted(true);
     store.getState().setCallStatus("FAILED");
 
@@ -54,7 +54,7 @@ describe("resetCallTimerEffect", () => {
 
   it.each(["ENDED", "CANCELLED", "FAILED", "REJECTED", "NOT_ANSWERED"] as const)("treats %s as terminal", (status) => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok"));
     store.getState().setCallStatus(status);
     vi.advanceTimersByTime(3000);
     expect(store.getState().callStatus).toBe("idle");
@@ -63,7 +63,7 @@ describe("resetCallTimerEffect", () => {
 
   it("disarms when the call turns out not to have ended", () => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setActive(new FakeCallActive("c1", "tok"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok"));
     store.getState().setCallStatus("CANCELLED");
 
     store.getState().setCallStatus("ACTIVE");
@@ -76,7 +76,7 @@ describe("resetCallTimerEffect", () => {
 
   it("unsub cancels pending timer", () => {
     const unsub = resetCallTimerEffect({ store });
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok"));
     store.getState().setCallStatus("ENDED");
     unsub();
 

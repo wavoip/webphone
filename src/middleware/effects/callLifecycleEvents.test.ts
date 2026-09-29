@@ -3,7 +3,7 @@ import { callLifecycleEventsEffect } from "@/middleware/effects/callLifecycleEve
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeCallActive, FakeCallOutgoing } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeOutgoingCall } from "@/middleware/testing/FakeWavoip";
 
 describe("callLifecycleEventsEffect", () => {
   let store: MiddlewareStoreApi;
@@ -19,7 +19,7 @@ describe("callLifecycleEventsEffect", () => {
   it("emits call:started when an outgoing call appears", () => {
     const cb = vi.fn();
     events.on("call:started", cb);
-    const outgoing = new FakeCallOutgoing("c1", "tok-1");
+    const outgoing = new FakeOutgoingCall("c1", "tok-1");
     store.getState().setOutgoing(outgoing);
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb.mock.calls[0][0].id).toBe("c1");
@@ -29,8 +29,8 @@ describe("callLifecycleEventsEffect", () => {
   it("does not re-emit call:started when outgoing stays the same id", () => {
     const cb = vi.fn();
     events.on("call:started", cb);
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
     expect(cb).toHaveBeenCalledTimes(1);
     unsub();
   });
@@ -38,7 +38,7 @@ describe("callLifecycleEventsEffect", () => {
   it("emits call:accepted when an active call appears", () => {
     const cb = vi.fn();
     events.on("call:accepted", cb);
-    store.getState().setActive(new FakeCallActive("c1", "tok-1"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok-1"));
     expect(cb).toHaveBeenCalledWith(expect.objectContaining({ id: "c1" }));
     unsub();
   });
@@ -46,7 +46,7 @@ describe("callLifecycleEventsEffect", () => {
   it("emits call:ended when status enters a terminal state", () => {
     const cb = vi.fn();
     events.on("call:ended", cb);
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
     store.getState().setCallStatus("ENDED");
     expect(cb).toHaveBeenCalledWith({ id: "c1", status: "ENDED" });
     unsub();
@@ -55,10 +55,10 @@ describe("callLifecycleEventsEffect", () => {
   it("emits call:ended for every terminal status (failed/rejected/unanswered)", () => {
     const cb = vi.fn();
     events.on("call:ended", cb);
-    store.getState().setOutgoing(new FakeCallOutgoing("c2", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c2", "tok-1"));
     store.getState().setCallStatus("FAILED");
     store.getState().resetCall();
-    store.getState().setOutgoing(new FakeCallOutgoing("c3", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c3", "tok-1"));
     store.getState().setCallStatus("REJECTED");
     expect(cb).toHaveBeenCalledTimes(2);
     expect(cb.mock.calls.map((c) => c[0].status)).toEqual(["FAILED", "REJECTED"]);
@@ -69,7 +69,7 @@ describe("callLifecycleEventsEffect", () => {
     const cb = vi.fn();
     events.on("call:started", cb);
     unsub();
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
     expect(cb).not.toHaveBeenCalled();
   });
 });

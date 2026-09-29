@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { CallController } from "@/middleware/controllers/CallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("CallController", () => {
   let store: MiddlewareStoreApi;
@@ -23,13 +23,13 @@ describe("CallController", () => {
     });
 
     it("forwards explicit fromTokens to wavoip.startCall", async () => {
-      wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
       await controller.start("5511", { fromTokens: ["tok-1"] });
       expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-1"]);
     });
 
     it("derives fromTokens from enabled devices when not provided", async () => {
-      wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
       store.getState().setDevices([
         {
           token: "tok-on",
@@ -55,7 +55,7 @@ describe("CallController", () => {
     });
 
     it("on success sets outgoing + callStatus 'calling'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       const result = await controller.start("5511");
       expect(result.err).toBeNull();
@@ -64,7 +64,7 @@ describe("CallController", () => {
     });
 
     it("returns a CallSummary with id + peer", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       const result = await controller.start("5511");
       if (result.err) throw new Error("expected success");
@@ -73,7 +73,7 @@ describe("CallController", () => {
     });
 
     it("outgoing status RINGING updates callStatus to 'ringing'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("status", "RINGING");
@@ -81,7 +81,7 @@ describe("CallController", () => {
     });
 
     it("outgoing status FAILED transitions to 'failed'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("status", "FAILED");
@@ -89,8 +89,8 @@ describe("CallController", () => {
     });
 
     it("peerAccept moves outgoing to active and sets status", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -100,8 +100,8 @@ describe("CallController", () => {
     });
 
     it("active call ended event sets status 'ended'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -110,8 +110,8 @@ describe("CallController", () => {
     });
 
     it("active peerMute / peerUnmute toggles peerMuted", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -122,8 +122,8 @@ describe("CallController", () => {
     });
 
     it("active error event captures fail reason in store", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -133,15 +133,15 @@ describe("CallController", () => {
 
     it("start clears any stale callFailReason from a prior call", async () => {
       store.getState().setCallFailReason("OLD_REASON");
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       expect(store.getState().callFailReason).toBeUndefined();
     });
 
     it("active status DISCONNECTED → 'reconnecting'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -150,8 +150,8 @@ describe("CallController", () => {
     });
 
     it("active status ENDED does not clobber a prior 'ended' state", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerAccept", active);
@@ -161,7 +161,7 @@ describe("CallController", () => {
     });
 
     it("outgoing peerReject → 'rejected'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("peerReject");
@@ -169,7 +169,7 @@ describe("CallController", () => {
     });
 
     it("outgoing unanswered → 'unanswered'", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
       outgoing.emitEvent("unanswered");
@@ -179,7 +179,7 @@ describe("CallController", () => {
 
   describe("end", () => {
     it("flips callStatus to 'ended' immediately on active end", async () => {
-      const active = new FakeCallActive("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       store.getState().setActive(active);
       store.getState().setCallStatus("ACTIVE");
       await controller.end();
@@ -187,7 +187,7 @@ describe("CallController", () => {
     });
 
     it("delegates to cancel() when only an outgoing call is in flight", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("CALLING");
       await controller.end();
@@ -205,7 +205,7 @@ describe("CallController", () => {
 
   describe("cancel", () => {
     it("flips callStatus to CANCELLED once the server confirms", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("RINGING");
 
@@ -217,7 +217,7 @@ describe("CallController", () => {
     });
 
     it("hands the refusal back to the caller", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("RINGING");
@@ -230,7 +230,7 @@ describe("CallController", () => {
     // Se o peer atende durante o await, o status já andou sozinho; desfazer às cegas o
     // arrastaria para RINGING e prenderia a tela em "Chamando...".
     it("does not clobber a status the server moved on during the await", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
       outgoing.cancel = async () => {
         store.getState().setCallStatus("ACTIVE");
@@ -245,7 +245,7 @@ describe("CallController", () => {
     });
 
     it("does not mark the call terminal until the server confirms", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
       store.getState().setOutgoing(outgoing);
       store.getState().setCallStatus("RINGING");
@@ -274,7 +274,7 @@ describe("CallController", () => {
 
   describe("outgoing terminal status", () => {
     it("keeps CANCELLED when the SDK reports a cancelled ending", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
 
@@ -285,7 +285,7 @@ describe("CallController", () => {
     });
 
     it("still reports an ordinary hangup as ENDED", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
       await controller.start("5511");
 
@@ -298,28 +298,28 @@ describe("CallController", () => {
 
   describe("ingestOffer", () => {
     it("adds the offer to store", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       expect(store.getState().offers.map((o) => o.id)).toEqual(["o1"]);
     });
 
     it("offer ended event removes it", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("ended");
       expect(store.getState().offers).toEqual([]);
     });
 
     it("offer acceptedElsewhere event removes it", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("acceptedElsewhere");
       expect(store.getState().offers).toEqual([]);
     });
 
     it("accept() on a stored offer transitions to active call", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
-      const active = new FakeCallActive("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
+      const active = new FakeActiveCall("o1", "tok-1");
       offer.acceptResult = { call: active, err: null };
       controller.ingestOffer(offer);
 
@@ -332,7 +332,7 @@ describe("CallController", () => {
     });
 
     it("accept() with err leaves offer in place and does not promote to active", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       offer.acceptResult = { call: null, err: "boom" };
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
@@ -342,7 +342,7 @@ describe("CallController", () => {
     });
 
     it("reject() removes the offer and marks outcome 'rejected'", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       offer.rejectResult = { err: null };
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
@@ -353,7 +353,7 @@ describe("CallController", () => {
     });
 
     it("reject() with err leaves the offer in place and does not mark outcome", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       offer.rejectResult = { err: "boom" };
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
@@ -364,8 +364,8 @@ describe("CallController", () => {
     });
 
     it("accept() marks outcome 'accepted' on the promoted offer", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
-      const active = new FakeCallActive("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
+      const active = new FakeActiveCall("o1", "tok-1");
       offer.acceptResult = { call: active, err: null };
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
@@ -374,35 +374,35 @@ describe("CallController", () => {
     });
 
     it("acceptedElsewhere marks outcome 'elsewhere'", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("acceptedElsewhere");
       expect(store.getState().lastOfferOutcomes.o1).toBe("elsewhere");
     });
 
     it("rejectedElsewhere marks outcome 'elsewhere'", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("rejectedElsewhere");
       expect(store.getState().lastOfferOutcomes.o1).toBe("elsewhere");
     });
 
     it("ended does not mark an outcome (counts as missed downstream)", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("ended");
       expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
     });
 
     it("unanswered does not mark an outcome (counts as missed downstream)", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       offer.emitEvent("unanswered");
       expect(store.getState().lastOfferOutcomes.o1).toBeUndefined();
     });
 
     it("ignore() removes the offer and does not mark an outcome (counts as missed downstream, like a real phone's 'ignore')", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
       stored.ignore();
@@ -411,8 +411,8 @@ describe("CallController", () => {
     });
 
     it("ignore() does not touch an offer that already left the store via accept()", async () => {
-      const offer = new FakeOffer("o1", "tok-1");
-      const active = new FakeCallActive("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
+      const active = new FakeActiveCall("o1", "tok-1");
       offer.acceptResult = { call: active, err: null };
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
@@ -425,7 +425,7 @@ describe("CallController", () => {
     });
 
     it("ignore() is a no-op when called twice in a row", () => {
-      const offer = new FakeOffer("o1", "tok-1");
+      const offer = new FakeIncomingCall("o1", "tok-1");
       controller.ingestOffer(offer);
       const [stored] = store.getState().offers;
       stored.ignore();

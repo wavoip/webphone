@@ -1,3 +1,4 @@
+import type { AudioDevice } from "@wavoip/wavoip-api/web";
 import { useEffect, useState } from "react";
 import { Field, FieldDescription, FieldGroup, FieldLabel, FieldSet } from "@/components/ui/field";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,14 +8,13 @@ import { useWavoip } from "@/providers/WavoipProvider";
 export function AudioConfig() {
   const { wavoip } = useWavoip();
 
-  const [microphones, setMicrophones] = useState<MediaDeviceInfo[]>([]);
-  const [speakers, setSpeakers] = useState<MediaDeviceInfo[]>([]);
+  const [microphones, setMicrophones] = useState<AudioDevice[]>([]);
+  const [speakers, setSpeakers] = useState<AudioDevice[]>([]);
 
   useEffect(() => {
-    const devices = wavoip.getMultimediaDevices();
-    setMicrophones(devices.filter((d) => d.kind === "audioinput"));
-    setSpeakers(devices.filter((d) => d.kind === "audiooutput"));
-  }, [wavoip.getMultimediaDevices]);
+    setMicrophones(wavoip.audio.listInputDevices());
+    setSpeakers(wavoip.audio.listOutputDevices());
+  }, [wavoip]);
 
   return (
     <div className=" wv:py-3">
@@ -28,7 +28,7 @@ export function AudioConfig() {
               </SelectTrigger>
               <SelectContent>
                 {microphones.map((device, index) => (
-                  <SelectItem value={device.deviceId} key={`microphone_${device.deviceId || index}`}>
+                  <SelectItem value={device.id} key={`microphone_${device.id || index}`}>
                     {device.label}
                   </SelectItem>
                 ))}
@@ -45,7 +45,7 @@ export function AudioConfig() {
               </SelectTrigger>
               <SelectContent>
                 {speakers.map((device, index) => (
-                  <SelectItem value={device.deviceId} key={`speaker_${device.deviceId || index}`}>
+                  <SelectItem value={device.id} key={`speaker_${device.id || index}`}>
                     {device.label}
                   </SelectItem>
                 ))}

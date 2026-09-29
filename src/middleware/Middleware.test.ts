@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Middleware } from "@/middleware/Middleware";
-import { FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeIncomingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("Middleware", () => {
   let wavoip: FakeWavoip;
@@ -52,7 +52,7 @@ describe("Middleware", () => {
 
   it("offer events emitted by wavoip flow into the store after init", async () => {
     const mw = new Middleware({ wavoip: wavoip.asWavoip() }).init();
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(mw.store.getState().offers.map((o) => o.id)).toEqual(["o1"]);
   });
@@ -60,7 +60,7 @@ describe("Middleware", () => {
   it("registered offer middleware can block before the store sees it", async () => {
     const mw = new Middleware({ wavoip: wavoip.asWavoip() }).init();
     mw.registry.use("offer", () => {});
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(mw.store.getState().offers).toEqual([]);
   });
@@ -71,7 +71,7 @@ describe("Middleware", () => {
       offer.peer.displayName = "Renamed";
       next();
     });
-    const offer = new FakeOffer("o1", "tok-1");
+    const offer = new FakeIncomingCall("o1", "tok-1");
     wavoip.emitEvent("offer", offer);
     await new Promise((r) => setTimeout(r, 0));
     expect(mw.store.getState().offers[0].peer.displayName).toBe("Renamed");
@@ -80,7 +80,7 @@ describe("Middleware", () => {
   it("destroy() stops further offer ingestion", async () => {
     const mw = new Middleware({ wavoip: wavoip.asWavoip() }).init();
     mw.destroy();
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(mw.store.getState().offers).toEqual([]);
   });

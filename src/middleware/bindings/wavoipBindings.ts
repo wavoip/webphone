@@ -1,4 +1,4 @@
-import type { Offer, Wavoip } from "@wavoip/wavoip-api";
+import type { IncomingCall, Wavoip } from "@wavoip/wavoip-api/web";
 import type { CallController } from "@/middleware/controllers/CallController";
 import type { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
@@ -23,7 +23,7 @@ export function bindWavoipEvents({ wavoip, registry, callController, events }: D
   return () => unsub?.();
 }
 
-function projectOffer(offer: Offer) {
+function projectOffer(offer: IncomingCall) {
   const { id, type, status, deviceToken, direction, peer } = offer;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }

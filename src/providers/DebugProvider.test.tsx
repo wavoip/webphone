@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react";
-import type { ConnectivityIssue, IceDiagnostics } from "@wavoip/wavoip-api";
+import type { ConnectivityIssue, IceDiagnostics } from "@wavoip/wavoip-api/web";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Middleware } from "@/middleware/Middleware";
 import { MiddlewareProvider } from "@/middleware/react/hooks";
-import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { DebugProvider, useDebugInfo } from "@/providers/DebugProvider";
 
 function wrap(middleware: Middleware) {
@@ -23,7 +23,7 @@ function setupMiddleware() {
   return { middleware, wavoip };
 }
 
-function addOffer(middleware: Middleware, offer: FakeOffer) {
+function addOffer(middleware: Middleware, offer: FakeIncomingCall) {
   middleware.store.getState().addOffer(offer as never);
 }
 
@@ -52,7 +52,7 @@ describe("DebugProvider", () => {
   it("captures iceDiagnostics emitted by an incoming offer with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const offer = new FakeOffer("offer-1", "tok-1");
+    const offer = new FakeIncomingCall("offer-1", "tok-1");
     act(() => addOffer(middleware, offer));
     act(() => offer.emitEvent("iceDiagnostics", sampleDiag));
 
@@ -65,7 +65,7 @@ describe("DebugProvider", () => {
   it("captures connectivityIssue emitted by an active call with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const active = new FakeCallActive("call-1", "tok-1");
+    const active = new FakeActiveCall("call-1", "tok-1");
     act(() => {
       middleware.store.getState().setActive(active);
       active.emitEvent("connectivityIssue", "STUN_UNREACHABLE" satisfies ConnectivityIssue);
@@ -80,7 +80,7 @@ describe("DebugProvider", () => {
   it("captures connectivityIssue emitted by an outgoing call with its call id", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const outgoing = new FakeCallOutgoing("call-2", "tok-1");
+    const outgoing = new FakeOutgoingCall("call-2", "tok-1");
     act(() => {
       middleware.store.getState().setOutgoing(outgoing);
       outgoing.emitEvent("connectivityIssue", "ICE_CONNECTION_FAILED" satisfies ConnectivityIssue);
@@ -93,7 +93,7 @@ describe("DebugProvider", () => {
   it("caps the issue ring buffer at 20 entries", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const active = new FakeCallActive("call-3", "tok-1");
+    const active = new FakeActiveCall("call-3", "tok-1");
     act(() => middleware.store.getState().setActive(active));
 
     act(() => {
@@ -106,7 +106,7 @@ describe("DebugProvider", () => {
   it("caps the ICE diagnostics ring buffer at 20 entries", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const active = new FakeCallActive("call-3b", "tok-1");
+    const active = new FakeActiveCall("call-3b", "tok-1");
     act(() => middleware.store.getState().setActive(active));
 
     act(() => {
@@ -119,7 +119,7 @@ describe("DebugProvider", () => {
   it("unsubscribes from a call after it leaves the store", () => {
     const { result } = renderHook(() => useDebugInfo(), { wrapper: wrap(middleware) });
 
-    const active = new FakeCallActive("call-4", "tok-1");
+    const active = new FakeActiveCall("call-4", "tok-1");
     act(() => middleware.store.getState().setActive(active));
     act(() => active.emitEvent("connectivityIssue", "STUN_UNREACHABLE"));
     expect(result.current.recentIssues).toHaveLength(1);

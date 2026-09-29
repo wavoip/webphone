@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing, Offer, Wavoip } from "@wavoip/wavoip-api";
+import type { ActiveCall, IncomingCall, OutgoingCall, Wavoip } from "@wavoip/wavoip-api/web";
 import React, { createContext, type ReactNode, useContext, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { OfferNotification } from "@/components/OfferNotification";
@@ -15,9 +15,9 @@ type StartCall = Middleware["controllers"]["call"]["start"];
 interface WavoipContextProps {
   wavoip: Wavoip;
   devices: DeviceStateEntry[];
-  offers: Offer[];
-  callOutgoing?: CallOutgoing;
-  callActive?: CallActive;
+  offers: IncomingCall[];
+  callOutgoing?: OutgoingCall;
+  callActive?: ActiveCall;
   callActiveStartedAt?: number;
   callStatus: CallStatus;
   peerMuted: boolean;

@@ -1,12 +1,12 @@
 import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
+import type { ActiveCall, CallConnection } from "@wavoip/wavoip-api/web";
 import { useEffect, useState } from "react";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
 const PING_POLL_MS = 500;
 
 type Props = {
-  call: CallActive;
+  call: ActiveCall;
 };
 
 const ConnectionStrength = {
@@ -43,7 +43,7 @@ const STRENGTH_STYLES: Record<ConnectionStrength, { text: string; bg: string; ri
 
 export function Ping({ call }: Props) {
   const [ping, setPing] = useState<number | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connectionStatus);
+  const [connection, setConnection] = useState<CallConnection>(call.connection);
   const [strength, setStrength] = useState<ConnectionStrength>(ConnectionStrength.high);
 
   useEffect(() => {
@@ -61,11 +61,11 @@ export function Ping({ call }: Props) {
     pull();
     const id = setInterval(pull, PING_POLL_MS);
 
-    const unsubConnection = call.on("connectionStatus", (status) => {
-      setConnectionStatus(status);
-      if (status === "connected")
+    const unsubConnection = call.on("connectionChanged", (next) => {
+      setConnection(next);
+      if (next === "connected")
         setStrength((prev) => (prev === ConnectionStrength.none ? ConnectionStrength.high : prev));
-      if (status === "disconnected") setStrength(ConnectionStrength.none);
+      if (next === "disconnected") setStrength(ConnectionStrength.none);
     });
 
     return () => {
@@ -75,7 +75,7 @@ export function Ping({ call }: Props) {
     };
   }, [call]);
 
-  if (connectionStatus === "disconnected") {
+  if (connection === "disconnected") {
     const style = STRENGTH_STYLES[ConnectionStrength.none];
     return (
       <CallDiagnosticsDialog
@@ -88,7 +88,7 @@ export function Ping({ call }: Props) {
     );
   }
 
-  const isPending = connectionStatus === "connecting" || connectionStatus === "reconnecting";
+  const isPending = connection === "reconnecting";
   const style = STRENGTH_STYLES[strength];
 
   return (

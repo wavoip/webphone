@@ -1,9 +1,9 @@
-import type { CallActive } from "@wavoip/wavoip-api";
+import type { ActiveCall, AudioAnalyser } from "@wavoip/wavoip-api/web";
 import { useEffect, useRef } from "react";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
 
 type Props = {
-  call?: CallActive;
+  call?: ActiveCall;
 };
 
 const BARS = 15;
@@ -16,25 +16,18 @@ export function WaveSound({ call }: Props) {
   const smoothRef = useRef<number[]>(Array(BARS).fill(0));
 
   useEffect(() => {
-    if (!call?.audioAnalyserIn) return;
-    let animationId: number | null = null;
-    let cancelled = false;
+    const canvas = canvasRef.current;
+    if (!call || !canvas) return;
+    let animationId = 0;
 
-    call.audioAnalyserIn.then((analyser) => {
-      if (cancelled || !canvasRef.current) return;
-      const canvas = canvasRef.current;
-      const loop = () => {
-        animationId = requestAnimationFrame(loop);
-        draw(canvas, analyser, smoothRef.current, theme);
-      };
-      loop();
-    });
-
-    return () => {
-      cancelled = true;
-      if (animationId !== null) cancelAnimationFrame(animationId);
+    const loop = () => {
+      animationId = requestAnimationFrame(loop);
+      draw(canvas, call.audio.in, smoothRef.current, theme);
     };
-  }, [call?.audioAnalyserIn, theme]);
+    loop();
+
+    return () => cancelAnimationFrame(animationId);
+  }, [call, theme]);
 
   return (
     <div className="text-center">
@@ -43,9 +36,8 @@ export function WaveSound({ call }: Props) {
   );
 }
 
-function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, smooth: number[], theme?: string) {
-  const dataArray = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(dataArray);
+function draw(canvas: HTMLCanvasElement, analyser: AudioAnalyser, smooth: number[], theme?: string) {
+  const dataArray = analyser.spectrum();
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.clearRect(0, 0, canvas.width, canvas.height);

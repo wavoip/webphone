@@ -1,4 +1,13 @@
-import type { CallActive, CallOutgoing, CallPeer, Offer, Wavoip } from "@wavoip/wavoip-api";
+import type {
+  ActiveCall,
+  CallPeer,
+  CommandFailure,
+  IncomingCall,
+  OutgoingCall,
+  Result,
+  StartCallFailure,
+  Wavoip,
+} from "@wavoip/wavoip-api/web";
 import { isTerminalCallStatus } from "@/middleware/store/callStatus";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/callSlice";
@@ -6,11 +15,26 @@ import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/cal
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
 
 export type StartCallSuccess = { call: { id: string; peer: CallPeer }; err: null };
-export type StartCallFailure = {
+export type StartCallRejection = {
   call: null;
   err: { message: string; devices: { token: string; reason: string }[] };
 };
-export type StartCallResult = StartCallSuccess | StartCallFailure;
+export type StartCallResult = StartCallSuccess | StartCallRejection;
+
+/**
+ * A v3 não devolve texto legível: o `code` é o contrato, e é ele que vira `message` aqui.
+ * O formato `{call, err}` é da API pública do webphone (`window.wavoip.call.start`) e não
+ * acompanha o `Result` da lib — mudá-lo quebraria quem integra.
+ */
+function toRejection(error: StartCallFailure): StartCallRejection {
+  return {
+    call: null,
+    err: {
+      message: error.code,
+      devices: error.devices.map((d) => ({ token: d.token, reason: d.error.code })),
+    },
+  };
+}
 
 export class CallController {
   private readonly deps: Deps;
@@ -22,8 +46,8 @@ export class CallController {
   async start(to: string, config: { fromTokens?: string[] } = {}): Promise<StartCallResult> {
     const fromTokens = config.fromTokens ?? this.enabledTokens();
 
-    const { call, err } = await this.deps.wavoip.startCall({ fromTokens, to });
-    if (err) return { call: null, err };
+    const { data: call, error } = await this.deps.wavoip.startCall({ fromTokens, to });
+    if (error) return toRejection(error);
 
     this.bindOutgoing(call);
     const { store } = this.deps;
@@ -39,10 +63,10 @@ export class CallController {
    * terminal localmente, só quando o servidor confirma, e a UI ficaria parada na
    * duração correndo até a volta do WSS.
    */
-  async end(): Promise<{ err: string | null }> {
+  async end(): Promise<Result<void, CommandFailure>> {
     const { store } = this.deps;
     const { active, outgoing } = store.getState();
-    if (!active) return outgoing ? this.cancel() : { err: null };
+    if (!active) return outgoing ? this.cancel() : { data: undefined, error: null };
     const result = await active.end();
     store.getState().setCallStatus("ENDED");
     return result;
@@ -57,28 +81,28 @@ export class CallController {
    * terminais — o timer que apaga a chamada, o `call:ended` público — e desfazer depois
    * não desarma o que já disparou. O "cancelando" é do botão, e não do status.
    */
-  async cancel(callId?: string): Promise<{ err: string | null }> {
+  async cancel(callId?: string): Promise<Result<void, CommandFailure>> {
     const { store } = this.deps;
     const { outgoing } = store.getState();
-    if (!outgoing) return { err: null };
+    if (!outgoing) return { data: undefined, error: null };
     // Um abort atrasado não pode cancelar o que estiver no store a essa altura — o
     // operador pode já ter discado de novo.
-    if (callId !== undefined && outgoing.id !== callId) return { err: null };
+    if (callId !== undefined && outgoing.id !== callId) return { data: undefined, error: null };
 
     const result = await outgoing.cancel();
-    if (result.err === null) store.getState().setCallStatus("CANCELLED");
+    if (result.error === null) store.getState().setCallStatus("CANCELLED");
     return result;
   }
 
-  ingestOffer(offer: Offer): void {
+  ingestOffer(offer: IncomingCall): void {
     this.deps.store.getState().addOffer(this.wrapOffer(offer));
     offer.on("ended", () => this.dropOffer(offer.id));
     offer.on("acceptedElsewhere", () => this.dropOfferWithOutcome(offer.id, "elsewhere"));
     offer.on("rejectedElsewhere", () => this.dropOfferWithOutcome(offer.id, "elsewhere"));
-    offer.on("unanswered", () => this.dropOffer(offer.id));
+    offer.on("cancelled", () => this.dropOffer(offer.id));
   }
 
-  private wrapOffer(offer: Offer): IgnorableOffer {
+  private wrapOffer(offer: IncomingCall): IgnorableOffer {
     const originalAccept = offer.accept.bind(offer);
     const originalReject = offer.reject.bind(offer);
     return new Proxy(offer, {
@@ -86,7 +110,7 @@ export class CallController {
         if (prop === "accept") {
           return async () => {
             const result = await originalAccept();
-            if (result.call) this.promoteToActive(result.call, offer.id);
+            if (result.data) this.promoteToActive(result.data, offer.id);
             return result;
           };
         }
@@ -95,7 +119,7 @@ export class CallController {
         if (prop === "reject") {
           return async () => {
             const result = await originalReject();
-            if (!result.err) this.dropOfferWithOutcome(offer.id, "rejected");
+            if (!result.error) this.dropOfferWithOutcome(offer.id, "rejected");
             return result;
           };
         }
@@ -115,7 +139,7 @@ export class CallController {
     }) as IgnorableOffer;
   }
 
-  private promoteToActive(call: CallActive, offerId: string): void {
+  private promoteToActive(call: ActiveCall, offerId: string): void {
     const { store } = this.deps;
     store.getState().markOfferOutcome(offerId, "accepted");
     store.getState().removeOffer(offerId);
@@ -134,37 +158,43 @@ export class CallController {
     this.deps.store.getState().removeOffer(id);
   }
 
-  private bindOutgoing(call: CallOutgoing): void {
+  private bindOutgoing(call: OutgoingCall): void {
     const { store } = this.deps;
-    call.on("peerAccept", (active) => {
+    // `ringing` é a única subida que muda o status sem trocar de objeto: `accepted` passa
+    // a chamada para a ActiveCall, e o resto é terminal.
+    call.on("ringing", () => store.getState().setCallStatus(call.status));
+    call.on("accepted", (active) => {
       store.getState().setOutgoing(undefined);
       this.bindActive(active);
       store.getState().setActive(active);
       store.getState().setCallStatus("ACTIVE");
       store.getState().setPeerMuted(active.peer.muted ?? false);
     });
-    call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
+    call.on("rejected", () => store.getState().setCallStatus("REJECTED"));
     call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
-    // Rede de segurança, e não o caminho principal: todo fim roteado pelo servidor
-    // chega como `status` antes do evento terminal, e gravar "ENDED" sempre aqui
-    // sobrescrevia "CANCELLED". Mas a falha na passagem de mídia depois do
-    // `call:answered` emite `ended` sem status nenhum, e sem isto a chamada ficaria
+    call.on("failed", (error) => this.failWith(error.code));
+    // Rede de segurança, e não o caminho principal: cada desfecho tem o seu próprio
+    // evento, e desistir daqui grava "CANCELLED" no `cancel()`. Mas a falha na passagem
+    // de mídia depois do `answered` emite `ended` sozinho, e sem isto a chamada ficaria
     // não terminal para sempre: tela presa, sem evento público, sem reset.
     call.on("ended", () => {
       const { callStatus } = store.getState();
       if (!isTerminalCallStatus(callStatus)) store.getState().setCallStatus("ENDED");
     });
-    call.on("status", (status) => store.getState().setCallStatus(status));
   }
 
-  private bindActive(call: CallActive): void {
+  private bindActive(call: ActiveCall): void {
     const { store } = this.deps;
     call.on("ended", () => store.getState().setCallStatus("ENDED"));
-    call.on("peerMute", () => store.getState().setPeerMuted(true));
-    call.on("peerUnmute", () => store.getState().setPeerMuted(false));
-    call.on("status", (status) => store.getState().setCallStatus(status));
-    // A wavoip-api entrega o motivo do `call:failed` do socket como evento `error`.
-    call.on("error", (reason) => store.getState().setCallFailReason(reason));
+    call.on("peerMuteChanged", (muted) => store.getState().setPeerMuted(muted));
+    call.on("failed", (error) => this.failWith(error.code));
+  }
+
+  /** O motivo vem como `code`: a v3 não devolve texto legível, e quem traduz é o `i18n`. */
+  private failWith(code: string): void {
+    const { store } = this.deps;
+    store.getState().setCallFailReason(code);
+    store.getState().setCallStatus("FAILED");
   }
 
   private enabledTokens(): string[] {

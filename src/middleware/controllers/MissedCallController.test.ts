@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { MissedCallController, peerLabel } from "@/middleware/controllers/MissedCallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeOffer, makePeer } from "@/middleware/testing/FakeWavoip";
+import { FakeIncomingCall, makePeer } from "@/middleware/testing/FakeWavoip";
 
 function buildOffer(id: string, displayName: string | null, phone = "5511999999999") {
-  return new FakeOffer(id, "device-1", { ...makePeer(phone), displayName });
+  return new FakeIncomingCall(id, "device-1", { ...makePeer(phone), displayName });
 }
 
 describe("MissedCallController", () => {

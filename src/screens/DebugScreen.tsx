@@ -8,7 +8,7 @@ import {
   WarningIcon,
   WaveformIcon,
 } from "@phosphor-icons/react";
-import { runStunProbe, type StunProbeResult } from "@wavoip/wavoip-api";
+import { runStunProbe, type StunProbeResult } from "@wavoip/wavoip-api/web";
 import { Loader2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";

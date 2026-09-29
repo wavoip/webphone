@@ -12,7 +12,7 @@ import {
   useUiState,
   useWidgetState,
 } from "@/middleware/react/hooks";
-import { FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeIncomingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 function withProvider(mw: Middleware) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -60,7 +60,7 @@ describe("MiddlewareProvider + hooks", () => {
   it("useOffers updates when an offer arrives", async () => {
     const { result } = renderHook(() => useOffers(), { wrapper: withProvider(middleware) });
     await act(async () => {
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
     });
     expect(result.current.map((o) => o.id)).toEqual(["o1"]);

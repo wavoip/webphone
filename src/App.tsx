@@ -1,4 +1,4 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import { useSyncExternalStore } from "react";
 import { WebPhone } from "@/components/WebPhone";
 import { getLanguage, normalizeLanguage, subscribeLocale } from "@/lib/i18n";

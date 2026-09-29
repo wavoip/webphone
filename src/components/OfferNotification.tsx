@@ -30,8 +30,8 @@ export function OfferNotification({ offer }: Props) {
         setStatus(t("Rejected by the app"));
         setShowActions(false);
       }),
-      offer.on("unanswered", () => {
-        setStatus(t("Timed out"));
+      offer.on("cancelled", () => {
+        setStatus(t("Canceled by the caller"));
         setShowActions(false);
       }),
     ];
@@ -91,9 +91,9 @@ export function OfferNotification({ offer }: Props) {
               className="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
               onClick={() => {
                 setShowActions(false);
-                offer.reject().then(({ err }: { err: string | null }) => {
-                  if (err) {
-                    setError(err);
+                offer.reject().then(({ error }) => {
+                  if (error) {
+                    setError(error.code);
                     setShowActions(true);
                     return;
                   }
@@ -123,8 +123,8 @@ export function OfferNotification({ offer }: Props) {
               onClick={() => {
                 setShowActions(false);
                 offer.accept().then((result) => {
-                  if (result.err) {
-                    setError(result.err);
+                  if (result.error) {
+                    setError(result.error.code);
                     setShowActions(true);
                     return;
                   }

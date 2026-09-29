@@ -7,7 +7,7 @@ import {
   PhoneTransferIcon,
   VideoCameraSlashIcon,
 } from "@phosphor-icons/react";
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
+import type { ActiveCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 
 type Props = {
-  call?: CallActive | CallOutgoing;
+  call?: ActiveCall | OutgoingCall;
 };
 
 export function CallButtons({ call }: Props) {
@@ -31,8 +31,8 @@ export function CallButtons({ call }: Props) {
 
   const hangUp = async () => {
     setActionMade(true);
-    const { err } = isOutgoing ? await middleware.controllers.call.cancel() : await middleware.controllers.call.end();
-    if (!err) return;
+    const { error } = isOutgoing ? await middleware.controllers.call.cancel() : await middleware.controllers.call.end();
+    if (!error) return;
     setActionMade(false);
     toast.error(isOutgoing ? t("Could not cancel the call") : t("Could not end the call"));
   };

@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing, Offer } from "@wavoip/wavoip-api";
+import type { ActiveCall, IncomingCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import { warnDeprecated } from "@/lib/webphone-api/api";
 import type { CallActiveProps, CallOfferProps, CallOutgoingProps, WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
@@ -159,19 +159,19 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
   };
 }
 
-function projectActive(call: CallActive | undefined): CallActiveProps | undefined {
+function projectActive(call: ActiveCall | undefined): CallActiveProps | undefined {
   if (!call) return undefined;
   const { id, type, status, deviceToken, direction, peer } = call;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
-function projectOutgoing(call: CallOutgoing | undefined): CallOutgoingProps | undefined {
+function projectOutgoing(call: OutgoingCall | undefined): CallOutgoingProps | undefined {
   if (!call) return undefined;
   const { id, type, status, deviceToken, direction, peer } = call;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
-function projectOffer(offer: Offer): CallOfferProps {
+function projectOffer(offer: IncomingCall): CallOfferProps {
   const { id, type, status, deviceToken, direction, peer } = offer;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }

@@ -1,4 +1,4 @@
-import type { CallActive, CallStats } from "@wavoip/wavoip-api";
+import type { ActiveCall, CallStats } from "@wavoip/wavoip-api/web";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { AudioLevelBar } from "@/components/layout/status-bar/AudioLevelBar";
 import {
@@ -16,10 +16,15 @@ import { useShadowRoot } from "@/providers/ShadowRootProvider";
 const STATS_POLL_MS = 200;
 
 type Props = {
-  call: CallActive;
+  call: ActiveCall;
   triggerClassName?: string;
   children: ReactNode;
 };
+
+/** `null` é "não medido nesta plataforma", e não zero — por isso o traço em vez de `0`. */
+function ms(value: number | null): string {
+  return value === null ? "—" : value.toFixed(0);
+}
 
 export function CallDiagnosticsDialog({ call, triggerClassName, children }: Props) {
   const { root } = useShadowRoot();
@@ -75,20 +80,24 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
                 <KV k="max" v={stats.rtt.max.toFixed(0)} />
               </StatGroup>
               <StatGroup label="TX">
-                <KV k="pkt" v={String(stats.tx.total)} />
-                <KV k="kB" v={(stats.tx.total_bytes / 1024).toFixed(1)} />
-                <KV k="loss" v={`${(stats.tx.loss * 100).toFixed(1)}%`} />
-                <KV k="kbps" v={stats.tx.bitrate_kbps.toFixed(1)} />
+                <KV k="pkt" v={String(stats.packets.tx.sent)} />
+                <KV k="kB" v={(stats.packets.tx.bytes / 1024).toFixed(1)} />
+                <KV k="lost" v={String(stats.packets.tx.lost)} />
+                <KV k="kbps" v={stats.audio.tx.bitrate_kbps.toFixed(1)} />
               </StatGroup>
               <StatGroup label="RX">
-                <KV k="pkt" v={String(stats.rx.total)} />
-                <KV k="kB" v={(stats.rx.total_bytes / 1024).toFixed(1)} />
-                <KV k="loss" v={`${(stats.rx.loss * 100).toFixed(1)}%`} />
-                <KV k="kbps" v={stats.rx.bitrate_kbps.toFixed(1)} />
-                <KV k="jitter" v={stats.rx.jitter_ms.toFixed(1)} />
+                <KV k="pkt" v={String(stats.packets.rx.received)} />
+                <KV k="kB" v={(stats.packets.rx.bytes / 1024).toFixed(1)} />
+                <KV k="lost" v={String(stats.packets.rx.lost)} />
+                <KV k="kbps" v={stats.audio.rx.bitrate_kbps.toFixed(1)} />
+                <KV k="jitter" v={stats.audio.rx.jitter_ms.toFixed(1)} />
               </StatGroup>
-              <StatGroup label="audio">
-                <KV k="out lat" v={`${stats.audio_context.output_latency_ms.toFixed(0)}ms`} />
+              <StatGroup label={t("Latency (ms)")}>
+                <KV k="total" v={ms(stats.latency.total_ms)} />
+                <KV k="network" v={ms(stats.latency.network_ms)} />
+                <KV k="whatsapp" v={ms(stats.latency.whatsapp_ms)} />
+                <KV k="jitter buf" v={ms(stats.latency.jitter_buffer_ms)} />
+                <KV k="playout" v={ms(stats.latency.playout_ms)} />
               </StatGroup>
             </div>
           )}
@@ -97,8 +106,8 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
         {open && (
           <Section title={t("Audio levels")}>
             <div className="wv:flex wv:flex-col wv:gap-2">
-              <AudioLevelBar analyser={call.audioAnalyserOut} label="TX (mic)" />
-              <AudioLevelBar analyser={call.audioAnalyserIn} label="RX (speaker)" />
+              <AudioLevelBar analyser={call.audio.out} label="TX (mic)" />
+              <AudioLevelBar analyser={call.audio.in} label="RX (speaker)" />
             </div>
           </Section>
         )}

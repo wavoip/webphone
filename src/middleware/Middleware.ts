@@ -1,4 +1,4 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import { bindWavoipEvents } from "@/middleware/bindings/wavoipBindings";
 import { documentFocusTracker, type FocusTracker } from "@/middleware/browser/focusTracker";
 import { type BrowserNotifier, domNotifier } from "@/middleware/browser/notifier";

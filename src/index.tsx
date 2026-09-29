@@ -1,4 +1,4 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import ReactDOM from "react-dom/client";
 import sonnerStyles from "sonner/dist/styles.css?inline";
 import { App } from "@/App";

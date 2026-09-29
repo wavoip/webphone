@@ -1,10 +1,10 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CallButtons } from "@/components/CallButtons";
-import { FakeCallActive, FakeCallOutgoing, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
-async function withOutgoing(outgoing = new FakeCallOutgoing("c1", "tok-1")) {
+async function withOutgoing(outgoing = new FakeOutgoingCall("c1", "tok-1")) {
   const wavoip = new FakeWavoip(["tok-1"]);
   wavoip.startCallResult = { call: outgoing, err: null };
   const { api } = await renderWithProviders({
@@ -41,7 +41,7 @@ describe("CallButtons hang-up", () => {
   });
 
   it("comes back when the server refuses the cancellation", async () => {
-    const outgoing = new FakeCallOutgoing("c1", "tok-1");
+    const outgoing = new FakeOutgoingCall("c1", "tok-1");
     outgoing.cancelResult = { err: "IS_NOT_OFFER" };
     await withOutgoing(outgoing);
 
@@ -51,7 +51,7 @@ describe("CallButtons hang-up", () => {
   });
 
   it("says 'end', not 'cancel', once the call is connected", async () => {
-    const active = new FakeCallActive("c1", "tok-1");
+    const active = new FakeActiveCall("c1", "tok-1");
     await renderWithProviders({ children: <CallButtons call={active} /> });
 
     expect(hangUp().getAttribute("aria-label")).toBe("Finalizar");

@@ -1,7 +1,8 @@
+import type { AudioAnalyser } from "@wavoip/wavoip-api/web";
 import { useEffect, useRef } from "react";
 
 type Props = {
-  analyser: Promise<AnalyserNode>;
+  analyser: AudioAnalyser;
   label: string;
 };
 
@@ -10,28 +11,14 @@ export function AudioLevelBar({ analyser, label }: Props) {
 
   useEffect(() => {
     let raf = 0;
-    let cancelled = false;
-
-    analyser.then((node) => {
-      if (cancelled || typeof node.getFloatTimeDomainData !== "function") return;
-      const buf = new Float32Array(node.fftSize);
-      const tick = () => {
-        if (cancelled || !fillRef.current) return;
-        node.getFloatTimeDomainData(buf);
-        let sum = 0;
-        for (let i = 0; i < buf.length; i++) sum += buf[i] * buf[i];
-        const rms = Math.sqrt(sum / buf.length);
-        const pct = Math.min(100, rms * 200);
-        fillRef.current.style.width = `${pct}%`;
-        raf = requestAnimationFrame(tick);
-      };
+    const tick = () => {
+      if (!fillRef.current) return;
+      fillRef.current.style.width = `${Math.min(100, analyser.level() * 100)}%`;
       raf = requestAnimationFrame(tick);
-    });
-
-    return () => {
-      cancelled = true;
-      if (raf) cancelAnimationFrame(raf);
     };
+    raf = requestAnimationFrame(tick);
+
+    return () => cancelAnimationFrame(raf);
   }, [analyser]);
 
   return (

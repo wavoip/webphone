@@ -1,4 +1,4 @@
-import type { Offer } from "@wavoip/wavoip-api";
+import type { IncomingCall } from "@wavoip/wavoip-api/web";
 import type { FocusTracker } from "@/middleware/browser/focusTracker";
 import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import type { MissedCallController } from "@/middleware/controllers/MissedCallController";
@@ -25,7 +25,7 @@ export type Unsubscribe = () => void;
  * precisa das entradas e das saídas; o toque só liga para vazio/não vazio.
  */
 export function offerNotificationEffect(deps: Deps): Unsubscribe {
-  let previous: ReadonlyArray<Offer> = deps.store.getState().offers;
+  let previous: ReadonlyArray<IncomingCall> = deps.store.getState().offers;
 
   return deps.store.subscribe(
     (s) => s.offers,
@@ -37,7 +37,7 @@ export function offerNotificationEffect(deps: Deps): Unsubscribe {
   );
 }
 
-function handleRemovals(curr: ReadonlyArray<Offer>, prev: ReadonlyArray<Offer>, deps: Deps): void {
+function handleRemovals(curr: ReadonlyArray<IncomingCall>, prev: ReadonlyArray<IncomingCall>, deps: Deps): void {
   const removed = prev.filter((p) => !curr.find((c) => c.id === p.id));
   if (removed.length === 0) return;
   const state = deps.store.getState();
@@ -49,7 +49,7 @@ function handleRemovals(curr: ReadonlyArray<Offer>, prev: ReadonlyArray<Offer>, 
   }
 }
 
-function render(offers: ReadonlyArray<Offer>, deps: Deps): void {
+function render(offers: ReadonlyArray<IncomingCall>, deps: Deps): void {
   if (offers.length === 0) {
     deps.notifier.close(OFFER_NOTIFICATION_TAG);
     return;
@@ -68,13 +68,13 @@ function render(offers: ReadonlyArray<Offer>, deps: Deps): void {
   });
 }
 
-function buildTitle(offers: ReadonlyArray<Offer>): string {
+function buildTitle(offers: ReadonlyArray<IncomingCall>): string {
   const first = offers[0];
   if (offers.length === 1 && first) return `Chamada de ${peerLabel(first)}`;
   return `${offers.length} chamadas recebidas`;
 }
 
-function buildBody(offers: ReadonlyArray<Offer>): string {
+function buildBody(offers: ReadonlyArray<IncomingCall>): string {
   const first = offers[0];
   if (offers.length === 1 && first) return first.peer.phone;
   const labels = offers.slice(0, BODY_TRUNCATE_AT).map((o) => peerLabel(o));

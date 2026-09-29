@@ -1,4 +1,4 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 import type { WebphoneSettings } from "./providers/settings/settings";
 

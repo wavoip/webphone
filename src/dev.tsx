@@ -1,4 +1,4 @@
-import { Wavoip } from "@wavoip/wavoip-api";
+import { Wavoip, webRuntime } from "@wavoip/wavoip-api/web";
 import webphone from "@/index.tsx";
 
 console.log("Rendering");
@@ -24,7 +24,7 @@ await webphone.render(
       autoRequest: true,
     },
   },
-  new Wavoip({ tokens: [], platform: "dev" }),
+  new Wavoip({ tokens: [], platform: "dev", runtime: webRuntime() }),
 );
 
 console.log("API ready");

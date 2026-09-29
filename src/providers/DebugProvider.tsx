@@ -1,11 +1,11 @@
 import type {
-  CallActive,
-  CallOutgoing,
+  ActiveCall,
   ConnectivityIssue,
   IceDiagnostics,
-  Offer,
+  IncomingCall,
+  OutgoingCall,
   Unsubscribe,
-} from "@wavoip/wavoip-api";
+} from "@wavoip/wavoip-api/web";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import { useMiddleware } from "@/middleware/react/hooks";
 
@@ -15,7 +15,7 @@ type CallLike = {
   on(event: "connectivityIssue", cb: (issue: ConnectivityIssue) => void): Unsubscribe;
 };
 
-function asCallLike(call: Offer | CallOutgoing | CallActive): CallLike {
+function asCallLike(call: IncomingCall | OutgoingCall | ActiveCall): CallLike {
   return call as unknown as CallLike;
 }
 
@@ -60,7 +60,7 @@ export function DebugProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const wireCall = (call: Offer | CallOutgoing | CallActive | undefined): (() => void) => {
+    const wireCall = (call: IncomingCall | OutgoingCall | ActiveCall | undefined): (() => void) => {
       if (!call) return () => {};
       const c = asCallLike(call);
       const unsubDiag = c.on("iceDiagnostics", (diag) => pushIce(c.id, diag));

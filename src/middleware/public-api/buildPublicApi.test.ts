@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("buildPublicApi", () => {
   let wavoip: FakeWavoip;
@@ -17,20 +17,20 @@ describe("buildPublicApi", () => {
 
   describe("call", () => {
     it("start delegates to the call controller", async () => {
-      wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
       const result = await api.call.start("5511");
       expect(result.err).toBeNull();
       expect(wavoip.startCallCalls[0].to).toBe("5511");
     });
 
     it("startCall (deprecated) passes fromTokens via the start signature", async () => {
-      wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
       await api.call.startCall("5511", ["tok-1"]);
       expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-1"]);
     });
 
     it("getCallActive returns a projected snapshot of the active call", () => {
-      const active = new FakeCallActive("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
       middleware.store.getState().setActive(active);
       const snapshot = api.call.getCallActive();
       expect(snapshot?.id).toBe("c1");
@@ -42,15 +42,15 @@ describe("buildPublicApi", () => {
     });
 
     it("getOffers projects every stored offer", () => {
-      middleware.store.getState().addOffer(new FakeOffer("o1", "tok-1"));
-      middleware.store.getState().addOffer(new FakeOffer("o2", "tok-1"));
+      middleware.store.getState().addOffer(new FakeIncomingCall("o1", "tok-1"));
+      middleware.store.getState().addOffer(new FakeIncomingCall("o2", "tok-1"));
       expect(api.call.getOffers().map((o) => o.id)).toEqual(["o1", "o2"]);
     });
 
     it("onOffer registers a callback that fires when offers arrive", async () => {
       const cb = vi.fn();
       api.call.onOffer(cb);
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(cb).toHaveBeenCalledTimes(1);
       expect(cb.mock.calls[0][0].id).toBe("o1");
@@ -150,7 +150,7 @@ describe("buildPublicApi", () => {
         seen.push(offer.id);
         next();
       });
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(seen).toEqual(["o1"]);
       expect(middleware.store.getState().offers.map((o) => o.id)).toEqual(["o1"]);
@@ -158,7 +158,7 @@ describe("buildPublicApi", () => {
 
     it("blocks the offer from reaching the store when next() is not called", async () => {
       api.use("offer", () => {});
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(middleware.store.getState().offers).toEqual([]);
     });
@@ -168,7 +168,7 @@ describe("buildPublicApi", () => {
         offer.peer.displayName = "Friendly Name";
         next();
       });
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(middleware.store.getState().offers[0]?.peer.displayName).toBe("Friendly Name");
     });

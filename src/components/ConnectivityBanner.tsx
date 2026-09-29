@@ -1,4 +1,4 @@
-import type { ConnectivityIssue } from "@wavoip/wavoip-api";
+import type { ConnectivityIssue } from "@wavoip/wavoip-api/web";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { type TranslationKey, t } from "@/lib/i18n";

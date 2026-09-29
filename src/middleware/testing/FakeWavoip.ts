@@ -1,26 +1,48 @@
 import type {
-  CallActive,
-  CallActiveEvents,
-  CallOutgoing,
-  CallOutgoingEvents,
+  AcceptFailure,
+  ActiveCall,
+  ActiveCallEvents,
+  CallAudio,
+  CallConnection,
   CallPeer,
   CallStats,
+  CommandFailure,
   Contact,
   Device,
+  DeviceApiFailure,
   DeviceEvents,
+  DeviceRestriction,
   DeviceStatus,
-  Offer,
-  OfferEvents,
+  IncomingCall,
+  IncomingCallEvents,
+  OutgoingCall,
+  OutgoingCallEvents,
+  Result,
+  StartCallFailure,
   Wavoip,
-} from "@wavoip/wavoip-api";
+} from "@wavoip/wavoip-api/web";
+
+export function ok<T>(data: T): { data: T; error: null } {
+  return { data, error: null };
+}
+
+export function err<E>(error: E): { data: null; error: E } {
+  return { data: null, error };
+}
 
 function makeEmptyCallStats(): CallStats {
   return {
     rtt: { min: 0, max: 0, avg: 0 },
-    tx: { total: 0, total_bytes: 0, loss: 0, bitrate_kbps: 0, audio_level: 0 },
-    rx: { total: 0, total_bytes: 0, loss: 0, bitrate_kbps: 0, audio_level: 0, jitter_ms: 0 },
-    audio_context: { output_latency_ms: 0 },
+    latency: { total_ms: null, network_ms: null, whatsapp_ms: null, jitter_buffer_ms: null, playout_ms: null },
+    audio: { tx: { level: 0, bitrate_kbps: 0 }, rx: { level: 0, bitrate_kbps: 0, jitter_ms: 0 } },
+    packets: { tx: { sent: 0, lost: 0, bytes: 0 }, rx: { received: 0, lost: 0, bytes: 0 } },
   };
+}
+
+/** Silêncio: o medidor lê zero e o espectro vem vazio, como na plataforma que não vê o áudio. */
+function makeSilentAudio(): CallAudio {
+  const silent = { level: () => 0, spectrum: () => new Uint8Array(), clipping: () => 0 };
+  return { in: silent, out: silent };
 }
 
 type Listener = (...args: unknown[]) => void;
@@ -47,110 +69,82 @@ export function makePeer(phone = "5511999999999"): CallPeer {
   return { phone, displayName: null, profilePicture: null, muted: false };
 }
 
-export class FakeOffer extends FakeEmitter<OfferEvents> implements Offer {
+export class FakeIncomingCall extends FakeEmitter<IncomingCallEvents> implements IncomingCall {
   type = "OFFICIAL" as const;
   direction = "INCOMING" as const;
   status = "RINGING" as const;
-  acceptResult: { call: CallActive | null; err: string | null } = { call: null, err: "not-set" };
-  rejectResult: { err: string | null } = { err: null };
+  acceptResult: Result<ActiveCall, AcceptFailure> = err({ code: "UNKNOWN" as const });
+  rejectResult: Result<void, CommandFailure> = ok(undefined);
   readonly id: string;
   readonly deviceToken: string;
-  readonly device_token: string;
   peer: CallPeer;
 
-  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
+  constructor(id: string, deviceToken: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
-    this.deviceToken = device_token;
-    this.device_token = device_token;
+    this.deviceToken = deviceToken;
     this.peer = peer;
   }
 
-  accept = async () => this.acceptResult as { call: CallActive; err: null } | { call: null; err: string };
+  accept = async () => this.acceptResult;
   reject = async () => this.rejectResult;
-  ignore() {}
-  onAcceptedElsewhere() {}
-  onRejectedElsewhere() {}
-  onUnanswered() {}
-  onEnd() {}
-  onStatus() {}
 }
 
-export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements CallOutgoing {
+export class FakeOutgoingCall extends FakeEmitter<OutgoingCallEvents> implements OutgoingCall {
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
   status = "CALLING" as const;
+  cancelResult: Result<void, CommandFailure> = ok(undefined);
+  cancelCalls = 0;
   readonly id: string;
   readonly deviceToken: string;
-  readonly device_token: string;
   peer: CallPeer;
 
-  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
+  constructor(id: string, deviceToken: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
-    this.deviceToken = device_token;
-    this.device_token = device_token;
+    this.deviceToken = deviceToken;
     this.peer = peer;
   }
 
-  mute = async () => ({ err: null });
-  unmute = async () => ({ err: null });
-  cancelResult: { err: string | null } = { err: null };
-  cancelCalls = 0;
+  mute = async () => ok(undefined);
+  unmute = async () => ok(undefined);
   cancel = async () => {
     this.cancelCalls++;
     return this.cancelResult;
   };
-  end = async () => this.cancel();
-  onPeerAccept() {}
-  onPeerReject() {}
-  onUnanswered() {}
-  onEnd() {}
-  onStatus() {}
 }
 
-export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements CallActive {
+export class FakeActiveCall extends FakeEmitter<ActiveCallEvents> implements ActiveCall {
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
   status = "ACTIVE" as const;
-  connectionStatus = "connected" as const;
-  connection_status = "connected" as const;
-  audioAnalyserIn = Promise.resolve({} as AnalyserNode);
-  audioAnalyserOut = Promise.resolve({} as AnalyserNode);
-  audio_analyser = Promise.resolve({} as AnalyserNode);
+  connection: CallConnection = "connected";
+  audio: CallAudio = makeSilentAudio();
+  endResult: Result<void, CommandFailure> = ok(undefined);
   readonly id: string;
   readonly deviceToken: string;
-  readonly device_token: string;
   peer: CallPeer;
 
-  constructor(id: string, device_token: string, peer: CallPeer = makePeer()) {
+  constructor(id: string, deviceToken: string, peer: CallPeer = makePeer()) {
     super();
     this.id = id;
-    this.deviceToken = device_token;
-    this.device_token = device_token;
+    this.deviceToken = deviceToken;
     this.peer = peer;
   }
 
-  mute = async () => ({ err: null });
-  unmute = async () => ({ err: null });
-  end = async () => ({ err: null });
+  mute = async () => ok(undefined);
+  unmute = async () => ok(undefined);
+  end = async () => this.endResult;
   getStats = async () => makeEmptyCallStats();
-  onError() {}
-  onPeerMute() {}
-  onPeerUnmute() {}
-  onEnd() {}
-  onStats() {}
-  onConnectionStatus() {}
-  onStatus() {}
 }
 
 export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
-  qrCode?: string;
-  contact?: Contact;
+  qrCode: string | null = null;
+  contact: Contact | null = null;
   status: DeviceStatus = "BUILDING";
   connectionStatus: "connected" | "disconnected" | "reconnecting" = "disconnected";
-  restricted = false;
-  restrictedUntil: Date | null = null;
+  restriction: DeviceRestriction | null = null;
   activeCalls = 0;
   readonly token: string;
 
@@ -159,23 +153,17 @@ export class FakeDevice extends FakeEmitter<DeviceEvents> implements Device {
     this.token = token;
   }
 
-  restart = async () => {};
-  logout = async () => {};
-  wakeUp = async () => true;
-  pairingCode = async () => ({ pairingCode: "0000", err: null as null });
-  onStatus = () => () => {};
-  onQRCode = () => () => {};
-  onContact = () => () => {};
+  restart = async (): Promise<Result<void, DeviceApiFailure>> => ok(undefined);
+  logout = async (): Promise<Result<void, DeviceApiFailure>> => ok(undefined);
+  wakeUp = async (): Promise<Result<void, DeviceApiFailure>> => ok(undefined);
+  pairingCode = async (): Promise<Result<string, CommandFailure>> => ok("0000");
 }
 
-type WavoipEvents = { offer: [Offer] };
+type WavoipEvents = { offer: [IncomingCall] };
 
 export class FakeWavoip extends FakeEmitter<WavoipEvents> {
   private _devices: FakeDevice[] = [];
-  startCallResult: {
-    call: CallOutgoing | null;
-    err: { message: string; devices: { token: string; reason: string }[] } | null;
-  } = { call: null, err: { message: "not-set", devices: [] } };
+  startCallResult: Result<OutgoingCall, StartCallFailure> = err({ code: "NO_DEVICES" as const, devices: [] });
   startCallCalls: { fromTokens?: string[]; to: string }[] = [];
 
   constructor(initialTokens: string[] = []) {
@@ -185,9 +173,7 @@ export class FakeWavoip extends FakeEmitter<WavoipEvents> {
 
   startCall = async (params: { fromTokens?: string[]; to: string }) => {
     this.startCallCalls.push(params);
-    return this.startCallResult as
-      | { call: CallOutgoing; err: null }
-      | { call: null; err: { message: string; devices: { token: string; reason: string }[] } };
+    return this.startCallResult;
   };
 
   getDevices = () => this._devices as unknown as Device[];
