@@ -1,88 +1,49 @@
-import { useMemo } from "react";
+import { createMemo, For, Show } from "solid-js";
 import { Warning } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { t } from "@/lib/i18n";
+import { type TranslationKey, t } from "@/lib/i18n";
+import { useStore } from "@/middleware/solid/context";
+import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
+
+type Grupo = { titulo: TranslationKey; devices: DeviceStateEntry[] };
 
 export function DevicesAlert() {
   const state = useStore();
 
-  const disconnectedDevices = useMemo(
-    () => devices.filter(({ connectionStatus }) => connectionStatus === "disconnected"),
-    [devices],
-  );
-  const qrcodeDevices = useMemo(() => devices.filter(({ status }) => status === "connecting"), [devices]);
-  const closedDevices = useMemo(() => devices.filter(({ status }) => status === "close"), [devices]);
-  const hibernatedDevices = useMemo(() => devices.filter(({ status }) => status === "hibernating"), [devices]);
-  const errorDevices = useMemo(
-    () => devices.filter(({ status }) => status === "error" || status === "EXTERNAL_INTEGRATION_ERROR"),
-    [devices],
-  );
-
-  const hasWarnings =
-    disconnectedDevices.length && qrcodeDevices.length && closedDevices.length && hibernatedDevices.length;
-
-  if (!hasWarnings) {
-    return null;
-  }
+  const grupos = createMemo<Grupo[]>(() => {
+    const por = (fn: (d: DeviceStateEntry) => boolean) => state.devices.filter(fn);
+    return [
+      { titulo: "Disconnected devices", devices: por((d) => d.connectionStatus === "disconnected") },
+      { titulo: "Devices waiting for QR code", devices: por((d) => d.status === "connecting") },
+      { titulo: "Closed devices", devices: por((d) => d.status === "close") },
+      { titulo: "Hibernating devices", devices: por((d) => d.status === "hibernating") },
+      {
+        titulo: "Devices with errors",
+        devices: por((d) => d.status === "error" || d.status === "EXTERNAL_INTEGRATION_ERROR"),
+      },
+    ].filter((grupo) => grupo.devices.length > 0);
+  });
 
   return (
-    <Tooltip>
-      <TooltipTrigger>
-        <Warning className="wv:size-6 wv:text-foreground" />
-      </TooltipTrigger>
-      <TooltipContent className="wv:flex wv:flex-col wv:items-center wv:gap-1">
-        {!!disconnectedDevices.length && (
-          <div className="wv:flex wv:flex-col wv:items-start wv:justify-center">
-            <p>{t("Disconnected devices")}</p>
-            <div className="wv:flex wv:gap-1">
-              {disconnectedDevices.map((device) => (
-                <Badge key={device.token}>{device.token}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        {!!qrcodeDevices.length && (
-          <div className="wv:flex wv:flex-col wv:items-start">
-            <p>{t("Devices waiting for QR code")}</p>
-            <div className="wv:flex wv:gap-1">
-              {qrcodeDevices.map((device) => (
-                <Badge key={device.token}>{device.token}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        {!!closedDevices.length && (
-          <div className="wv:flex wv:flex-col wv:items-start">
-            <p>{t("Closed devices")}</p>
-            <div className="wv:flex wv:gap-1">
-              {closedDevices.map((device) => (
-                <Badge key={device.token}>{device.token}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        {!!hibernatedDevices.length && (
-          <div className="wv:flex wv:flex-col wv:items-start">
-            <p>{t("Hibernating devices")}</p>
-            <div className="wv:flex wv:gap-1">
-              {hibernatedDevices.map((device) => (
-                <Badge key={device.token}>{device.token}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-        {!!errorDevices.length && (
-          <div className="wv:flex wv:flex-col wv:items-start">
-            <p>{t("Devices with errors")}</p>
-            <div className="wv:flex wv:gap-1">
-              {errorDevices.map((device) => (
-                <Badge key={device.token}>{device.token}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
-      </TooltipContent>
-    </Tooltip>
+    <Show when={grupos().length > 0}>
+      <Tooltip>
+        <TooltipTrigger>
+          <Warning class="wv:size-6 wv:text-foreground" />
+        </TooltipTrigger>
+        <TooltipContent class="wv:flex wv:flex-col wv:items-center wv:gap-1">
+          <For each={grupos()}>
+            {(grupo) => (
+              <div class="wv:flex wv:flex-col wv:items-start wv:justify-center">
+                <p>{t(grupo.titulo)}</p>
+                <div class="wv:flex wv:gap-1">
+                  <For each={grupo.devices}>{(device) => <Badge>{device.token}</Badge>}</For>
+                </div>
+              </div>
+            )}
+          </For>
+        </TooltipContent>
+      </Tooltip>
+    </Show>
   );
 }

@@ -1,5 +1,5 @@
 import type { ActiveCall, AudioAnalyser } from "@wavoip/wavoip-api/web";
-import { useEffect, useRef } from "react";
+import { createEffect, onCleanup } from "solid-js";
 import { useMount } from "@/providers/MountProvider";
 
 type Props = {
@@ -9,29 +9,31 @@ type Props = {
 const BARS = 15;
 const GAP = 2;
 
-export function WaveSound({ call }: Props) {
+export function WaveSound(props: Props) {
   const { root } = useMount();
-  const theme = root.classList.contains("dark") ? "dark" : "light";
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const smoothRef = useRef<number[]>(Array(BARS).fill(0));
+  const theme = () => (root.classList.contains("dark") ? "dark" : "light");
+  const smooth: number[] = Array(BARS).fill(0);
+  let canvas: HTMLCanvasElement | undefined;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
+  createEffect(() => {
+    const call = props.call;
     if (!call || !canvas) return;
+    const alvo = canvas;
+    const cor = theme();
     let animationId = 0;
 
     const loop = () => {
       animationId = requestAnimationFrame(loop);
-      draw(canvas, call.audio.in, smoothRef.current, theme);
+      draw(alvo, call.audio.in, smooth, cor);
     };
     loop();
 
-    return () => cancelAnimationFrame(animationId);
-  }, [call, theme]);
+    onCleanup(() => cancelAnimationFrame(animationId));
+  });
 
   return (
-    <div className="text-center">
-      <canvas ref={canvasRef} width={75} height={35} style={{ width: "75px", height: "50px", display: "block" }} />
+    <div class="text-center">
+      <canvas ref={canvas} width={75} height={35} style={{ width: "75px", height: "50px", display: "block" }} />
     </div>
   );
 }
