@@ -21,7 +21,6 @@ import { RecentNumbersDropdown } from "@/components/ui/recentNumbers";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/lib/notifications";
-import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [
   { digit: "1", letters: "", audio: new Audio(SoundDTMF1) },
@@ -61,7 +60,8 @@ export default function KeyboardScreen() {
     setError,
     setIsLoading: setCallIsLoading,
   } = useDialState();
-  const { startCall, devices } = useWavoip();
+  const state = useStore();
+  const startCall = useMiddleware().controllers.call.start;
   const { addNotification } = useNotificationManager();
 
   const dialToken = () => middleware.store.getState().dialToken;

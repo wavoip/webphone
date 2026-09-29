@@ -11,7 +11,6 @@ import { PipProvider } from "@/providers/PipProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type MountOptions = {
@@ -72,11 +71,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
         >
           <ThemeProvider root={root}>
             <PipProvider rootNode={shadowRoot}>
-              <WidgetProvider>
-                  {/* As telas chegam ao SDK pelo `useWavoip`, então sem a ponte nenhuma
-                      renderiza aqui. */}
-                  <WavoipProvider>{options.children ?? null}</WavoipProvider>
-              </WidgetProvider>
+              <WidgetProvider>{options.children ?? null}</WidgetProvider>
             </PipProvider>
           </ThemeProvider>
         </MiddlewareRoot>

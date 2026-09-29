@@ -22,11 +22,11 @@ import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useMount } from "@/providers/MountProvider";
 import { useSettings } from "@/providers/settings/Provider";
-import { useWavoip } from "@/providers/WavoipProvider";
 import { DebugScreen } from "@/screens/DebugScreen";
 
 export const SettingsModal = forwardRef(() => {
-  const { wavoip, addDevice, devices } = useWavoip();
+  const middleware = useMiddleware();
+  const state = useStore();
   const { root } = useMount();
   const { audio: audioMenuSettings } = useSettings();
 

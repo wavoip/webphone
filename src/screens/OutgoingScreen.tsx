@@ -8,14 +8,13 @@ import { ContactAvatar } from "@/components/ContactAvatar";
 import MarqueeText from "@/components/MarqueeText";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
-import { useWavoip } from "@/providers/WavoipProvider";
 
 const calling_sound = new Audio(Calling);
 calling_sound.preload = "auto";
 const postalcode_sound = new Audio(PostalCode);
 
 export default function OutgoingScreen() {
-  const { callOutgoing, callStatus, callFailReason } = useWavoip();
+  const state = useStore();
   const middleware = useMiddleware();
   const keyboardInput = useStore(middleware.store, (s) => s.keyboardInput);
 

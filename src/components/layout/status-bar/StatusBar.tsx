@@ -10,12 +10,11 @@ import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { useMount } from "@/providers/MountProvider";
 import { usePip } from "@/providers/PipProvider";
-import { useWavoip } from "@/providers/WavoipProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  const { callActive } = useWavoip();
+  
   const { togglePip } = usePip();
   // Dono da janela não se fecha nem se destaca dela: os dois botões são do widget.
   const isFloating = useMount().layout === "floating";

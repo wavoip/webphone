@@ -58,7 +58,31 @@ export function MiddlewareRoot(props: Props) {
     middleware.browserNotifier.requestPermission().catch(() => {});
   }
 
+  applyDisplayName(middleware, config?.callSettings?.displayName);
+
   onCleanup(() => middleware.destroy());
 
   return <MiddlewareProvider middleware={middleware}>{props.children}</MiddlewareProvider>;
+}
+
+/** O nome que o integrador escolheu substitui o do peer, na oferta e na saída. */
+function applyDisplayName(middleware: Middleware, displayName?: string): void {
+  if (!displayName) return;
+
+  middleware.registry.use("offer", (offer, next) => {
+    offer.peer.displayName = displayName;
+    offer.peer.phone = displayName;
+    next();
+  });
+
+  onCleanup(
+    middleware.store.subscribe(
+      (s) => s.outgoing,
+      (outgoing) => {
+        if (!outgoing) return;
+        outgoing.peer.displayName = displayName;
+        outgoing.peer.phone = displayName;
+      },
+    ),
+  );
 }

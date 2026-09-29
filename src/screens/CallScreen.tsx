@@ -8,14 +8,13 @@ import { CopyablePeer } from "@/components/CopyablePeer";
 import { WaveSound } from "@/components/WaveSound";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { isTerminalCallStatus } from "@/middleware/store/callStatus";
-import { useWavoip } from "@/providers/WavoipProvider";
 import { useReconnectingSound } from "./useReconnectingSound";
 
 const hang_up_sound = new Audio(HangUp);
 const reconnecting_sound = new Audio(Reconnecting);
 
 export default function CallScreen() {
-  const { callActive, callStatus, peerMuted, callFailReason, callActiveStartedAt } = useWavoip();
+  const state = useStore();
 
   const [durationSeconds, setDurationSeconds] = useState(() =>
     callActiveStartedAt ? Math.floor((Date.now() - callActiveStartedAt) / 1000) : 0,

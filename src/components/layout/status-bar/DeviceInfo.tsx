@@ -8,7 +8,6 @@ import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { useMount } from "@/providers/MountProvider";
-import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
   settings: {
@@ -20,7 +19,7 @@ type Props = {
 };
 
 export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
-  const { removeDevice, disableDevice, enableDevice } = useWavoip();
+  const { device: deviceController } = useMiddleware().controllers;
   const middleware = useMiddleware();
   const { root } = useMount();
   const { showEnable, showRemove } = settings;

@@ -3,10 +3,9 @@ import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/lib/i18n";
-import { useWavoip } from "@/providers/WavoipProvider";
 
 export function DevicesAlert() {
-  const { devices } = useWavoip();
+  const state = useStore();
 
   const disconnectedDevices = useMemo(
     () => devices.filter(({ connectionStatus }) => connectionStatus === "disconnected"),
