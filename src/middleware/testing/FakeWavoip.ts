@@ -114,6 +114,8 @@ export class FakeOutgoingCall extends FakeEmitter<OutgoingCallEvents> implements
   unmute = async () => ok(undefined);
   cancel = async () => {
     this.cancelCalls++;
+    // A lib move o status antes de resolver; o dublê só é fiel se fizer o mesmo.
+    if (this.cancelResult.error === null) this.status = "CANCELLED";
     return this.cancelResult;
   };
 }

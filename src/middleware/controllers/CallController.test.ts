@@ -85,6 +85,7 @@ describe("CallController", () => {
       const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
+      outgoing.status = "FAILED";
       outgoing.emitEvent("failed", { code: "UNKNOWN" });
       expect(store.getState().callStatus).toBe("FAILED");
     });
@@ -106,6 +107,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
       outgoing.emitEvent("accepted", active);
+      active.status = "ENDED";
       active.emitEvent("ended");
       expect(store.getState().callStatus).toBe("ENDED");
     });
@@ -128,6 +130,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
       outgoing.emitEvent("accepted", active);
+      active.status = "FAILED";
       active.emitEvent("failed", { code: "SERVER_ERROR" });
       expect(store.getState().callFailReason).toBe("SERVER_ERROR");
     });
@@ -165,6 +168,7 @@ describe("CallController", () => {
       const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
+      outgoing.status = "REJECTED";
       outgoing.emitEvent("rejected");
       expect(store.getState().callStatus).toBe("REJECTED");
     });
@@ -173,6 +177,7 @@ describe("CallController", () => {
       const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
+      outgoing.status = "NOT_ANSWERED";
       outgoing.emitEvent("unanswered");
       expect(store.getState().callStatus).toBe("NOT_ANSWERED");
     });
@@ -273,13 +278,38 @@ describe("CallController", () => {
     });
   });
 
+  // A lib distingue os dois fins pelo `outcome.status` que viaja no `call:ended`, e o
+  // getter já reflete isso quando o evento dispara. Espelhar preserva a distinção sem o
+  // webphone precisar saber qual fim foi.
+  describe("end", () => {
+    it("does not read our own hangup as a dropped connection", async () => {
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      const active = new FakeActiveCall("c1", "tok-1");
+      wavoip.startCallResult = { data: outgoing, error: null };
+      await controller.start("5511");
+      active.status = "ACTIVE";
+      outgoing.emitEvent("accepted", active);
+
+      // Desligar derruba a mídia, e a mídia parando emite `connectionChanged`. Sem a
+      // guarda isso pintaria "DISCONNECTED" no instante em que o operador desliga.
+      active.end = async () => {
+        active.emitEvent("connectionChanged", "disconnected");
+        return active.endResult;
+      };
+
+      await controller.end();
+
+      expect(store.getState().callStatus).toBe("ENDED");
+    });
+  });
+
   describe("outgoing terminal status", () => {
     it("keeps CANCELLED when the SDK reports a cancelled ending", async () => {
       const outgoing = new FakeOutgoingCall("c1", "tok-1");
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
 
-      store.getState().setCallStatus("CANCELLED");
+      outgoing.status = "CANCELLED";
       outgoing.emitEvent("ended");
 
       expect(store.getState().callStatus).toBe("CANCELLED");
@@ -290,6 +320,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
 
+      outgoing.status = "ENDED";
       outgoing.emitEvent("ended");
 
       expect(store.getState().callStatus).toBe("ENDED");

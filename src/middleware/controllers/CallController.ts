@@ -38,6 +38,8 @@ function toRejection(error: StartCallFailure): StartCallRejection {
 
 export class CallController {
   private readonly deps: Deps;
+  /** Chamadas que nós mesmos estamos desligando; ver a guarda em `bindActive`. */
+  private readonly hangingUp = new Set<string>();
 
   constructor(deps: Deps) {
     this.deps = deps;
@@ -63,13 +65,25 @@ export class CallController {
    * terminal localmente, só quando o servidor confirma, e a UI ficaria parada na
    * duração correndo até a volta do WSS.
    */
+  /**
+   * O `end()` da lib é o único comando que não move o `status`: ele só vira `ENDED`
+   * quando o `call:ended` do servidor chega — e esse evento é suprimido justamente
+   * quando fomos nós que desligamos. Nem a promessa nem evento nenhum entregam o fim
+   * aqui, então este é o único lugar que grava status por conta própria.
+   */
   async end(): Promise<Result<void, CommandFailure>> {
     const { store } = this.deps;
     const { active, outgoing } = store.getState();
     if (!active) return outgoing ? this.cancel() : { data: undefined, error: null };
-    const result = await active.end();
-    store.getState().setCallStatus("ENDED");
-    return result;
+
+    this.hangingUp.add(active.id);
+    try {
+      const result = await active.end();
+      store.getState().setCallStatus("ENDED");
+      return result;
+    } finally {
+      this.hangingUp.delete(active.id);
+    }
   }
 
   /**
@@ -89,8 +103,13 @@ export class CallController {
     // operador pode já ter discado de novo.
     if (callId !== undefined && outgoing.id !== callId) return { data: undefined, error: null };
 
+    // Três desfechos, não dois. `ok`: a lib já pôs `CANCELLED` antes de resolver, então
+    // espelhar basta. `CALL_ALREADY_ANSWERED`: a chamada continua viva e o `accepted`
+    // vem — não há o que gravar. `ACK_TIMEOUT`: o servidor pode não ter visto, o outro
+    // lado pode estar tocando, e a mídia foi mantida de propósito; inventar status aqui
+    // seria mentir para a tela.
     const result = await outgoing.cancel();
-    if (result.error === null) store.getState().setCallStatus("CANCELLED");
+    if (result.error === null) this.mirror(outgoing);
     return result;
   }
 
@@ -158,40 +177,53 @@ export class CallController {
     this.deps.store.getState().removeOffer(id);
   }
 
+  /**
+   * O `status` da lib é a fonte da verdade e está sempre atual dentro de qualquer
+   * handler — o `settle` do servidor roda antes do `announce`. Espelhar é o que a v3
+   * pede: reconstruir a máquina de estado aqui fora era a v2 sobrevivendo, e cada
+   * transição chapada é uma chance de divergir da lib.
+   */
+  private mirror(call: OutgoingCall | ActiveCall): void {
+    this.deps.store.getState().setCallStatus(call.status);
+  }
+
   private bindOutgoing(call: OutgoingCall): void {
     const { store } = this.deps;
-    // `ringing` é a única subida que muda o status sem trocar de objeto: `accepted` passa
-    // a chamada para a ActiveCall, e o resto é terminal.
-    call.on("ringing", () => store.getState().setCallStatus(call.status));
+    const mirror = () => this.mirror(call);
+
+    call.on("ringing", mirror);
+    call.on("rejected", mirror);
+    call.on("unanswered", mirror);
+    call.on("ended", mirror);
+    call.on("failed", (error) => {
+      store.getState().setCallFailReason(error.code);
+      mirror();
+    });
     call.on("accepted", (active) => {
       store.getState().setOutgoing(undefined);
       this.bindActive(active);
       store.getState().setActive(active);
-      store.getState().setCallStatus("ACTIVE");
+      this.mirror(active);
       store.getState().setPeerMuted(active.peer.muted ?? false);
-    });
-    call.on("rejected", () => store.getState().setCallStatus("REJECTED"));
-    call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));
-    call.on("failed", (error) => this.failWith(error.code));
-    // Rede de segurança, e não o caminho principal: cada desfecho tem o seu próprio
-    // evento, e desistir daqui grava "CANCELLED" no `cancel()`. Mas a falha na passagem
-    // de mídia depois do `answered` emite `ended` sozinho, e sem isto a chamada ficaria
-    // não terminal para sempre: tela presa, sem evento público, sem reset.
-    call.on("ended", () => {
-      const { callStatus } = store.getState();
-      if (!isTerminalCallStatus(callStatus)) store.getState().setCallStatus("ENDED");
     });
   }
 
   private bindActive(call: ActiveCall): void {
     const { store } = this.deps;
-    call.on("ended", () => store.getState().setCallStatus("ENDED"));
+    const mirror = () => this.mirror(call);
+
+    call.on("ended", mirror);
     call.on("peerMuteChanged", (muted) => store.getState().setPeerMuted(muted));
-    call.on("failed", (error) => this.failWith(error.code));
-    // A v3 trocou o status `DISCONNECTED` por uma perna de conexão caída. A guarda de
-    // terminal é o que impede um "disconnected" atrasado de desfazer um fim já gravado.
+    call.on("failed", (error) => {
+      store.getState().setCallFailReason(error.code);
+      mirror();
+    });
+    // A perna caída não é status: a lib a separa de propósito. Mas desligar daqui também
+    // derruba a mídia, e o `connectionChanged` que vem disso não pode ser lido como
+    // queda — por isso a guarda do próprio desligamento, e não só a de terminal.
     call.on("connectionChanged", (connection) => {
       if (connection !== "disconnected") return;
+      if (this.hangingUp.has(call.id)) return;
       if (isTerminalCallStatus(store.getState().callStatus)) return;
       store.getState().setCallStatus("DISCONNECTED");
     });
