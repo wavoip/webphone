@@ -6,6 +6,7 @@ import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
+import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import { usePip } from "@/providers/PipProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
@@ -41,6 +42,8 @@ export default function StatusBar() {
         <Button
           type="button"
           variant={"ghost"}
+          title={t("Picture-in-picture")}
+          aria-label={t("Picture-in-picture")}
           className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
           onClick={() => togglePip()}
         >
@@ -56,6 +59,8 @@ export default function StatusBar() {
         <Button
           type="button"
           variant={"ghost"}
+          title={t("Close")}
+          aria-label={t("Close")}
           className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
           onClick={() => close()}
         >

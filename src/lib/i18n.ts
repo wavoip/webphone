@@ -49,6 +49,10 @@ export type TranslationKey =
   | "Timed out"
   | "Canceled by the caller"
   | "Latency (ms)"
+  | "Call"
+  | "Erase digit"
+  | "Recent numbers"
+  | "Picture-in-picture"
   | "Unknown"
   | "Ignore"
   | "Reconnecting"
@@ -168,6 +172,10 @@ const ptBR: LocaleResource = {
   "Call ended": "Chamada encerrada",
   "Canceled by the caller": "Cancelada por quem ligou",
   "Latency (ms)": "Latência (ms)",
+  Call: "Ligar",
+  "Erase digit": "Apagar dígito",
+  "Recent numbers": "Números recentes",
+  "Picture-in-picture": "Picture-in-picture",
   "Accepted by another user": "Aceita por outro usuário",
   "Rejected by the app": "Rejeitada pelo aplicativo",
   "Timed out": "Tempo limite",
@@ -286,6 +294,10 @@ const es: LocaleResource = {
   "Call ended": "Llamada finalizada",
   "Canceled by the caller": "Cancelada por quien llamó",
   "Latency (ms)": "Latencia (ms)",
+  Call: "Llamar",
+  "Erase digit": "Borrar dígito",
+  "Recent numbers": "Números recientes",
+  "Picture-in-picture": "Picture-in-picture",
   "Accepted by another user": "Aceptada por otro usuario",
   "Rejected by the app": "Rechazada por la aplicación",
   "Timed out": "Tiempo agotado",

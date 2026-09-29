@@ -1,4 +1,8 @@
 @import "tailwindcss" prefix(wv);
+/* O Tailwind v4 varre a partir da raiz do Vite, e ela difere entre os dois modos: o do
+   PWA tem raiz em `src/shells/app` e geraria um CSS vazio. Apontar a fonte aqui deixa os
+   dois builds enxergando as mesmas classes. */
+@source "../";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));

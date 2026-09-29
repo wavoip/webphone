@@ -176,6 +176,9 @@ export default function KeyboardScreen() {
           />
           <button
             type="button"
+            title={t("Recent numbers")}
+            aria-label={t("Recent numbers")}
+            aria-expanded={recentOpen}
             onMouseDown={(e) => e.preventDefault()} // não rouba o foco do input
             onClick={() => setRecentOpen((open) => !open)}
             className="wv:absolute wv:right-0 wv:top-1/2 wv:-translate-y-1/2 wv:p-1 wv:text-muted-400 wv:cursor-pointer"
@@ -245,6 +248,8 @@ export default function KeyboardScreen() {
             type="button"
             variant="secondary"
             size="icon"
+            title={t("Erase digit")}
+            aria-label={t("Erase digit")}
             onClick={() => {
               backspace_audio.pause();
               backspace_audio.currentTime = 0;
@@ -272,6 +277,8 @@ export default function KeyboardScreen() {
             <Button
               type="submit"
               size="icon"
+              title={t("Call")}
+              aria-label={t("Call")}
               className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             >
               <PhoneIcon className="wv:size-7" weight="fill" />

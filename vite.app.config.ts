@@ -52,5 +52,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist-app"),
     emptyOutDir: true,
+    // O pacote npm já sai legível, então o mapa não esconde nada que o widget não mostre
+    // — e sem ele o relatório de erro de quem usa o PWA aponta para código minificado.
+    sourcemap: true,
   },
 });
