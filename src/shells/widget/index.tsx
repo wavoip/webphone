@@ -5,8 +5,8 @@ import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
 import { maybeUpgrade } from "@/lib/auto-update";
 import { webphoneAPIPromise } from "@/lib/webphone-api/api";
+import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import type { WebphoneSettings } from "@/providers/settings/settings";
-import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
@@ -50,7 +50,7 @@ class WebPhoneComponent {
     root.appendChild(container);
 
     this.root = ReactDOM.createRoot(container);
-    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} wavoip={wavoip} />);
+    this.root.render(<App root={root} styleSource={shadowRoot} config={config || {}} wavoip={wavoip} />);
 
     const webphoneAPI = await webphoneAPIPromise();
     window.wavoip = webphoneAPI;

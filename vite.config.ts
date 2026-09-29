@@ -36,7 +36,7 @@ export default defineConfig({
   build: {
     cssCodeSplit: false,
     lib: {
-      entry: "src/index.tsx",
+      entry: "src/shells/widget/index.tsx",
       name: "wavoipWebphone",
       formats: ["es", "umd"],
       fileName: (format) => {

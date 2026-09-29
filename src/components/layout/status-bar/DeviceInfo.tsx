@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useMount } from "@/providers/MountProvider";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 type Props = {
@@ -23,7 +23,7 @@ type Props = {
 export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
   const { removeDevice, disableDevice, enableDevice } = useWavoip();
   const middleware = useMiddleware();
-  const { root } = useShadowRoot();
+  const { root } = useMount();
   const { showEnable, showRemove } = settings;
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -163,7 +163,7 @@ const TOKEN_MASK = "••••••••••••";
 
 function TokenLine({ token }: { token: string }) {
   const [visible, setVisible] = useState(false);
-  const { root } = useShadowRoot();
+  const { root } = useMount();
 
   return (
     <div className="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:min-w-0">

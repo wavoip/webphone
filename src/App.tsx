@@ -5,9 +5,9 @@ import { getLanguage, normalizeLanguage, subscribeLocale } from "@/lib/i18n";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
+import { MountProvider } from "@/providers/MountProvider";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { PipProvider } from "@/providers/PipProvider";
-import { ShadowProvider } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -15,25 +15,25 @@ import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type Props = {
-  shadowRoot: ShadowRoot;
   root: HTMLDivElement;
+  styleSource: ParentNode;
   config: WebphoneSettings;
   wavoip?: Wavoip;
 };
 
-export function App({ shadowRoot, root, config, wavoip }: Props) {
+export function App({ root, styleSource, config, wavoip }: Props) {
   useSyncExternalStore(
     subscribeLocale,
     () => normalizeLanguage(getLanguage()),
     () => normalizeLanguage(config.language),
   );
   return (
-    <ShadowProvider shadowRoot={shadowRoot} root={root}>
+    <MountProvider root={root} styleSource={styleSource}>
       <SettingsProvider config={config}>
         <MiddlewareRoot wavoip={wavoip} config={config}>
           <LanguageProvider initial={config.language}>
             <ThemeProvider root={root}>
-              <PipProvider shadowRoot={shadowRoot}>
+              <PipProvider styleSource={styleSource}>
                 <WidgetProvider>
                   <NotificationsProvider>
                     <WavoipProvider>
@@ -48,6 +48,6 @@ export function App({ shadowRoot, root, config, wavoip }: Props) {
           </LanguageProvider>
         </MiddlewareRoot>
       </SettingsProvider>
-    </ShadowProvider>
+    </MountProvider>
   );
 }

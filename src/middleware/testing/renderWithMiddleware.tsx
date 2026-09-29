@@ -6,9 +6,9 @@ import type { FocusTracker } from "@/middleware/browser/focusTracker";
 import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { MountContext } from "@/providers/MountProvider";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { PipProvider } from "@/providers/PipProvider";
-import { ShadowRootContext } from "@/providers/ShadowRootProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -63,7 +63,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
   const rendered = render(
-    <ShadowRootContext.Provider value={{ shadowRoot, root }}>
+    <MountContext.Provider value={{ root, styleSource: shadowRoot }}>
       <SettingsProvider config={options.config ?? {}}>
         <MiddlewareRoot
           wavoip={fake.asWavoip()}
@@ -72,7 +72,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           focus={options.focus}
         >
           <ThemeProvider root={root}>
-            <PipProvider shadowRoot={shadowRoot}>
+            <PipProvider styleSource={shadowRoot}>
               <WidgetProvider>
                 <NotificationsProvider>
                   {/* As telas chegam ao SDK pelo `useWavoip`, então sem a ponte nenhuma
@@ -84,7 +84,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           </ThemeProvider>
         </MiddlewareRoot>
       </SettingsProvider>
-    </ShadowRootContext.Provider>,
+    </MountContext.Provider>,
   );
   const api = await webphoneAPIPromise();
   return { rendered, wavoip: fake, api };

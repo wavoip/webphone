@@ -1,6 +1,6 @@
 import type { ActiveCall, AudioAnalyser } from "@wavoip/wavoip-api/web";
 import { useEffect, useRef } from "react";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useMount } from "@/providers/MountProvider";
 
 type Props = {
   call?: ActiveCall;
@@ -10,7 +10,7 @@ const BARS = 15;
 const GAP = 2;
 
 export function WaveSound({ call }: Props) {
-  const { root } = useShadowRoot();
+  const { root } = useMount();
   const theme = root.classList.contains("dark") ? "dark" : "light";
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const smoothRef = useRef<number[]>(Array(BARS).fill(0));

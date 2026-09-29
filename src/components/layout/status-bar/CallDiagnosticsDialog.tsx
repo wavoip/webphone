@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { t } from "@/lib/i18n";
 import { useDebugInfo } from "@/providers/DebugProvider";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useMount } from "@/providers/MountProvider";
 
 const STATS_POLL_MS = 200;
 
@@ -27,7 +27,7 @@ function ms(value: number | null): string {
 }
 
 export function CallDiagnosticsDialog({ call, triggerClassName, children }: Props) {
-  const { root } = useShadowRoot();
+  const { root } = useMount();
   const debug = useDebugInfo();
   const [open, setOpen] = useState(false);
   const [stats, setStats] = useState<CallStats | null>(null);

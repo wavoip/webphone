@@ -2,7 +2,7 @@ import * as React from "react";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 import { cn } from "@/lib/utils";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useMount } from "@/providers/MountProvider";
 
 function Popover({ ...props }: React.ComponentProps<typeof PopoverPrimitive.Root>) {
   return <PopoverPrimitive.Root data-slot="popover" {...props} />;
@@ -18,7 +18,7 @@ function PopoverContent({
   sideOffset = 4,
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  const { root } = useShadowRoot();
+  const { root } = useMount();
 
   return (
     <PopoverPrimitive.Portal container={root}>

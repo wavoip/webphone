@@ -15,21 +15,20 @@ export const PipContext = createContext<PipContextType | undefined>(undefined);
 export const PIP_WINDOW_SIZE = { width: 320, height: 450 } as const;
 
 type Props = {
-  shadowRoot: ShadowRoot;
+  styleSource: ParentNode;
   children: ReactNode;
 };
 
-async function createNewPipWindow(shadowRoot: ShadowRoot): Promise<Window> {
+async function createNewPipWindow(styleSource: ParentNode): Promise<Window> {
   // @ts-expect-error
   const newPipWindow = await window.documentPictureInPicture.requestWindow(PIP_WINDOW_SIZE);
   newPipWindow.document.body.style.margin = "0";
   newPipWindow.document.body.style.overflow = "hidden";
   newPipWindow.document.body.style.backgroundColor = "#1a1b1e";
 
-  // Só o CSS do ShadowRoot: as folhas do documento são da página do cliente, e ler
-  // `cssRules` de uma folha de outra origem (a CDN do jsDelivr) lança SecurityError e
-  // aborta a abertura do PiP.
-  shadowRoot.querySelectorAll('style, link[rel="stylesheet"]').forEach((el) => {
+  // Quem escolhe a fonte é o shell — ver `Mount.styleSource`, que explica por que o
+  // widget não pode clonar as folhas do documento.
+  styleSource.querySelectorAll('style, link[rel="stylesheet"]').forEach((el) => {
     newPipWindow.document.head.appendChild(el.cloneNode(true));
   });
 
@@ -47,7 +46,7 @@ async function createNewPipWindow(shadowRoot: ShadowRoot): Promise<Window> {
   return newPipWindow;
 }
 
-export function PipProvider({ shadowRoot, children }: Props) {
+export function PipProvider({ styleSource, children }: Props) {
   const [pipWindow, setPipWindow] = useState<Window | null>(null);
   const isPiP = !!pipWindow;
   const middleware = useMiddleware();
@@ -60,12 +59,12 @@ export function PipProvider({ shadowRoot, children }: Props) {
       console.warn("Picture-in-Picture not supported in this browser.");
       return;
     }
-    const newPipWindow = await createNewPipWindow(shadowRoot);
+    const newPipWindow = await createNewPipWindow(styleSource);
     newPipWindow.addEventListener("pagehide", () => {
       setPipWindow(null);
     });
     setPipWindow(newPipWindow);
-  }, [pipWindow, shadowRoot]);
+  }, [pipWindow, styleSource]);
 
   const closePip = useCallback(() => {
     if (pipWindow) {

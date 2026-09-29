@@ -3,8 +3,8 @@ import { useStore } from "zustand";
 import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { PipPortal } from "@/components/PipPortal";
 import { useMiddleware } from "@/middleware/react/hooks";
+import { useMount } from "@/providers/MountProvider";
 import { usePip } from "@/providers/PipProvider";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
@@ -14,7 +14,7 @@ export function WebPhone() {
   const middleware = useMiddleware();
   const screen = useStore(middleware.store, (s) => s.screen);
   const { startDrag, stopDrag } = useWidget();
-  const { root } = useShadowRoot();
+  const { root } = useMount();
   const resolvedTheme = root.classList.contains("dark") ? "dark" : "light";
   const { pipWindow, isPiP } = usePip();
 

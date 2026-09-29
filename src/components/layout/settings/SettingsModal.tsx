@@ -29,14 +29,14 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import { useMount } from "@/providers/MountProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useWavoip } from "@/providers/WavoipProvider";
 import { DebugScreen } from "@/screens/DebugScreen";
 
 export const SettingsModal = forwardRef(() => {
   const { wavoip, addDevice, devices } = useWavoip();
-  const { root } = useShadowRoot();
+  const { root } = useMount();
   const { audio: audioMenuSettings } = useSettings();
 
   const [showAudio] = useState(audioMenuSettings.show);

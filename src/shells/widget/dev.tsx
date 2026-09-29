@@ -1,5 +1,5 @@
 import { Wavoip, webRuntime } from "@wavoip/wavoip-api/web";
-import webphone from "@/index.tsx";
+import webphone from "@/shells/widget/index.tsx";
 
 console.log("Rendering");
 

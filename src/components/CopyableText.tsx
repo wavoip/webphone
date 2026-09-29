@@ -1,7 +1,7 @@
 import { type KeyboardEvent, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/lib/i18n";
-import { ShadowRootContext } from "@/providers/ShadowRootProvider";
+import { MountContext } from "@/providers/MountProvider";
 
 type Props = {
   value: string;
@@ -15,7 +15,7 @@ const FEEDBACK_DURATION_MS = 1500;
 export function CopyableText({ value, ariaLabel, className, children }: Props) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const shadow = useContext(ShadowRootContext);
+  const shadow = useContext(MountContext);
 
   useEffect(() => {
     return () => {
