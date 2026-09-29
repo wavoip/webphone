@@ -1,5 +1,5 @@
 import { type Wavoip, Wavoip as WavoipCtor, webRuntime } from "@wavoip/wavoip-api/web";
-import { type ReactNode, useEffect, useState } from "react";
+import { type JSX, onCleanup } from "solid-js";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { getSettings } from "@/lib/device-settings";
@@ -11,12 +11,12 @@ import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { MiddlewareProvider } from "@/middleware/react/hooks";
+import { MiddlewareProvider } from "@/middleware/solid/context";
 import { useSettings } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
 type Props = {
-  children: ReactNode;
+  children: JSX.Element;
   wavoip?: Wavoip;
   config?: WebphoneSettings;
   notifier?: BrowserNotifier;
@@ -24,10 +24,11 @@ type Props = {
 };
 
 /** Abaixo do `SettingsProvider`, que ele lê, e acima dos providers que leem o store dele. */
-export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notifier, focus }: Props) {
+export function MiddlewareRoot(props: Props) {
   const settings = useSettings();
+  const { wavoip: injectedWavoip, config, notifier, focus } = props;
 
-  const [middleware] = useState(() => {
+  const middleware = (() => {
     const storedTokens = [...getSettings().keys()];
     const language = config?.language;
     if (language) setWebphoneLanguage(language);
@@ -51,19 +52,13 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
     bootstrapStore({ store: mw.store, config: config ?? {} });
     setPublicApiBase(buildPublicApi(mw));
     return mw;
-  });
+  })();
 
-  useEffect(() => {
-    if (config?.offerNotification?.autoRequest) {
-      middleware.browserNotifier.requestPermission().catch(() => {});
-    }
-  }, [middleware, config?.offerNotification?.autoRequest]);
+  if (config?.offerNotification?.autoRequest) {
+    middleware.browserNotifier.requestPermission().catch(() => {});
+  }
 
-  useEffect(() => {
-    return () => {
-      middleware.destroy();
-    };
-  }, [middleware]);
+  onCleanup(() => middleware.destroy());
 
-  return <MiddlewareProvider middleware={middleware}>{children}</MiddlewareProvider>;
+  return <MiddlewareProvider middleware={middleware}>{props.children}</MiddlewareProvider>;
 }

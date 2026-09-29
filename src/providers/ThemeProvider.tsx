@@ -1,39 +1,40 @@
-import { useCallback, useEffect } from "react";
-import { useStore } from "zustand";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { createEffect, type JSX } from "solid-js";
+import { useMiddleware, useStore } from "@/middleware/solid/context";
 import type { Theme } from "@/providers/settings/settings";
 
 type ThemeProviderProps = {
-  children: React.ReactNode;
+  children: JSX.Element;
   root: HTMLDivElement;
   storageKey?: string;
 };
 
-export function ThemeProvider({ children, root, storageKey = "webphone-ui-theme" }: ThemeProviderProps) {
-  const middleware = useMiddleware();
-  const theme = useStore(middleware.store, (s) => s.theme);
+export function ThemeProvider(props: ThemeProviderProps) {
+  const state = useStore();
+  const storageKey = () => props.storageKey ?? "webphone-ui-theme";
 
-  useEffect(() => {
-    root.classList.remove("light", "dark");
-    const applied = theme === "system" ? systemTheme() : theme;
-    root.classList.add(applied);
-  }, [theme, root]);
+  createEffect(() => {
+    props.root.classList.remove("light", "dark");
+    props.root.classList.add(state.theme === "system" ? systemTheme() : state.theme);
+  });
 
-  useEffect(() => {
-    localStorage.setItem(storageKey, theme);
-  }, [theme, storageKey]);
+  createEffect(() => {
+    localStorage.setItem(storageKey(), state.theme);
+  });
 
-  return <>{children}</>;
+  return <>{props.children}</>;
 }
 
 function systemTheme(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-export const useTheme = (): { theme: Theme; setTheme: (theme: Theme) => void } => {
+export function useTheme(): { readonly theme: Theme; setTheme: (theme: Theme) => void } {
   const middleware = useMiddleware();
-  const theme = useStore(middleware.store, (s) => s.theme);
-  const setStoreTheme = useStore(middleware.store, (s) => s.setTheme);
-  const setTheme = useCallback((next: Theme) => setStoreTheme(next), [setStoreTheme]);
-  return { theme, setTheme };
-};
+  const state = middleware.store.getState();
+  return {
+    get theme() {
+      return state.theme;
+    },
+    setTheme: (next: Theme) => state.setTheme(next),
+  };
+}

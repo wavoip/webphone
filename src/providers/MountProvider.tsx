@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useContext } from "react";
+import { createContext, type JSX, useContext } from "solid-js";
 
 /**
  * O que o shell entrega à interface. O widget monta dentro de um shadow root fechado na
@@ -24,12 +24,13 @@ export type Mount = {
   rootNode: ShadowRoot | Document;
 };
 
-export const MountContext = createContext<Mount | null>(null);
+export const MountContext = createContext<Mount>();
 
-type Props = Mount & { children: ReactNode };
+type Props = Mount & { children: JSX.Element };
 
-export function MountProvider({ children, layout, root, rootNode }: Props) {
-  return <MountContext.Provider value={{ layout, root, rootNode }}>{children}</MountContext.Provider>;
+export function MountProvider(props: Props) {
+  const value = { layout: props.layout, root: props.root, rootNode: props.rootNode };
+  return <MountContext.Provider value={value}>{props.children}</MountContext.Provider>;
 }
 
 export function useMount(): Mount {

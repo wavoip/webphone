@@ -1,12 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useSyncExternalStore,
-} from "react";
+import { createContext, createSignal, type JSX, onCleanup, onMount, useContext } from "solid-js";
 import {
   setLanguage as applyLanguage,
   getLanguage,
@@ -16,40 +8,40 @@ import {
 } from "@/lib/i18n";
 
 type LanguageContextValue = {
-  language: Language;
+  readonly language: Language;
   setLanguage: (lang: Language) => void;
 };
 
-const LanguageContext = createContext<LanguageContextValue | null>(null);
+const LanguageContext = createContext<LanguageContextValue>();
 
 type Props = {
-  children: ReactNode;
+  children: JSX.Element;
   initial?: Language;
 };
 
 /**
- * Troca de língua re-renderiza, e não remonta com `key`: remontar perderia estado de
- * UI sem relação, como o diálogo de configurações aberto.
+ * O `i18n` é um módulo, e não um componente: quem troca o idioma pode ser a tela de
+ * preferências ou o integrador. O `subscribeLocale` alimenta o sinal direto, venha de
+ * onde vier.
  */
-export function LanguageProvider({ children, initial }: Props) {
-  useEffect(() => {
-    const resolved = normalizeLanguage(initial ?? getLanguage());
+export function LanguageProvider(props: Props) {
+  const [language, setLanguageSignal] = createSignal(normalizeLanguage(props.initial ?? getLanguage()));
+
+  onMount(() => {
+    const resolved = normalizeLanguage(props.initial ?? getLanguage());
     if (resolved !== getLanguage()) applyLanguage(resolved);
-  }, [initial]);
+  });
 
-  const language = useSyncExternalStore(
-    subscribeLocale,
-    () => normalizeLanguage(getLanguage()),
-    () => normalizeLanguage(initial),
-  );
+  onCleanup(subscribeLocale(() => setLanguageSignal(normalizeLanguage(getLanguage()))));
 
-  const setLanguage = useCallback((next: Language) => {
-    applyLanguage(next);
-  }, []);
+  const value: LanguageContextValue = {
+    get language() {
+      return language();
+    },
+    setLanguage: applyLanguage,
+  };
 
-  const value = useMemo(() => ({ language, setLanguage }), [language, setLanguage]);
-
-  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+  return <LanguageContext.Provider value={value}>{props.children}</LanguageContext.Provider>;
 }
 
 export function useLanguage(): LanguageContextValue {
