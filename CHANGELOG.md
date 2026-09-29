@@ -55,13 +55,5 @@ distribuição — o widget de sempre e um PWA instalável.
   anterior. O reamostrador de áudio (~1,3 MB) só é baixado quando há chamada, e os sons
   viraram arquivos que o service worker cacheia em vez de texto embutido no JavaScript.
 
-### Por dentro
-
-- Uma biblioteca de ícones só, atrás de `src/components/icons.ts`.
-- Radix trocado por Ark UI, que compartilha as máquinas de estado do Zag entre React e
-  Solid — foi o que permitiu validar foco, teclado e shadow DOM antes de trocar de
-  framework.
-- O estado do núcleo virou sinais, e o `zustand` saiu. Mudança vinda de fora — o integrador
-  chamando `window.wavoip.*` — atualiza a interface pelo mesmo caminho de um clique.
-- O status da chamada passou a ser **espelhado** da lib em vez de remontado aqui: dez
-  transições escritas à mão viraram uma linha.
+> Mudanças internas — arquitetura, ferramentas, o que muda para quem desenvolve o
+> webphone — ficam no [CHANGELOG-INTERNAL.md](./CHANGELOG-INTERNAL.md).
