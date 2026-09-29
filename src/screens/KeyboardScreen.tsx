@@ -232,7 +232,7 @@ export default function KeyboardScreen() {
             >
               <p className="wv:text-[24px] wv:leading-6 wv:font-semibold">{digit}</p>
               {!!letters && (
-                <p className="wv:text-[10px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
+                <p className="wv:text-[12px] wv:font-light wv:text-muted-400 wv:tracking-[.15em]">{letters}</p>
               )}
             </Button>
           ))}
