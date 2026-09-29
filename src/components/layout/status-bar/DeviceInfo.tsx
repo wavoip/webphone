@@ -1,5 +1,4 @@
-import { CopyIcon, EyeIcon, EyeSlashIcon, PhoneIcon, QrCodeIcon, TrashIcon, WarningIcon } from "@phosphor-icons/react";
-import { PowerIcon } from "@phosphor-icons/react/dist/ssr";
+import { Copy, Eye, EyeSlash, Phone, Power, QrCode, Trash, Warning } from "@/components/icons";
 import { useState } from "react";
 import { CopyableText } from "@/components/CopyableText";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,7 @@ export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
                   className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
                   onClick={() => middleware.controllers.device.wakeUp(device.token)}
                 >
-                  <PowerIcon className="wv:size-3.5" />
+                  <Power className="wv:size-3.5" />
                 </TooltipTrigger>
                 <TooltipContent container={root}>
                   <p>{t("Power on device")}</p>
@@ -152,7 +151,7 @@ function PhoneLine({ phone }: { phone: string }) {
   return (
     <CopyableText value={phone} ariaLabel={t("Copy phone")}>
       <span className="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
-        <PhoneIcon size={16} weight="fill" className="wv:text-green-500" />
+        <Phone size={16} weight="fill" className="wv:text-green-500" />
         <span className="wv:truncate">{phone}</span>
       </span>
     </CopyableText>
@@ -180,7 +179,7 @@ function TokenLine({ token }: { token: string }) {
           className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
           onClick={() => setVisible((v) => !v)}
         >
-          {visible ? <EyeSlashIcon className="wv:size-3.5" /> : <EyeIcon className="wv:size-3.5" />}
+          {visible ? <EyeSlash className="wv:size-3.5" /> : <Eye className="wv:size-3.5" />}
         </TooltipTrigger>
         <TooltipContent container={root}>
           <p>{visible ? t("Hide token") : t("Show token")}</p>
@@ -188,7 +187,7 @@ function TokenLine({ token }: { token: string }) {
       </Tooltip>
       <CopyableText value={token} ariaLabel={t("Copy token")}>
         <span className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:text-muted-foreground wv:hover:text-foreground">
-          <CopyIcon className="wv:size-3.5" />
+          <Copy className="wv:size-3.5" />
         </span>
       </CopyableText>
     </div>
@@ -198,7 +197,7 @@ function TokenLine({ token }: { token: string }) {
 function RestrictionBar({ until }: { until: Date | null }) {
   return (
     <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
-      <WarningIcon size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
+      <Warning size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
       <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
       {until && (
         <span className="wv:text-[12px] wv:text-foreground/70 wv:ml-auto wv:truncate">
@@ -261,7 +260,7 @@ function ActionCluster({
             className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer wv:text-muted-foreground wv:hover:text-foreground"
             onClick={onShowQRCode}
           >
-            <QrCodeIcon className="wv:size-4" />
+            <QrCode className="wv:size-4" />
           </TooltipTrigger>
           <TooltipContent container={root}>
             <p>{t("Show QR Code")}</p>
@@ -276,7 +275,7 @@ function ActionCluster({
             className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:text-destructive wv:hover:bg-destructive/10 wv:hover:cursor-pointer"
             onClick={onConfirmDelete}
           >
-            <TrashIcon className="wv:size-4" />
+            <Trash className="wv:size-4" />
           </TooltipTrigger>
           <TooltipContent container={root}>
             <p>{t("Delete")}</p>

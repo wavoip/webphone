@@ -1,5 +1,5 @@
 import type { ConnectivityIssue } from "@wavoip/wavoip-api/web";
-import { XIcon } from "lucide-react";
+import { X } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { type TranslationKey, t } from "@/lib/i18n";
 
@@ -31,7 +31,7 @@ export function ConnectivityBanner({ issue, onDismiss, onOpenDebug }: Props) {
         {t("Open diagnostics")}
       </Button>
       <button type="button" aria-label={t("Close")} onClick={onDismiss} className="wv:p-1">
-        <XIcon className="wv:size-4" />
+        <X className="wv:size-4" />
       </button>
     </div>
   );

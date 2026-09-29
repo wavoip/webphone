@@ -1,4 +1,4 @@
-import { WhatsappLogoIcon } from "@phosphor-icons/react";
+import { WhatsappLogo } from "@/components/icons";
 import { useEffect, useMemo } from "react";
 import { useStore } from "zustand";
 import Calling from "@/assets/sounds/calling.mp3";
@@ -81,7 +81,7 @@ export default function OutgoingScreen() {
           data-slot="call-type"
           className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 "
         >
-          <WhatsappLogoIcon size={20} />
+          <WhatsappLogo size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>
 

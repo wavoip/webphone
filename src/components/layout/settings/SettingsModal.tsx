@@ -1,14 +1,5 @@
-import {
-  ArrowLeftIcon,
-  DeviceMobileIcon,
-  GearIcon,
-  MicrophoneIcon,
-  PhoneIcon,
-  QrCodeIcon,
-  SlidersIcon,
-  StethoscopeIcon,
-} from "@phosphor-icons/react";
-import { PlusIcon } from "lucide-react";
+import { ArrowLeft, DeviceMobile, Gear, Microphone, Phone, QrCode, Sliders, Stethoscope } from "@/components/icons";
+import { Plus } from "@/components/icons";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
@@ -87,7 +78,7 @@ export const SettingsModal = forwardRef(() => {
         aria-label={t("Settings")}
         className="wv:hover:cursor-pointer wv:hover:bg-background wv:text-foreground wv:hover:text-foreground wv:p-0.5 wv:rounded-full wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:max-sm:p-2 wv:focus-visible:outline-none wv:focus-visible:ring-2 wv:focus-visible:ring-ring"
       >
-        <GearIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
+        <Gear className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
       <DialogContent
         container={root}
@@ -103,11 +94,11 @@ export const SettingsModal = forwardRef(() => {
                 onClick={() => setQrcode(null)}
                 className="wv:inline-flex wv:items-center wv:justify-center wv:size-9 wv:rounded-md wv:text-muted-foreground wv:hover:bg-accent wv:hover:text-foreground wv:hover:cursor-pointer wv:shrink-0"
               >
-                <ArrowLeftIcon className="wv:size-5" />
+                <ArrowLeft className="wv:size-5" />
               </button>
               <div className="wv:flex wv:flex-col wv:gap-0.5 wv:min-w-0 wv:flex-1">
                 <DialogTitle className="wv:flex wv:items-center wv:gap-2 wv:text-lg wv:font-semibold wv:text-foreground">
-                  <QrCodeIcon className="wv:size-5 wv:text-green-500" weight="fill" />
+                  <QrCode className="wv:size-5 wv:text-green-500" weight="fill" />
                   {t("Link a WhatsApp number")}
                 </DialogTitle>
                 <DialogDescription className="wv:text-sm wv:text-muted-foreground">
@@ -118,15 +109,15 @@ export const SettingsModal = forwardRef(() => {
 
             <ol className="wv:flex wv:flex-col wv:gap-2 wv:px-1 wv:text-sm wv:text-muted-foreground">
               <li className="wv:flex wv:items-start wv:gap-2">
-                <DeviceMobileIcon className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+                <DeviceMobile className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
                 <span>{t("Open WhatsApp on your phone")}</span>
               </li>
               <li className="wv:flex wv:items-start wv:gap-2">
-                <GearIcon className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+                <Gear className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
                 <span>{t("Tap menu, then Linked devices")}</span>
               </li>
               <li className="wv:flex wv:items-start wv:gap-2">
-                <QrCodeIcon className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+                <QrCode className="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
                 <span>{t("Point your camera at the code below")}</span>
               </li>
             </ol>
@@ -153,22 +144,22 @@ export const SettingsModal = forwardRef(() => {
               >
                 {showDevices && (
                   <TabsTrigger value="devices" className="wv:gap-2 wv:max-sm:min-h-9">
-                    <PhoneIcon className="wv:size-4" weight="duotone" />
+                    <Phone className="wv:size-4" weight="duotone" />
                     {t("Numbers")}
                   </TabsTrigger>
                 )}
                 {showAudio && (
                   <TabsTrigger value="settings" disabled className="wv:gap-2 wv:max-sm:min-h-9">
-                    <MicrophoneIcon className="wv:size-4" weight="duotone" />
+                    <Microphone className="wv:size-4" weight="duotone" />
                     Audio
                   </TabsTrigger>
                 )}
                 <TabsTrigger value="preferences" className="wv:gap-2 wv:max-sm:min-h-9">
-                  <SlidersIcon className="wv:size-4" weight="duotone" />
+                  <Sliders className="wv:size-4" weight="duotone" />
                   {t("Preferences")}
                 </TabsTrigger>
                 <TabsTrigger value="diagnostics" className="wv:gap-2 wv:max-sm:min-h-9">
-                  <StethoscopeIcon className="wv:size-4" weight="duotone" />
+                  <Stethoscope className="wv:size-4" weight="duotone" />
                   {t("Diagnostics")}
                 </TabsTrigger>
               </TabsList>
@@ -209,7 +200,7 @@ export const SettingsModal = forwardRef(() => {
                         }}
                         className="wv:bg-green-500 wv:hover:bg-green-600 wv:h-9 wv:aspect-square wv:p-0 wv:hover:cursor-pointer wv:max-sm:h-10"
                       >
-                        <PlusIcon className="wv:size-4" />
+                        <Plus className="wv:size-4" />
                       </Button>
                     </div>
                   )}

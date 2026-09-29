@@ -1,4 +1,4 @@
-import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
+import { WifiHigh, WifiLow, WifiMedium, WifiSlash, WifiX } from "@/components/icons";
 import type { ActiveCall, CallConnection } from "@wavoip/wavoip-api/web";
 import { useEffect, useState } from "react";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
@@ -82,7 +82,7 @@ export function Ping({ call }: Props) {
         call={call}
         triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text}`}
       >
-        <WifiXIcon className="wv:size-4" />
+        <WifiX className="wv:size-4" />
         <span className="wv:text-[12px] wv:font-medium">offline</span>
       </CallDiagnosticsDialog>
     );
@@ -105,10 +105,10 @@ export function Ping({ call }: Props) {
 }
 
 function SignalIcon({ strength, className }: { strength: ConnectionStrength; className?: string }) {
-  if (strength === ConnectionStrength.none) return <WifiSlashIcon className={className} />;
-  if (strength === ConnectionStrength.low) return <WifiLowIcon className={className} />;
-  if (strength === ConnectionStrength.medium) return <WifiMediumIcon className={className} />;
-  return <WifiHighIcon className={className} />;
+  if (strength === ConnectionStrength.none) return <WifiSlash className={className} />;
+  if (strength === ConnectionStrength.low) return <WifiLow className={className} />;
+  if (strength === ConnectionStrength.medium) return <WifiMedium className={className} />;
+  return <WifiHigh className={className} />;
 }
 
 function getPingLevel(ping: number): ConnectionStrength {

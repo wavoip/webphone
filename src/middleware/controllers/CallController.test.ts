@@ -149,6 +149,9 @@ describe("CallController", () => {
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
       outgoing.emitEvent("accepted", active);
+      // Só o servidor decide que a chamada caiu, e a lib grava isso no `status` antes de
+      // anunciar. O transporte piscando sem isso não é queda.
+      active.status = "DISCONNECTED";
       active.emitEvent("connectionChanged", "disconnected");
       expect(store.getState().callStatus).toBe("DISCONNECTED");
     });
@@ -159,7 +162,7 @@ describe("CallController", () => {
       wavoip.startCallResult = { data: outgoing, error: null };
       await controller.start("5511");
       outgoing.emitEvent("accepted", active);
-      store.getState().setCallStatus("ENDED");
+      active.status = "ENDED";
       active.emitEvent("connectionChanged", "disconnected");
       expect(store.getState().callStatus).toBe("ENDED");
     });
@@ -290,9 +293,11 @@ describe("CallController", () => {
       active.status = "ACTIVE";
       outgoing.emitEvent("accepted", active);
 
-      // Desligar derruba a mídia, e a mídia parando emite `connectionChanged`. Sem a
-      // guarda isso pintaria "DISCONNECTED" no instante em que o operador desliga.
+      // Como na lib: o status vira ENDED antes de a mídia parar, e a mídia parando emite
+      // `connectionChanged`. Derivar o status do payload pintaria "DISCONNECTED" no
+      // instante em que o operador desliga.
       active.end = async () => {
+        active.status = "ENDED";
         active.emitEvent("connectionChanged", "disconnected");
         return active.endResult;
       };

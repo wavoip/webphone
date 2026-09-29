@@ -8,7 +8,6 @@ import type {
   StartCallFailure,
   Wavoip,
 } from "@wavoip/wavoip-api/web";
-import { isTerminalCallStatus } from "@/middleware/store/callStatus";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/callSlice";
 
@@ -38,8 +37,6 @@ function toRejection(error: StartCallFailure): StartCallRejection {
 
 export class CallController {
   private readonly deps: Deps;
-  /** Chamadas que nós mesmos estamos desligando; ver a guarda em `bindActive`. */
-  private readonly hangingUp = new Set<string>();
 
   constructor(deps: Deps) {
     this.deps = deps;
@@ -66,24 +63,17 @@ export class CallController {
    * duração correndo até a volta do WSS.
    */
   /**
-   * O `end()` da lib é o único comando que não move o `status`: ele só vira `ENDED`
-   * quando o `call:ended` do servidor chega — e esse evento é suprimido justamente
-   * quando fomos nós que desligamos. Nem a promessa nem evento nenhum entregam o fim
-   * aqui, então este é o único lugar que grava status por conta própria.
+   * Desligar não emite evento público — o fim que o usuário causou ele já conhece —, por
+   * isso o espelho é explícito aqui em vez de vir de um handler.
    */
   async end(): Promise<Result<void, CommandFailure>> {
     const { store } = this.deps;
     const { active, outgoing } = store.getState();
     if (!active) return outgoing ? this.cancel() : { data: undefined, error: null };
 
-    this.hangingUp.add(active.id);
-    try {
-      const result = await active.end();
-      store.getState().setCallStatus("ENDED");
-      return result;
-    } finally {
-      this.hangingUp.delete(active.id);
-    }
+    const result = await active.end();
+    this.mirror(active);
+    return result;
   }
 
   /**
@@ -218,15 +208,11 @@ export class CallController {
       store.getState().setCallFailReason(error.code);
       mirror();
     });
-    // A perna caída não é status: a lib a separa de propósito. Mas desligar daqui também
-    // derruba a mídia, e o `connectionChanged` que vem disso não pode ser lido como
-    // queda — por isso a guarda do próprio desligamento, e não só a de terminal.
-    call.on("connectionChanged", (connection) => {
-      if (connection !== "disconnected") return;
-      if (this.hangingUp.has(call.id)) return;
-      if (isTerminalCallStatus(store.getState().callStatus)) return;
-      store.getState().setCallStatus("DISCONNECTED");
-    });
+    // Perna de mídia e estado da chamada são fatos diferentes, e só o servidor decide o
+    // segundo: a lib grava `DISCONNECTED` quando ele avisa, e deixa o status quieto
+    // quando é só o transporte piscando. Espelhar acerta os dois — derivar do payload
+    // pintaria queda toda vez que a mídia parasse, inclusive ao desligar daqui.
+    call.on("connectionChanged", mirror);
   }
 
   /** O motivo vem como `code`: a v3 não devolve texto legível, e quem traduz é o `i18n`. */

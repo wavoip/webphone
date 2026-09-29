@@ -1,4 +1,4 @@
-import { PictureInPictureIcon, XIcon } from "@phosphor-icons/react";
+import { PictureInPicture, X } from "@/components/icons";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
@@ -53,7 +53,7 @@ export default function StatusBar() {
             className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
             onClick={() => togglePip()}
           >
-            <PictureInPictureIcon className="wv:size-5 wv:max-sm:size-8 wv:pointer-events-none" weight="fill" />
+            <PictureInPicture className="wv:size-5 wv:max-sm:size-8 wv:pointer-events-none" weight="fill" />
           </Button>
         )}
         {callActive && <Ping call={callActive} />}
@@ -72,7 +72,7 @@ export default function StatusBar() {
             className="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
             onClick={() => close()}
           >
-            <XIcon className="wv:max-sm:size-6 wv:pointer-events-none" />
+            <X className="wv:max-sm:size-6 wv:pointer-events-none" />
           </Button>
         )}
       </div>

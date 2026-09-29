@@ -1,4 +1,4 @@
-import { BellIcon, CheckCircleIcon, PhoneIncomingIcon, PhoneXIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
+import { Bell, CheckCircle, PhoneIncoming, PhoneX, Warning, X } from "@/components/icons";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,11 @@ const typeLabel = (type: Notification["type"]): string => {
 };
 
 function TypeIcon({ type }: { type: Notification["type"] }) {
-  if (type === "MISSED_CALL") return <PhoneIncomingIcon size={14} weight="fill" />;
-  if (type === "CALL_FAILED") return <PhoneXIcon size={14} weight="fill" />;
-  if (type === "DEVICE_RESTRICTED") return <WarningIcon size={14} weight="fill" />;
-  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircleIcon size={14} weight="fill" />;
-  return <BellIcon size={14} weight="fill" />;
+  if (type === "MISSED_CALL") return <PhoneIncoming size={14} weight="fill" />;
+  if (type === "CALL_FAILED") return <PhoneX size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTED") return <Warning size={14} weight="fill" />;
+  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircle size={14} weight="fill" />;
+  return <Bell size={14} weight="fill" />;
 }
 
 function buildSecondary(n: Notification): string {
@@ -49,7 +49,7 @@ export function Notifications() {
         className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
         onClick={() => readNotifications()}
       >
-        <BellIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
+        <Bell className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
         {unreadCount > 0 && (
           <Badge
             className="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
@@ -102,7 +102,7 @@ export function Notifications() {
                     className="wv:p-0 wv:size-4 wv:rounded-full wv:hover:bg-foreground/10 wv:text-foreground/60"
                     onClick={() => removeNotification(n.id)}
                   >
-                    <XIcon size={10} />
+                    <X size={10} />
                   </Button>
                 </div>
               </li>

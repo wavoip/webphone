@@ -140,7 +140,11 @@ export class FakeActiveCall extends FakeEmitter<ActiveCallEvents> implements Act
 
   mute = async () => ok(undefined);
   unmute = async () => ok(undefined);
-  end = async () => this.endResult;
+  end = async () => {
+    // A lib move o status antes de parar a mídia; o dublê só é fiel se fizer o mesmo.
+    if (this.endResult.error === null) this.status = "ENDED";
+    return this.endResult;
+  };
   getStats = async () => makeEmptyCallStats();
 }
 

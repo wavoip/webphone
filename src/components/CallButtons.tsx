@@ -1,12 +1,4 @@
-import {
-  DotsNineIcon,
-  MicrophoneIcon,
-  MicrophoneSlashIcon,
-  PauseIcon,
-  PhoneSlashIcon,
-  PhoneTransferIcon,
-  VideoCameraSlashIcon,
-} from "@phosphor-icons/react";
+import { DotsNine, Microphone, MicrophoneSlash, Pause, PhoneSlash, PhoneTransfer, VideoCameraSlash } from "@/components/icons";
 import type { ActiveCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -47,7 +39,7 @@ export function CallButtons({ call }: Props) {
           disabled
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PauseIcon size={32} weight="fill" />
+            <Pause size={32} weight="fill" />
           </p>
         </Button>
         <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
@@ -61,7 +53,7 @@ export function CallButtons({ call }: Props) {
           disabled
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <VideoCameraSlashIcon size={32} weight="fill" />
+            <VideoCameraSlash size={32} weight="fill" />
           </p>
         </Button>
         <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
@@ -77,7 +69,7 @@ export function CallButtons({ call }: Props) {
             disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold wv:text-[red] ">
-              <MicrophoneSlashIcon size={32} weight="fill" />
+              <MicrophoneSlash size={32} weight="fill" />
             </p>
           </Button>
           <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Falar</p>
@@ -92,7 +84,7 @@ export function CallButtons({ call }: Props) {
             disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-              <MicrophoneIcon size={32} weight="fill" />
+              <Microphone size={32} weight="fill" />
             </p>
           </Button>
           <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
@@ -109,7 +101,7 @@ export function CallButtons({ call }: Props) {
           disabled
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PhoneTransferIcon size={32} weight="fill" />{" "}
+            <PhoneTransfer size={32} weight="fill" />{" "}
           </p>
         </Button>
         <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
@@ -128,7 +120,7 @@ export function CallButtons({ call }: Props) {
           aria-busy={actionMade && isOutgoing}
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PhoneSlashIcon size={32} weight="fill" />
+            <PhoneSlash size={32} weight="fill" />
           </p>
         </Button>
         <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
@@ -143,7 +135,7 @@ export function CallButtons({ call }: Props) {
           disabled
         >
           <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <DotsNineIcon size={32} />
+            <DotsNine size={32} />
           </p>
         </Button>
         <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>

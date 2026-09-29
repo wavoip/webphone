@@ -1,4 +1,4 @@
-import { MicrophoneSlashIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
+import { MicrophoneSlash, WhatsappLogo } from "@/components/icons";
 import { useEffect, useMemo, useState } from "react";
 import HangUp from "@/assets/sounds/hangup.mp3";
 import Reconnecting from "@/assets/sounds/reconnecting.mp3";
@@ -79,7 +79,7 @@ export default function CallScreen() {
           data-slot="call-type"
           className="wv:flex wv:flex-row wv:justify-start wv:items-center wv:gap-2 wv:opacity-50 wv:text-foreground "
         >
-          <WhatsappLogoIcon size={20} />
+          <WhatsappLogo size={20} />
           <p className="wv:text-foreground wv:text-[14px] select-none">Whatsapp Audio</p>
         </div>
 
@@ -107,7 +107,7 @@ export default function CallScreen() {
         <div className="wv:flex wv:grow-1 wv:justify-center wv:items-end wv:pb-[15px] wv:opacity-80">
           {peerMuted ? (
             <div className="wv:flex wv:text-foreground wv:h-[40px] wv:items-center wv:justify-cente wv:gap-1">
-              <MicrophoneSlashIcon />
+              <MicrophoneSlash />
               <p className="wv:text-[16px]">Silenciado</p>
             </div>
           ) : (

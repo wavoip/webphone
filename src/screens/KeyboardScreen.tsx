@@ -1,4 +1,4 @@
-import { BackspaceIcon, CaretDownIcon, PhoneIcon, PhoneSlashIcon } from "@phosphor-icons/react";
+import { Backspace, CaretDown, Phone, PhoneSlash } from "@/components/icons";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -183,7 +183,7 @@ export default function KeyboardScreen() {
             onClick={() => setRecentOpen((open) => !open)}
             className="wv:absolute wv:right-0 wv:top-1/2 wv:-translate-y-1/2 wv:p-1 wv:text-muted-400 wv:cursor-pointer"
           >
-            <CaretDownIcon
+            <CaretDown
               weight="bold"
               className={`wv:size-4 wv:transition-transform wv:duration-200 ${recentOpen ? "wv:rotate-180" : ""}`}
             />
@@ -258,7 +258,7 @@ export default function KeyboardScreen() {
             }}
             className="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
           >
-            <BackspaceIcon className="wv:size-5 wv:max-sm:size-8" weight="fill" />
+            <Backspace className="wv:size-5 wv:max-sm:size-8" weight="fill" />
           </Button>
 
           {/* Discando, o botão verde vira a saída do loop. */}
@@ -271,7 +271,7 @@ export default function KeyboardScreen() {
               onClick={abortDial}
               className="wv:aspect-square wv:size-full wv:rounded-full wv:bg-[#e7000b] wv:hover:bg-red-800 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             >
-              <PhoneSlashIcon className="wv:size-7" weight="fill" />
+              <PhoneSlash className="wv:size-7" weight="fill" />
             </Button>
           ) : (
             <Button
@@ -281,7 +281,7 @@ export default function KeyboardScreen() {
               aria-label={t("Call")}
               className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             >
-              <PhoneIcon className="wv:size-7" weight="fill" />
+              <Phone className="wv:size-7" weight="fill" />
             </Button>
           )}
         </div>

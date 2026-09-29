@@ -1,5 +1,5 @@
-import { WarningIcon } from "@phosphor-icons/react";
-import { Badge } from "lucide-react";
+import { Warning } from "@/components/icons";
+import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/lib/i18n";
@@ -30,7 +30,7 @@ export function DevicesAlert() {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <WarningIcon className="wv:size-6 wv:text-foreground" />
+        <Warning className="wv:size-6 wv:text-foreground" />
       </TooltipTrigger>
       <TooltipContent className="wv:flex wv:flex-col wv:items-center wv:gap-1">
         {!!disconnectedDevices.length && (

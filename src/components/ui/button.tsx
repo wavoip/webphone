@@ -1,6 +1,6 @@
-import { ark } from "@ark-ui/react/factory";
+import { ark } from "@ark-ui/solid/factory";
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import { type ComponentProps, splitProps } from "solid-js";
 
 import { cn } from "@/lib/utils";
 
@@ -32,22 +32,16 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
+type Props = ComponentProps<"button"> & VariantProps<typeof buttonVariants> & { asChild?: boolean };
+
+function Button(props: Props) {
+  const [local, rest] = splitProps(props, ["class", "variant", "size", "asChild"]);
   return (
     <ark.button
       data-slot="button"
-      asChild={asChild}
-      className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      asChild={local.asChild}
+      class={cn(buttonVariants({ variant: local.variant, size: local.size, className: local.class }))}
+      {...rest}
     />
   );
 }

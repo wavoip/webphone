@@ -1,4 +1,4 @@
-import { UserIcon } from "@phosphor-icons/react";
+import { User } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
 
@@ -14,7 +14,7 @@ export function ContactAvatar({ src, displayName, className }: Props) {
   return (
     <Avatar className={className}>
       <AvatarImage src={src || undefined} />
-      <AvatarFallback>{initials !== null ? initials : <UserIcon size={20} />}</AvatarFallback>
+      <AvatarFallback>{initials !== null ? initials : <User size={20} />}</AvatarFallback>
     </Avatar>
   );
 }

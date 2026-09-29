@@ -1,4 +1,4 @@
-import { PhoneIcon } from "@phosphor-icons/react";
+import { Phone } from "@/components/icons";
 import {
   createContext,
   type MouseEvent,
@@ -174,7 +174,7 @@ export function WidgetProvider({ children }: Props) {
           data-closed={isClosed}
           className="wv:fixed wv:bottom-6 wv:right-6 wv:z-50 wv:transition wv:data-[closed=false]:hidden wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
         >
-          <PhoneIcon className="wv:size-8" />
+          <Phone className="wv:size-8" />
         </Button>
       )}
 

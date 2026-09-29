@@ -1,15 +1,6 @@
-import {
-  BrowserIcon,
-  CopyIcon,
-  GlobeIcon,
-  MicrophoneIcon,
-  PackageIcon,
-  StethoscopeIcon,
-  WarningIcon,
-  WaveformIcon,
-} from "@phosphor-icons/react";
+import { Browser, Copy, Globe, Microphone, Package, Stethoscope, Warning, Waveform } from "@/components/icons";
 import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
-import { Loader2Icon } from "lucide-react";
+import { CircleNotch } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
@@ -92,7 +83,7 @@ export function DebugScreen() {
     <div className="wv:flex wv:flex-col wv:h-full wv:text-foreground">
       <div className="wv:sticky wv:top-0 wv:z-10 wv:flex wv:items-center wv:justify-between wv:gap-2 wv:px-6 wv:pt-4 wv:pb-2 wv:max-sm:px-4 wv:bg-background/95 wv:backdrop-blur">
         <span className="wv:inline-flex wv:items-center wv:gap-1.5 wv:rounded-full wv:border wv:border-border/60 wv:bg-muted/40 wv:px-2 wv:py-0.5 wv:text-xs wv:font-mono wv:tabular-nums wv:text-muted-foreground">
-          <PackageIcon className="wv:size-3.5" weight="duotone" />v{__WEBPHONE_VERSION__}
+          <Package className="wv:size-3.5" weight="duotone" />v{__WEBPHONE_VERSION__}
         </span>
         <Button
           type="button"
@@ -102,7 +93,7 @@ export function DebugScreen() {
           aria-label={t("Copy report")}
           className="wv:gap-2"
         >
-          <CopyIcon className="wv:size-4" weight="duotone" />
+          <Copy className="wv:size-4" weight="duotone" />
           <span aria-live="polite">{copied ? "✓" : t("Copy report")}</span>
         </Button>
       </div>
@@ -111,12 +102,12 @@ export function DebugScreen() {
         ref={scrollRef}
         className="wv:flex-1 wv:overflow-auto wv:px-6 wv:pb-6 wv:max-sm:px-4 wv:flex wv:flex-col wv:gap-3"
       >
-        <Card title={t("Browser")} icon={<BrowserIcon className="wv:size-4" weight="duotone" />}>
+        <Card title={t("Browser")} icon={<Browser className="wv:size-4" weight="duotone" />}>
           <p className="wv:text-xs wv:font-mono wv:break-all wv:text-foreground">{system?.userAgent ?? "…"}</p>
         </Card>
 
         <div className="wv:grid wv:gap-3 wv:sm:grid-cols-2">
-          <Card title={t("Network")} icon={<GlobeIcon className="wv:size-4" weight="duotone" />}>
+          <Card title={t("Network")} icon={<Globe className="wv:size-4" weight="duotone" />}>
             <KeyValue
               k="online"
               v={system == null ? "…" : <StatusDot ok={system.online} label={system.online ? "online" : "offline"} />}
@@ -130,14 +121,14 @@ export function DebugScreen() {
             )}
           </Card>
 
-          <Card title={t("Audio devices")} icon={<MicrophoneIcon className="wv:size-4" weight="duotone" />}>
+          <Card title={t("Audio devices")} icon={<Microphone className="wv:size-4" weight="duotone" />}>
             <KeyValue k="microphone permission" v={system?.microphonePermission ?? "…"} />
             <KeyValue k="inputs" v={String(system?.audioInputs.length ?? 0)} />
             <KeyValue k="outputs" v={String(system?.audioOutputs.length ?? 0)} />
           </Card>
         </div>
 
-        <Card title={t("Environment check")} icon={<WaveformIcon className="wv:size-4" weight="duotone" />}>
+        <Card title={t("Environment check")} icon={<Waveform className="wv:size-4" weight="duotone" />}>
           <div className="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
             <Button
               type="button"
@@ -148,9 +139,9 @@ export function DebugScreen() {
               className="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
             >
               {checkupRunning ? (
-                <Loader2Icon className="wv:size-4 wv:animate-spin" />
+                <CircleNotch className="wv:size-4 wv:animate-spin" />
               ) : (
-                <WaveformIcon className="wv:size-4" weight="duotone" />
+                <Waveform className="wv:size-4" weight="duotone" />
               )}
               {t("Run check")}
             </Button>
@@ -193,7 +184,7 @@ export function DebugScreen() {
           )}
         </Card>
 
-        <Card title={t("Recent ICE diagnostics")} icon={<StethoscopeIcon className="wv:size-4" weight="duotone" />}>
+        <Card title={t("Recent ICE diagnostics")} icon={<Stethoscope className="wv:size-4" weight="duotone" />}>
           {debug.recentIceDiagnostics.length === 0 ? (
             <EmptyState />
           ) : (
@@ -221,7 +212,7 @@ export function DebugScreen() {
           )}
         </Card>
 
-        <Card title={t("Recent issues")} icon={<WarningIcon className="wv:size-4" weight="duotone" />}>
+        <Card title={t("Recent issues")} icon={<Warning className="wv:size-4" weight="duotone" />}>
           {debug.recentIssues.length === 0 ? (
             <EmptyState />
           ) : (

@@ -1,4 +1,4 @@
-import { PhoneIcon, PhoneSlash, WhatsappLogo, XIcon } from "@phosphor-icons/react";
+import { Phone, PhoneSlash, WhatsappLogo, X } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ContactAvatar } from "@/components/ContactAvatar";
@@ -114,7 +114,7 @@ export function OfferNotification({ offer }: Props) {
                 toast.dismiss(offer.id);
               }}
             >
-              <XIcon className="wv:size-5" weight="bold" />
+              <X className="wv:size-5" weight="bold" />
             </Button>
             <Button
               type="submit"
@@ -132,7 +132,7 @@ export function OfferNotification({ offer }: Props) {
                 });
               }}
             >
-              <PhoneIcon className="wv:size-5" weight="fill" />
+              <Phone className="wv:size-5" weight="fill" />
             </Button>
           </div>
         )}

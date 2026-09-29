@@ -1,13 +1,13 @@
-import { DesktopIcon, MoonIcon, SunIcon, TranslateIcon } from "@phosphor-icons/react";
+import { Desktop, Moon, Sun, Translate } from "@/components/icons";
 import { type Language, t } from "@/lib/i18n";
 import { useLanguage } from "@/providers/LanguageProvider";
 import type { Theme } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 const THEMES: { value: Theme; label: string; icon: React.ReactNode }[] = [
-  { value: "light", label: "Light", icon: <SunIcon className="wv:size-4" weight="duotone" /> },
-  { value: "dark", label: "Dark", icon: <MoonIcon className="wv:size-4" weight="duotone" /> },
-  { value: "system", label: "System", icon: <DesktopIcon className="wv:size-4" weight="duotone" /> },
+  { value: "light", label: "Light", icon: <Sun className="wv:size-4" weight="duotone" /> },
+  { value: "dark", label: "Dark", icon: <Moon className="wv:size-4" weight="duotone" /> },
+  { value: "system", label: "System", icon: <Desktop className="wv:size-4" weight="duotone" /> },
 ];
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -28,7 +28,7 @@ export function PreferencesConfig() {
     <div className="wv:flex wv:flex-col wv:gap-6">
       <Section
         title={t("Theme")}
-        icon={<SunIcon className="wv:size-4" weight="duotone" />}
+        icon={<Sun className="wv:size-4" weight="duotone" />}
         description={t("Pick light, dark, or follow the system")}
       >
         <div className="wv:grid wv:grid-cols-3 wv:gap-2">
@@ -48,7 +48,7 @@ export function PreferencesConfig() {
 
       <Section
         title={t("Language")}
-        icon={<TranslateIcon className="wv:size-4" weight="duotone" />}
+        icon={<Translate className="wv:size-4" weight="duotone" />}
         description={t("Switch the webphone interface language")}
       >
         <div className="wv:grid wv:grid-cols-1 wv:gap-2 wv:sm:grid-cols-3">

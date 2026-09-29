@@ -1,5 +1,5 @@
-import * as React from "react"
-import { ark } from "@ark-ui/react/factory"
+import { type ComponentProps, splitProps } from "solid-js"
+import { ark } from "@ark-ui/solid/factory"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -25,19 +25,16 @@ const badgeVariants = cva(
   }
 )
 
-function Badge({
-  className,
-  variant,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+type Props = ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean };
 
+function Badge(props: Props) {
+  const [local, rest] = splitProps(props, ["class", "variant", "asChild"]);
   return (
-    <ark.span asChild={asChild}
+    <ark.span
+      asChild={local.asChild}
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
+      class={cn(badgeVariants({ variant: local.variant }), local.class)}
+      {...rest}
     />
   )
 }
