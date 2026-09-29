@@ -1,4 +1,4 @@
-import { Slot } from "@radix-ui/react-slot";
+import { ark } from "@ark-ui/react/factory";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 
@@ -42,9 +42,14 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean;
   }) {
-  const Comp = asChild ? Slot : "button";
-
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+  return (
+    <ark.button
+      data-slot="button"
+      asChild={asChild}
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  );
 }
 
 export { Button, buttonVariants };

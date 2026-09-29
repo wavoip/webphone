@@ -1,4 +1,4 @@
-import { fireEvent, screen, within } from "@testing-library/react";
+import { act, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
@@ -39,7 +39,10 @@ function makeFailed(id: number, error = "Número não atende"): Notification {
 
 async function openPopover() {
   const trigger = await screen.findByRole("button", { name: /notificações/i });
-  fireEvent.click(trigger);
+  // O conteúdo do popover monta na entrada, e não no mesmo tick do clique.
+  await act(async () => {
+    fireEvent.click(trigger);
+  });
 }
 
 describe("Notifications popover — compact redesign", () => {
