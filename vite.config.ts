@@ -25,6 +25,9 @@ export default defineConfig({
     // o sourcemap do build inteiro.
     "process.env.NODE_ENV": JSON.stringify("production"),
   },
+  // O `public/` é do PWA: sem isto os ícones dele entram no pacote publicado, que é o
+  // `dist` inteiro (ver `files` no package.json).
+  publicDir: false,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
