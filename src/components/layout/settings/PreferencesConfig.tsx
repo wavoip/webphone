@@ -59,7 +59,7 @@ export function PreferencesConfig() {
               onClick={() => handleLanguage(opt.value)}
               aria-pressed={language === opt.value}
             >
-              <span className="wv:font-mono wv:text-[10px] wv:uppercase wv:text-muted-foreground">{opt.value}</span>
+              <span className="wv:font-mono wv:text-[12px] wv:uppercase wv:text-muted-foreground">{opt.value}</span>
               <span>{opt.label}</span>
             </OptionButton>
           ))}

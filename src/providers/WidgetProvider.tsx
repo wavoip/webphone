@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import { useMiddleware } from "@/middleware/react/hooks";
+import { useMount } from "@/providers/MountProvider";
 import { usePip } from "@/providers/PipProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -44,6 +45,8 @@ export function WidgetProvider({ children }: Props) {
   const { theme } = useTheme();
   const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
   const { isPiP } = usePip();
+  const { layout } = useMount();
+  const isFilled = layout === "filled";
 
   const { isClosed, position, buttonPosition, showWidget } = useStore(
     middleware.store,
@@ -90,12 +93,15 @@ export function WidgetProvider({ children }: Props) {
 
   const startDrag = useCallback(
     (e: MouseEvent) => {
+      // Ocupando a janela inteira não há para onde arrastar, e a barra de status segue
+      // chamando isto sem saber em que modo está.
+      if (isFilled) return;
       document.body.style.userSelect = "none";
       setIsDragging(true);
       offsetRef.current = { x: e.clientX - position.x, y: e.clientY - position.y };
       document.addEventListener("mousemove", handleMouseMove);
     },
-    [handleMouseMove, position.x, position.y],
+    [handleMouseMove, isFilled, position.x, position.y],
   );
 
   const stopDrag = useCallback(() => {
@@ -182,8 +188,12 @@ export function WidgetProvider({ children }: Props) {
       <div
         ref={divRef}
         data-closed={isClosed}
-        className="wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
-        style={{ position: "fixed", left: position.x, top: position.y }}
+        className={
+          isFilled
+            ? "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-full wv:h-dvh wv:max-w-[420px] wv:mx-auto wv:bg-background wv:touch-manipulation"
+            : "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
+        }
+        style={isFilled ? undefined : { position: "fixed", left: position.x, top: position.y }}
       >
         {children}
       </div>

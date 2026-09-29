@@ -201,7 +201,7 @@ function RestrictionBar({ until }: { until: Date | null }) {
       <WarningIcon size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
       <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
       {until && (
-        <span className="wv:text-[11px] wv:text-foreground/70 wv:ml-auto wv:truncate">
+        <span className="wv:text-[12px] wv:text-foreground/70 wv:ml-auto wv:truncate">
           {t("Lifted on")} {formatRestrictionDate(until)}
         </span>
       )}

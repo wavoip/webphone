@@ -199,14 +199,14 @@ export default function KeyboardScreen() {
           />
         </div>
 
-        {error && <p className="wv:text-[10px] wv:font-light wv:text-red-400 wv:tracking-[.15em]">{error}</p>}
+        {error && <p className="wv:text-[12px] wv:font-light wv:text-red-400 wv:tracking-[.15em]">{error}</p>}
 
         {status && (
           <div className="wv:flex wv:flex-row wv:gap-2 wv:items-center wv:justify-center">
             {callIsLoading && (
               <div className="wv:h-3 wv:w-3 wv:shrink-0 wv:animate-spin wv:rounded-full wv:border-2 wv:border-[gray] wv:border-t-transparent" />
             )}
-            <p className="wv:text-[10px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
+            <p className="wv:text-[12px] wv:font-light wv:text-[gray] wv:tracking-[.15em]">{status}</p>
           </div>
         )}
       </div>

@@ -5,7 +5,7 @@ import { getLanguage, normalizeLanguage, subscribeLocale } from "@/lib/i18n";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
-import { MountProvider } from "@/providers/MountProvider";
+import { type Mount, MountProvider } from "@/providers/MountProvider";
 import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { PipProvider } from "@/providers/PipProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
@@ -15,20 +15,21 @@ import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type Props = {
+  layout: Mount["layout"];
   root: HTMLDivElement;
   styleSource: ParentNode;
   config: WebphoneSettings;
   wavoip?: Wavoip;
 };
 
-export function App({ root, styleSource, config, wavoip }: Props) {
+export function App({ layout, root, styleSource, config, wavoip }: Props) {
   useSyncExternalStore(
     subscribeLocale,
     () => normalizeLanguage(getLanguage()),
     () => normalizeLanguage(config.language),
   );
   return (
-    <MountProvider root={root} styleSource={styleSource}>
+    <MountProvider layout={layout} root={root} styleSource={styleSource}>
       <SettingsProvider config={config}>
         <MiddlewareRoot wavoip={wavoip} config={config}>
           <LanguageProvider initial={config.language}>

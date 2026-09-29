@@ -86,13 +86,13 @@ export function Notifications() {
                       {typeLabel(n.type)}
                     </p>
                   </div>
-                  <p className="wv:text-[11px] wv:leading-tight wv:text-foreground/60 wv:truncate">
+                  <p className="wv:text-[12px] wv:leading-tight wv:text-foreground/60 wv:truncate">
                     {buildSecondary(n)}
                   </p>
                 </div>
 
                 <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
-                  <span className="wv:text-[10px] wv:text-foreground/50 wv:whitespace-nowrap">
+                  <span className="wv:text-[12px] wv:text-foreground/50 wv:whitespace-nowrap">
                     {relativeTime(n.created_at)}
                   </span>
                   <Button
@@ -115,7 +115,7 @@ export function Notifications() {
             <Button
               variant="link"
               onClick={clearNotifications}
-              className="wv:text-[11px] wv:select-none wv:p-0 wv:h-auto"
+              className="wv:text-[12px] wv:select-none wv:p-0 wv:h-auto"
             >
               {t("Clear")}
             </Button>

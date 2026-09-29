@@ -2,6 +2,7 @@ import { Wavoip, webRuntime } from "@wavoip/wavoip-api/web";
 import ReactDOM from "react-dom/client";
 import { App } from "@/App";
 import "@/assets/index.css";
+import "./app.css";
 import "sonner/dist/styles.css";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
@@ -28,6 +29,7 @@ function mount(): void {
 
   ReactDOM.createRoot(container).render(
     <App
+      layout="filled"
       root={root}
       styleSource={document.head}
       config={APP_SETTINGS}

@@ -152,7 +152,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 function StatGroup({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="wv:flex wv:flex-col wv:gap-1 wv:rounded wv:bg-muted/40 wv:p-2">
-      <span className="wv:text-[10px] wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">
+      <span className="wv:text-[12px] wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">
         {label}
       </span>
       {children}

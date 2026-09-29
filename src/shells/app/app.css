@@ -1,0 +1,14 @@
+/* O PWA é dono da janela: a cadeia toda precisa de altura para o `h-dvh` do webphone
+   ter contra o que medir, e o fundo de fora do conteúdo é da página, não do widget. */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: #1a1b1e;
+}
+
+#webphone-root,
+#webphone-root > #root,
+#webphone-root #container {
+  height: 100%;
+}

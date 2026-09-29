@@ -6,6 +6,11 @@ import { createContext, type ReactNode, useContext } from "react";
  * dois, e são tudo que a interface precisa saber sobre onde está.
  */
 export type Mount = {
+  /**
+   * `floating` é o widget: tamanho fixo, arrastável, encostado num canto da página de
+   * outra pessoa. `filled` é o PWA, que é dono da janela e a ocupa inteira.
+   */
+  layout: "floating" | "filled";
   /** Onde a classe de tema mora e para onde os portais vão. */
   root: HTMLDivElement;
   /**
@@ -21,8 +26,8 @@ export const MountContext = createContext<Mount | null>(null);
 
 type Props = Mount & { children: ReactNode };
 
-export function MountProvider({ children, root, styleSource }: Props) {
-  return <MountContext.Provider value={{ root, styleSource }}>{children}</MountContext.Provider>;
+export function MountProvider({ children, layout, root, styleSource }: Props) {
+  return <MountContext.Provider value={{ layout, root, styleSource }}>{children}</MountContext.Provider>;
 }
 
 export function useMount(): Mount {

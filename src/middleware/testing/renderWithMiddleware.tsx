@@ -63,7 +63,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
   const rendered = render(
-    <MountContext.Provider value={{ root, styleSource: shadowRoot }}>
+    <MountContext.Provider value={{ layout: "floating", root, styleSource: shadowRoot }}>
       <SettingsProvider config={options.config ?? {}}>
         <MiddlewareRoot
           wavoip={fake.asWavoip()}

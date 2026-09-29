@@ -50,7 +50,7 @@ export function CallButtons({ call }: Props) {
             <PauseIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
+        <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
       </div>
 
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -64,7 +64,7 @@ export function CallButtons({ call }: Props) {
             <VideoCameraSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
+        <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
       </div>
 
       {muted ? (
@@ -80,7 +80,7 @@ export function CallButtons({ call }: Props) {
               <MicrophoneSlashIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Falar</p>
+          <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Falar</p>
         </div>
       ) : (
         <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -95,7 +95,7 @@ export function CallButtons({ call }: Props) {
               <MicrophoneIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
+          <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
             Silenciar
           </p>
         </div>
@@ -112,7 +112,7 @@ export function CallButtons({ call }: Props) {
             <PhoneTransferIcon size={32} weight="fill" />{" "}
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+        <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
           Transferir
         </p>
       </div>
@@ -131,7 +131,7 @@ export function CallButtons({ call }: Props) {
             <PhoneSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
+        <p className="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
           {hangUpLabel}
         </p>
       </div>
@@ -146,7 +146,7 @@ export function CallButtons({ call }: Props) {
             <DotsNineIcon size={32} />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>
+        <p className="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>
       </div>
     </div>
   );

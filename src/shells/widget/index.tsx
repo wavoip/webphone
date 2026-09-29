@@ -50,7 +50,9 @@ class WebPhoneComponent {
     root.appendChild(container);
 
     this.root = ReactDOM.createRoot(container);
-    this.root.render(<App root={root} styleSource={shadowRoot} config={config || {}} wavoip={wavoip} />);
+    this.root.render(
+      <App layout="floating" root={root} styleSource={shadowRoot} config={config || {}} wavoip={wavoip} />,
+    );
 
     const webphoneAPI = await webphoneAPIPromise();
     window.wavoip = webphoneAPI;
