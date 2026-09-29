@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 import { RecentNumbersDropdown } from "@/components/ui/recentNumbers";
 import { type TranslationKey, t } from "@/lib/i18n";
 import { useDialState, useMiddleware } from "@/middleware/react/hooks";
-import { useNotificationManager } from "@/providers/NotificationsProvider";
+import { useNotificationManager } from "@/lib/notifications";
 import { useWavoip } from "@/providers/WavoipProvider";
 
 const buttons = [

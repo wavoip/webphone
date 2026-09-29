@@ -1,207 +1,148 @@
+import { type Accessor, createContext, createSignal, type JSX, onCleanup, onMount, useContext } from "solid-js";
 import { Phone } from "@/components/icons";
-import {
-  createContext,
-  type MouseEvent,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import { useStore } from "zustand";
-import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { useStore } from "@/middleware/solid/context";
 import { useMount } from "@/providers/MountProvider";
 import { usePip } from "@/providers/PipProvider";
 import { useSettings } from "@/providers/settings/Provider";
-import { useTheme } from "@/providers/ThemeProvider";
 
 type Position = { x: number; y: number };
 
 interface WidgetContextType {
-  position: Position;
-  buttonPosition: Position;
-  isDragging: boolean;
+  position: Accessor<Position>;
+  buttonPosition: Accessor<Position>;
+  isDragging: Accessor<boolean>;
+  isClosed: Accessor<boolean>;
   setPosition: (pos: Position) => void;
   startDrag: (e: MouseEvent) => void;
   stopDrag: () => void;
-  isClosed: boolean;
   setIsClosed: (closed: boolean) => void;
   close: () => void;
   open: () => void;
   toggle: () => void;
 }
 
-const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
+const WidgetContext = createContext<WidgetContextType>();
 
-type Props = { children: ReactNode };
-
-export function WidgetProvider({ children }: Props) {
-  const middleware = useMiddleware();
-  const { theme } = useTheme();
+export function WidgetProvider(props: { children: JSX.Element }) {
+  const state = useStore();
   const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
   const { isPiP } = usePip();
   const { layout } = useMount();
   const isFilled = layout === "filled";
 
-  const { isClosed, position, buttonPosition, showWidget } = useStore(
-    middleware.store,
-    useShallow((s) => ({
-      isClosed: s.isClosed,
-      position: s.position,
-      buttonPosition: s.buttonPosition,
-      showWidget: s.settings.showWidgetButton,
-    })),
-  );
+  const [isDragging, setIsDragging] = createSignal(false);
+  let widgetEl: HTMLDivElement | undefined;
+  let offset: Position = { x: 0, y: 0 };
 
-  const { setStorePosition, setStoreButtonPosition, openWidget, closeWidget, toggleWidget } = useStore(
-    middleware.store,
-    useShallow((s) => ({
-      setStorePosition: s.setWidgetPosition,
-      setStoreButtonPosition: s.setButtonPosition,
-      openWidget: s.openWidget,
-      closeWidget: s.closeWidget,
-      toggleWidget: s.toggleWidget,
-    })),
-  );
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!widgetEl) return;
+    let x = Math.max(0, e.clientX - offset.x);
+    let y = Math.max(0, e.clientY - offset.y);
 
-  const [isDragging, setIsDragging] = useState(false);
-  const divRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef<Position>({ x: 0, y: 0 });
+    const rect = widgetEl.getBoundingClientRect();
+    if (x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
+    if (y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
 
-  const handleMouseMove = useCallback(
-    (e: globalThis.MouseEvent) => {
-      if (!divRef.current) return;
-      let x = e.clientX - offsetRef.current.x;
-      let y = e.clientY - offsetRef.current.y;
+    state.setWidgetPosition({ x, y });
+  };
 
-      if (x < 0) x = 0;
-      if (y < 0) y = 0;
+  const startDrag = (e: MouseEvent) => {
+    // Ocupando a janela inteira não há para onde arrastar, e a barra de status segue
+    // chamando isto sem saber em que modo está.
+    if (isFilled) return;
+    document.body.style.userSelect = "none";
+    setIsDragging(true);
+    offset = { x: e.clientX - state.position.x, y: e.clientY - state.position.y };
+    document.addEventListener("mousemove", handleMouseMove);
+  };
 
-      const rect = divRef.current.getBoundingClientRect();
-      if (x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
-      if (y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
-
-      setStorePosition({ x, y });
-    },
-    [setStorePosition],
-  );
-
-  const startDrag = useCallback(
-    (e: MouseEvent) => {
-      // Ocupando a janela inteira não há para onde arrastar, e a barra de status segue
-      // chamando isto sem saber em que modo está.
-      if (isFilled) return;
-      document.body.style.userSelect = "none";
-      setIsDragging(true);
-      offsetRef.current = { x: e.clientX - position.x, y: e.clientY - position.y };
-      document.addEventListener("mousemove", handleMouseMove);
-    },
-    [handleMouseMove, isFilled, position.x, position.y],
-  );
-
-  const stopDrag = useCallback(() => {
+  const stopDrag = () => {
     setIsDragging(false);
     document.body.style.userSelect = "unset";
     document.removeEventListener("mousemove", handleMouseMove);
-  }, [handleMouseMove]);
+  };
 
-  useLayoutEffect(() => {
-    if (!divRef.current) return;
-    const rect = divRef.current.getBoundingClientRect();
+  onMount(() => {
+    const rect = widgetEl?.getBoundingClientRect();
     // Widget que começa fechado está em `display:none` e mede zero; o tamanho padrão do
     // resolver mantém as posições por palavra ("bottom-left") dentro do viewport.
-    const size = rect.width > 0 && rect.height > 0 ? { width: rect.width, height: rect.height } : undefined;
-    setStorePosition(resolveWebphonePosition(positionInitial, size));
-    setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
+    const size = rect && rect.width > 0 && rect.height > 0 ? { width: rect.width, height: rect.height } : undefined;
+    state.setWidgetPosition(resolveWebphonePosition(positionInitial, size));
+    state.setButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
+
     document.addEventListener("mouseleave", stopDrag);
-    return () => {
-      document.removeEventListener("mouseleave", stopDrag);
-    };
-  }, [stopDrag, positionInitial, buttonPositionInitial, setStorePosition, setStoreButtonPosition]);
-
-  useLayoutEffect(() => {
-    function handleResize() {
-      if (!divRef.current) return;
-      const rect = divRef.current.getBoundingClientRect();
-      let x: number | null = null;
-      let y: number | null = null;
-      if (rect.x + rect.width > window.innerWidth) x = window.innerWidth - rect.width;
-      if (rect.y + rect.height > window.innerHeight) {
-        y = window.innerHeight - rect.height;
-        if (y < 0) y = 0;
-      }
-      if (x !== null || y !== null) {
-        const current = middleware.store.getState().position;
-        setStorePosition({ x: x ?? current.x, y: y ?? current.y });
-      }
-      setStoreButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
-    }
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, [middleware, setStorePosition, setStoreButtonPosition, buttonPositionInitial]);
+    onCleanup(() => {
+      document.removeEventListener("mouseleave", stopDrag);
+      window.removeEventListener("resize", handleResize);
+    });
+  });
 
-  const setIsClosed = useCallback(
-    (closed: boolean) => (closed ? closeWidget() : openWidget()),
-    [openWidget, closeWidget],
-  );
+  function handleResize() {
+    if (!widgetEl) return;
+    const rect = widgetEl.getBoundingClientRect();
+    let x: number | null = null;
+    let y: number | null = null;
+    if (rect.x + rect.width > window.innerWidth) x = window.innerWidth - rect.width;
+    if (rect.y + rect.height > window.innerHeight) y = Math.max(0, window.innerHeight - rect.height);
+    if (x !== null || y !== null) {
+      state.setWidgetPosition({ x: x ?? state.position.x, y: y ?? state.position.y });
+    }
+    state.setButtonPosition(resolveWidgetButtonPosition(buttonPositionInitial));
+  }
+
+  const value: WidgetContextType = {
+    position: () => state.position,
+    buttonPosition: () => state.buttonPosition,
+    isDragging,
+    isClosed: () => state.isClosed,
+    setPosition: (pos) => state.setWidgetPosition(pos),
+    startDrag,
+    stopDrag,
+    setIsClosed: (closed) => (closed ? state.closeWidget() : state.openWidget()),
+    close: () => state.closeWidget(),
+    open: () => state.openWidget(),
+    toggle: () => state.toggleWidget(),
+  };
 
   return (
-    <WidgetContext.Provider
-      value={{
-        position,
-        buttonPosition,
-        setPosition: setStorePosition,
-        startDrag,
-        stopDrag,
-        isDragging,
-        isClosed,
-        setIsClosed,
-        close: closeWidget,
-        open: openWidget,
-        toggle: toggleWidget,
-      }}
-    >
-      {showWidget && !isPiP && (
+    <WidgetContext.Provider value={value}>
+      {state.settings.showWidgetButton && !isPiP() && (
         <Button
           type="button"
-          onClick={openWidget}
-          size={"icon"}
-          data-closed={isClosed}
-          className="wv:fixed wv:bottom-6 wv:right-6 wv:z-50 wv:transition wv:data-[closed=false]:hidden wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
+          onClick={() => state.openWidget()}
+          size="icon"
+          data-closed={state.isClosed}
+          class="wv:fixed wv:bottom-6 wv:right-6 wv:z-50 wv:transition wv:data-[closed=false]:hidden wv:p-3 wv:rounded-full wv:aspect-square wv:size-fit wv:bg-widget-background wv:text-widget-text wv:font-bold wv:hover:bg-widget-background-hover"
         >
-          <Phone className="wv:size-8" />
+          <Phone class="wv:size-8" />
         </Button>
       )}
 
-      <Toaster
-        theme={theme}
-        position="top-right"
-        className="!w-[400px]"
-        toastOptions={{ className: "wv:max-w-[400px] wv:w-full" }}
-      />
+      <Toaster position="top-right" class="!w-[400px]" toastOptions={{ class: "wv:max-w-[400px] wv:w-full" }} />
 
       <div
-        ref={divRef}
-        data-closed={isClosed}
-        className={
+        ref={widgetEl}
+        data-closed={state.isClosed}
+        class={
           isFilled
             ? "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-full wv:h-dvh wv:max-w-[420px] wv:mx-auto wv:bg-background wv:touch-manipulation"
             : "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
         }
-        style={isFilled ? undefined : { position: "fixed", left: position.x, top: position.y }}
+        style={
+          isFilled ? undefined : { position: "fixed", left: `${state.position.x}px`, top: `${state.position.y}px` }
+        }
       >
-        {children}
+        {props.children}
       </div>
     </WidgetContext.Provider>
   );
 }
 
-export function useWidget() {
+export function useWidget(): WidgetContextType {
   const ctx = useContext(WidgetContext);
   if (!ctx) throw new Error("useWidget deve ser usado dentro de <WidgetProvider>");
   return ctx;

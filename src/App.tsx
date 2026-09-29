@@ -7,7 +7,6 @@ import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
 import { type Mount, MountProvider } from "@/providers/MountProvider";
-import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { PipProvider } from "@/providers/PipProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
@@ -40,13 +39,11 @@ export function App({ layout, root, rootNode, config, wavoip }: Props) {
               <ThemeProvider root={root}>
                 <PipProvider rootNode={rootNode}>
                   <WidgetProvider>
-                    <NotificationsProvider>
                       <WavoipProvider>
                         <DebugProvider>
                           <WebPhone />
                         </DebugProvider>
                       </WavoipProvider>
-                    </NotificationsProvider>
                   </WidgetProvider>
                 </PipProvider>
               </ThemeProvider>

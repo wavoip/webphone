@@ -7,7 +7,6 @@ import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { MountContext } from "@/providers/MountProvider";
-import { NotificationsProvider } from "@/providers/NotificationsProvider";
 import { PipProvider } from "@/providers/PipProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
@@ -74,11 +73,9 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           <ThemeProvider root={root}>
             <PipProvider rootNode={shadowRoot}>
               <WidgetProvider>
-                <NotificationsProvider>
                   {/* As telas chegam ao SDK pelo `useWavoip`, então sem a ponte nenhuma
                       renderiza aqui. */}
                   <WavoipProvider>{options.children ?? null}</WavoipProvider>
-                </NotificationsProvider>
               </WidgetProvider>
             </PipProvider>
           </ThemeProvider>

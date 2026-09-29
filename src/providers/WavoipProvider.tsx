@@ -1,9 +1,9 @@
 import type { ActiveCall, IncomingCall, OutgoingCall, Wavoip } from "@wavoip/wavoip-api/web";
-import React, { createContext, type ReactNode, useContext, useEffect, useMemo } from "react";
-import { toast } from "sonner";
+import { createContext, createEffect, type JSX, onCleanup, useContext } from "solid-js";
+import { toast } from "solid-sonner";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { Middleware } from "@/middleware/Middleware";
-import { useCallState, useDevices, useMiddleware, useOffers } from "@/middleware/react/hooks";
+import { useMiddleware } from "@/middleware/solid/context";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { usePip } from "@/providers/PipProvider";
@@ -13,15 +13,15 @@ import { useWidget } from "@/providers/WidgetProvider";
 type StartCall = Middleware["controllers"]["call"]["start"];
 
 interface WavoipContextProps {
-  wavoip: Wavoip;
-  devices: DeviceStateEntry[];
-  offers: IncomingCall[];
-  callOutgoing?: OutgoingCall;
-  callActive?: ActiveCall;
-  callActiveStartedAt?: number;
-  callStatus: CallStatus;
-  peerMuted: boolean;
-  callFailReason?: string;
+  readonly wavoip: Wavoip;
+  readonly devices: DeviceStateEntry[];
+  readonly offers: IncomingCall[];
+  readonly callOutgoing?: OutgoingCall;
+  readonly callActive?: ActiveCall;
+  readonly callActiveStartedAt?: number;
+  readonly callStatus: CallStatus;
+  readonly peerMuted: boolean;
+  readonly callFailReason?: string;
   addDevice: (token: string, persist?: boolean) => void;
   removeDevice: (token: string) => void;
   enableDevice: (token: string) => void;
@@ -29,114 +29,93 @@ interface WavoipContextProps {
   startCall: StartCall;
 }
 
-const WavoipContext = createContext<WavoipContextProps | undefined>(undefined);
+const WavoipContext = createContext<WavoipContextProps>();
 
-type RootProps = { children: ReactNode };
-
-export const WavoipProvider: React.FC<RootProps> = ({ children }) => {
-  return <WavoipBridge>{children}</WavoipBridge>;
-};
-
-function WavoipBridge({ children }: { children: ReactNode }) {
+export function WavoipProvider(props: { children: JSX.Element }) {
   const middleware = useMiddleware();
-  const devices = useDevices();
-  const offers = useOffers();
-  const { outgoing, active, activeStartedAt, callStatus, peerMuted, callFailReason } = useCallState();
-  const { isClosed, setIsClosed, open: openWidget } = useWidget();
-  const { isPiP } = usePip();
+  const state = middleware.store.getState();
   const { callSettings } = useSettings();
 
-  const startCall: StartCall = useMemo(
-    () => (to, config) => middleware.controllers.call.start(to, config),
-    [middleware],
-  );
+  applyDisplayName(middleware, callSettings.displayName);
+  bridgeOffersToToasts(middleware);
+  followCallWithWidget(middleware);
 
-  const addDevice = useMemo(
-    () => (token: string, persist?: boolean) => middleware.controllers.device.add(token, persist),
-    [middleware],
-  );
-  const removeDevice = useMemo(() => (token: string) => middleware.controllers.device.remove(token), [middleware]);
-  const enableDevice = useMemo(() => (token: string) => middleware.controllers.device.enable(token), [middleware]);
-  const disableDevice = useMemo(() => (token: string) => middleware.controllers.device.disable(token), [middleware]);
+  // Getters, e não valores: quem lê `callStatus` no JSX assina só esse campo.
+  const value: WavoipContextProps = {
+    wavoip: middleware.wavoip,
+    get devices() {
+      return state.devices;
+    },
+    get offers() {
+      return state.offers;
+    },
+    get callOutgoing() {
+      return state.outgoing;
+    },
+    get callActive() {
+      return state.active;
+    },
+    get callActiveStartedAt() {
+      return state.activeStartedAt;
+    },
+    get callStatus() {
+      return state.callStatus;
+    },
+    get peerMuted() {
+      return state.peerMuted;
+    },
+    get callFailReason() {
+      return state.callFailReason;
+    },
+    startCall: (to, config) => middleware.controllers.call.start(to, config),
+    addDevice: (token, persist) => middleware.controllers.device.add(token, persist),
+    removeDevice: (token) => middleware.controllers.device.remove(token),
+    enableDevice: (token) => middleware.controllers.device.enable(token),
+    disableDevice: (token) => middleware.controllers.device.disable(token),
+  };
 
-  // O registry não tem unregister, então uma flag de módulo por middleware impede o
-  // registro duplo.
-  useDisplayNameOfferMiddleware(middleware, callSettings.displayName);
-
-  useToastBridge(middleware);
-  useWidgetCache(middleware, isClosed, setIsClosed, openWidget, isPiP);
-  usePictureInPictureSync(middleware);
-
-  return (
-    <WavoipContext.Provider
-      value={{
-        wavoip: middleware.wavoip,
-        devices,
-        offers,
-        callOutgoing: outgoing,
-        callActive: active,
-        callActiveStartedAt: activeStartedAt,
-        callStatus,
-        peerMuted,
-        callFailReason,
-        startCall,
-        addDevice,
-        removeDevice,
-        enableDevice,
-        disableDevice,
-      }}
-    >
-      {children}
-    </WavoipContext.Provider>
-  );
+  return <WavoipContext.Provider value={value}>{props.children}</WavoipContext.Provider>;
 }
 
-export const useWavoip = () => {
+export function useWavoip(): WavoipContextProps {
   const context = useContext(WavoipContext);
-  if (!context) {
-    throw new Error("useWavoip deve ser usado dentro de WavoipProvider");
-  }
+  if (!context) throw new Error("useWavoip deve ser usado dentro de WavoipProvider");
   return context;
-};
+}
 
-const displayNameRegistered = new WeakSet<Middleware>();
+/** O nome que o integrador escolheu substitui o do peer, na oferta e na saída. */
+function applyDisplayName(middleware: Middleware, displayName?: string) {
+  if (!displayName) return;
 
-function useDisplayNameOfferMiddleware(middleware: Middleware, displayName?: string) {
-  useEffect(() => {
-    if (!displayName) return;
-    if (displayNameRegistered.has(middleware)) return;
-    displayNameRegistered.add(middleware);
-    middleware.registry.use("offer", (offer, next) => {
-      offer.peer.displayName = displayName;
-      offer.peer.phone = displayName;
-      next();
-    });
-  }, [middleware, displayName]);
+  middleware.registry.use("offer", (offer, next) => {
+    offer.peer.displayName = displayName;
+    offer.peer.phone = displayName;
+    next();
+  });
 
-  useEffect(() => {
-    if (!displayName) return;
-    return middleware.store.subscribe(
+  onCleanup(
+    middleware.store.subscribe(
       (s) => s.outgoing,
       (outgoing) => {
         if (!outgoing) return;
         outgoing.peer.displayName = displayName;
         outgoing.peer.phone = displayName;
       },
-    );
-  }, [middleware, displayName]);
+    ),
+  );
 }
 
-function useToastBridge(middleware: Middleware) {
-  useEffect(() => {
-    return middleware.store.subscribe(
+function bridgeOffersToToasts(middleware: Middleware) {
+  onCleanup(
+    middleware.store.subscribe(
       (s) => s.offers,
       (current, previous) => {
         for (const offer of current) {
           if (previous.some((p) => p.id === offer.id)) continue;
-          toast(<OfferNotification offer={offer} />, {
+          toast(() => <OfferNotification offer={offer} />, {
             id: offer.id,
             duration: 100_000,
-            className: "wv:max-w-[400px] wv:!w-full",
+            class: "wv:max-w-[400px] wv:!w-full",
             // Arrastar o toast para longe é ignorar a chamada: para o toque, e não só
             // esconde a notificação. Também dispara nos nossos toast.dismiss(), onde o
             // ignore() não faz nada porque a oferta já saiu.
@@ -148,51 +127,46 @@ function useToastBridge(middleware: Middleware) {
           setTimeout(() => toast.dismiss(offer.id), 2000);
         }
       },
-    );
-  }, [middleware]);
+    ),
+  );
 }
 
-function useWidgetCache(
-  middleware: Middleware,
-  isClosed: boolean,
-  setIsClosed: (closed: boolean) => void,
-  openWidget: () => void,
-  isPiP: boolean,
-) {
-  const closedBeforePip = React.useRef<boolean | null>(null);
-  const closedBeforeCall = React.useRef<boolean | null>(null);
+/**
+ * O widget abre sozinho quando entra chamada e volta ao que era quando ela acaba — e o
+ * mesmo vale ao entrar e sair do Picture-in-Picture, que esconde o widget da página.
+ */
+function followCallWithWidget(middleware: Middleware) {
+  const { isClosed, setIsClosed, open: openWidget } = useWidget();
+  const { isPiP } = usePip();
+  let closedBeforePip: boolean | null = null;
+  let closedBeforeCall: boolean | null = null;
 
-  useEffect(() => {
-    if (isPiP) {
-      if (closedBeforePip.current === null) closedBeforePip.current = isClosed;
+  createEffect(() => {
+    if (isPiP()) {
+      if (closedBeforePip === null) closedBeforePip = isClosed();
       setIsClosed(true);
-    } else if (closedBeforePip.current !== null) {
-      setIsClosed(closedBeforePip.current);
-      closedBeforePip.current = null;
+      return;
     }
-  }, [isPiP, isClosed, setIsClosed]);
+    if (closedBeforePip !== null) {
+      setIsClosed(closedBeforePip);
+      closedBeforePip = null;
+    }
+  });
 
-  useEffect(() => {
-    return middleware.store.subscribe(
+  onCleanup(
+    middleware.store.subscribe(
       (s) => Boolean(s.active || s.outgoing),
       (inCall) => {
         if (inCall) {
-          if (closedBeforeCall.current === null) closedBeforeCall.current = isClosed;
-          if (!isPiP) openWidget();
-        } else if (closedBeforeCall.current !== null) {
-          if (closedBeforeCall.current) setIsClosed(true);
-          closedBeforeCall.current = null;
+          if (closedBeforeCall === null) closedBeforeCall = isClosed();
+          if (!isPiP()) openWidget();
+          return;
+        }
+        if (closedBeforeCall !== null) {
+          if (closedBeforeCall) setIsClosed(true);
+          closedBeforeCall = null;
         }
       },
-    );
-  }, [middleware, isClosed, setIsClosed, openWidget, isPiP]);
-}
-
-function usePictureInPictureSync(middleware: Middleware) {
-  useEffect(() => {
-    return middleware.store.subscribe(
-      (s) => s.active ?? s.outgoing,
-      () => {},
-    );
-  }, [middleware]);
+    ),
+  );
 }

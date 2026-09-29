@@ -1,22 +1,22 @@
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useStore } from "zustand";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { type Accessor, createContext, createEffect, createSignal, type JSX, useContext } from "solid-js";
+import { useStore } from "@/middleware/solid/context";
 
 type PipContextType = {
-  pipWindow: Window | null;
-  isPiP: boolean;
+  /** Acessor, e não valor: a janela some quando o usuário fecha o PiP, sem passar por aqui. */
+  pipWindow: Accessor<Window | null>;
+  isPiP: Accessor<boolean>;
   togglePip: () => void;
   openPip: () => void;
   closePip: () => void;
 };
 
-export const PipContext = createContext<PipContextType | undefined>(undefined);
+export const PipContext = createContext<PipContextType>();
 
 export const PIP_WINDOW_SIZE = { width: 320, height: 450 } as const;
 
 type Props = {
   rootNode: ParentNode;
-  children: ReactNode;
+  children: JSX.Element;
 };
 
 async function createNewPipWindow(rootNode: ParentNode): Promise<Window> {
@@ -46,46 +46,38 @@ async function createNewPipWindow(rootNode: ParentNode): Promise<Window> {
   return newPipWindow;
 }
 
-export function PipProvider({ rootNode, children }: Props) {
-  const [pipWindow, setPipWindow] = useState<Window | null>(null);
-  const isPiP = !!pipWindow;
-  const middleware = useMiddleware();
-  const screen = useStore(middleware.store, (s) => s.screen);
-  const prevScreenRef = useRef(screen);
+export function PipProvider(props: Props) {
+  const [pipWindow, setPipWindow] = createSignal<Window | null>(null);
+  const isPiP = () => pipWindow() !== null;
+  const state = useStore();
+  let telaAnterior = state.screen;
 
-  const openPip = useCallback(async () => {
-    if (pipWindow) return;
+  const openPip = async () => {
+    if (pipWindow()) return;
     if (!("documentPictureInPicture" in window)) {
       console.warn("Picture-in-Picture not supported in this browser.");
       return;
     }
-    const newPipWindow = await createNewPipWindow(rootNode);
-    newPipWindow.addEventListener("pagehide", () => {
-      setPipWindow(null);
-    });
+    const newPipWindow = await createNewPipWindow(props.rootNode);
+    newPipWindow.addEventListener("pagehide", () => setPipWindow(null));
     setPipWindow(newPipWindow);
-  }, [pipWindow, rootNode]);
+  };
 
-  const closePip = useCallback(() => {
-    if (pipWindow) {
-      pipWindow.close();
-    }
-  }, [pipWindow]);
+  const closePip = () => pipWindow()?.close();
 
-  const togglePip = useCallback(() => {
-    if (pipWindow) closePip();
-    else openPip();
-  }, [pipWindow, openPip, closePip]);
+  const togglePip = () => (pipWindow() ? closePip() : openPip());
 
-  useEffect(() => {
-    if (screen === "keyboard" && prevScreenRef.current !== "keyboard" && pipWindow) {
-      pipWindow.close();
-    }
-    prevScreenRef.current = screen;
-  }, [screen, pipWindow]);
+  // Voltar ao teclado fecha o PiP: a janelinha existe para acompanhar uma chamada.
+  createEffect(() => {
+    const tela = state.screen;
+    if (tela === "keyboard" && telaAnterior !== "keyboard") pipWindow()?.close();
+    telaAnterior = tela;
+  });
 
   return (
-    <PipContext.Provider value={{ pipWindow, isPiP, togglePip, openPip, closePip }}>{children}</PipContext.Provider>
+    <PipContext.Provider value={{ pipWindow, isPiP, togglePip, openPip, closePip }}>
+      {props.children}
+    </PipContext.Provider>
   );
 }
 

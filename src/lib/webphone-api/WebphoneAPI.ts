@@ -3,7 +3,7 @@ import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/ev
 import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
 import type { NotificationInput } from "@/middleware/store/slices/notificationsSlice";
-import type { NotificationsType } from "@/providers/NotificationsProvider";
+import type { NotificationsType } from "@/lib/notifications";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
 /**

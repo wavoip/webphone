@@ -6,7 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { t } from "@/lib/i18n";
 import { relativeTime } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
-import { useNotificationManager } from "@/providers/NotificationsProvider";
+import { useNotificationManager } from "@/lib/notifications";
 
 const typeLabel = (type: Notification["type"]): string => {
   if (type === "MISSED_CALL") return t("Missed call");
