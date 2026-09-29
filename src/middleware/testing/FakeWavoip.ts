@@ -6,6 +6,7 @@ import type {
   CallConnection,
   CallPeer,
   CallStats,
+  CallStatus,
   CommandFailure,
   Contact,
   Device,
@@ -72,7 +73,7 @@ export function makePeer(phone = "5511999999999"): CallPeer {
 export class FakeIncomingCall extends FakeEmitter<IncomingCallEvents> implements IncomingCall {
   type = "OFFICIAL" as const;
   direction = "INCOMING" as const;
-  status = "RINGING" as const;
+  status: CallStatus = "RINGING";
   acceptResult: Result<ActiveCall, AcceptFailure> = err({ code: "UNKNOWN" as const });
   rejectResult: Result<void, CommandFailure> = ok(undefined);
   readonly id: string;
@@ -88,12 +89,14 @@ export class FakeIncomingCall extends FakeEmitter<IncomingCallEvents> implements
 
   accept = async () => this.acceptResult;
   reject = async () => this.rejectResult;
+  /** Só o `IgnorableOffer` do store tem isto; a lib não. Ver `CallController.wrapOffer`. */
+  ignore() {}
 }
 
 export class FakeOutgoingCall extends FakeEmitter<OutgoingCallEvents> implements OutgoingCall {
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
-  status = "CALLING" as const;
+  status: CallStatus = "CALLING";
   cancelResult: Result<void, CommandFailure> = ok(undefined);
   cancelCalls = 0;
   readonly id: string;
@@ -118,7 +121,7 @@ export class FakeOutgoingCall extends FakeEmitter<OutgoingCallEvents> implements
 export class FakeActiveCall extends FakeEmitter<ActiveCallEvents> implements ActiveCall {
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
-  status = "ACTIVE" as const;
+  status: CallStatus = "ACTIVE";
   connection: CallConnection = "connected";
   audio: CallAudio = makeSilentAudio();
   endResult: Result<void, CommandFailure> = ok(undefined);

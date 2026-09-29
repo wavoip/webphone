@@ -68,7 +68,7 @@ describe("public API React-tree integration", () => {
   describe("call lifecycle", () => {
     it("api.call.start sets callStatus to CALLING", async () => {
       const wavoip = new FakeWavoip(["tok-1"]);
-      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
       const { api } = await renderWithMiddleware({ wavoip });
       await api.call.start("5511", { fromTokens: ["tok-1"] });
       expect(api.call.getCallOutgoing()?.status).toBe("CALLING");
@@ -77,12 +77,12 @@ describe("public API React-tree integration", () => {
     it("api.on('call:accepted') fires when outgoing call gets accepted", async () => {
       const wavoip = new FakeWavoip(["tok-1"]);
       const outgoing = new FakeOutgoingCall("c1", "tok-1");
-      wavoip.startCallResult = { call: outgoing, err: null };
+      wavoip.startCallResult = { data: outgoing, error: null };
       const { api } = await renderWithMiddleware({ wavoip });
       const events: string[] = [];
       api.on("call:accepted", (payload) => events.push(payload.id));
       await api.call.start("5511");
-      outgoing.emitEvent("peerAccept", new FakeActiveCall("c1", "tok-1"));
+      outgoing.emitEvent("accepted", new FakeActiveCall("c1", "tok-1"));
       expect(events).toEqual(["c1"]);
     });
 

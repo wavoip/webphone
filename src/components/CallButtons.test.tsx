@@ -6,7 +6,7 @@ import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/te
 
 async function withOutgoing(outgoing = new FakeOutgoingCall("c1", "tok-1")) {
   const wavoip = new FakeWavoip(["tok-1"]);
-  wavoip.startCallResult = { call: outgoing, err: null };
+  wavoip.startCallResult = { data: outgoing, error: null };
   const { api } = await renderWithProviders({
     wavoip,
     children: <CallButtons call={outgoing} />,
@@ -42,7 +42,7 @@ describe("CallButtons hang-up", () => {
 
   it("comes back when the server refuses the cancellation", async () => {
     const outgoing = new FakeOutgoingCall("c1", "tok-1");
-    outgoing.cancelResult = { err: "IS_NOT_OFFER" };
+    outgoing.cancelResult = { data: null, error: { code: "CALL_ALREADY_ANSWERED" } };
     await withOutgoing(outgoing);
 
     fireEvent.click(hangUp());

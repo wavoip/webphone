@@ -8,14 +8,20 @@ import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { DebugScreen } from "@/screens/DebugScreen";
 
-vi.mock("@wavoip/wavoip-api", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@wavoip/wavoip-api")>();
+vi.mock("@wavoip/wavoip-api/web", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@wavoip/wavoip-api/web")>();
   return {
     ...actual,
-    runStunProbe: vi.fn().mockResolvedValue([
-      { server: "stun:stun.l.google.com:19302", reachable: true, latencyMs: 42 },
-      { server: "stun:stun.cloudflare.com:3478", reachable: false },
-    ]),
+    runDiagnostics: vi.fn().mockResolvedValue({
+      checks: [
+        { code: "MICROPHONE_FOUND", severity: "ok" },
+        { code: "STUN_UNREACHABLE", severity: "failure" },
+      ],
+      readiness: {
+        OFFICIAL: { ready: false, blockedBy: ["STUN_UNREACHABLE"] },
+        UNOFFICIAL: { ready: true, blockedBy: [] },
+      },
+    }),
   };
 });
 
@@ -48,21 +54,22 @@ describe("DebugScreen", () => {
     expect(screen.getByText(/Navegador/i)).toBeDefined();
     expect(screen.getByText(/Rede/i)).toBeDefined();
     expect(screen.getByText(/Áudio/i)).toBeDefined();
-    expect(screen.getByText(/Reachability STUN/i)).toBeDefined();
+    expect(screen.getByText(/Checagem do ambiente/i)).toBeDefined();
   });
 
-  it("runs runStunProbe when the user clicks the probe button and renders results", async () => {
-    const api = await import("@wavoip/wavoip-api");
+  it("runs runDiagnostics when the user clicks the check button and renders the report", async () => {
+    const api = await import("@wavoip/wavoip-api/web");
     render(<DebugScreen />, { wrapper: Wrapper });
 
-    const button = screen.getByRole("button", { name: /Testar STUN/i });
+    const button = screen.getByRole("button", { name: /Testar ambiente/i });
     button.click();
 
     await waitFor(() => {
-      expect(api.runStunProbe).toHaveBeenCalled();
+      expect(api.runDiagnostics).toHaveBeenCalled();
     });
     await waitFor(() => {
-      expect(screen.getByText(/stun\.l\.google\.com/)).toBeDefined();
+      // Aparece duas vezes: no que bloqueia a chamada OFFICIAL e na lista de checagens.
+      expect(screen.getAllByText("STUN_UNREACHABLE").length).toBe(2);
     });
   });
 

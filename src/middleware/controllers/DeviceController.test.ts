@@ -129,13 +129,12 @@ describe("DeviceController", () => {
   });
 
   describe("restriction", () => {
-    it("restrictedChanged true patches state and adds DEVICE_RESTRICTED notification", () => {
+    it("restrictionChanged true patches state and adds DEVICE_RESTRICTED notification", () => {
       controller.add("tok-1");
       const [fake] = wavoip.getDevices();
-      (fake as unknown as { emitEvent: (e: string, r: boolean, u: Date | null) => void }).emitEvent(
-        "restrictedChanged",
-        true,
-        null,
+      (fake as unknown as { emitEvent: (e: string, r: { until: Date | null } | null) => void }).emitEvent(
+        "restrictionChanged",
+        { until: null },
       );
 
       expect(store.getState().devices[0].restricted).toBe(true);
@@ -146,14 +145,13 @@ describe("DeviceController", () => {
       expect(notes[0].message).toBe("tok-1");
     });
 
-    it("restrictedChanged carries restrictedUntil date into the store", () => {
+    it("restrictionChanged carries restrictedUntil date into the store", () => {
       controller.add("tok-1");
       const [fake] = wavoip.getDevices();
       const until = new Date("2030-01-15T12:34:56.000Z");
-      (fake as unknown as { emitEvent: (e: string, r: boolean, u: Date | null) => void }).emitEvent(
-        "restrictedChanged",
-        true,
-        until,
+      (fake as unknown as { emitEvent: (e: string, r: { until: Date | null } | null) => void }).emitEvent(
+        "restrictionChanged",
+        { until },
       );
 
       expect(store.getState().devices[0].restrictedUntil).toEqual(until);
@@ -163,25 +161,25 @@ describe("DeviceController", () => {
       controller.add("tok-1");
       const [fake] = wavoip.getDevices() as unknown as Array<{
         contact: { phone: string };
-        emitEvent: (e: string, r: boolean, u: Date | null) => void;
+        emitEvent: (e: string, r: { until: Date | null } | null) => void;
       }>;
       fake.contact = { phone: "5511999990000" };
-      fake.emitEvent("restrictedChanged", true, null);
+      fake.emitEvent("restrictionChanged", { until: null });
 
       const notes = store.getState().notifications;
       expect(notes[0].message).toBe("5511999990000 · tok-1");
     });
 
-    it("restrictedChanged false patches state and adds DEVICE_RESTRICTION_LIFTED notification", () => {
+    it("restrictionChanged false patches state and adds DEVICE_RESTRICTION_LIFTED notification", () => {
       controller.add("tok-1");
       const [fake] = wavoip.getDevices() as unknown as Array<{
-        restricted: boolean;
-        emitEvent: (e: string, r: boolean, u: Date | null) => void;
+        restriction: { until: Date | null } | null;
+        emitEvent: (e: string, r: { until: Date | null } | null) => void;
       }>;
-      fake.restricted = true;
+      fake.restriction = { until: null };
       store.getState().updateDeviceState("tok-1", { restricted: true });
 
-      fake.emitEvent("restrictedChanged", false, null);
+      fake.emitEvent("restrictionChanged", null);
 
       expect(store.getState().devices[0].restricted).toBe(false);
       expect(store.getState().devices[0].restrictedUntil).toBe(null);
@@ -189,21 +187,20 @@ describe("DeviceController", () => {
       expect(notes[0].type).toBe("DEVICE_RESTRICTION_LIFTED");
     });
 
-    it("does not duplicate notification when restrictedChanged fires with same value", () => {
+    it("does not duplicate notification when restrictionChanged fires with same value", () => {
       controller.add("tok-1");
       const [fake] = wavoip.getDevices();
-      const emit = (fake as unknown as { emitEvent: (e: string, r: boolean, u: Date | null) => void }).emitEvent;
-      emit.call(fake, "restrictedChanged", false, null);
-      emit.call(fake, "restrictedChanged", false, null);
+      const emit = (fake as unknown as { emitEvent: (e: string, r: { until: Date | null } | null) => void }).emitEvent;
+      emit.call(fake, "restrictionChanged", null);
+      emit.call(fake, "restrictionChanged", null);
       expect(store.getState().notifications).toHaveLength(0);
     });
 
     it("hydrate fires notification once for devices that start restricted and seeds restrictedUntil", () => {
       wavoip.addDevices(["tok-1"]);
       const until = new Date("2030-01-15T12:34:56.000Z");
-      const [fake] = wavoip.getDevices() as unknown as Array<{ restricted: boolean; restrictedUntil: Date | null }>;
-      fake.restricted = true;
-      fake.restrictedUntil = until;
+      const [fake] = wavoip.getDevices() as unknown as Array<{ restriction: { until: Date | null } | null }>;
+      fake.restriction = { until };
 
       controller.hydrate();
 

@@ -1,4 +1,4 @@
-import { Wavoip } from "@wavoip/wavoip-api/web";
+import { Wavoip, webRuntime } from "@wavoip/wavoip-api/web";
 import { describe, expect, it } from "vitest";
 import { DeviceController } from "@/middleware/controllers/DeviceController";
 import { NotificationsController } from "@/middleware/controllers/NotificationsController";
@@ -9,7 +9,7 @@ describe("DeviceController.hydrate with real Wavoip", () => {
     const uuid = "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee";
     localStorage.setItem("wavoip:tokens", `${uuid}:true:true`);
 
-    const wavoip = new Wavoip({ tokens: [uuid], platform: "test" });
+    const wavoip = new Wavoip({ tokens: [uuid], platform: "test", runtime: webRuntime() });
     const store = createMiddlewareStore();
     const notifications = new NotificationsController({ store });
     const controller = new DeviceController({ wavoip, store, notifications });

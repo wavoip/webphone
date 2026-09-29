@@ -188,6 +188,13 @@ export class CallController {
     call.on("ended", () => store.getState().setCallStatus("ENDED"));
     call.on("peerMuteChanged", (muted) => store.getState().setPeerMuted(muted));
     call.on("failed", (error) => this.failWith(error.code));
+    // A v3 trocou o status `DISCONNECTED` por uma perna de conexão caída. A guarda de
+    // terminal é o que impede um "disconnected" atrasado de desfazer um fim já gravado.
+    call.on("connectionChanged", (connection) => {
+      if (connection !== "disconnected") return;
+      if (isTerminalCallStatus(store.getState().callStatus)) return;
+      store.getState().setCallStatus("DISCONNECTED");
+    });
   }
 
   /** O motivo vem como `code`: a v3 não devolve texto legível, e quem traduz é o `i18n`. */

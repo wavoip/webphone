@@ -1,14 +1,12 @@
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import type { OutgoingCall } from "@wavoip/wavoip-api/web";
+import type { OutgoingCall, Result, StartCallFailure } from "@wavoip/wavoip-api/web";
 import { beforeEach, describe, expect, it } from "vitest";
 import { FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 import KeyboardScreen from "@/screens/KeyboardScreen";
 
 type StartCallParams = { fromTokens?: string[]; to: string };
-type StartCallResult =
-  | { call: OutgoingCall; err: null }
-  | { call: null; err: { message: string; devices: { token: string; reason: string }[] } };
+type StartCallResult = Result<OutgoingCall, StartCallFailure>;
 
 /** O abort só importa enquanto um device ainda está sendo tentado. */
 function deferredStartCall(wavoip: FakeWavoip) {
@@ -25,8 +23,11 @@ function deferredStartCall(wavoip: FakeWavoip) {
     // Motivo genérico de propósito: `PHONE_DONT_EXIST` e `NO_DEVICES_FOUND` encerram a
     // fila, e nenhum dos dois exercitaria a passagem ao próximo device.
     failLast: () =>
-      pending.pop()?.({ call: null, err: { message: "BUSY", devices: [{ token: "tok-1", reason: "BUSY" }] } }),
-    succeedLast: (call: OutgoingCall) => pending.pop()?.({ call, err: null }),
+      pending.pop()?.({
+        data: null,
+        error: { code: "DEVICE_BUSY", devices: [{ token: "tok-1", error: { code: "DEVICE_BUSY" } }] },
+      }),
+    succeedLast: (call: OutgoingCall) => pending.pop()?.({ data: call, error: null }),
   };
 }
 

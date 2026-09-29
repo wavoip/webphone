@@ -17,14 +17,14 @@ describe("buildPublicApi", () => {
 
   describe("call", () => {
     it("start delegates to the call controller", async () => {
-      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
       const result = await api.call.start("5511");
       expect(result.err).toBeNull();
       expect(wavoip.startCallCalls[0].to).toBe("5511");
     });
 
     it("startCall (deprecated) passes fromTokens via the start signature", async () => {
-      wavoip.startCallResult = { call: new FakeOutgoingCall("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
       await api.call.startCall("5511", ["tok-1"]);
       expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-1"]);
     });
