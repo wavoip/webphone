@@ -31,7 +31,7 @@ O topo da tela fica fixo durante a rolagem e mostra:
 | **Navegador**                  | `User-Agent` completo. Útil para identificar versão de Chromium/Firefox/Safari.                                                                   |
 | **Rede**                       | Estado online (com indicador colorido), tipo de conexão (`4g`, `wifi`...), downlink estimado e RTT (quando o navegador expõe).                    |
 | **Áudio**                      | Permissão atual do microfone, contagem de entradas/saídas.                                                                                        |
-| **Reachability STUN**          | Botão para testar os STUNs padrão em paralelo via `runStunProbe`. Após executar, exibe **Testado em** seguido do timestamp formatado e o resultado por servidor (reachable/latência). |
+| **Checagem do ambiente**       | Botão que roda `runDiagnostics` da `@wavoip/wavoip-api`. Após executar, exibe **Testado em** seguido do timestamp e duas listas: se cada tipo de chamada (`OFFICIAL`, `UNOFFICIAL`) funcionaria agora — e o que o bloqueia, quando não —, seguida de cada checagem com a sua severidade (`ok`, `warning`, `failure`). |
 | **Diagnósticos ICE recentes**  | Lista os últimos eventos `iceDiagnostics` (até 20) com timestamp formatado e o `id` da chamada que os emitiu.                                     |
 | **Problemas recentes**         | Lista as últimas ocorrências de `connectivityIssue` (até 20), com timestamp, `id` da chamada e o código do problema.                              |
 
@@ -55,11 +55,19 @@ O botão **Copiar relatório** copia um JSON com a forma:
     "audioOutputs": [],
     "microphonePermission": "granted"
   },
-  "stunResults": {
+  "checkup": {
     "at": 1717012345678,
-    "results": [
-      { "server": "stun:stun.l.google.com:19302", "reachable": true, "latencyMs": 42 }
-    ]
+    "report": {
+      "checks": [
+        { "code": "AUDIO_RUNNING", "severity": "ok" },
+        { "code": "MICROPHONE_FOUND", "severity": "ok" },
+        { "code": "STUN_UNREACHABLE", "severity": "failure", "details": { "servers": [] } }
+      ],
+      "readiness": {
+        "OFFICIAL": { "ready": false, "blockedBy": ["STUN_UNREACHABLE"] },
+        "UNOFFICIAL": { "ready": true, "blockedBy": [] }
+      }
+    }
   },
   "recentIceDiagnostics": [
     {

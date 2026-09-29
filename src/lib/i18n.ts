@@ -94,11 +94,11 @@ export type TranslationKey =
   | "Open diagnostics"
   | "Close"
   | "Copy report"
-  | "Test STUN"
+  | "Run check"
   | "Browser"
   | "Network"
   | "Audio devices"
-  | "STUN reachability"
+  | "Environment check"
   | "Tested at"
   | "Recent issues"
   | "Recent ICE diagnostics"
@@ -216,11 +216,11 @@ const ptBR: LocaleResource = {
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Fechar",
   "Copy report": "Copiar relatório",
-  "Test STUN": "Testar STUN",
+  "Run check": "Testar ambiente",
   Browser: "Navegador",
   Network: "Rede",
   "Audio devices": "Áudio",
-  "STUN reachability": "Reachability STUN",
+  "Environment check": "Checagem do ambiente",
   "Tested at": "Testado em",
   "Recent issues": "Problemas recentes",
   "Recent ICE diagnostics": "Diagnósticos ICE recentes",
@@ -334,11 +334,11 @@ const es: LocaleResource = {
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Cerrar",
   "Copy report": "Copiar informe",
-  "Test STUN": "Probar STUN",
+  "Run check": "Probar entorno",
   Browser: "Navegador",
   Network: "Red",
   "Audio devices": "Audio",
-  "STUN reachability": "Alcance STUN",
+  "Environment check": "Chequeo del entorno",
   "Tested at": "Probado a las",
   "Recent issues": "Problemas recientes",
   "Recent ICE diagnostics": "Diagnósticos ICE recientes",

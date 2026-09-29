@@ -8,7 +8,7 @@ import {
   WarningIcon,
   WaveformIcon,
 } from "@phosphor-icons/react";
-import { runStunProbe, type StunProbeResult } from "@wavoip/wavoip-api/web";
+import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
 import { Loader2Icon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -22,11 +22,19 @@ const DEFAULT_STUN_SERVERS = [
   "stun:stun.cloudflare.com:3478",
 ];
 
+const SEVERITY_STYLES: Record<DiagnosticSeverity, string> = {
+  ok: "wv:bg-green-500/15 wv:text-green-500",
+  warning: "wv:bg-amber-500/15 wv:text-amber-500",
+  failure: "wv:bg-red-500/15 wv:text-red-500",
+};
+
+const SEVERITY_GLYPHS: Record<DiagnosticSeverity, string> = { ok: "✓", warning: "!", failure: "✗" };
+
 export function DebugScreen() {
   const debug = useDebugInfo();
   const [system, setSystem] = useState<SystemInfo | null>(null);
-  const [stunResults, setStunResults] = useState<{ at: number; results: StunProbeResult[] } | null>(null);
-  const [stunRunning, setStunRunning] = useState(false);
+  const [checkup, setCheckup] = useState<{ at: number; report: DiagnosticsReport } | null>(null);
+  const [checkupRunning, setCheckupRunning] = useState(false);
   const [copied, setCopied] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -54,13 +62,13 @@ export function DebugScreen() {
     return () => el.removeEventListener("wheel", onWheel);
   }, []);
 
-  const handleProbe = async () => {
-    setStunRunning(true);
+  const handleCheckup = async () => {
+    setCheckupRunning(true);
     try {
-      const results = await runStunProbe(DEFAULT_STUN_SERVERS);
-      setStunResults({ at: Date.now(), results });
+      const report = await runDiagnostics({ runtime: webRuntime(), stunServers: DEFAULT_STUN_SERVERS });
+      setCheckup({ at: Date.now(), report });
     } finally {
-      setStunRunning(false);
+      setCheckupRunning(false);
     }
   };
 
@@ -71,7 +79,7 @@ export function DebugScreen() {
         webphone: __WEBPHONE_VERSION__,
       },
       system,
-      stunResults,
+      checkup,
       recentIceDiagnostics: debug.recentIceDiagnostics,
       recentIssues: debug.recentIssues,
     };
@@ -129,46 +137,59 @@ export function DebugScreen() {
           </Card>
         </div>
 
-        <Card title={t("STUN reachability")} icon={<WaveformIcon className="wv:size-4" weight="duotone" />}>
+        <Card title={t("Environment check")} icon={<WaveformIcon className="wv:size-4" weight="duotone" />}>
           <div className="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
             <Button
               type="button"
               size="sm"
-              onClick={handleProbe}
-              disabled={stunRunning}
-              aria-label={t("Test STUN")}
+              onClick={handleCheckup}
+              disabled={checkupRunning}
+              aria-label={t("Run check")}
               className="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
             >
-              {stunRunning ? (
+              {checkupRunning ? (
                 <Loader2Icon className="wv:size-4 wv:animate-spin" />
               ) : (
                 <WaveformIcon className="wv:size-4" weight="duotone" />
               )}
-              {t("Test STUN")}
+              {t("Run check")}
             </Button>
-            {stunResults && (
+            {checkup && (
               <span className="wv:text-xs wv:text-muted-foreground">
-                {t("Tested at")} {formatTimestamp(stunResults.at)}
+                {t("Tested at")} {formatTimestamp(checkup.at)}
               </span>
             )}
           </div>
-          {stunResults && (
-            <ul className="wv:mt-1 wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
-              {stunResults.results.map((r) => (
-                <li
-                  key={r.server}
-                  className="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
-                >
-                  <ReachableBadge ok={r.reachable} />
-                  <span className="wv:flex-1 wv:truncate" title={r.server}>
-                    {r.server}
-                  </span>
-                  {r.reachable && (
-                    <span className="wv:tabular-nums wv:text-muted-foreground">{r.latencyMs ?? "?"} ms</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+          {checkup && (
+            <>
+              <ul className="wv:mt-1 wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-1">
+                {Object.entries(checkup.report.readiness).map(([callType, readiness]) => (
+                  <li
+                    key={callType}
+                    className="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
+                  >
+                    <SeverityBadge severity={readiness.ready ? "ok" : "failure"} />
+                    <span className="wv:flex-1 wv:truncate">{callType}</span>
+                    {!readiness.ready && (
+                      <span className="wv:text-muted-foreground wv:truncate">{readiness.blockedBy.join(", ")}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <ul className="wv:mt-1 wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
+                {checkup.report.checks.map((check) => (
+                  <li
+                    key={check.code}
+                    className="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
+                  >
+                    <SeverityBadge severity={check.severity} />
+                    <span className="wv:flex-1 wv:truncate" title={check.code}>
+                      {check.code}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </Card>
 
@@ -272,16 +293,14 @@ function StatusDot({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-function ReachableBadge({ ok }: { ok: boolean }) {
+function SeverityBadge({ severity }: { severity: DiagnosticSeverity }) {
   return (
     <span
       role="img"
-      aria-label={ok ? "reachable" : "unreachable"}
-      className={`wv:inline-flex wv:size-4 wv:items-center wv:justify-center wv:rounded-full ${
-        ok ? "wv:bg-green-500/15 wv:text-green-500" : "wv:bg-red-500/15 wv:text-red-500"
-      }`}
+      aria-label={severity}
+      className={`wv:inline-flex wv:size-4 wv:items-center wv:justify-center wv:rounded-full ${SEVERITY_STYLES[severity]}`}
     >
-      {ok ? "✓" : "✗"}
+      {SEVERITY_GLYPHS[severity]}
     </span>
   );
 }
