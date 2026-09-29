@@ -31,7 +31,7 @@ function mount(): void {
     <App
       layout="filled"
       root={root}
-      styleSource={document.head}
+      rootNode={document}
       config={APP_SETTINGS}
       wavoip={new Wavoip({ tokens: [], platform: "pwa", runtime: webRuntime() })}
     />,

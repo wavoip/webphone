@@ -14,20 +14,22 @@ export type Mount = {
   /** Onde a classe de tema mora e para onde os portais vão. */
   root: HTMLDivElement;
   /**
-   * De onde o PiP clona o CSS. No widget é o shadow root, e só ele: as folhas do
-   * documento são da página do cliente, e ler `cssRules` de uma folha de outra origem
-   * (a CDN do jsDelivr) lança SecurityError e aborta a abertura do PiP. No PWA a
-   * página é nossa, e a fonte é o `document.head`.
+   * A subárvore em que esta instância vive: o shadow root no widget, o documento no PWA.
+   * É onde o CSS mora, e é o que o Ark usa para resolver portal e consulta de DOM.
+   *
+   * No widget o PiP clona daqui e só daqui: as folhas do documento são da página do
+   * cliente, e ler `cssRules` de uma folha de outra origem (a CDN do jsDelivr) lança
+   * SecurityError e aborta a abertura da janela.
    */
-  styleSource: ParentNode;
+  rootNode: ShadowRoot | Document;
 };
 
 export const MountContext = createContext<Mount | null>(null);
 
 type Props = Mount & { children: ReactNode };
 
-export function MountProvider({ children, layout, root, styleSource }: Props) {
-  return <MountContext.Provider value={{ layout, root, styleSource }}>{children}</MountContext.Provider>;
+export function MountProvider({ children, layout, root, rootNode }: Props) {
+  return <MountContext.Provider value={{ layout, root, rootNode }}>{children}</MountContext.Provider>;
 }
 
 export function useMount(): Mount {

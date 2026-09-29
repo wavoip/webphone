@@ -74,6 +74,11 @@ describe("CopyablePeer", () => {
     await act(async () => {
       vi.advanceTimersByTime(1500);
     });
+    await act(async () => {
+      // O Ark desmonta o tooltip depois da transição de saída, e não no mesmo tick em
+      // que o estado fecha. O que se observa é igual; só não é mais instantâneo.
+      vi.advanceTimersByTime(50);
+    });
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });
 
@@ -96,6 +101,11 @@ describe("CopyablePeer", () => {
     expect(screen.queryAllByText("Copiado").length).toBeGreaterThan(0);
     await act(async () => {
       vi.advanceTimersByTime(600);
+    });
+    await act(async () => {
+      // O Ark desmonta o tooltip depois da transição de saída, e não no mesmo tick em
+      // que o estado fecha. O que se observa é igual; só não é mais instantâneo.
+      vi.advanceTimersByTime(50);
     });
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });

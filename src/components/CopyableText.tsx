@@ -42,7 +42,7 @@ export function CopyableText({ value, ariaLabel, className, children }: Props) {
   };
 
   return (
-    <Tooltip open={copied}>
+    <Tooltip open={copied} positioning={{ placement: "top", gutter: 4 }}>
       <TooltipTrigger asChild>
         {/* biome-ignore lint/a11y/useSemanticElements: quem chama pode passar filhos de bloco, inválidos dentro de <button>; span + role=button + teclado mantêm a semântica. */}
         <span
@@ -56,7 +56,7 @@ export function CopyableText({ value, ariaLabel, className, children }: Props) {
           {children}
         </span>
       </TooltipTrigger>
-      <TooltipContent container={shadow?.root} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
+      <TooltipContent container={shadow?.root} className="wv:bg-green-600 wv:text-white">
         {t("Copied")}
       </TooltipContent>
     </Tooltip>

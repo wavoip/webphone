@@ -1,3 +1,4 @@
+import { EnvironmentProvider } from "@ark-ui/react/environment";
 import type { Wavoip } from "@wavoip/wavoip-api/web";
 import { useSyncExternalStore } from "react";
 import { WebPhone } from "@/components/WebPhone";
@@ -17,38 +18,42 @@ import { WidgetProvider } from "@/providers/WidgetProvider";
 type Props = {
   layout: Mount["layout"];
   root: HTMLDivElement;
-  styleSource: ParentNode;
+  rootNode: Mount["rootNode"];
   config: WebphoneSettings;
   wavoip?: Wavoip;
 };
 
-export function App({ layout, root, styleSource, config, wavoip }: Props) {
+export function App({ layout, root, rootNode, config, wavoip }: Props) {
   useSyncExternalStore(
     subscribeLocale,
     () => normalizeLanguage(getLanguage()),
     () => normalizeLanguage(config.language),
   );
   return (
-    <MountProvider layout={layout} root={root} styleSource={styleSource}>
-      <SettingsProvider config={config}>
-        <MiddlewareRoot wavoip={wavoip} config={config}>
-          <LanguageProvider initial={config.language}>
-            <ThemeProvider root={root}>
-              <PipProvider styleSource={styleSource}>
-                <WidgetProvider>
-                  <NotificationsProvider>
-                    <WavoipProvider>
-                      <DebugProvider>
-                        <WebPhone />
-                      </DebugProvider>
-                    </WavoipProvider>
-                  </NotificationsProvider>
-                </WidgetProvider>
-              </PipProvider>
-            </ThemeProvider>
-          </LanguageProvider>
-        </MiddlewareRoot>
-      </SettingsProvider>
-    </MountProvider>
+    // O Ark consulta o DOM por `getRootNode()`: sem isto ele procuraria no `document` e
+    // não acharia nada do que vive dentro do shadow root fechado do widget.
+    <EnvironmentProvider value={rootNode}>
+      <MountProvider layout={layout} root={root} rootNode={rootNode}>
+        <SettingsProvider config={config}>
+          <MiddlewareRoot wavoip={wavoip} config={config}>
+            <LanguageProvider initial={config.language}>
+              <ThemeProvider root={root}>
+                <PipProvider rootNode={rootNode}>
+                  <WidgetProvider>
+                    <NotificationsProvider>
+                      <WavoipProvider>
+                        <DebugProvider>
+                          <WebPhone />
+                        </DebugProvider>
+                      </WavoipProvider>
+                    </NotificationsProvider>
+                  </WidgetProvider>
+                </PipProvider>
+              </ThemeProvider>
+            </LanguageProvider>
+          </MiddlewareRoot>
+        </SettingsProvider>
+      </MountProvider>
+    </EnvironmentProvider>
   );
 }

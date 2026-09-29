@@ -63,7 +63,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
   const rendered = render(
-    <MountContext.Provider value={{ layout: "floating", root, styleSource: shadowRoot }}>
+    <MountContext.Provider value={{ layout: "floating", root, rootNode: shadowRoot }}>
       <SettingsProvider config={options.config ?? {}}>
         <MiddlewareRoot
           wavoip={fake.asWavoip()}
@@ -72,7 +72,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           focus={options.focus}
         >
           <ThemeProvider root={root}>
-            <PipProvider styleSource={shadowRoot}>
+            <PipProvider rootNode={shadowRoot}>
               <WidgetProvider>
                 <NotificationsProvider>
                   {/* As telas chegam ao SDK pelo `useWavoip`, então sem a ponte nenhuma
