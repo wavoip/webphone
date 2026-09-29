@@ -1,5 +1,5 @@
-import { shallow } from "zustand/shallow";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
+import { shallowEqual } from "@/middleware/store/shallowEqual";
 
 type Deps = { store: MiddlewareStoreApi };
 
@@ -23,6 +23,6 @@ export function screenSyncEffect({ store }: Deps): Unsubscribe {
       }
       if (status === "idle") store.getState().setScreen("keyboard");
     },
-    { equalityFn: shallow },
+    { equalityFn: shallowEqual },
   );
 }

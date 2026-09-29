@@ -1,7 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import solid from "vite-plugin-solid";
 import { defineConfig } from "vite";
 import dts from "vite-plugin-dts";
 
@@ -13,17 +13,12 @@ const version = process.env.WEBPHONE_VERSION_OVERRIDE ?? pkg.version;
 
 export default defineConfig({
   plugins: [
-    react(),
+    solid(),
     tailwindcss(),
     dts({ insertTypesEntry: true, tsconfigPath: "./tsconfig.app.json", rollupTypes: true }),
   ],
   define: {
     __WEBPHONE_VERSION__: JSON.stringify(version),
-    // React só troca para o build de produção quando `process.env.NODE_ENV` é
-    // literal no bundle. Feito via `define` (e não por um plugin com hook
-    // `transform`) porque um plugin que devolve string sem sourcemap invalida
-    // o sourcemap do build inteiro.
-    "process.env.NODE_ENV": JSON.stringify("production"),
   },
   // O `public/` é do PWA: sem isto os ícones dele entram no pacote publicado, que é o
   // `dist` inteiro (ver `files` no package.json).
@@ -48,12 +43,6 @@ export default defineConfig({
     },
     rollupOptions: {
       external: [],
-      output: {
-        globals: {
-          react: "React",
-          "react-dom": "ReactDOM",
-        },
-      },
     },
     emptyOutDir: true,
   },

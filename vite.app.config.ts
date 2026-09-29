@@ -1,6 +1,6 @@
 import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import solid from "vite-plugin-solid";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -16,7 +16,7 @@ export default defineConfig({
   root: path.resolve(__dirname, "src/shells/app"),
   publicDir: path.resolve(__dirname, "public"),
   plugins: [
-    react(),
+    solid(),
     tailwindcss(),
     VitePWA({
       registerType: "autoUpdate",

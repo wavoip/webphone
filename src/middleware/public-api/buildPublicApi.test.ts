@@ -15,6 +15,56 @@ describe("buildPublicApi", () => {
     api = buildPublicApi(middleware);
   });
 
+  describe("watch", () => {
+    it("reports state changes and stops after unsubscribing", () => {
+      const seen: number[] = [];
+      const unwatch = api.watch(
+        () => api.call.getOffers().length,
+        (count) => seen.push(count),
+      );
+
+      middleware.store.getState().addOffer(new FakeIncomingCall("o1", "tok-1") as never);
+      middleware.store.getState().addOffer(new FakeIncomingCall("o2", "tok-1") as never);
+      unwatch();
+      middleware.store.getState().addOffer(new FakeIncomingCall("o3", "tok-1") as never);
+
+      expect(seen).toEqual([1, 2]);
+    });
+
+    it("stays quiet while the derived value does not change", () => {
+      const seen: string[] = [];
+      const unwatch = api.watch(
+        () => middleware.store.getState().callStatus,
+        (status) => seen.push(status),
+      );
+
+      middleware.store.getState().setCallStatus("CALLING");
+      middleware.store.getState().setCallStatus("CALLING");
+      middleware.store.getState().setPeerMuted(true);
+      unwatch();
+
+      expect(seen).toEqual(["CALLING"]);
+    });
+
+    it("hands out an inert copy, so a held reference does not change underneath", () => {
+      middleware.store.getState().upsertDevice({
+        token: "tok-9",
+        status: "open",
+        connectionStatus: "connected",
+        restricted: false,
+        restrictedUntil: null,
+        enable: true,
+        persist: false,
+      });
+      const before = api.device.get();
+
+      middleware.store.getState().updateDeviceState("tok-9", { enable: false });
+
+      expect(before.find((d) => d.token === "tok-9")?.enable).toBe(true);
+      expect(api.device.get().find((d) => d.token === "tok-9")?.enable).toBe(false);
+    });
+  });
+
   describe("call", () => {
     it("start delegates to the call controller", async () => {
       wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };

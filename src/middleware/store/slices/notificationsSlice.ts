@@ -1,5 +1,4 @@
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { SliceCreator } from "@/middleware/store/createStore";
 
 export type NotificationType =
   | "INFO"
@@ -36,7 +35,7 @@ export type NotificationsSliceActions = {
 
 export type NotificationsSlice = NotificationsSliceState & NotificationsSliceActions;
 
-export const createNotificationsSlice: StateCreator<MiddlewareStore, [], [], NotificationsSlice> = (set) => ({
+export const createNotificationsSlice: SliceCreator<NotificationsSlice> = (set) => ({
   notifications: [],
   setNotifications: (notifications) => set({ notifications }),
   addNotification: (notification) => set((state) => ({ notifications: [notification, ...state.notifications] })),

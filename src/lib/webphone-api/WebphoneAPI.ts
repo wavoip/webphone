@@ -155,5 +155,10 @@ export type WebphoneAPI = {
   position: PositionAPI;
   settings: SettingsAPI;
   on: <K extends WebphoneEventName>(event: K, cb: (payload: WebphoneEventMap[K]) => void) => () => void;
+  /**
+   * Observa estado, e não evento. `read` roda de novo a cada mudança do que ele lê, e
+   * `onChange` só é chamado quando o resultado muda. Devolve o cancelamento.
+   */
+  watch: <T>(read: () => T, onChange: (value: T, previous: T) => void) => () => void;
   use: <E extends MiddlewareEvent>(event: E, fn: PublicMiddleware<E>) => void;
 };

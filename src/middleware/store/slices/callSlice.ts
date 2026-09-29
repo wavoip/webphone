@@ -1,6 +1,5 @@
 import type { ActiveCall, IncomingCall, OutgoingCall, CallStatus as WavoipCallStatus } from "@wavoip/wavoip-api/web";
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { SliceCreator } from "@/middleware/store/createStore";
 
 /**
  * Mirrors `CallStatus` from `@wavoip/wavoip-api` verbatim, plus `"idle"` for
@@ -53,7 +52,7 @@ const initialCallState: CallSliceState = {
   lastOfferOutcomes: {},
 } as const;
 
-export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> = (set) => ({
+export const createCallSlice: SliceCreator<CallSlice> = (set) => ({
   ...initialCallState,
   addOffer: (offer) => set((state) => ({ offers: [...state.offers, offer] })),
   removeOffer: (id) => set((state) => ({ offers: state.offers.filter((o) => o.id !== id) })),

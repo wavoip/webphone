@@ -10,12 +10,32 @@ function stampNotification(input: NotificationInput): Notification {
   return { ...input, id: newId(), created_at: new Date() };
 }
 
+/**
+ * Entrega uma cópia inerte do que veio do store.
+ *
+ * A leitura acontece aqui dentro, então chamar o getter num escopo reativo rastreia; o
+ * que sai é valor morto. Devolver o objeto do store direto daria a quem integra uma
+ * referência que muda sozinha depois — `const d = device.get()` leria outra coisa um
+ * segundo depois, e nada no código dele explicaria por quê.
+ */
+function plainList<T extends object>(items: readonly T[]): T[] {
+  return items.map((item) => ({ ...item }));
+}
+
 /** Leitura é getter para quem integra sempre ver o estado atual do store. */
 export function buildPublicApi(middleware: Middleware): WebphoneAPI {
   const { store, controllers, registry, events } = middleware;
 
   return {
     on: (event, cb) => events.on(event, cb),
+    /**
+     * `on` conta o que aconteceu; `watch` conta o que é. Sem isto, quem integra precisa
+     * remontar o estado a partir dos eventos e manter a própria cópia em dia.
+     *
+     * O que `read` devolve é comparado por identidade, então derive o que você precisa:
+     * `watch(() => api.call.getOffers().length, …)` só dispara quando o número muda.
+     */
+    watch: (read, onChange) => store.subscribe(read, onChange),
     use: (event, fn) => registry.use(event, fn),
     call: {
       start: (to, config) => controllers.call.start(to, config),
@@ -35,7 +55,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       },
     },
     device: {
-      get: () => store.getState().devices,
+      get: () => plainList(store.getState().devices),
       add: (token, persist) => controllers.device.add(token, persist),
       remove: (token) => controllers.device.remove(token),
       enable: (token) => controllers.device.enable(token),
@@ -62,7 +82,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       },
     },
     notifications: {
-      get: () => store.getState().notifications,
+      get: () => plainList(store.getState().notifications),
       add: (input) => {
         const stamped = stampNotification(input);
         controllers.notifications.add(stamped);
@@ -105,7 +125,7 @@ export function buildPublicApi(middleware: Middleware): WebphoneAPI {
       toggle: () => store.getState().toggleWidget(),
       buttonPosition: {
         get value() {
-          return store.getState().buttonPosition;
+          return { ...store.getState().buttonPosition };
         },
         set: (position) => store.getState().setButtonPosition(resolveWidgetButtonPosition(position)),
       },

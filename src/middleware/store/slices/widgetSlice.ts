@@ -1,5 +1,4 @@
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { SliceCreator } from "@/middleware/store/createStore";
 
 export type WidgetPoint = { x: number; y: number };
 
@@ -19,7 +18,7 @@ export type WidgetSliceActions = {
 
 export type WidgetSlice = WidgetSliceState & WidgetSliceActions;
 
-export const createWidgetSlice: StateCreator<MiddlewareStore, [], [], WidgetSlice> = (set) => ({
+export const createWidgetSlice: SliceCreator<WidgetSlice> = (set) => ({
   isClosed: true,
   position: { x: 0, y: 0 },
   buttonPosition: { x: 0, y: 0 },
