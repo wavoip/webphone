@@ -1,12 +1,12 @@
-import { Bell, CheckCircle, PhoneIncoming, PhoneX, Warning, X } from "@/components/icons";
 import { useMemo } from "react";
+import { Bell, CheckCircle, PhoneIncoming, PhoneX, Warning, X } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { t } from "@/lib/i18n";
+import { useNotificationManager } from "@/lib/notifications";
 import { relativeTime } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
-import { useNotificationManager } from "@/lib/notifications";
 
 const typeLabel = (type: Notification["type"]): string => {
   if (type === "MISSED_CALL") return t("Missed call");

@@ -1,6 +1,6 @@
+import { useMemo } from "react";
 import { Warning } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
-import { useMemo } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/lib/i18n";
 

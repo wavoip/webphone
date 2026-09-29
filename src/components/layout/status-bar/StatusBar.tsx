@@ -1,6 +1,6 @@
-import { PictureInPicture, X } from "@/components/icons";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import { PictureInPicture, X } from "@/components/icons";
 import { SettingsModal } from "@/components/layout/settings/SettingsModal";
 import { DevicesAlert } from "@/components/layout/status-bar/DevicesAlert";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
@@ -14,7 +14,7 @@ import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  
+
   const { togglePip } = usePip();
   // Dono da janela não se fecha nem se destaca dela: os dois botões são do widget.
   const isFloating = useMount().layout === "floating";

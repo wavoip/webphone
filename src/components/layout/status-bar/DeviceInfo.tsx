@@ -1,6 +1,6 @@
-import { Copy, Eye, EyeSlash, Phone, Power, QrCode, Trash, Warning } from "@/components/icons";
 import { useState } from "react";
 import { CopyableText } from "@/components/CopyableText";
+import { Copy, Eye, EyeSlash, Phone, Power, QrCode, Trash, Warning } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";

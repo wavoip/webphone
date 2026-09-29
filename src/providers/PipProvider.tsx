@@ -1,4 +1,5 @@
 import { type Accessor, createContext, createEffect, createSignal, type JSX, useContext } from "solid-js";
+import { delegateEvents } from "solid-js/web";
 import { useStore } from "@/middleware/solid/context";
 
 type PipContextType = {
@@ -13,6 +14,16 @@ type PipContextType = {
 export const PipContext = createContext<PipContextType>();
 
 export const PIP_WINDOW_SIZE = { width: 320, height: 450 } as const;
+
+/**
+ * O Solid escuta evento uma vez no `document` e resolve o alvo pela árvore — o que é
+ * rápido, e o que faz um clique na janela do Picture-in-Picture não chegar em ninguém:
+ * ele borbulha no documento **dela**, e nosso ouvinte está no nosso.
+ *
+ * A lista é a dos eventos que o teclado e as telas de chamada usam. Faltar um aqui não
+ * quebra nada visível: o botão simplesmente não responde dentro do PiP.
+ */
+const PIP_DELEGATED_EVENTS = ["click", "mousedown", "mouseup", "input", "change", "keydown", "focusin", "focusout"];
 
 type Props = {
   rootNode: ParentNode;
@@ -59,6 +70,7 @@ export function PipProvider(props: Props) {
       return;
     }
     const newPipWindow = await createNewPipWindow(props.rootNode);
+    delegateEvents(PIP_DELEGATED_EVENTS, newPipWindow.document);
     newPipWindow.addEventListener("pagehide", () => setPipWindow(null));
     setPipWindow(newPipWindow);
   };

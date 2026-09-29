@@ -1,7 +1,7 @@
-import { Phone, PhoneSlash, WhatsappLogo, X } from "@/components/icons";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ContactAvatar } from "@/components/ContactAvatar";
+import { Phone, PhoneSlash, WhatsappLogo, X } from "@/components/icons";
 import MarqueeText from "@/components/MarqueeText";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";

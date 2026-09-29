@@ -1,7 +1,15 @@
-import { DotsNine, Microphone, MicrophoneSlash, Pause, PhoneSlash, PhoneTransfer, VideoCameraSlash } from "@/components/icons";
 import type { ActiveCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+  DotsNine,
+  Microphone,
+  MicrophoneSlash,
+  Pause,
+  PhoneSlash,
+  PhoneTransfer,
+  VideoCameraSlash,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/react/hooks";

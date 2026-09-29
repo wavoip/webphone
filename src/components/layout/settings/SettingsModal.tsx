@@ -1,9 +1,18 @@
-import { ArrowLeft, DeviceMobile, Gear, Microphone, Phone, QrCode, Sliders, Stethoscope } from "@/components/icons";
-import { Plus } from "@/components/icons";
 import { forwardRef, useEffect, useMemo, useState } from "react";
 import QRCode from "react-qr-code";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
+import {
+  ArrowLeft,
+  DeviceMobile,
+  Gear,
+  Microphone,
+  Phone,
+  Plus,
+  QrCode,
+  Sliders,
+  Stethoscope,
+} from "@/components/icons";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { PreferencesConfig } from "@/components/layout/settings/PreferencesConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";

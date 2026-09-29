@@ -1,6 +1,6 @@
-import { WifiHigh, WifiLow, WifiMedium, WifiSlash, WifiX } from "@/components/icons";
 import type { ActiveCall, CallConnection } from "@wavoip/wavoip-api/web";
 import { useEffect, useState } from "react";
+import { WifiHigh, WifiLow, WifiMedium, WifiSlash, WifiX } from "@/components/icons";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
 const PING_POLL_MS = 500;
