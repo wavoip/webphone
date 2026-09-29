@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { createSignal, onCleanup, Show } from "solid-js";
 import MarqueeText from "@/components/MarqueeText";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useMount } from "@/providers/MountProvider";
@@ -7,7 +7,7 @@ import { usePip } from "@/providers/PipProvider";
 type Props = {
   displayName: string | null | undefined;
   phone: string;
-  className?: string;
+  class?: string;
   marqueeSpeed?: number;
 };
 
@@ -17,68 +17,69 @@ const FEEDBACK_DURATION_MS = 1500;
  * O clique copia o *número*, nunca o displayName. O tooltip flutua para escapar do
  * recorte dos ancestrais do cabeçalho da chamada.
  */
-export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 }: Props) {
-  const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+export function CopyablePeer(props: Props) {
+  const [copied, setCopied] = createSignal(false);
   const mount = useMount();
   const pip = usePip();
-  const tooltipContainer = pip.pipWindow?.document.body ?? mount.root;
-  const clipboard = pip.pipWindow?.navigator.clipboard ?? navigator.clipboard;
+  let timer: ReturnType<typeof setTimeout> | null = null;
 
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, []);
+  onCleanup(() => {
+    if (timer) clearTimeout(timer);
+  });
 
-  const label = displayName?.trim() || phone;
-
-  if (!phone) {
-    return (
-      <MarqueeText speed={marqueeSpeed} className={className}>
-        {label}
-      </MarqueeText>
-    );
-  }
+  const label = () => props.displayName?.trim() || props.phone;
+  // Acessores: a janela do PiP abre e fecha durante a chamada, e o destino do tooltip
+  // (e a área de transferência) mudam com ela.
+  const tooltipContainer = () => pip.pipWindow()?.document.body ?? mount.root;
+  const clipboard = () => pip.pipWindow()?.navigator.clipboard ?? navigator.clipboard;
 
   const handleClick = async () => {
     try {
-      await clipboard.writeText(phone);
+      await clipboard().writeText(props.phone);
     } catch (e) {
       console.error(e);
       return;
     }
     setCopied(true);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => setCopied(false), FEEDBACK_DURATION_MS);
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => setCopied(false), FEEDBACK_DURATION_MS);
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLSpanElement>) => {
+  const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key !== "Enter" && e.key !== " ") return;
     e.preventDefault();
     void handleClick();
   };
 
   return (
-    <Tooltip open={copied} positioning={{ placement: "top", gutter: 4 }}>
-      <TooltipTrigger asChild>
-        {/* biome-ignore lint/a11y/useSemanticElements: o MarqueeText renderiza <div>, que é HTML inválido dentro de <button>; span + role=button + teclado mantêm a semântica. */}
-        <span
-          role="button"
-          tabIndex={0}
-          aria-label="Copiar telefone"
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          className="wv:cursor-pointer wv:select-none wv:block wv:w-full"
-        >
-          <MarqueeText speed={marqueeSpeed} className={className}>
-            {label}
-          </MarqueeText>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent container={tooltipContainer} className="wv:bg-green-600 wv:text-white">
-        Copiado
-      </TooltipContent>
-    </Tooltip>
+    <Show
+      when={props.phone}
+      fallback={
+        <MarqueeText speed={props.marqueeSpeed ?? 10} class={props.class}>
+          {label()}
+        </MarqueeText>
+      }
+    >
+      <Tooltip open={copied()} positioning={{ placement: "top", gutter: 4 }}>
+        <TooltipTrigger asChild>
+          {/* biome-ignore lint/a11y/useSemanticElements: o MarqueeText renderiza <div>, que é HTML inválido dentro de <button>; span + role=button + teclado mantêm a semântica. */}
+          <span
+            role="button"
+            tabIndex={0}
+            aria-label="Copiar telefone"
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            class="wv:cursor-pointer wv:select-none wv:block wv:w-full"
+          >
+            <MarqueeText speed={props.marqueeSpeed ?? 10} class={props.class}>
+              {label()}
+            </MarqueeText>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent container={tooltipContainer()} class="wv:bg-green-600 wv:text-white">
+          Copiado
+        </TooltipContent>
+      </Tooltip>
+    </Show>
   );
 }
