@@ -1,75 +1,140 @@
 import type { LucideProps } from "lucide-solid";
+import BrowserGlyph from "lucide-solid/icons/app-window";
+import ArrowLeftGlyph from "lucide-solid/icons/arrow-left";
+import WaveformGlyph from "lucide-solid/icons/audio-waveform";
+import BellGlyph from "lucide-solid/icons/bell";
+import CheckGlyph from "lucide-solid/icons/check";
+import CaretDownGlyph from "lucide-solid/icons/chevron-down";
+import CheckCircleGlyph from "lucide-solid/icons/circle-check";
+import CopyGlyph from "lucide-solid/icons/copy";
+import BackspaceGlyph from "lucide-solid/icons/delete";
+import EyeGlyph from "lucide-solid/icons/eye";
+import EyeSlashGlyph from "lucide-solid/icons/eye-off";
+import GlobeGlyph from "lucide-solid/icons/globe";
+import DotsNineGlyph from "lucide-solid/icons/grid-3x3";
+import TranslateGlyph from "lucide-solid/icons/languages";
+import SpinnerGlyph from "lucide-solid/icons/loader-circle";
+import MicrophoneGlyph from "lucide-solid/icons/mic";
+import MicrophoneSlashGlyph from "lucide-solid/icons/mic-off";
+import DesktopGlyph from "lucide-solid/icons/monitor";
+import MoonGlyph from "lucide-solid/icons/moon";
+import PackageGlyph from "lucide-solid/icons/package";
+import PauseGlyph from "lucide-solid/icons/pause";
+import PhoneGlyph from "lucide-solid/icons/phone";
+import PhoneTransferGlyph from "lucide-solid/icons/phone-forwarded";
+import PhoneIncomingGlyph from "lucide-solid/icons/phone-incoming";
+import PhoneXGlyph from "lucide-solid/icons/phone-missed";
+import PhoneSlashGlyph from "lucide-solid/icons/phone-off";
+import PictureInPictureGlyph from "lucide-solid/icons/picture-in-picture";
+import PlusGlyph from "lucide-solid/icons/plus";
+import PowerGlyph from "lucide-solid/icons/power";
+import QrCodeGlyph from "lucide-solid/icons/qr-code";
+import GearGlyph from "lucide-solid/icons/settings";
+import SlidersGlyph from "lucide-solid/icons/sliders-horizontal";
+import DeviceMobileGlyph from "lucide-solid/icons/smartphone";
+import StethoscopeGlyph from "lucide-solid/icons/stethoscope";
+import SunGlyph from "lucide-solid/icons/sun";
+import TrashGlyph from "lucide-solid/icons/trash";
+import WarningGlyph from "lucide-solid/icons/triangle-alert";
+import UserGlyph from "lucide-solid/icons/user";
+import VideoCameraSlashGlyph from "lucide-solid/icons/video-off";
+import WifiHighGlyph from "lucide-solid/icons/wifi";
+import WifiMediumGlyph from "lucide-solid/icons/wifi-high";
+import WifiLowGlyph from "lucide-solid/icons/wifi-low";
+import WifiSlashGlyph from "lucide-solid/icons/wifi-off";
+import WifiXGlyph from "lucide-solid/icons/wifi-zero";
+import XGlyph from "lucide-solid/icons/x";
+import { type JSX, splitProps } from "solid-js";
 
 /**
  * Fronteira dos ícones: o resto do código importa daqui, e trocar de pacote é mexer só
  * neste arquivo. O nome que exportamos descreve o desenho no nosso vocabulário; o nome
- * que o pacote dá está no caminho do import, ao lado.
- *
- * O `lucide-solid` desenha um traço só, e foi isso que tirou da mesa inlinar os SVGs: o
- * pacote anterior embarcava os seis pesos de cada ícone e nós desenhávamos três.
+ * que o lucide dá está no caminho do import, ao lado.
  *
  * Import por subcaminho, e não pelo índice: são 2121 ícones em JSX cru, e o barril faria
- * o servidor de desenvolvimento compilar todos.
+ * o servidor de desenvolvimento compilar todos — o que também descarta o `LucideProvider`,
+ * que só o índice exporta.
  */
-export type IconProps = LucideProps;
+export type IconProps = LucideProps & {
+  /**
+   * Pinta o miolo além do traço. O lucide desenha contorno, e preencher só faz sentido
+   * onde a silhueta é fechada: no telefone, sim; no triângulo de aviso, o preenchimento
+   * engoliria a exclamação de dentro.
+   */
+  filled?: boolean;
+};
 
-export { default as Browser } from "lucide-solid/icons/app-window";
-export { default as ArrowLeft } from "lucide-solid/icons/arrow-left";
-export { default as Waveform } from "lucide-solid/icons/audio-waveform";
-export { default as Bell } from "lucide-solid/icons/bell";
-export { default as Check } from "lucide-solid/icons/check";
-export { default as CaretDown } from "lucide-solid/icons/chevron-down";
-export { default as CheckCircle } from "lucide-solid/icons/circle-check";
-export { default as Copy } from "lucide-solid/icons/copy";
-export { default as Backspace } from "lucide-solid/icons/delete";
-export { default as Eye } from "lucide-solid/icons/eye";
-export { default as EyeSlash } from "lucide-solid/icons/eye-off";
-export { default as Globe } from "lucide-solid/icons/globe";
-export { default as DotsNine } from "lucide-solid/icons/grid-3x3";
-export { default as Translate } from "lucide-solid/icons/languages";
-export { default as Spinner } from "lucide-solid/icons/loader-circle";
-export { default as Microphone } from "lucide-solid/icons/mic";
-export { default as MicrophoneSlash } from "lucide-solid/icons/mic-off";
-export { default as Desktop } from "lucide-solid/icons/monitor";
-export { default as Moon } from "lucide-solid/icons/moon";
-export { default as Package } from "lucide-solid/icons/package";
-export { default as Pause } from "lucide-solid/icons/pause";
-export { default as Phone } from "lucide-solid/icons/phone";
-export { default as PhoneTransfer } from "lucide-solid/icons/phone-forwarded";
-export { default as PhoneIncoming } from "lucide-solid/icons/phone-incoming";
-export { default as PhoneX } from "lucide-solid/icons/phone-missed";
-export { default as PhoneSlash } from "lucide-solid/icons/phone-off";
-export { default as PictureInPicture } from "lucide-solid/icons/picture-in-picture";
-export { default as Plus } from "lucide-solid/icons/plus";
-export { default as Power } from "lucide-solid/icons/power";
-export { default as QrCode } from "lucide-solid/icons/qr-code";
-export { default as Gear } from "lucide-solid/icons/settings";
-export { default as Sliders } from "lucide-solid/icons/sliders-horizontal";
-export { default as DeviceMobile } from "lucide-solid/icons/smartphone";
-export { default as Stethoscope } from "lucide-solid/icons/stethoscope";
-export { default as Sun } from "lucide-solid/icons/sun";
-export { default as Trash } from "lucide-solid/icons/trash";
-export { default as Warning } from "lucide-solid/icons/triangle-alert";
-export { default as User } from "lucide-solid/icons/user";
-export { default as VideoCameraSlash } from "lucide-solid/icons/video-off";
-export { default as WifiHigh } from "lucide-solid/icons/wifi";
-export { default as WifiMedium } from "lucide-solid/icons/wifi-high";
-export { default as WifiLow } from "lucide-solid/icons/wifi-low";
-export { default as WifiSlash } from "lucide-solid/icons/wifi-off";
-export { default as WifiX } from "lucide-solid/icons/wifi-zero";
-export { default as X } from "lucide-solid/icons/x";
+type Glyph = (props: LucideProps) => JSX.Element;
 
 /**
- * O lucide não desenha marca de terceiro, e esta é a única de que precisamos. Preenchida,
- * e não traçada, porque é a forma com que a marca é reconhecida.
+ * O lucide desenha 24px quando ninguém pede tamanho; o pacote anterior desenhava `1em`, e
+ * é disso que os tamanhos do webphone dependem — ícone sem classe acompanha a fonte de
+ * quem o contém. Trocar o padrão aqui é mais barato que anotar tamanho em cada uso.
+ */
+function icon(Glyph: Glyph) {
+  return (props: IconProps): JSX.Element => {
+    const [local, rest] = splitProps(props, ["filled"]);
+    return <Glyph size="1em" fill={local.filled ? "currentColor" : "none"} {...rest} />;
+  };
+}
+
+export const ArrowLeft = icon(ArrowLeftGlyph);
+export const Backspace = icon(BackspaceGlyph);
+export const Bell = icon(BellGlyph);
+export const Browser = icon(BrowserGlyph);
+export const CaretDown = icon(CaretDownGlyph);
+export const Check = icon(CheckGlyph);
+export const CheckCircle = icon(CheckCircleGlyph);
+export const Copy = icon(CopyGlyph);
+export const Desktop = icon(DesktopGlyph);
+export const DeviceMobile = icon(DeviceMobileGlyph);
+export const DotsNine = icon(DotsNineGlyph);
+export const Eye = icon(EyeGlyph);
+export const EyeSlash = icon(EyeSlashGlyph);
+export const Gear = icon(GearGlyph);
+export const Globe = icon(GlobeGlyph);
+export const Microphone = icon(MicrophoneGlyph);
+export const MicrophoneSlash = icon(MicrophoneSlashGlyph);
+export const Moon = icon(MoonGlyph);
+export const Package = icon(PackageGlyph);
+export const Pause = icon(PauseGlyph);
+export const Phone = icon(PhoneGlyph);
+export const PhoneIncoming = icon(PhoneIncomingGlyph);
+export const PhoneSlash = icon(PhoneSlashGlyph);
+export const PhoneTransfer = icon(PhoneTransferGlyph);
+export const PhoneX = icon(PhoneXGlyph);
+export const PictureInPicture = icon(PictureInPictureGlyph);
+export const Plus = icon(PlusGlyph);
+export const Power = icon(PowerGlyph);
+export const QrCode = icon(QrCodeGlyph);
+export const Sliders = icon(SlidersGlyph);
+export const Spinner = icon(SpinnerGlyph);
+export const Stethoscope = icon(StethoscopeGlyph);
+export const Sun = icon(SunGlyph);
+export const Translate = icon(TranslateGlyph);
+export const Trash = icon(TrashGlyph);
+export const User = icon(UserGlyph);
+export const VideoCameraSlash = icon(VideoCameraSlashGlyph);
+export const Warning = icon(WarningGlyph);
+export const Waveform = icon(WaveformGlyph);
+export const WifiHigh = icon(WifiHighGlyph);
+export const WifiLow = icon(WifiLowGlyph);
+export const WifiMedium = icon(WifiMediumGlyph);
+export const WifiSlash = icon(WifiSlashGlyph);
+export const WifiX = icon(WifiXGlyph);
+export const X = icon(XGlyph);
+
+/**
+ * O lucide não desenha marca de terceiro, e esta é a única de que precisamos. Sempre
+ * preenchida: é a forma com que a marca é reconhecida.
  */
 export function WhatsappLogo(props: IconProps) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 24 24"
-      width={props.size ?? 24}
-      height={props.size ?? 24}
+      width={props.size ?? "1em"}
+      height={props.size ?? "1em"}
       fill={props.color ?? "currentColor"}
       class={props.class}
       aria-hidden="true"

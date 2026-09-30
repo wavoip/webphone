@@ -152,7 +152,7 @@ function PhoneLine(props: { phone: string }) {
   return (
     <CopyableText value={props.phone} ariaLabel={t("Copy phone")}>
       <span class="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
-        <Phone size={16} class="wv:text-green-500" />
+        <Phone filled size={16} class="wv:text-green-500" />
         <span class="wv:truncate">{props.phone}</span>
       </span>
     </CopyableText>

@@ -77,6 +77,18 @@ caminho do import, ao lado — foi apelido sem origem visível que deixou quatro
 apontando para o desenho errado. A única marca de terceiro, o logo do WhatsApp, é SVG
 nosso: o lucide não desenha marca.
 
+Duas coisas que a troca quebra em silêncio, e que a fronteira resolve:
+
+- **O padrão de tamanho.** O lucide desenha 24px quando ninguém pede; o phosphor desenhava
+  `1em`. Ícone com classe de tamanho não sente — CSS ganha do atributo —, mas os seis sem
+  classe cresceram 50%. A fronteira devolve `1em`, então ícone sem classe volta a
+  acompanhar a fonte de quem o contém.
+- **O preenchimento.** O lucide passa qualquer atributo de SVG adiante, então `fill` existe
+  — e é o `filled` que a fronteira expõe. Mas só funciona onde a silhueta é fechada:
+  telefone, sino e microfone ficam bons; engrenagem, aviso, QR code e apagar perdem o
+  detalhe de dentro, que o preenchimento engole. É decisão por ícone, e não um botão
+  global.
+
 ### Delegação de evento
 
 O Solid registra um ouvinte por tipo de evento numa raiz só e acha o `onClick` subindo a

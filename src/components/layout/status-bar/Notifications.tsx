@@ -18,11 +18,11 @@ const typeLabel = (type: Notification["type"]): string => {
 
 function TypeIcon(props: { type: Notification["type"] }) {
   const type = props.type;
-  if (type === "MISSED_CALL") return <PhoneIncoming size={14} />;
-  if (type === "CALL_FAILED") return <PhoneX size={14} />;
+  if (type === "MISSED_CALL") return <PhoneIncoming filled size={14} />;
+  if (type === "CALL_FAILED") return <PhoneX filled size={14} />;
   if (type === "DEVICE_RESTRICTED") return <Warning size={14} />;
   if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircle size={14} />;
-  return <Bell size={14} />;
+  return <Bell filled size={14} />;
 }
 
 function buildSecondary(n: Notification): string {

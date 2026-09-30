@@ -175,7 +175,7 @@ export default function KeyboardScreen() {
                 aria-label={t("Call")}
                 class="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
               >
-                <Phone class="wv:size-7" />
+                <Phone filled class="wv:size-7" />
               </Button>
             }
           >
@@ -187,7 +187,7 @@ export default function KeyboardScreen() {
               onClick={() => middleware.controllers.call.abortDial()}
               class="wv:aspect-square wv:size-full wv:rounded-full wv:bg-[#e7000b] wv:hover:bg-red-800 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             >
-              <PhoneSlash class="wv:size-7" />
+              <PhoneSlash filled class="wv:size-7" />
             </Button>
           </Show>
         </div>
