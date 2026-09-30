@@ -1,4 +1,4 @@
-import { type Accessor, createContext, createSignal, type JSX, onCleanup, onMount, useContext } from "solid-js";
+import { type Accessor, createContext, createSignal, type JSX, onCleanup, onMount, Show, useContext } from "solid-js";
 import { Phone } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -110,7 +110,7 @@ export function WidgetProvider(props: { children: JSX.Element }) {
 
   return (
     <WidgetContext.Provider value={value}>
-      {state.settings.showWidgetButton && !isPiP() && (
+      <Show when={state.settings.showWidgetButton && !isPiP()}>
         <Button
           type="button"
           onClick={() => state.openWidget()}
@@ -120,7 +120,7 @@ export function WidgetProvider(props: { children: JSX.Element }) {
         >
           <Phone class="wv:size-8" />
         </Button>
-      )}
+      </Show>
 
       <Toaster position="top-right" class="!w-[400px]" toastOptions={{ class: "wv:max-w-[400px] wv:w-full" }} />
 
