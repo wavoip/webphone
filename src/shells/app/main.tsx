@@ -1,9 +1,9 @@
 import { Wavoip, webRuntime } from "@wavoip/wavoip-api/web";
-import ReactDOM from "react-dom/client";
+import { render } from "solid-js/web";
 import { App } from "@/App";
 import "@/assets/index.css";
 import "./app.css";
-import "sonner/dist/styles.css";
+import "solid-sonner/styles.css";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
 /**
@@ -27,14 +27,17 @@ function mount(): void {
   container.id = "container";
   root.appendChild(container);
 
-  ReactDOM.createRoot(container).render(
-    <App
-      layout="filled"
-      root={root}
-      rootNode={document}
-      config={APP_SETTINGS}
-      wavoip={new Wavoip({ tokens: [], platform: "pwa", runtime: webRuntime() })}
-    />,
+  render(
+    () => (
+      <App
+        layout="filled"
+        root={root}
+        rootNode={document}
+        config={APP_SETTINGS}
+        wavoip={new Wavoip({ tokens: [], platform: "pwa", runtime: webRuntime() })}
+      />
+    ),
+    container,
   );
 }
 

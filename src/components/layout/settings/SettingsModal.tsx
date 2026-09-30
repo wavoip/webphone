@@ -1,16 +1,6 @@
 import { QrCode as ArkQrCode } from "@ark-ui/solid/qr-code";
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import {
-  ArrowLeft,
-  DeviceMobile,
-  Gear,
-  Microphone,
-  Phone,
-  Plus,
-  QrCode,
-  Sliders,
-  Stethoscope,
-} from "@/components/icons";
+import { Activity, ArrowLeft, DeviceMobile, Gear, Microphone, Phone, Plus, QrCode, Sliders } from "@/components/icons";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { PreferencesConfig } from "@/components/layout/settings/PreferencesConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
@@ -127,7 +117,7 @@ function PainelQrCode(props: { codigo: string; onVoltar: () => void }) {
   );
 }
 
-function PainelConfiguracoes(props: { onQrCode: (codigo: string) => void }) {
+function PainelConfiguracoes(props: { onQrCode: (codigo: string | null) => void }) {
   const middleware = useMiddleware();
   const state = useStore();
   const { audio: audioMenuSettings } = useSettings();
@@ -179,7 +169,7 @@ function PainelConfiguracoes(props: { onQrCode: (codigo: string) => void }) {
             {t("Preferences")}
           </TabsTrigger>
           <TabsTrigger value="diagnostics" class="wv:gap-2 wv:max-sm:min-h-9">
-            <Stethoscope class="wv:size-4" weight="duotone" />
+            <Activity class="wv:size-4" weight="duotone" />
             {t("Diagnostics")}
           </TabsTrigger>
         </TabsList>

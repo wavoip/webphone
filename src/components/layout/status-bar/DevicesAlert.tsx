@@ -13,7 +13,7 @@ export function DevicesAlert() {
 
   const grupos = createMemo<Grupo[]>(() => {
     const por = (fn: (d: DeviceStateEntry) => boolean) => state.devices.filter(fn);
-    return [
+    const todos: Grupo[] = [
       { titulo: "Disconnected devices", devices: por((d) => d.connectionStatus === "disconnected") },
       { titulo: "Devices waiting for QR code", devices: por((d) => d.status === "connecting") },
       { titulo: "Closed devices", devices: por((d) => d.status === "close") },
@@ -22,7 +22,8 @@ export function DevicesAlert() {
         titulo: "Devices with errors",
         devices: por((d) => d.status === "error" || d.status === "EXTERNAL_INTEGRATION_ERROR"),
       },
-    ].filter((grupo) => grupo.devices.length > 0);
+    ];
+    return todos.filter((grupo) => grupo.devices.length > 0);
   });
 
   return (

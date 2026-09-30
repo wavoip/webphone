@@ -25,7 +25,9 @@ const badgeVariants = cva(
   }
 )
 
-type Props = ComponentProps<"span"> & VariantProps<typeof badgeVariants> & { asChild?: boolean };
+// Os props vêm do `ark.span`: o `asChild` do Solid é função, e não booleano — declarar
+// como booleano aqui compila e quebra na hora do clique.
+type Props = ComponentProps<typeof ark.span> & VariantProps<typeof badgeVariants>;
 
 function Badge(props: Props) {
   const [local, rest] = splitProps(props, ["class", "variant", "asChild"]);

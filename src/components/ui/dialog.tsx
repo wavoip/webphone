@@ -2,7 +2,7 @@ import { Dialog as ArkDialog } from "@ark-ui/solid/dialog";
 import { type ComponentProps, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import { XIcon } from "@/components/icons";
+import { X } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 type RootProps = Omit<ComponentProps<typeof ArkDialog.Root>, "onOpenChange"> & {
@@ -66,7 +66,7 @@ function DialogContent(props: ContentProps) {
               data-slot="dialog-close"
               class="wv:ring-offset-background wv:focus:ring-ring wv:absolute wv:top-4 wv:right-4 wv:rounded-xs wv:opacity-70 wv:transition-opacity wv:hover:opacity-100 wv:focus:ring-2 wv:focus:ring-offset-2 wv:focus:outline-hidden wv:disabled:pointer-events-none wv:[&_svg]:pointer-events-none wv:[&_svg]:shrink-0 wv:[&_svg:not([class*=size-])]:size-4"
             >
-              <XIcon />
+              <X />
               <span class="wv:sr-only">Close</span>
             </ArkDialog.CloseTrigger>
           )}

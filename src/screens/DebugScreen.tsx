@@ -1,16 +1,6 @@
 import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
 import { createSignal, For, type JSX, onCleanup, onMount, Show } from "solid-js";
-import {
-  Browser,
-  CircleNotch,
-  Copy,
-  Globe,
-  Microphone,
-  Package,
-  Stethoscope,
-  Warning,
-  Waveform,
-} from "@/components/icons";
+import { Activity, Browser, Copy, Globe, Microphone, Package, SpinnerGap, Warning, Waves } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { collectSystemInfo, type SystemInfo } from "@/lib/system-info";
@@ -147,7 +137,7 @@ export function DebugScreen() {
           </Card>
         </div>
 
-        <Card title={t("Environment check")} icon={<Waveform class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Environment check")} icon={<Waves class="wv:size-4" weight="duotone" />}>
           <div class="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
             <Button
               type="button"
@@ -157,8 +147,8 @@ export function DebugScreen() {
               aria-label={t("Run check")}
               class="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
             >
-              <Show when={checkupRunning()} fallback={<Waveform class="wv:size-4" weight="duotone" />}>
-                <CircleNotch class="wv:size-4 wv:animate-spin" />
+              <Show when={checkupRunning()} fallback={<Waves class="wv:size-4" weight="duotone" />}>
+                <SpinnerGap class="wv:size-4 wv:animate-spin" />
               </Show>
               {t("Run check")}
             </Button>
@@ -203,7 +193,7 @@ export function DebugScreen() {
           </Show>
         </Card>
 
-        <Card title={t("Recent ICE diagnostics")} icon={<Stethoscope class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Recent ICE diagnostics")} icon={<Activity class="wv:size-4" weight="duotone" />}>
           <Show when={debug.recentIceDiagnostics.length > 0} fallback={<EmptyState />}>
             <ul class="wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-2">
               <For each={debug.recentIceDiagnostics.slice().reverse()}>

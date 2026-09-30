@@ -6,8 +6,8 @@ import {
   Microphone,
   MicrophoneSlash,
   Pause,
+  PhoneOutgoing,
   PhoneSlash,
-  PhoneTransfer,
   VideoCameraSlash,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -105,7 +105,7 @@ export function CallButtons(props: Props) {
           disabled
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PhoneTransfer size={32} weight="fill" />{" "}
+            <PhoneOutgoing size={32} weight="fill" />{" "}
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
@@ -121,7 +121,7 @@ export function CallButtons(props: Props) {
           disabled={actionMade()}
           title={hangUpLabel()}
           aria-label={hangUpLabel()}
-          aria-busy={actionMade && isOutgoing}
+          aria-busy={actionMade() && isOutgoing()}
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
             <PhoneSlash size={32} weight="fill" />

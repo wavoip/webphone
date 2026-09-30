@@ -32,7 +32,9 @@ const buttonVariants = cva(
   },
 );
 
-type Props = ComponentProps<"button"> & VariantProps<typeof buttonVariants> & { asChild?: boolean };
+// Os props vêm do `ark.button`: o `asChild` do Solid é função, e não booleano — declarar
+// como booleano aqui compila e quebra na hora do clique.
+type Props = ComponentProps<typeof ark.button> & VariantProps<typeof buttonVariants>;
 
 function Button(props: Props) {
   const [local, rest] = splitProps(props, ["class", "variant", "size", "asChild"]);
