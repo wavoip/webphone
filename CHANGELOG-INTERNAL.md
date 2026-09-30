@@ -70,12 +70,20 @@ Uma biblioteca de ícones só (`phosphor-solid`), atrás de `src/components/icon
 de pacote — ou inlinar os SVGs, que resolveria os seis pesos que o phosphor carrega — é
 mexer num arquivo só.
 
-### Picture-in-Picture
+### Delegação de evento
 
-O Solid escuta evento uma vez no `document` e resolve o alvo pela árvore. A janela do PiP é
-outro documento: sem `delegateEvents(eventos, pipWindow.document)` ela abre, desenha certo e
-**não responde a nada**. A lista de eventos delegados está no `PipProvider`; faltar um ali
-não quebra nada visível, só deixa aquele controle inerte dentro do PiP.
+O Solid registra um ouvinte por tipo de evento numa raiz só e acha o `onClick` subindo a
+árvore a partir de `event.target`. A raiz padrão é o `document` da página, e isso não cobre
+nenhum dos dois lugares onde o webphone desenha:
+
+- o **shadow root** do widget, porque o clique chega ao `document` já retargetado para o
+  host — a árvore inteira fica inerte, e o React não tinha esse problema porque desde a 17
+  ele escuta no container em que montou;
+- a janela do **Picture-in-Picture**, que é outro documento.
+
+`delegateEventsToRoot` (em `lib/event-delegation.ts`) é o dono dessa regra, e toda raiz fora
+do `document` passa por ela. Registra a lista inteira do Solid em vez de só o que hoje se
+usa: faltar um evento não quebra nada visível, só deixa aquele controle sem responder.
 
 ### `wavoip-api` v3
 
@@ -105,7 +113,15 @@ Nenhuma destas tinha teste, e nenhuma apareceria numa tradução mecânica.
   inclusive quando era o próprio usuário desligando.
 - `Badge` foi importado da biblioteca de ícones e usado envolvendo texto.
 - O `WebPhone` tinha a escolha de tela escrita duas vezes, uma para a página e outra para a
-  janela do PiP, sem nada garantindo que continuassem iguais.
+  janela do PiP, sem nada garantindo que continuassem iguais — e o teclado ficava de fora
+  da guarda, então abrir o PiP nele deixava dois montados.
+- `{sinal() && <X/>}` solto entre os filhos de um provider assina aquele sinal no escopo que
+  monta **todos** os filhos: mudar `isPiP()` refazia a árvore inteira abaixo do
+  `WidgetProvider`, com `Toaster` e webphone junto. Dentro de `<Show>` a leitura fica no
+  escopo do próprio `<Show>`.
+- `useNotificationManager` devolvia a lista num getter, e o componente desestruturava —
+  o array chegava congelado no primeiro estado. Quem expõe estado expõe acessor, e quem
+  consome chama.
 
 ### Discagem
 
@@ -118,9 +134,25 @@ Sobrou `CallController.dial`, que consome o iterador e conta o andamento pelo st
 a desistência.
 
 Era regra de negócio numa tela: qual device tentar em seguida, o que fazer com cada
-recusa, o que conta como desistência. E a tela é justamente o lugar que pode estar
-montado duas vezes, por causa do Picture-in-Picture — razão de o `dialToken` viver no
+recusa, o que conta como desistência. E a tela é justamente o que remonta ao abrir e ao
+fechar o Picture-in-Picture, porque muda de documento — razão de o `dialToken` viver no
 store desde sempre.
+
+### Testes
+
+- O `renderWithProviders` espelha a árvore do `App`. Quando ela ficou para trás, o
+  `DebugScreen` quebrou por falta de `DebugProvider` — e o erro apontava para a tela.
+- Ele monta num `<div>` do documento, e não dentro do shadow root: o bug de delegação não
+  reproduz ali, e o happy-dom também não retargeta `event.target` na borda do shadow root.
+- `fireEvent.change` não alimenta mais nada: quem escreve no store é o `onInput`. Use
+  `fireEvent.input`.
+- O Ark monta e desmonta com transição; depois do clique, adiante o timer antes de
+  afirmar que o conteúdo apareceu.
+- O `phosphor-solid` não declara `exports` e o `main` dele é CJS, que faz
+  `require("solid-js")` e carrega um **segundo Solid** — contexto e reatividade param de
+  atravessar, e as máquinas do Ark nunca abrem. Os builds pegam o `module` sozinhos; o
+  `vitest.config.ts` tem um alias para o ESM. Sai junto com o pacote, quando os SVGs forem
+  inlinados.
 
 ### Build
 
