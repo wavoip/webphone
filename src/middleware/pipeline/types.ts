@@ -1,7 +1,7 @@
-import type { Offer } from "@wavoip/wavoip-api";
+import type { IncomingCall } from "@wavoip/wavoip-api/web";
 
 export type MiddlewareEventMap = {
-  offer: Offer;
+  offer: IncomingCall;
 };
 
 export type MiddlewareEvent = keyof MiddlewareEventMap;

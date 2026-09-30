@@ -1,50 +1,40 @@
-import { useEffect, useRef, useState } from "react";
+import { createSignal, type JSX, onCleanup, onMount, Show } from "solid-js";
 
 type Props = {
-  children: React.ReactNode;
+  children: JSX.Element;
   speed?: number;
-  className?: string;
+  class?: string;
 };
 
-export default function MarqueeText({ children, speed = 15, className }: Props) {
-  const [width, setWidth] = useState(0);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const textRef = useRef<HTMLDivElement | null>(null);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
+/** Só rola quando o texto não cabe; medir é o que decide, e o tamanho muda com a janela. */
+export default function MarqueeText(props: Props) {
+  const [shouldAnimate, setShouldAnimate] = createSignal(false);
+  let container: HTMLDivElement | undefined;
+  let text: HTMLSpanElement | undefined;
 
-  useEffect(() => {
-    if (!containerRef?.current || !textRef?.current) {
-      return;
-    }
-    const containerWidth = containerRef.current.offsetWidth;
-
-    setShouldAnimate(width > containerWidth);
-  }, [width]);
-
-  useEffect(() => {
-    if (!textRef.current) return;
-
+  onMount(() => {
+    if (!text) return;
     const observer = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setWidth(entry.contentRect.width);
+        setShouldAnimate(entry.contentRect.width > (container?.offsetWidth ?? 0));
       }
     });
-
-    observer.observe(textRef?.current);
-
-    return () => observer.disconnect();
-  }, []);
+    observer.observe(text);
+    onCleanup(() => observer.disconnect());
+  });
 
   return (
-    <div className="marquee-container" ref={containerRef}>
+    <div class="marquee-container" ref={container}>
       <div
-        className={`marquee-track ${shouldAnimate ? "marquee-animate" : ""}`}
-        style={{ animationDuration: `${speed}s` }}
+        class={`marquee-track ${shouldAnimate() ? "marquee-animate" : ""}`}
+        style={{ "animation-duration": `${props.speed ?? 15}s` }}
       >
-        <span ref={textRef} className={className ?? ""}>
-          {children}
+        <span ref={text} class={props.class ?? ""}>
+          {props.children}
         </span>
-        {shouldAnimate && <span className={className ?? ""}>{children}</span>}
+        <Show when={shouldAnimate()}>
+          <span class={props.class ?? ""}>{props.children}</span>
+        </Show>
       </div>
     </div>
   );

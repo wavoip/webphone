@@ -1,112 +1,121 @@
-import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { XIcon } from "lucide-react";
-import * as React from "react";
+import { Dialog as ArkDialog } from "@ark-ui/solid/dialog";
+import { type ComponentProps, splitProps } from "solid-js";
+import { Portal } from "solid-js/web";
 
+import { X } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
-function Dialog({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />;
-}
+type RootProps = Omit<ComponentProps<typeof ArkDialog.Root>, "onOpenChange"> & {
+  onOpenChange?: (open: boolean) => void;
+};
 
-function DialogTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
-}
-
-function DialogPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />;
-}
-
-function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
-}
-
-const DialogOverlay = React.forwardRef<
-  React.ElementRef<typeof DialogPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
->(({ className, ...props }) => {
+function Dialog(props: RootProps) {
+  const [local, rest] = splitProps(props, ["onOpenChange"]);
   return (
-    <DialogPrimitive.Overlay
+    <ArkDialog.Root lazyMount unmountOnExit onOpenChange={(details) => local.onOpenChange?.(details.open)} {...rest} />
+  );
+}
+
+function DialogTrigger(props: ComponentProps<typeof ArkDialog.Trigger>) {
+  return <ArkDialog.Trigger data-slot="dialog-trigger" {...props} />;
+}
+
+function DialogClose(props: ComponentProps<typeof ArkDialog.CloseTrigger>) {
+  return <ArkDialog.CloseTrigger data-slot="dialog-close" {...props} />;
+}
+
+function DialogOverlay(props: ComponentProps<typeof ArkDialog.Backdrop>) {
+  const [local, rest] = splitProps(props, ["class"]);
+  return (
+    <ArkDialog.Backdrop
       data-slot="dialog-overlay"
-      className={cn(
-        "wv:data-[state=open]:animate-in wv:data-[state=closed]:animate-out wv:data-[state=closed]:fade-out-0 wv:data-[state=open]:fade-in-0 wv:fixed wv:inset-0 wv:z-50 wv:bg-black/50",
-        className,
-      )}
-      {...props}
+      class={cn("wv:fixed wv:inset-0 wv:z-50 wv:bg-black/50", local.class)}
+      {...rest}
     />
   );
-});
+}
 
-function DialogContent({
-  className,
-  children,
-  showCloseButton = true,
-  container,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Content> & {
+type ContentProps = ComponentProps<typeof ArkDialog.Content> & {
   showCloseButton?: boolean;
-} & Pick<React.ComponentProps<typeof DialogPrimitive.Portal>, "container">) {
+  container?: HTMLElement | null;
+};
+
+/**
+ * Centralizar é do `Positioner`, e não do conteúdo: o Ark separa quem posiciona de quem é
+ * posicionado, então as classes de tamanho de quem usa continuam valendo no conteúdo.
+ */
+function DialogContent(props: ContentProps) {
+  const [local, rest] = splitProps(props, ["class", "children", "showCloseButton", "container"]);
+  const showClose = () => local.showCloseButton ?? true;
+
   return (
-    <DialogPortal container={container} data-slot="dialog-portal">
+    <Portal mount={local.container ?? undefined}>
       <DialogOverlay />
-      <DialogPrimitive.Content
-        data-slot="dialog-content"
-        className={cn(
-          "wv:bg-background wv:data-[state=open]:animate-in wv:data-[state=closed]:animate-out wv:data-[state=closed]:fade-out-0 wv:data-[state=open]:fade-in-0 wv:data-[state=closed]:zoom-out-95 wv:data-[state=open]:zoom-in-95 wv:fixed wv:top-[50%] wv:left-[50%] wv:z-50 wv:grid wv:w-full wv:max-w-[calc(100%-2rem)] wv:translate-x-[-50%] wv:translate-y-[-50%] wv:gap-4 wv:rounded-lg wv:border wv:p-6 wv:shadow-lg wv:duration-200 wv:sm:max-w-lg",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-        {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="wv:ring-offset-background wv:focus:ring-ring wv:data-[state=open]:bg-accent wv:data-[state=open]:text-muted-foreground wv:absolute wv:top-4 wv:right-4 wv:rounded-xs wv:opacity-70 wv:transition-opacity wv:hover:opacity-100 wv:focus:ring-2 wv:focus:ring-offset-2 wv:focus:outline-hidden wv:disabled:pointer-events-none wv:[&_svg]:pointer-events-none wv:[&_svg]:shrink-0 wv:[&_svg:not([class*=size-])]:size-4"
-          >
-            <XIcon />
-            <span className="wv:sr-only">Close</span>
-          </DialogPrimitive.Close>
-        )}
-      </DialogPrimitive.Content>
-    </DialogPortal>
+      <ArkDialog.Positioner class="wv:fixed wv:inset-0 wv:z-50 wv:flex wv:items-center wv:justify-center wv:p-4">
+        <ArkDialog.Content
+          data-slot="dialog-content"
+          class={cn(
+            "wv:bg-background wv:relative wv:grid wv:w-full wv:gap-4 wv:rounded-lg wv:border wv:p-6 wv:shadow-lg wv:sm:max-w-lg",
+            local.class,
+          )}
+          {...rest}
+        >
+          {local.children}
+          {showClose() && (
+            <ArkDialog.CloseTrigger
+              data-slot="dialog-close"
+              class="wv:ring-offset-background wv:focus:ring-ring wv:absolute wv:top-4 wv:right-4 wv:rounded-xs wv:opacity-70 wv:transition-opacity wv:hover:opacity-100 wv:focus:ring-2 wv:focus:ring-offset-2 wv:focus:outline-hidden wv:disabled:pointer-events-none wv:[&_svg]:pointer-events-none wv:[&_svg]:shrink-0 wv:[&_svg:not([class*=size-])]:size-4"
+            >
+              <X />
+              <span class="wv:sr-only">Close</span>
+            </ArkDialog.CloseTrigger>
+          )}
+        </ArkDialog.Content>
+      </ArkDialog.Positioner>
+    </Portal>
   );
 }
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+function DialogHeader(props: ComponentProps<"div">) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
     <div
       data-slot="dialog-header"
-      className={cn("wv:flex wv:flex-col wv:gap-2 wv:text-center wv:sm:text-left", className)}
-      {...props}
+      class={cn("wv:flex wv:flex-col wv:gap-2 wv:text-center wv:sm:text-left", local.class)}
+      {...rest}
     />
   );
 }
 
-function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+function DialogFooter(props: ComponentProps<"div">) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
     <div
       data-slot="dialog-footer"
-      className={cn("wv:flex wv:flex-col-reverse wv:gap-2 wv:sm:flex-row wv:sm:justify-end", className)}
-      {...props}
+      class={cn("wv:flex wv:flex-col-reverse wv:gap-2 wv:sm:flex-row wv:sm:justify-end", local.class)}
+      {...rest}
     />
   );
 }
 
-function DialogTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DialogTitle(props: ComponentProps<typeof ArkDialog.Title>) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
-    <DialogPrimitive.Title
+    <ArkDialog.Title
       data-slot="dialog-title"
-      className={cn("wv:text-lg wv:leading-none wv:font-semibold", className)}
-      {...props}
+      class={cn("wv:text-lg wv:leading-none wv:font-semibold", local.class)}
+      {...rest}
     />
   );
 }
 
-function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
+function DialogDescription(props: ComponentProps<typeof ArkDialog.Description>) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
-    <DialogPrimitive.Description
+    <ArkDialog.Description
       data-slot="dialog-description"
-      className={cn("wv:text-muted-foreground wv:text-sm", className)}
-      {...props}
+      class={cn("wv:text-muted-foreground wv:text-sm", local.class)}
+      {...rest}
     />
   );
 }
@@ -119,7 +128,6 @@ export {
   DialogFooter,
   DialogHeader,
   DialogOverlay,
-  DialogPortal,
   DialogTitle,
   DialogTrigger,
 };

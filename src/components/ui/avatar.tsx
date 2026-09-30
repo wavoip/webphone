@@ -1,51 +1,33 @@
-import * as React from "react"
-import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import { Avatar as ArkAvatar } from "@ark-ui/solid/avatar";
+import { type ComponentProps, splitProps } from "solid-js";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-function Avatar({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Root>) {
+function Avatar(props: ComponentProps<typeof ArkAvatar.Root>) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
-    <AvatarPrimitive.Root
+    <ArkAvatar.Root
       data-slot="avatar"
-      className={cn(
-        "wv:relative wv:flex wv:size-8 wv:shrink-0 wv:overflow-hidden wv:rounded-full",
-        className
-      )}
-      {...props}
+      class={cn("wv:relative wv:flex wv:size-8 wv:shrink-0 wv:overflow-hidden wv:rounded-full", local.class)}
+      {...rest}
     />
-  )
+  );
 }
 
-function AvatarImage({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Image>) {
-  return (
-    <AvatarPrimitive.Image
-      data-slot="avatar-image"
-      className={cn("wv:aspect-square wv:size-full", className)}
-      {...props}
-    />
-  )
+function AvatarImage(props: ComponentProps<typeof ArkAvatar.Image>) {
+  const [local, rest] = splitProps(props, ["class"]);
+  return <ArkAvatar.Image data-slot="avatar-image" class={cn("wv:aspect-square wv:size-full", local.class)} {...rest} />;
 }
 
-function AvatarFallback({
-  className,
-  ...props
-}: React.ComponentProps<typeof AvatarPrimitive.Fallback>) {
+function AvatarFallback(props: ComponentProps<typeof ArkAvatar.Fallback>) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
-    <AvatarPrimitive.Fallback
+    <ArkAvatar.Fallback
       data-slot="avatar-fallback"
-      className={cn(
-        "wv:bg-muted wv:flex wv:size-full wv:items-center wv:justify-center wv:rounded-full",
-        className
-      )}
-      {...props}
+      class={cn("wv:bg-muted wv:flex wv:size-full wv:items-center wv:justify-center wv:rounded-full", local.class)}
+      {...rest}
     />
-  )
+  );
 }
 
-export { Avatar, AvatarImage, AvatarFallback }
+export { Avatar, AvatarImage, AvatarFallback };

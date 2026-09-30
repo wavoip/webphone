@@ -1,13 +1,13 @@
 import type {
-  CallActive,
-  CallOutgoing,
+  ActiveCall,
   ConnectivityIssue,
   IceDiagnostics,
-  Offer,
+  IncomingCall,
+  OutgoingCall,
   Unsubscribe,
-} from "@wavoip/wavoip-api";
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
-import { useMiddleware } from "@/middleware/react/hooks";
+} from "@wavoip/wavoip-api/web";
+import { createContext, createSignal, type JSX, onCleanup, useContext } from "solid-js";
+import { useMiddleware } from "@/middleware/solid/context";
 
 type CallLike = {
   id: string;
@@ -15,7 +15,7 @@ type CallLike = {
   on(event: "connectivityIssue", cb: (issue: ConnectivityIssue) => void): Unsubscribe;
 };
 
-function asCallLike(call: Offer | CallOutgoing | CallActive): CallLike {
+function asCallLike(call: IncomingCall | OutgoingCall | ActiveCall): CallLike {
   return call as unknown as CallLike;
 }
 
@@ -34,92 +34,89 @@ export type IceRecord = {
 };
 
 type DebugInfo = {
-  recentIssues: IssueRecord[];
-  recentIceDiagnostics: IceRecord[];
+  readonly recentIssues: IssueRecord[];
+  readonly recentIceDiagnostics: IceRecord[];
 };
 
-const DebugContext = createContext<DebugInfo | undefined>(undefined);
+const DebugContext = createContext<DebugInfo>();
 
-export function DebugProvider({ children }: { children: ReactNode }) {
+export function DebugProvider(props: { children: JSX.Element }) {
   const middleware = useMiddleware();
-  const [recentIssues, setRecentIssues] = useState<IssueRecord[]>([]);
-  const [recentIceDiagnostics, setRecentIceDiagnostics] = useState<IceRecord[]>([]);
+  const [recentIssues, setRecentIssues] = createSignal<IssueRecord[]>([]);
+  const [recentIceDiagnostics, setRecentIce] = createSignal<IceRecord[]>([]);
 
-  const pushIssue = useCallback((callId: string, issue: ConnectivityIssue) => {
-    setRecentIssues((prev) => {
-      const next = [...prev, { at: Date.now(), callId, issue }];
-      return next.slice(Math.max(0, next.length - MAX_HISTORY));
-    });
-  }, []);
+  const ultimos = <T,>(lista: T[], novo: T) => lista.concat(novo).slice(-MAX_HISTORY);
+  const pushIssue = (callId: string, issue: ConnectivityIssue) =>
+    setRecentIssues((prev) => ultimos(prev, { at: Date.now(), callId, issue }));
+  const pushIce = (callId: string, diag: IceDiagnostics) =>
+    setRecentIce((prev) => ultimos(prev, { at: Date.now(), callId, diag }));
 
-  const pushIce = useCallback((callId: string, diag: IceDiagnostics) => {
-    setRecentIceDiagnostics((prev) => {
-      const next = [...prev, { at: Date.now(), callId, diag }];
-      return next.slice(Math.max(0, next.length - MAX_HISTORY));
-    });
-  }, []);
-
-  useEffect(() => {
-    const wireCall = (call: Offer | CallOutgoing | CallActive | undefined): (() => void) => {
-      if (!call) return () => {};
-      const c = asCallLike(call);
-      const unsubDiag = c.on("iceDiagnostics", (diag) => pushIce(c.id, diag));
-      const unsubIssue = c.on("connectivityIssue", (issue) => pushIssue(c.id, issue));
-      return () => {
-        unsubDiag?.();
-        unsubIssue?.();
-      };
-    };
-
-    let activeOffers = new Map<string, () => void>();
-    let unsubActive: (() => void) | undefined;
-    let unsubOutgoing: (() => void) | undefined;
-
-    const unsubOffers = middleware.store.subscribe(
-      (s) => s.offers,
-      (offers) => {
-        const stillSeen = new Set<string>();
-        for (const offer of offers) {
-          stillSeen.add(offer.id);
-          if (!activeOffers.has(offer.id)) activeOffers.set(offer.id, wireCall(offer));
-        }
-        for (const [id, cleanup] of activeOffers) {
-          if (!stillSeen.has(id)) {
-            cleanup();
-            activeOffers.delete(id);
-          }
-        }
-      },
-    );
-
-    const unsubActiveSel = middleware.store.subscribe(
-      (s) => s.active,
-      (active) => {
-        unsubActive?.();
-        unsubActive = wireCall(active);
-      },
-    );
-
-    const unsubOutgoingSel = middleware.store.subscribe(
-      (s) => s.outgoing,
-      (outgoing) => {
-        unsubOutgoing?.();
-        unsubOutgoing = wireCall(outgoing);
-      },
-    );
-
+  const wireCall = (call: IncomingCall | OutgoingCall | ActiveCall | undefined): (() => void) => {
+    if (!call) return () => {};
+    const c = asCallLike(call);
+    const unsubDiag = c.on("iceDiagnostics", (diag) => pushIce(c.id, diag));
+    const unsubIssue = c.on("connectivityIssue", (issue) => pushIssue(c.id, issue));
     return () => {
-      unsubOffers();
-      unsubActiveSel();
-      unsubOutgoingSel();
-      unsubActive?.();
-      unsubOutgoing?.();
-      for (const cleanup of activeOffers.values()) cleanup();
-      activeOffers = new Map();
+      unsubDiag?.();
+      unsubIssue?.();
     };
-  }, [middleware, pushIssue, pushIce]);
+  };
 
-  return <DebugContext.Provider value={{ recentIssues, recentIceDiagnostics }}>{children}</DebugContext.Provider>;
+  const ofertasLigadas = new Map<string, () => void>();
+  let unsubActive: (() => void) | undefined;
+  let unsubOutgoing: (() => void) | undefined;
+
+  const unsubOffers = middleware.store.subscribe(
+    (s) => s.offers,
+    (offers) => {
+      const vistas = new Set(offers.map((o) => o.id));
+      for (const offer of offers) {
+        if (!ofertasLigadas.has(offer.id)) ofertasLigadas.set(offer.id, wireCall(offer));
+      }
+      for (const [id, cleanup] of ofertasLigadas) {
+        if (vistas.has(id)) continue;
+        cleanup();
+        ofertasLigadas.delete(id);
+      }
+    },
+  );
+
+  const unsubActiveSel = middleware.store.subscribe(
+    (s) => s.active,
+    (active) => {
+      unsubActive?.();
+      unsubActive = wireCall(active);
+    },
+  );
+
+  const unsubOutgoingSel = middleware.store.subscribe(
+    (s) => s.outgoing,
+    (outgoing) => {
+      unsubOutgoing?.();
+      unsubOutgoing = wireCall(outgoing);
+    },
+  );
+
+  onCleanup(() => {
+    unsubOffers();
+    unsubActiveSel();
+    unsubOutgoingSel();
+    unsubActive?.();
+    unsubOutgoing?.();
+    for (const cleanup of ofertasLigadas.values()) cleanup();
+    ofertasLigadas.clear();
+  });
+
+  const value: DebugInfo = {
+    get recentIssues() {
+      return recentIssues();
+    },
+    get recentIceDiagnostics() {
+      return recentIceDiagnostics();
+    },
+  };
+
+  return <DebugContext.Provider value={value}>{props.children}</DebugContext.Provider>;
 }
 
 export function useDebugInfo(): DebugInfo {

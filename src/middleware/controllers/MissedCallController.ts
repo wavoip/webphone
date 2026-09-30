@@ -1,4 +1,4 @@
-import type { Offer } from "@wavoip/wavoip-api";
+import type { IncomingCall } from "@wavoip/wavoip-api/web";
 import { t } from "@/lib/i18n";
 import { newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
@@ -17,7 +17,7 @@ export class MissedCallController {
     this.deps = deps;
   }
 
-  record(offer: Offer): void {
+  record(offer: IncomingCall): void {
     // Em MISSED_CALL, `message` é o rótulo do peer, para a UI montar `<rótulo> · <número>`
     // sem desmontar uma string já formatada.
     const entry: Notification = {
@@ -34,7 +34,7 @@ export class MissedCallController {
   }
 }
 
-export function peerLabel(offer: Offer): string {
+export function peerLabel(offer: IncomingCall): string {
   const name = offer.peer.displayName?.trim();
   if (name) return name;
   const phone = offer.peer.phone.trim();

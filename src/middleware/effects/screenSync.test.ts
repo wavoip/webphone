@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { screenSyncEffect } from "@/middleware/effects/screenSync";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeCallActive, FakeCallOutgoing } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeOutgoingCall } from "@/middleware/testing/FakeWavoip";
 
 describe("screenSyncEffect", () => {
   let store: MiddlewareStoreApi;
@@ -13,19 +13,19 @@ describe("screenSyncEffect", () => {
   });
 
   it("switches to 'call' when an active call appears", () => {
-    store.getState().setActive(new FakeCallActive("c1", "tok-1"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok-1"));
     expect(store.getState().screen).toBe("call");
     unsub();
   });
 
   it("switches to 'outgoing' when an outgoing call appears (no active)", () => {
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
     expect(store.getState().screen).toBe("outgoing");
     unsub();
   });
 
   it("returns to 'keyboard' when calls clear and status is 'idle'", () => {
-    store.getState().setActive(new FakeCallActive("c1", "tok-1"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok-1"));
     store.getState().setActive(undefined);
     store.getState().setCallStatus("idle");
     expect(store.getState().screen).toBe("keyboard");
@@ -35,7 +35,7 @@ describe("screenSyncEffect", () => {
   it("stays on 'call' when status flips to ENDED while active call is still set", () => {
     // No fluxo real o CallController grava "ENDED" sem limpar `active`; só o resetCall
     // limpa.
-    store.getState().setActive(new FakeCallActive("c1", "tok-1"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok-1"));
     expect(store.getState().screen).toBe("call");
     store.getState().setCallStatus("ENDED");
     expect(store.getState().screen).toBe("call");
@@ -43,8 +43,8 @@ describe("screenSyncEffect", () => {
   });
 
   it("prefers active over outgoing when both are set", () => {
-    store.getState().setOutgoing(new FakeCallOutgoing("c1", "tok-1"));
-    store.getState().setActive(new FakeCallActive("c1", "tok-1"));
+    store.getState().setOutgoing(new FakeOutgoingCall("c1", "tok-1"));
+    store.getState().setActive(new FakeActiveCall("c1", "tok-1"));
     expect(store.getState().screen).toBe("call");
     unsub();
   });

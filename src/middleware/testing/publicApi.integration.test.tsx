@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { BrowserNotifier, NotifyArgs } from "@/middleware/browser/notifier";
-import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithMiddleware, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
 class FakeNotifier implements BrowserNotifier {
@@ -68,7 +68,7 @@ describe("public API React-tree integration", () => {
   describe("call lifecycle", () => {
     it("api.call.start sets callStatus to CALLING", async () => {
       const wavoip = new FakeWavoip(["tok-1"]);
-      wavoip.startCallResult = { call: new FakeCallOutgoing("c1", "tok-1"), err: null };
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
       const { api } = await renderWithMiddleware({ wavoip });
       await api.call.start("5511", { fromTokens: ["tok-1"] });
       expect(api.call.getCallOutgoing()?.status).toBe("CALLING");
@@ -76,13 +76,13 @@ describe("public API React-tree integration", () => {
 
     it("api.on('call:accepted') fires when outgoing call gets accepted", async () => {
       const wavoip = new FakeWavoip(["tok-1"]);
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      wavoip.startCallResult = { call: outgoing, err: null };
+      const outgoing = new FakeOutgoingCall("c1", "tok-1");
+      wavoip.startCallResult = { data: outgoing, error: null };
       const { api } = await renderWithMiddleware({ wavoip });
       const events: string[] = [];
       api.on("call:accepted", (payload) => events.push(payload.id));
       await api.call.start("5511");
-      outgoing.emitEvent("peerAccept", new FakeCallActive("c1", "tok-1"));
+      outgoing.emitEvent("accepted", new FakeActiveCall("c1", "tok-1"));
       expect(events).toEqual(["c1"]);
     });
 
@@ -91,7 +91,7 @@ describe("public API React-tree integration", () => {
       const { api } = await renderWithMiddleware({ wavoip });
       const events: string[] = [];
       api.on("offer:received", (payload) => events.push(payload.id));
-      wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(events).toEqual(["o1"]);
     });
@@ -100,7 +100,7 @@ describe("public API React-tree integration", () => {
       const wavoip = new FakeWavoip(["tok-1"]);
       const { api } = await renderWithMiddleware({ wavoip });
       api.use("offer", () => {});
-      wavoip.emitEvent("offer", new FakeOffer("o-blocked", "tok-1"));
+      wavoip.emitEvent("offer", new FakeIncomingCall("o-blocked", "tok-1"));
       await new Promise((r) => setTimeout(r, 0));
       expect(api.call.getOffers()).toEqual([]);
     });

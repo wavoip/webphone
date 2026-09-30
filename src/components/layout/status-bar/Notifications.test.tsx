@@ -1,11 +1,11 @@
-import { fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Notifications } from "@/components/layout/status-bar/Notifications";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
+import { act, fireEvent, screen, within } from "@/middleware/testing/dom";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
 async function seed(notifications: Notification[]) {
-  const result = await renderWithProviders({ children: <Notifications /> });
+  const result = await renderWithProviders({ children: () => <Notifications /> });
   result.api.notifications.clear();
   for (const n of notifications) result.api.notifications.add(n);
   return result;
@@ -39,7 +39,10 @@ function makeFailed(id: number, error = "Número não atende"): Notification {
 
 async function openPopover() {
   const trigger = await screen.findByRole("button", { name: /notificações/i });
-  fireEvent.click(trigger);
+  // O conteúdo do popover monta na entrada, e não no mesmo tick do clique.
+  await act(async () => {
+    fireEvent.click(trigger);
+  });
 }
 
 describe("Notifications popover — compact redesign", () => {

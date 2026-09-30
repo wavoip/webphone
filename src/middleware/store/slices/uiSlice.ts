@@ -1,5 +1,4 @@
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { SliceCreator } from "@/middleware/store/createStore";
 import type { Theme } from "@/providers/settings/settings";
 
 export type Screen = "keyboard" | "outgoing" | "call";
@@ -57,7 +56,7 @@ const initialSettings: UiSettings = {
   showWidgetButton: true,
 };
 
-export const createUiSlice: StateCreator<MiddlewareStore, [], [], UiSlice> = (set) => ({
+export const createUiSlice: SliceCreator<UiSlice> = (set) => ({
   screen: "keyboard",
   theme: "system",
   settings: initialSettings,

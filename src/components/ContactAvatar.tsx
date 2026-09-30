@@ -1,20 +1,25 @@
-import { UserIcon } from "@phosphor-icons/react";
+import { Show } from "solid-js";
+import { User } from "@/components/icons";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getFullnameLetters } from "@/lib/utils";
 
 type Props = {
   src?: string | null;
   displayName?: string | null;
-  className?: string;
+  class?: string;
 };
 
-export function ContactAvatar({ src, displayName, className }: Props) {
-  const initials = getFullnameLetters(displayName);
+export function ContactAvatar(props: Props) {
+  const initials = () => getFullnameLetters(props.displayName);
 
   return (
-    <Avatar className={className}>
-      <AvatarImage src={src || undefined} />
-      <AvatarFallback>{initials !== null ? initials : <UserIcon size={20} />}</AvatarFallback>
+    <Avatar class={props.class}>
+      <AvatarImage src={props.src || undefined} />
+      <AvatarFallback>
+        <Show when={initials()} fallback={<User size={20} />}>
+          {initials()}
+        </Show>
+      </AvatarFallback>
     </Avatar>
   );
 }

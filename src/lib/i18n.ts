@@ -47,6 +47,19 @@ export type TranslationKey =
   | "Accepted by another user"
   | "Rejected by the app"
   | "Timed out"
+  | "Canceled by the caller"
+  | "Latency (ms)"
+  | "Hold"
+  | "Keypad"
+  | "Transfer"
+  | "Video"
+  | "Mute"
+  | "Unmute"
+  | "Muted"
+  | "Call"
+  | "Erase digit"
+  | "Recent numbers"
+  | "Picture-in-picture"
   | "Unknown"
   | "Ignore"
   | "Reconnecting"
@@ -92,11 +105,11 @@ export type TranslationKey =
   | "Open diagnostics"
   | "Close"
   | "Copy report"
-  | "Test STUN"
+  | "Run check"
   | "Browser"
   | "Network"
   | "Audio devices"
-  | "STUN reachability"
+  | "Environment check"
   | "Tested at"
   | "Recent issues"
   | "Recent ICE diagnostics"
@@ -164,6 +177,19 @@ const ptBR: LocaleResource = {
   "Remove notification": "Remover notificação",
   Clear: "Limpar",
   "Call ended": "Chamada encerrada",
+  "Canceled by the caller": "Cancelada por quem ligou",
+  "Latency (ms)": "Latência (ms)",
+  Hold: "Espera",
+  Keypad: "Teclado",
+  Transfer: "Transferir",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Falar",
+  Muted: "Silenciado",
+  Call: "Ligar",
+  "Erase digit": "Apagar dígito",
+  "Recent numbers": "Números recentes",
+  "Picture-in-picture": "Picture-in-picture",
   "Accepted by another user": "Aceita por outro usuário",
   "Rejected by the app": "Rejeitada pelo aplicativo",
   "Timed out": "Tempo limite",
@@ -212,11 +238,11 @@ const ptBR: LocaleResource = {
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Fechar",
   "Copy report": "Copiar relatório",
-  "Test STUN": "Testar STUN",
+  "Run check": "Testar ambiente",
   Browser: "Navegador",
   Network: "Rede",
   "Audio devices": "Áudio",
-  "STUN reachability": "Reachability STUN",
+  "Environment check": "Checagem do ambiente",
   "Tested at": "Testado em",
   "Recent issues": "Problemas recentes",
   "Recent ICE diagnostics": "Diagnósticos ICE recentes",
@@ -280,6 +306,19 @@ const es: LocaleResource = {
   "Remove notification": "Eliminar notificación",
   Clear: "Limpiar",
   "Call ended": "Llamada finalizada",
+  "Canceled by the caller": "Cancelada por quien llamó",
+  "Latency (ms)": "Latencia (ms)",
+  Hold: "Espera",
+  Keypad: "Teclado",
+  Transfer: "Transferir",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Hablar",
+  Muted: "Silenciado",
+  Call: "Llamar",
+  "Erase digit": "Borrar dígito",
+  "Recent numbers": "Números recientes",
+  "Picture-in-picture": "Picture-in-picture",
   "Accepted by another user": "Aceptada por otro usuario",
   "Rejected by the app": "Rechazada por la aplicación",
   "Timed out": "Tiempo agotado",
@@ -328,11 +367,11 @@ const es: LocaleResource = {
   "Open diagnostics": "Abrir diagnóstico",
   Close: "Cerrar",
   "Copy report": "Copiar informe",
-  "Test STUN": "Probar STUN",
+  "Run check": "Probar entorno",
   Browser: "Navegador",
   Network: "Red",
   "Audio devices": "Audio",
-  "STUN reachability": "Alcance STUN",
+  "Environment check": "Chequeo del entorno",
   "Tested at": "Probado a las",
   "Recent issues": "Problemas recientes",
   "Recent ICE diagnostics": "Diagnósticos ICE recientes",

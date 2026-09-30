@@ -1,51 +1,45 @@
-import type { CallActive } from "@wavoip/wavoip-api";
-import { useEffect, useRef } from "react";
-import { useShadowRoot } from "@/providers/ShadowRootProvider";
+import type { ActiveCall, AudioAnalyser } from "@wavoip/wavoip-api/web";
+import { createEffect, onCleanup } from "solid-js";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 type Props = {
-  call?: CallActive;
+  call?: ActiveCall;
 };
 
 const BARS = 15;
 const GAP = 2;
 
-export function WaveSound({ call }: Props) {
-  const { root } = useShadowRoot();
-  const theme = root.classList.contains("dark") ? "dark" : "light";
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const smoothRef = useRef<number[]>(Array(BARS).fill(0));
+export function WaveSound(props: Props) {
+  const { root } = useSurface();
+  const theme = () => (root.classList.contains("dark") ? "dark" : "light");
+  const smooth: number[] = Array(BARS).fill(0);
+  let canvas: HTMLCanvasElement | undefined;
 
-  useEffect(() => {
-    if (!call?.audioAnalyserIn) return;
-    let animationId: number | null = null;
-    let cancelled = false;
+  createEffect(() => {
+    const call = props.call;
+    if (!call || !canvas) return;
+    const alvo = canvas;
+    const cor = theme();
+    let animationId = 0;
 
-    call.audioAnalyserIn.then((analyser) => {
-      if (cancelled || !canvasRef.current) return;
-      const canvas = canvasRef.current;
-      const loop = () => {
-        animationId = requestAnimationFrame(loop);
-        draw(canvas, analyser, smoothRef.current, theme);
-      };
-      loop();
-    });
-
-    return () => {
-      cancelled = true;
-      if (animationId !== null) cancelAnimationFrame(animationId);
+    const loop = () => {
+      animationId = requestAnimationFrame(loop);
+      draw(alvo, call.audio.in, smooth, cor);
     };
-  }, [call?.audioAnalyserIn, theme]);
+    loop();
+
+    onCleanup(() => cancelAnimationFrame(animationId));
+  });
 
   return (
-    <div className="text-center">
-      <canvas ref={canvasRef} width={75} height={35} style={{ width: "75px", height: "50px", display: "block" }} />
+    <div class="text-center">
+      <canvas ref={canvas} width={75} height={35} style={{ width: "75px", height: "50px", display: "block" }} />
     </div>
   );
 }
 
-function draw(canvas: HTMLCanvasElement, analyser: AnalyserNode, smooth: number[], theme?: string) {
-  const dataArray = new Uint8Array(analyser.frequencyBinCount);
-  analyser.getByteFrequencyData(dataArray);
+function draw(canvas: HTMLCanvasElement, analyser: AudioAnalyser, smooth: number[], theme?: string) {
+  const dataArray = analyser.spectrum();
 
   const ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
   ctx.clearRect(0, 0, canvas.width, canvas.height);

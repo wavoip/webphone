@@ -1,10 +1,18 @@
-import type { Device, Wavoip } from "@wavoip/wavoip-api";
+import type { Device, DeviceRestriction, Wavoip } from "@wavoip/wavoip-api/web";
 import { getSettings } from "@/lib/device-settings";
 import { type NotificationsController, newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
 
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi; notifications: NotificationsController };
+
+/**
+ * A v3 juntou `restricted` e `restrictedUntil` num `restriction` que é nulo quando a conta
+ * está livre. O par continua aqui porque é o que `window.wavoip` publica.
+ */
+function toRestrictionState(restriction: DeviceRestriction | null) {
+  return { restricted: restriction !== null, restrictedUntil: restriction?.until ?? null };
+}
 
 export class DeviceController {
   private readonly deps: Deps;
@@ -26,7 +34,7 @@ export class DeviceController {
     this.deps.store.getState().setDevices(seeded);
     for (const device of devices) {
       this.bindEvents(device);
-      if (device.restricted) this.notifyRestriction(device, true);
+      if (device.restriction) this.notifyRestriction(device, true);
     }
   }
 
@@ -35,7 +43,7 @@ export class DeviceController {
     if (!device) return;
     this.deps.store.getState().upsertDevice(this.toState(device, { enable: device.status === "open", persist }));
     this.bindEvents(device);
-    if (device.restricted) this.notifyRestriction(device, true);
+    if (device.restriction) this.notifyRestriction(device, true);
   }
 
   remove(token: string): void {
@@ -54,13 +62,18 @@ export class DeviceController {
   async wakeUp(token: string): Promise<boolean> {
     const device = this.deps.wavoip.getDevices().find((d) => d.token === token);
     if (!device) return false;
-    return device.wakeUp();
+    const { error } = await device.wakeUp();
+    return error === null;
   }
 
   private bindEvents(device: Device): void {
     const { store } = this.deps;
-    device.on("qrCodeChanged", (qrCode) => store.getState().updateDeviceState(device.token, { qrCode }));
-    device.on("contactChanged", (contact) => store.getState().updateDeviceState(device.token, { contact }));
+    device.on("qrCodeChanged", (qrCode) => {
+      store.getState().updateDeviceState(device.token, { qrCode: qrCode ?? undefined });
+    });
+    device.on("contactChanged", (contact) => {
+      store.getState().updateDeviceState(device.token, { contact: contact ?? undefined });
+    });
     device.on("statusChanged", (status) => {
       const patch = status === "open" ? { status, enable: true } : { status };
       store.getState().updateDeviceState(device.token, patch);
@@ -68,9 +81,10 @@ export class DeviceController {
     device.on("connectionStatusChanged", (connectionStatus) => {
       store.getState().updateDeviceState(device.token, { connectionStatus });
     });
-    device.on("restrictedChanged", (restricted, restrictedUntil) => {
+    device.on("restrictionChanged", (restriction) => {
       const prev = store.getState().devices.find((d) => d.token === device.token)?.restricted ?? false;
-      store.getState().updateDeviceState(device.token, { restricted, restrictedUntil });
+      const restricted = restriction !== null;
+      store.getState().updateDeviceState(device.token, toRestrictionState(restriction));
       if (prev !== restricted) this.notifyRestriction(device, restricted);
     });
   }
@@ -96,10 +110,9 @@ export class DeviceController {
       token: device.token,
       status: device.status,
       connectionStatus: device.connectionStatus,
-      qrCode: device.qrCode,
-      contact: device.contact,
-      restricted: device.restricted,
-      restrictedUntil: device.restrictedUntil,
+      qrCode: device.qrCode ?? undefined,
+      contact: device.contact ?? undefined,
+      ...toRestrictionState(device.restriction),
       enable: extras.enable,
       persist: extras.persist,
     };

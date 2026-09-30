@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
+import type { ActiveCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import type { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { TERMINAL_CALL_STATUSES as TERMINAL } from "@/middleware/store/callStatus";
@@ -53,12 +53,12 @@ function subscribeEndedFromStatus(store: MiddlewareStoreApi, events: EventBus<We
   );
 }
 
-function projectOutgoing(call: CallOutgoing) {
+function projectOutgoing(call: OutgoingCall) {
   const { id, type, status, deviceToken, direction, peer } = call;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }
 
-function projectActive(call: CallActive) {
+function projectActive(call: ActiveCall) {
   const { id, type, status, deviceToken, direction, peer } = call;
   return { id, type, status, device_token: deviceToken, direction, peer };
 }

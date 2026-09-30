@@ -1,24 +1,21 @@
-"use client"
+import { type ComponentProps, splitProps } from "solid-js";
 
-import * as React from "react"
-import * as LabelPrimitive from "@radix-ui/react-label"
+import { cn } from "@/lib/utils";
 
-import { cn } from "@/lib/utils"
-
-function Label({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+/** O `<label>` nativo já associa pelo `for`; o que falta é só o estilo. */
+function Label(props: ComponentProps<"label">) {
+  const [local, rest] = splitProps(props, ["class"]);
   return (
-    <LabelPrimitive.Root
+    // biome-ignore lint/a11y/noLabelWithoutControl: quem usa passa `for` ou aninha o controle
+    <label
       data-slot="label"
-      className={cn(
+      class={cn(
         "wv:flex wv:items-center wv:gap-2 wv:text-sm wv:leading-none wv:font-medium wv:select-none wv:group-data-[disabled=true]:pointer-events-none wv:group-data-[disabled=true]:opacity-50 wv:peer-disabled:cursor-not-allowed wv:peer-disabled:opacity-50",
-        className
+        local.class,
       )}
-      {...props}
+      {...rest}
     />
-  )
+  );
 }
 
-export { Label }
+export { Label };

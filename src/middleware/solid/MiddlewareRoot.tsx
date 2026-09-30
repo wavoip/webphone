@@ -1,5 +1,5 @@
-import { type Wavoip, Wavoip as WavoipCtor } from "@wavoip/wavoip-api";
-import { type ReactNode, useEffect, useState } from "react";
+import { type Wavoip, Wavoip as WavoipCtor, webRuntime } from "@wavoip/wavoip-api/web";
+import { type JSX, onCleanup } from "solid-js";
 import Ringtone from "@/assets/sounds/ringtone-02.mp3";
 import Vibration from "@/assets/sounds/vibration.mp3";
 import { getSettings } from "@/lib/device-settings";
@@ -11,12 +11,12 @@ import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { audioRingtonePlayer } from "@/middleware/effects/ringtone";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { MiddlewareProvider } from "@/middleware/react/hooks";
+import { MiddlewareProvider } from "@/middleware/solid/context";
 import { useSettings } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 
 type Props = {
-  children: ReactNode;
+  children: JSX.Element;
   wavoip?: Wavoip;
   config?: WebphoneSettings;
   notifier?: BrowserNotifier;
@@ -24,15 +24,17 @@ type Props = {
 };
 
 /** Abaixo do `SettingsProvider`, que ele lê, e acima dos providers que leem o store dele. */
-export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notifier, focus }: Props) {
+export function MiddlewareRoot(props: Props) {
   const settings = useSettings();
+  const { wavoip: injectedWavoip, config, notifier, focus } = props;
 
-  const [middleware] = useState(() => {
+  const middleware = (() => {
     const storedTokens = [...getSettings().keys()];
     const language = config?.language;
     if (language) setWebphoneLanguage(language);
-    const wavoip = injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, language });
-    if (injectedWavoip && language) injectedWavoip.setLanguage(language);
+    // A v3 não tem idioma: ela só devolve `code`, e quem traduz é o `i18n` daqui.
+    const wavoip =
+      injectedWavoip ?? new WavoipCtor({ tokens: storedTokens, platform: settings.platform, runtime: webRuntime() });
     // Mesmo com Wavoip injetado, a persistência de devices é nossa: os tokens guardados
     // entram para o hydrate restaurá-los. O `addDevices` tira duplicados.
     if (injectedWavoip && storedTokens.length) injectedWavoip.addDevices(storedTokens);
@@ -50,19 +52,37 @@ export function MiddlewareRoot({ children, wavoip: injectedWavoip, config, notif
     bootstrapStore({ store: mw.store, config: config ?? {} });
     setPublicApiBase(buildPublicApi(mw));
     return mw;
+  })();
+
+  if (config?.offerNotification?.autoRequest) {
+    middleware.browserNotifier.requestPermission().catch(() => {});
+  }
+
+  applyDisplayName(middleware, config?.callSettings?.displayName);
+
+  onCleanup(() => middleware.destroy());
+
+  return <MiddlewareProvider middleware={middleware}>{props.children}</MiddlewareProvider>;
+}
+
+/** O nome que o integrador escolheu substitui o do peer, na oferta e na saída. */
+function applyDisplayName(middleware: Middleware, displayName?: string): void {
+  if (!displayName) return;
+
+  middleware.registry.use("offer", (offer, next) => {
+    offer.peer.displayName = displayName;
+    offer.peer.phone = displayName;
+    next();
   });
 
-  useEffect(() => {
-    if (config?.offerNotification?.autoRequest) {
-      middleware.browserNotifier.requestPermission().catch(() => {});
-    }
-  }, [middleware, config?.offerNotification?.autoRequest]);
-
-  useEffect(() => {
-    return () => {
-      middleware.destroy();
-    };
-  }, [middleware]);
-
-  return <MiddlewareProvider middleware={middleware}>{children}</MiddlewareProvider>;
+  onCleanup(
+    middleware.store.subscribe(
+      (s) => s.outgoing,
+      (outgoing) => {
+        if (!outgoing) return;
+        outgoing.peer.displayName = displayName;
+        outgoing.peer.phone = displayName;
+      },
+    ),
+  );
 }

@@ -1,6 +1,5 @@
-import type { ConnectionStatus, Contact, DeviceStatus } from "@wavoip/wavoip-api";
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { ConnectionStatus, Contact, DeviceStatus } from "@wavoip/wavoip-api/web";
+import type { SliceCreator } from "@/middleware/store/createStore";
 
 export type DeviceStateEntry = {
   token: string;
@@ -33,7 +32,7 @@ function patchDevice(devices: DeviceStateEntry[], token: string, patch: Partial<
   return devices.map((d) => (d.token === token ? { ...d, ...patch } : d));
 }
 
-export const createDeviceSlice: StateCreator<MiddlewareStore, [], [], DeviceSlice> = (set) => ({
+export const createDeviceSlice: SliceCreator<DeviceSlice> = (set) => ({
   devices: [],
   setDevices: (devices) => set({ devices }),
   upsertDevice: (device) =>

@@ -1,12 +1,12 @@
-import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } from "@phosphor-icons/react";
-import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
-import { useEffect, useState } from "react";
+import type { ActiveCall, CallConnection } from "@wavoip/wavoip-api/web";
+import { createSignal, onCleanup, onMount, Show } from "solid-js";
+import { WifiHigh, WifiLow, WifiMedium, WifiSlash } from "@/components/icons";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
 const PING_POLL_MS = 500;
 
 type Props = {
-  call: CallActive;
+  call: ActiveCall;
 };
 
 const ConnectionStrength = {
@@ -41,74 +41,69 @@ const STRENGTH_STYLES: Record<ConnectionStrength, { text: string; bg: string; ri
   },
 };
 
-export function Ping({ call }: Props) {
-  const [ping, setPing] = useState<number | null>(null);
-  const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connectionStatus);
-  const [strength, setStrength] = useState<ConnectionStrength>(ConnectionStrength.high);
+export function Ping(props: Props) {
+  const [ping, setPing] = createSignal<number | null>(null);
+  const [connection, setConnection] = createSignal<CallConnection>(props.call.connection);
+  const [strength, setStrength] = createSignal<ConnectionStrength>(ConnectionStrength.high);
 
-  useEffect(() => {
-    const applyPing = (ms: number) => {
-      setPing(ms);
-      setStrength(getPingLevel(ms));
-    };
-
+  onMount(() => {
     let cancelled = false;
     const pull = () => {
-      call.getStats().then((s) => {
-        if (!cancelled) applyPing(s.rtt.avg);
+      props.call.getStats().then((s) => {
+        if (cancelled) return;
+        setPing(s.rtt.avg);
+        setStrength(getPingLevel(s.rtt.avg));
       });
     };
     pull();
     const id = setInterval(pull, PING_POLL_MS);
 
-    const unsubConnection = call.on("connectionStatus", (status) => {
-      setConnectionStatus(status);
-      if (status === "connected")
+    const unsubConnection = props.call.on("connectionChanged", (next) => {
+      setConnection(next);
+      if (next === "connected") {
         setStrength((prev) => (prev === ConnectionStrength.none ? ConnectionStrength.high : prev));
-      if (status === "disconnected") setStrength(ConnectionStrength.none);
+      }
+      if (next === "disconnected") setStrength(ConnectionStrength.none);
     });
 
-    return () => {
+    onCleanup(() => {
       cancelled = true;
       clearInterval(id);
       unsubConnection();
-    };
-  }, [call]);
+    });
+  });
 
-  if (connectionStatus === "disconnected") {
-    const style = STRENGTH_STYLES[ConnectionStrength.none];
-    return (
-      <CallDiagnosticsDialog
-        call={call}
-        triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text}`}
-      >
-        <WifiXIcon className="wv:size-4" />
-        <span className="wv:text-[11px] wv:font-medium">offline</span>
-      </CallDiagnosticsDialog>
-    );
-  }
-
-  const isPending = connectionStatus === "connecting" || connectionStatus === "reconnecting";
-  const style = STRENGTH_STYLES[strength];
+  const style = () => STRENGTH_STYLES[connection() === "disconnected" ? ConnectionStrength.none : strength()];
+  const pulsando = () => (connection() === "reconnecting" ? "wv:animate-pulse" : "");
 
   return (
     <CallDiagnosticsDialog
-      call={call}
-      triggerClassName={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 wv:hover:cursor-pointer ${style.bg} ${style.ring} ${style.text} ${isPending ? "wv:animate-pulse" : ""}`}
+      call={props.call}
+      triggerClass={`wv:flex wv:items-center wv:gap-1.5 wv:rounded-full wv:px-2 wv:py-0.5 wv:ring-1 wv:transition-colors wv:duration-300 wv:hover:cursor-pointer ${style().bg} ${style().ring} ${style().text} ${pulsando()}`}
     >
-      <SignalIcon strength={strength} className="wv:size-4" />
-      <span className="wv:text-[11px] wv:font-medium wv:tabular-nums wv:whitespace-nowrap">
-        {ping !== null ? `${ping.toFixed(0)} ms` : "—"}
-      </span>
+      <Show
+        when={connection() !== "disconnected"}
+        fallback={
+          <>
+            <WifiSlash class="wv:size-4" />
+            <span class="wv:text-[12px] wv:font-medium">offline</span>
+          </>
+        }
+      >
+        <SignalIcon strength={strength()} class="wv:size-4" />
+        <span class="wv:text-[12px] wv:font-medium wv:tabular-nums wv:whitespace-nowrap">
+          {ping() !== null ? `${ping()?.toFixed(0)} ms` : "—"}
+        </span>
+      </Show>
     </CallDiagnosticsDialog>
   );
 }
 
-function SignalIcon({ strength, className }: { strength: ConnectionStrength; className?: string }) {
-  if (strength === ConnectionStrength.none) return <WifiSlashIcon className={className} />;
-  if (strength === ConnectionStrength.low) return <WifiLowIcon className={className} />;
-  if (strength === ConnectionStrength.medium) return <WifiMediumIcon className={className} />;
-  return <WifiHighIcon className={className} />;
+function SignalIcon(props: { strength: ConnectionStrength; class?: string }) {
+  if (props.strength === ConnectionStrength.none) return <WifiSlash class={props.class} />;
+  if (props.strength === ConnectionStrength.low) return <WifiLow class={props.class} />;
+  if (props.strength === ConnectionStrength.medium) return <WifiMedium class={props.class} />;
+  return <WifiHigh class={props.class} />;
 }
 
 function getPingLevel(ping: number): ConnectionStrength {

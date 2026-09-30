@@ -1,4 +1,4 @@
-import type { CallActive, CallOutgoing } from "@wavoip/wavoip-api";
+import type { ActiveCall, OutgoingCall } from "@wavoip/wavoip-api/web";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { IgnorableOffer } from "@/middleware/store/slices/callSlice";
@@ -13,12 +13,12 @@ function makeOffer(id: string): IgnorableOffer {
   } as unknown as IgnorableOffer;
 }
 
-function makeOutgoing(id: string): CallOutgoing {
-  return { id, type: "OFFICIAL", direction: "OUTGOING", status: "CALLING" } as unknown as CallOutgoing;
+function makeOutgoing(id: string): OutgoingCall {
+  return { id, type: "OFFICIAL", direction: "OUTGOING", status: "CALLING" } as unknown as OutgoingCall;
 }
 
-function makeActive(id: string): CallActive {
-  return { id, type: "OFFICIAL", direction: "OUTGOING", status: "ACTIVE" } as unknown as CallActive;
+function makeActive(id: string): ActiveCall {
+  return { id, type: "OFFICIAL", direction: "OUTGOING", status: "ACTIVE" } as unknown as ActiveCall;
 }
 
 describe("callSlice", () => {

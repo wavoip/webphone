@@ -1,4 +1,4 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import { bindWavoipEvents } from "@/middleware/bindings/wavoipBindings";
 import { documentFocusTracker, type FocusTracker } from "@/middleware/browser/focusTracker";
 import { type BrowserNotifier, domNotifier } from "@/middleware/browser/notifier";
@@ -69,7 +69,7 @@ export class Middleware {
     this.events = new EventBus<WebphoneEventMap>();
     const notifications = new NotificationsController({ store: this.store });
     this.controllers = {
-      call: new CallController({ wavoip: this.wavoip, store: this.store }),
+      call: new CallController({ wavoip: this.wavoip, store: this.store, notifications }),
       device: new DeviceController({ wavoip: this.wavoip, store: this.store, notifications }),
       notifications,
       missedCall: new MissedCallController({ store: this.store }),

@@ -1,12 +1,12 @@
-import { BellIcon, CheckCircleIcon, PhoneIncomingIcon, PhoneXIcon, WarningIcon, XIcon } from "@phosphor-icons/react";
-import { useMemo } from "react";
+import { createMemo, For, Show } from "solid-js";
+import { Bell, CheckCircle, PhoneIncoming, PhoneX, Warning, X } from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { t } from "@/lib/i18n";
+import { useNotificationManager } from "@/lib/notifications";
 import { relativeTime } from "@/lib/relative-time";
 import type { Notification } from "@/middleware/store/slices/notificationsSlice";
-import { useNotificationManager } from "@/providers/NotificationsProvider";
 
 const typeLabel = (type: Notification["type"]): string => {
   if (type === "MISSED_CALL") return t("Missed call");
@@ -16,12 +16,13 @@ const typeLabel = (type: Notification["type"]): string => {
   return t("Notice");
 };
 
-function TypeIcon({ type }: { type: Notification["type"] }) {
-  if (type === "MISSED_CALL") return <PhoneIncomingIcon size={14} weight="fill" />;
-  if (type === "CALL_FAILED") return <PhoneXIcon size={14} weight="fill" />;
-  if (type === "DEVICE_RESTRICTED") return <WarningIcon size={14} weight="fill" />;
-  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircleIcon size={14} weight="fill" />;
-  return <BellIcon size={14} weight="fill" />;
+function TypeIcon(props: { type: Notification["type"] }) {
+  const type = props.type;
+  if (type === "MISSED_CALL") return <PhoneIncoming filled size={14} />;
+  if (type === "CALL_FAILED") return <PhoneX filled size={14} />;
+  if (type === "DEVICE_RESTRICTED") return <Warning size={14} />;
+  if (type === "DEVICE_RESTRICTION_LIFTED") return <CheckCircle size={14} />;
+  return <Bell filled size={14} />;
 }
 
 function buildSecondary(n: Notification): string {
@@ -35,92 +36,87 @@ function buildSecondary(n: Notification): string {
 export function Notifications() {
   const { notifications, readNotifications, clearNotifications, removeNotification } = useNotificationManager();
 
-  const visible = useMemo(
-    () => notifications.filter((n) => !n.isHidden).sort((a, b) => Number(a.isRead) - Number(b.isRead)),
-    [notifications],
+  // `filter` já devolve array novo, então ordenar aqui não encosta no estado.
+  const visible = createMemo(() =>
+    notifications()
+      .filter((n) => !n.isHidden)
+      .sort((a, b) => Number(a.isRead) - Number(b.isRead)),
   );
-  const unreadCount = useMemo(() => visible.filter((n) => !n.isRead).length, [visible]);
-  const hasAny = visible.length > 0;
+  const unreadCount = createMemo(() => visible().filter((n) => !n.isRead).length);
 
   return (
     <Popover>
       <PopoverTrigger
         aria-label={t("Notifications")}
-        className="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
+        class="wv:relative wv:hover:cursor-pointer wv:hover:bg-accent wv:text-foreground wv:hover:text-foreground wv:rounded-full wv:size-fit wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:p-1 wv:max-sm:p-2"
         onClick={() => readNotifications()}
       >
-        <BellIcon className="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
-        {unreadCount > 0 && (
+        <Bell class="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
+        <Show when={unreadCount() > 0}>
           <Badge
-            className="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
+            class="wv:absolute wv:bottom-0 wv:right-[-5px] wv:h-3 wv:w-3 wv:rounded-full wv:px-[1px] wv:bg-[red] wv:text-[8px]"
             variant="destructive"
           >
-            {unreadCount}
+            {unreadCount()}
           </Badge>
-        )}
+        </Show>
       </PopoverTrigger>
-      <PopoverContent className="wv:flex wv:flex-col wv:max-h-[320px] wv:w-[320px] wv:overflow-y-auto wv:p-0">
-        {!hasAny && <p className="wv:text-center wv:py-6 wv:text-xs wv:text-foreground/60">{t("No notifications")}</p>}
-
-        {hasAny && (
-          <ul className="wv:flex wv:flex-col wv:divide-y wv:divide-foreground/10">
-            {visible.map((n) => (
-              <li
-                key={`notification_${n.id}`}
-                data-notification-id={n.id}
-                className="wv:flex wv:flex-row wv:items-start wv:gap-2 wv:px-2 wv:py-1.5 wv:hover:bg-foreground/5"
-              >
-                <span className="wv:flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:bg-foreground/10 wv:text-foreground wv:shrink-0 wv:mt-0.5">
-                  <TypeIcon type={n.type} />
-                </span>
-
-                <div className="wv:flex wv:flex-col wv:flex-grow wv:min-w-0">
-                  <div className="wv:flex wv:items-center wv:gap-1.5">
-                    {!n.isRead && (
-                      <output
-                        aria-label={t("Unread")}
-                        className="wv:size-1.5 wv:rounded-full wv:bg-blue-500 wv:shrink-0"
-                      />
-                    )}
-                    <p className="wv:text-[12px] wv:font-medium wv:leading-tight wv:text-foreground wv:truncate">
-                      {typeLabel(n.type)}
-                    </p>
-                  </div>
-                  <p className="wv:text-[11px] wv:leading-tight wv:text-foreground/60 wv:truncate">
-                    {buildSecondary(n)}
-                  </p>
-                </div>
-
-                <div className="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
-                  <span className="wv:text-[10px] wv:text-foreground/50 wv:whitespace-nowrap">
-                    {relativeTime(n.created_at)}
+      <PopoverContent class="wv:flex wv:flex-col wv:max-h-[320px] wv:w-[320px] wv:overflow-y-auto wv:p-0">
+        <Show
+          when={visible().length > 0}
+          fallback={<p class="wv:text-center wv:py-6 wv:text-xs wv:text-foreground/60">{t("No notifications")}</p>}
+        >
+          <ul class="wv:flex wv:flex-col wv:divide-y wv:divide-foreground/10">
+            <For each={visible()}>
+              {(n) => (
+                <li
+                  data-notification-id={n.id}
+                  class="wv:flex wv:flex-row wv:items-start wv:gap-2 wv:px-2 wv:py-1.5 wv:hover:bg-foreground/5"
+                >
+                  <span class="wv:flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:bg-foreground/10 wv:text-foreground wv:shrink-0 wv:mt-0.5">
+                    <TypeIcon type={n.type} />
                   </span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    aria-label={t("Remove notification")}
-                    className="wv:p-0 wv:size-4 wv:rounded-full wv:hover:bg-foreground/10 wv:text-foreground/60"
-                    onClick={() => removeNotification(n.id)}
-                  >
-                    <XIcon size={10} />
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
 
-        {hasAny && (
-          <div className="wv:flex wv:justify-end wv:border-t wv:border-foreground/10 wv:px-2 wv:py-1">
-            <Button
-              variant="link"
-              onClick={clearNotifications}
-              className="wv:text-[11px] wv:select-none wv:p-0 wv:h-auto"
-            >
+                  <div class="wv:flex wv:flex-col wv:flex-grow wv:min-w-0">
+                    <div class="wv:flex wv:items-center wv:gap-1.5">
+                      <Show when={!n.isRead}>
+                        <output
+                          aria-label={t("Unread")}
+                          class="wv:size-1.5 wv:rounded-full wv:bg-blue-500 wv:shrink-0"
+                        />
+                      </Show>
+                      <p class="wv:text-[12px] wv:font-medium wv:leading-tight wv:text-foreground wv:truncate">
+                        {typeLabel(n.type)}
+                      </p>
+                    </div>
+                    <p class="wv:text-[12px] wv:leading-tight wv:text-foreground/60 wv:truncate">{buildSecondary(n)}</p>
+                  </div>
+
+                  <div class="wv:flex wv:items-center wv:gap-1 wv:shrink-0">
+                    <span class="wv:text-[12px] wv:text-foreground/50 wv:whitespace-nowrap">
+                      {relativeTime(n.created_at)}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      aria-label={t("Remove notification")}
+                      class="wv:p-0 wv:size-4 wv:rounded-full wv:hover:bg-foreground/10 wv:text-foreground/60"
+                      onClick={() => removeNotification(n.id)}
+                    >
+                      <X size={10} />
+                    </Button>
+                  </div>
+                </li>
+              )}
+            </For>
+          </ul>
+
+          <div class="wv:flex wv:justify-end wv:border-t wv:border-foreground/10 wv:px-2 wv:py-1">
+            <Button variant="link" onClick={clearNotifications} class="wv:text-[12px] wv:select-none wv:p-0 wv:h-auto">
               {t("Clear")}
             </Button>
           </div>
-        )}
+        </Show>
       </PopoverContent>
     </Popover>
   );

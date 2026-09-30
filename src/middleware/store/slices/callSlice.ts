@@ -1,6 +1,5 @@
-import type { CallActive, CallOutgoing, Offer, CallStatus as WavoipCallStatus } from "@wavoip/wavoip-api";
-import type { StateCreator } from "zustand";
-import type { MiddlewareStore } from "@/middleware/store/types";
+import type { ActiveCall, IncomingCall, OutgoingCall, CallStatus as WavoipCallStatus } from "@wavoip/wavoip-api/web";
+import type { SliceCreator } from "@/middleware/store/createStore";
 
 /**
  * Mirrors `CallStatus` from `@wavoip/wavoip-api` verbatim, plus `"idle"` for
@@ -15,12 +14,12 @@ export type CallStatus = WavoipCallStatus | "idle";
 export type OfferOutcome = "accepted" | "rejected" | "elsewhere";
 
 /** `ignore` só existe aqui, sem equivalente no servidor (ver `CallController.wrapOffer`). */
-export type IgnorableOffer = Offer & { ignore(): void };
+export type IgnorableOffer = IncomingCall & { ignore(): void };
 
 export type CallSliceState = {
   offers: IgnorableOffer[];
-  outgoing?: CallOutgoing;
-  active?: CallActive;
+  outgoing?: OutgoingCall;
+  active?: ActiveCall;
   activeStartedAt?: number;
   callStatus: CallStatus;
   peerMuted: boolean;
@@ -31,8 +30,8 @@ export type CallSliceState = {
 export type CallSliceActions = {
   addOffer: (offer: IgnorableOffer) => void;
   removeOffer: (id: string) => void;
-  setOutgoing: (call: CallOutgoing | undefined) => void;
-  setActive: (call: CallActive | undefined) => void;
+  setOutgoing: (call: OutgoingCall | undefined) => void;
+  setActive: (call: ActiveCall | undefined) => void;
   setCallStatus: (status: CallStatus) => void;
   setPeerMuted: (muted: boolean) => void;
   setCallFailReason: (reason: string | undefined) => void;
@@ -53,7 +52,7 @@ const initialCallState: CallSliceState = {
   lastOfferOutcomes: {},
 } as const;
 
-export const createCallSlice: StateCreator<MiddlewareStore, [], [], CallSlice> = (set) => ({
+export const createCallSlice: SliceCreator<CallSlice> = (set) => ({
   ...initialCallState,
   addOffer: (offer) => set((state) => ({ offers: [...state.offers, offer] })),
   removeOffer: (id) => set((state) => ({ offers: state.offers.filter((o) => o.id !== id) })),

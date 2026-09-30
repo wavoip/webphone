@@ -1,53 +1,51 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
-import { useSyncExternalStore } from "react";
+import { EnvironmentProvider } from "@ark-ui/solid/environment";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
 import { WebPhone } from "@/components/WebPhone";
-import { getLanguage, normalizeLanguage, subscribeLocale } from "@/lib/i18n";
-import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
+import { MiddlewareRoot } from "@/middleware/solid/MiddlewareRoot";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { LanguageProvider } from "@/providers/LanguageProvider";
-import { NotificationsProvider } from "@/providers/NotificationsProvider";
-import { PipProvider } from "@/providers/PipProvider";
-import { ShadowProvider } from "@/providers/ShadowRootProvider";
+import { type Surface, SurfaceProvider, useSurface } from "@/providers/SurfaceProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
-import { WavoipProvider } from "@/providers/WavoipProvider";
 import { WidgetProvider } from "@/providers/WidgetProvider";
 
 type Props = {
-  shadowRoot: ShadowRoot;
+  layout: Surface["layout"];
   root: HTMLDivElement;
+  rootNode: ShadowRoot | Document;
   config: WebphoneSettings;
   wavoip?: Wavoip;
 };
 
-export function App({ shadowRoot, root, config, wavoip }: Props) {
-  useSyncExternalStore(
-    subscribeLocale,
-    () => normalizeLanguage(getLanguage()),
-    () => normalizeLanguage(config.language),
-  );
+/**
+ * O Ark consulta o DOM por `getRootNode()`, e aceita função — então ele acompanha a
+ * superfície ativa. Sem isto procuraria no `document` da página: não acharia nada do que
+ * vive dentro do shadow root fechado do widget, nem do que está na janela do PiP.
+ */
+function ArkEnvironment(props: { children: Parameters<typeof EnvironmentProvider>[0]["children"] }) {
+  const { rootNode } = useSurface();
+  return <EnvironmentProvider value={rootNode}>{props.children}</EnvironmentProvider>;
+}
+
+export function App(props: Props) {
   return (
-    <ShadowProvider shadowRoot={shadowRoot} root={root}>
-      <SettingsProvider config={config}>
-        <MiddlewareRoot wavoip={wavoip} config={config}>
-          <LanguageProvider initial={config.language}>
-            <ThemeProvider root={root}>
-              <PipProvider shadowRoot={shadowRoot}>
+    <SurfaceProvider layout={props.layout} root={props.root} rootNode={props.rootNode}>
+      <ArkEnvironment>
+        <SettingsProvider config={props.config}>
+          <MiddlewareRoot wavoip={props.wavoip} config={props.config}>
+            <LanguageProvider initial={props.config.language}>
+              <ThemeProvider root={props.root}>
                 <WidgetProvider>
-                  <NotificationsProvider>
-                    <WavoipProvider>
-                      <DebugProvider>
-                        <WebPhone />
-                      </DebugProvider>
-                    </WavoipProvider>
-                  </NotificationsProvider>
+                  <DebugProvider>
+                    <WebPhone />
+                  </DebugProvider>
                 </WidgetProvider>
-              </PipProvider>
-            </ThemeProvider>
-          </LanguageProvider>
-        </MiddlewareRoot>
-      </SettingsProvider>
-    </ShadowProvider>
+              </ThemeProvider>
+            </LanguageProvider>
+          </MiddlewareRoot>
+        </SettingsProvider>
+      </ArkEnvironment>
+    </SurfaceProvider>
   );
 }

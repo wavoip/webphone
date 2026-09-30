@@ -1,50 +1,57 @@
-"use client";
-
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import type * as React from "react";
+import { Portal } from "solid-js/web";
+import { Tooltip as ArkTooltip } from "@ark-ui/solid/tooltip";
+import { type ComponentProps, splitProps } from "solid-js";
 
 import { cn } from "@/lib/utils";
 
-function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-  return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
-}
-
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+/**
+ * Onde o tooltip aparece é decisão do `Tooltip`, e não do conteúdo: o Zag calcula a
+ * posição na máquina de estado, que é a raiz. Use `positioning={{ placement, gutter }}`.
+ */
+function Tooltip(props: ComponentProps<typeof ArkTooltip.Root>) {
   return (
-    <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
-    </TooltipProvider>
+    <ArkTooltip.Root
+      openDelay={0}
+      closeDelay={0}
+      // O Ark deixa o conteúdo montado e escondido; fechado, ele sai do DOM só com isto.
+      lazyMount
+      unmountOnExit
+      {...props}
+    />
   );
 }
 
-function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-  return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+function TooltipTrigger(props: ComponentProps<typeof ArkTooltip.Trigger>) {
+  return <ArkTooltip.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
-function TooltipContent({
-  className,
-  sideOffset = 0,
-  children,
-  container,
-  ...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content> &
-  Pick<React.ComponentProps<typeof TooltipPrimitive.Portal>, "container">) {
+type ContentProps = ComponentProps<typeof ArkTooltip.Content> & {
+  /** Para onde portar. No widget é o `root` do shadow, que carrega a classe de tema. */
+  container?: HTMLElement | null;
+};
+
+function TooltipContent(props: ContentProps) {
+  const [local, rest] = splitProps(props, ["class", "container", "children"]);
+
   return (
-    <TooltipPrimitive.Portal container={container}>
-      <TooltipPrimitive.Content
-        data-slot="tooltip-content"
-        sideOffset={sideOffset}
-        className={cn(
-          "wv:bg-primary wv:text-primary-foreground wv:animate-in wv:fade-in-0 wv:zoom-in-95 wv:data-[state=closed]:animate-out wv:data-[state=closed]:fade-out-0 wv:data-[state=closed]:zoom-out-95 wv:data-[side=bottom]:slide-in-from-top-2 wv:data-[side=left]:slide-in-from-right-2 wv:data-[side=right]:slide-in-from-left-2 wv:data-[side=top]:slide-in-from-bottom-2 wv:z-50 wv:w-fit wv:origin-(--radix-tooltip-content-transform-origin) wv:rounded-md wv:px-3 wv:py-1.5 wv:text-xs wv:text-balance",
-          className,
-        )}
-        {...props}
-      >
-        {children}
-        <TooltipPrimitive.Arrow className="wv:bg-primary wv:fill-primary wv:z-50 wv:size-2.5 wv:translate-y-[calc(-50%_-_2px)] wv:rotate-45 wv:rounded-[2px]" />
-      </TooltipPrimitive.Content>
-    </TooltipPrimitive.Portal>
+    <Portal mount={local.container ?? undefined}>
+      <ArkTooltip.Positioner>
+        <ArkTooltip.Content
+          data-slot="tooltip-content"
+          class={cn(
+            "wv:bg-primary wv:text-primary-foreground wv:z-50 wv:w-fit wv:rounded-md wv:px-3 wv:py-1.5 wv:text-xs wv:text-balance",
+            local.class,
+          )}
+          {...rest}
+        >
+          {local.children}
+          <ArkTooltip.Arrow class="wv:[--arrow-size:10px] wv:[--arrow-background:var(--color-primary)]">
+            <ArkTooltip.ArrowTip class="wv:border-primary" />
+          </ArkTooltip.Arrow>
+        </ArkTooltip.Content>
+      </ArkTooltip.Positioner>
+    </Portal>
   );
 }
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+export { Tooltip, TooltipTrigger, TooltipContent };

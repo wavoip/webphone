@@ -1,9 +1,8 @@
-import type React from "react";
-import { createContext, useContext } from "react";
+import { createContext, type JSX, useContext } from "solid-js";
 import type { WebphonePosition, WebphoneSettings, WidgetButtonPosition } from "@/providers/settings/settings";
 
 type SettingsProviderProps = {
-  children: React.ReactNode;
+  children: JSX.Element;
   config: WebphoneSettings;
 };
 
@@ -21,9 +20,10 @@ type SettingsProviderState = {
   platform?: string;
 };
 
-const SettingsProviderContext = createContext<SettingsProviderState | undefined>(undefined);
+const SettingsProviderContext = createContext<SettingsProviderState>();
 
-export function SettingsProvider({ children, config }: SettingsProviderProps) {
+export function SettingsProvider(props: SettingsProviderProps) {
+  const { config } = props;
   const { statusBar, settingsMenu, widget } = config;
 
   const showNotifications = statusBar?.showNotificationsIcon ?? true;
@@ -69,7 +69,7 @@ export function SettingsProvider({ children, config }: SettingsProviderProps) {
         platform: platform || undefined,
       }}
     >
-      {children}
+      {props.children}
     </SettingsProviderContext.Provider>
   );
 }

@@ -1,11 +1,20 @@
 @import "tailwindcss" prefix(wv);
+/* O Tailwind v4 varre a partir da raiz do Vite, e ela difere entre os dois modos: o do
+   PWA tem raiz em `src/shells/app` e geraria um CSS vazio. Apontar a fonte aqui deixa os
+   dois builds enxergando as mesmas classes. */
+@source "../";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-:host, :root {
+/* Só o widget flutua sobre a página de outra pessoa. `:host` não existe fora de um
+   shadow root, então a regra não alcança o PWA, que ocupa a página inteira. */
+:host {
   position: fixed;
   z-index: 2147483647; /* max 32-bit int */
+}
+
+:host, :root {
   --radius: 0.65rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);

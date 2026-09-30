@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetForTesting, setPublicApiBase, webphoneAPIPromise } from "@/lib/webphone-api/api";
 import { Middleware } from "@/middleware/Middleware";
 import { buildPublicApi } from "@/middleware/public-api/buildPublicApi";
-import { FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeIncomingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("api.ts public surface", () => {
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe("api.ts public surface", () => {
       seen.push(offer.id);
       next();
     });
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(seen).toEqual(["o1"]);
   });

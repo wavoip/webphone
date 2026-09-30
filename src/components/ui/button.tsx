@@ -1,6 +1,6 @@
-import { Slot } from "@radix-ui/react-slot";
+import { ark } from "@ark-ui/solid/factory";
 import { cva, type VariantProps } from "class-variance-authority";
-import type * as React from "react";
+import { type ComponentProps, splitProps } from "solid-js";
 
 import { cn } from "@/lib/utils";
 
@@ -32,19 +32,20 @@ const buttonVariants = cva(
   },
 );
 
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
+// Os props vêm do `ark.button`: o `asChild` do Solid é função, e não booleano — declarar
+// como booleano aqui compila e quebra na hora do clique.
+type Props = ComponentProps<typeof ark.button> & VariantProps<typeof buttonVariants>;
 
-  return <Comp data-slot="button" className={cn(buttonVariants({ variant, size, className }))} {...props} />;
+function Button(props: Props) {
+  const [local, rest] = splitProps(props, ["class", "variant", "size", "asChild"]);
+  return (
+    <ark.button
+      data-slot="button"
+      asChild={local.asChild}
+      class={cn(buttonVariants({ variant: local.variant, size: local.size, className: local.class }))}
+      {...rest}
+    />
+  );
 }
 
 export { Button, buttonVariants };

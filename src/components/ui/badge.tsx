@@ -1,5 +1,5 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
+import { type ComponentProps, splitProps } from "solid-js"
+import { ark } from "@ark-ui/solid/factory"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
@@ -25,20 +25,18 @@ const badgeVariants = cva(
   }
 )
 
-function Badge({
-  className,
-  variant,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"span"> &
-  VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : "span"
+// Os props vêm do `ark.span`: o `asChild` do Solid é função, e não booleano — declarar
+// como booleano aqui compila e quebra na hora do clique.
+type Props = ComponentProps<typeof ark.span> & VariantProps<typeof badgeVariants>;
 
+function Badge(props: Props) {
+  const [local, rest] = splitProps(props, ["class", "variant", "asChild"]);
   return (
-    <Comp
+    <ark.span
+      asChild={local.asChild}
       data-slot="badge"
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
+      class={cn(badgeVariants({ variant: local.variant }), local.class)}
+      {...rest}
     />
   )
 }

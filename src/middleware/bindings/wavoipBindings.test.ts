@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { bindWavoipEvents } from "@/middleware/bindings/wavoipBindings";
 import { CallController } from "@/middleware/controllers/CallController";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
-import { FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { FakeIncomingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
 describe("bindWavoipEvents", () => {
   let wavoip: FakeWavoip;
@@ -18,13 +19,17 @@ describe("bindWavoipEvents", () => {
     wavoip = new FakeWavoip();
     registry = new MiddlewareRegistry();
     store = createMiddlewareStore();
-    callController = new CallController({ wavoip: wavoip.asWavoip(), store });
+    callController = new CallController({
+      wavoip: wavoip.asWavoip(),
+      store,
+      notifications: new NotificationsController({ store }),
+    });
     events = new EventBus<WebphoneEventMap>();
   });
 
   it("ingests an offer into the store when the pipeline reaches terminal", async () => {
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
-    const offer = new FakeOffer("o1", "tok-1");
+    const offer = new FakeIncomingCall("o1", "tok-1");
 
     wavoip.emitEvent("offer", offer);
     await new Promise((r) => setTimeout(r, 0));
@@ -37,7 +42,7 @@ describe("bindWavoipEvents", () => {
     registry.use("offer", () => {});
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
 
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
 
     expect(store.getState().offers).toEqual([]);
@@ -52,8 +57,8 @@ describe("bindWavoipEvents", () => {
     });
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
 
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
-    wavoip.emitEvent("offer", new FakeOffer("o2", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o2", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
 
     expect(seen).toEqual(["o1", "o2"]);
@@ -65,7 +70,7 @@ describe("bindWavoipEvents", () => {
     const cb = vi.fn();
     events.on("offer:received", cb);
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb.mock.calls[0][0].id).toBe("o1");
@@ -77,7 +82,7 @@ describe("bindWavoipEvents", () => {
     events.on("offer:received", cb);
     registry.use("offer", () => {});
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
     expect(cb).not.toHaveBeenCalled();
     unsub();
@@ -87,7 +92,7 @@ describe("bindWavoipEvents", () => {
     const unsub = bindWavoipEvents({ wavoip: wavoip.asWavoip(), registry, callController, events });
     unsub();
 
-    wavoip.emitEvent("offer", new FakeOffer("o1", "tok-1"));
+    wavoip.emitEvent("offer", new FakeIncomingCall("o1", "tok-1"));
     await new Promise((r) => setTimeout(r, 0));
 
     expect(store.getState().offers).toEqual([]);

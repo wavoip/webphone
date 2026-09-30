@@ -1,6 +1,6 @@
-import { act, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CopyablePeer } from "@/components/CopyablePeer";
+import { act, fireEvent, screen } from "@/middleware/testing/dom";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
 class FakeClipboard {
@@ -12,6 +12,15 @@ class FakeClipboard {
     if (this.rejection) throw this.rejection;
     this.texts.push(text);
   };
+}
+
+// O Ark monta e desmonta o tooltip depois da transição, e não no tick em que `open` muda.
+const TRANSITION_MS = 50;
+
+async function settleTooltip(): Promise<void> {
+  await act(async () => {
+    vi.advanceTimersByTime(TRANSITION_MS);
+  });
 }
 
 describe("CopyablePeer", () => {
@@ -39,17 +48,17 @@ describe("CopyablePeer", () => {
   });
 
   it("renders displayName when present, falling back to phone", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     expect(screen.getByText("Maria")).toBeTruthy();
   });
 
   it("renders phone when displayName is null", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName={null} phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName={null} phone="5511999999999" /> });
     expect(screen.getByText("5511999999999")).toBeTruthy();
   });
 
   it("copies the phone number (not the displayName) when clicked", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     const button = screen.getByRole("button", { name: /copiar telefone/i });
     await act(async () => {
       fireEvent.click(button);
@@ -58,27 +67,30 @@ describe("CopyablePeer", () => {
   });
 
   it("shows 'Copiado' feedback after a successful copy", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /copiar telefone/i }));
     });
+    await settleTooltip();
     expect(screen.getAllByText("Copiado").length).toBeGreaterThan(0);
   });
 
   it("hides the feedback after 1500ms", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /copiar telefone/i }));
     });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado").length).toBeGreaterThan(0);
     await act(async () => {
       vi.advanceTimersByTime(1500);
     });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });
 
   it("resets the hide timer when clicked again before it expires", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     const button = screen.getByRole("button", { name: /copiar telefone/i });
     await act(async () => {
       fireEvent.click(button);
@@ -97,25 +109,26 @@ describe("CopyablePeer", () => {
     await act(async () => {
       vi.advanceTimersByTime(600);
     });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });
 
   it("does nothing when phone is empty", async () => {
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="" /> });
     const button = screen.queryByRole("button", { name: /copiar telefone/i });
     expect(button).toBeNull();
   });
 
   it("wraps the label in MarqueeText so long names scroll on overflow", async () => {
     const { rendered } = await renderWithProviders({
-      children: <CopyablePeer displayName="Nome Muito Longo" phone="5511999999999" />,
+      children: () => <CopyablePeer displayName="Nome Muito Longo" phone="5511999999999" />,
     });
     expect(rendered.container.querySelector(".marquee-container")).toBeTruthy();
   });
 
   it("does not show 'Copiado' when clipboard.writeText rejects", async () => {
     clipboard.rejection = new Error("clipboard unavailable");
-    await renderWithProviders({ children: <CopyablePeer displayName="Maria" phone="5511999999999" /> });
+    await renderWithProviders({ children: () => <CopyablePeer displayName="Maria" phone="5511999999999" /> });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /copiar telefone/i }));
     });

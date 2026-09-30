@@ -1,19 +1,20 @@
-import type { Wavoip } from "@wavoip/wavoip-api";
-import ReactDOM from "react-dom/client";
-import sonnerStyles from "sonner/dist/styles.css?inline";
+import type { Wavoip } from "@wavoip/wavoip-api/web";
+import { render } from "solid-js/web";
+import sonnerStyles from "solid-sonner/styles.css?inline";
 import { App } from "@/App";
 import styles from "@/assets/index.css?inline";
 import { maybeUpgrade } from "@/lib/auto-update";
+import { delegateEventsToRoot } from "@/lib/event-delegation";
 import { webphoneAPIPromise } from "@/lib/webphone-api/api";
+import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import type { WebphoneSettings } from "@/providers/settings/settings";
-import type { WebphoneAPI } from "./lib/webphone-api/WebphoneAPI";
 
 class WebPhoneComponent {
   private container: HTMLElement | null = null;
-  private root: ReactDOM.Root | null = null;
+  private dispose: (() => void) | null = null;
 
   async render(config?: WebphoneSettings, wavoip?: Wavoip): Promise<WebphoneAPI | undefined> {
-    if (this.root) return window.wavoip as WebphoneAPI;
+    if (this.dispose) return window.wavoip as WebphoneAPI;
 
     try {
       const upgraded = await maybeUpgrade(__WEBPHONE_VERSION__);
@@ -33,6 +34,7 @@ class WebPhoneComponent {
     document.body.appendChild(this.container);
 
     const shadowRoot = this.container.attachShadow({ mode: "closed" });
+    delegateEventsToRoot(shadowRoot);
 
     const style = document.createElement("style");
     style.textContent = `
@@ -49,8 +51,10 @@ class WebPhoneComponent {
     container.id = "container";
     root.appendChild(container);
 
-    this.root = ReactDOM.createRoot(container);
-    this.root.render(<App shadowRoot={shadowRoot} root={root} config={config || {}} wavoip={wavoip} />);
+    this.dispose = render(
+      () => <App layout="floating" root={root} rootNode={shadowRoot} config={config || {}} wavoip={wavoip} />,
+      container,
+    );
 
     const webphoneAPI = await webphoneAPIPromise();
     window.wavoip = webphoneAPI;
@@ -58,14 +62,14 @@ class WebPhoneComponent {
   }
 
   destroy() {
-    if (!this.root || !this.container) {
+    if (!this.dispose || !this.container) {
       return;
     }
 
-    this.root.unmount();
+    this.dispose();
     this.container.remove();
 
-    this.root = null;
+    this.dispose = null;
     this.container = null;
 
     window.wavoip = undefined;
