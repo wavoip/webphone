@@ -8,10 +8,11 @@ import type {
   StartCallFailure,
   Wavoip,
 } from "@wavoip/wavoip-api/web";
+import { type NotificationsController, newId } from "@/middleware/controllers/NotificationsController";
 import type { MiddlewareStoreApi } from "@/middleware/store/createStore";
 import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/callSlice";
 
-type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
+type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi; notifications: NotificationsController };
 
 export type StartCallSuccess = { call: { id: string; peer: CallPeer }; err: null };
 export type StartCallRejection = {
@@ -101,6 +102,92 @@ export class CallController {
     const result = await outgoing.cancel();
     if (result.error === null) this.mirror(outgoing);
     return result;
+  }
+
+  /**
+   * Tenta os devices um a um até algum atender pelo servidor, e conta o andamento pelo
+   * store (`dialStatus`, `dialError`, `dialIsLoading`). Mora aqui, e não na tela, porque
+   * é regra: qual device tentar em seguida, o que fazer com cada recusa, e o que conta
+   * como desistência.
+   *
+   * O `dialToken` é a desistência. Ele vive no store porque o Picture-in-Picture monta um
+   * segundo teclado, e um contador por instância deixaria o botão de abortar de uma sem
+   * efeito sobre o laço da outra.
+   */
+  async dial(to: string, tokens: string[]): Promise<void> {
+    const { store } = this.deps;
+    store.getState().bumpDialToken();
+    await this.tryDevices(to, tokens, store.getState().dialToken);
+  }
+
+  /** Desiste da discagem em curso; o laço percebe entre um device e o próximo. */
+  abortDial(): void {
+    const { store } = this.deps;
+    store.getState().bumpDialToken();
+    store.getState().setDialIsLoading(false);
+    store.getState().setDialStatus("");
+  }
+
+  private async tryDevices(to: string, devices: string[], token: number): Promise<void> {
+    const { store } = this.deps;
+    // O ack do `startCall` não tem timeout, então a desistência só é percebida entre um
+    // device e o outro — nunca enquanto o atual ainda está pendurado.
+    if (token !== store.getState().dialToken) return;
+
+    const device = devices[0];
+    if (!device) return;
+
+    store.getState().setDialIsLoading(true);
+    store.getState().setDialError("");
+    store.getState().setDialStatus(`${device}`);
+
+    const { call, err } = await this.start(to, { fromTokens: [device] });
+
+    // Desistiu enquanto este device era tentado: se a chamada chegou a existir, ela já
+    // está no controller, e o cancelamento vai pelo id — para não cancelar uma discagem
+    // que o operador começou nesse meio-tempo.
+    if (token !== store.getState().dialToken) {
+      if (!err) void this.cancel(call.id);
+      return;
+    }
+
+    if (!err) {
+      store.getState().pushRecentNumber(to);
+      store.getState().setKeyboardInput("");
+      store.getState().setDialStatus("");
+      store.getState().setDialIsLoading(false);
+      return;
+    }
+
+    const code = err.devices[0]?.reason ?? err.message;
+
+    // Sem device é o fim do assunto: não adianta tentar o próximo de uma lista vazia.
+    if (code === "NO_DEVICES") {
+      store.getState().setDialError(code);
+      store.getState().setDialStatus("");
+      store.getState().setDialIsLoading(false);
+      return;
+    }
+
+    this.deps.notifications.add({
+      id: newId(),
+      created_at: new Date(),
+      type: "CALL_FAILED",
+      detail: `${device} -> ${to}`,
+      message: code,
+      token: device,
+      isRead: false,
+      isHidden: false,
+    });
+
+    const restantes = devices.slice(1);
+    if (restantes.length) {
+      await this.tryDevices(to, restantes, token);
+      return;
+    }
+    store.getState().setDialError("NO_DEVICES");
+    store.getState().setDialStatus("");
+    store.getState().setDialIsLoading(false);
   }
 
   ingestOffer(offer: IncomingCall): void {

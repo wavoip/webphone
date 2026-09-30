@@ -47,6 +47,10 @@ distribuição — o widget de sempre e um PWA instalável.
   rótulo tinha sido importado da biblioteca de ícones por engano.
 - **Abrir as configurações reordenava a lista de números** para o resto da interface, e não
   só para aquela tela.
+- **"Número não existe" e "nenhum device disponível" pararam de aparecer** em algum
+  momento: a tela comparava contra códigos de erro que a biblioteca renomeou, então um
+  número errado virava "falha ao ligar" genérica e o webphone ainda tentava todos os
+  outros devices antes de desistir.
 - **O som de reconexão podia tocar depois da chamada voltar** ou de acabar: a regra estava
   escrita em dois lugares, e a segunda cópia agendava uma repetição que ninguém cancelava.
 - **Cinco botões da tela de chamada ficavam em português** em qualquer idioma — espera,

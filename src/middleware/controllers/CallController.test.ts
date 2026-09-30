@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { CallController } from "@/middleware/controllers/CallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
@@ -7,11 +8,13 @@ describe("CallController", () => {
   let store: MiddlewareStoreApi;
   let wavoip: FakeWavoip;
   let controller: CallController;
+  let notifications: NotificationsController;
 
   beforeEach(() => {
     wavoip = new FakeWavoip(["tok-1"]);
     store = createMiddlewareStore();
-    controller = new CallController({ wavoip: wavoip.asWavoip(), store });
+    notifications = new NotificationsController({ store });
+    controller = new CallController({ wavoip: wavoip.asWavoip(), store, notifications });
   });
 
   describe("start", () => {
@@ -183,6 +186,57 @@ describe("CallController", () => {
       outgoing.status = "NOT_ANSWERED";
       outgoing.emitEvent("unanswered");
       expect(store.getState().callStatus).toBe("NOT_ANSWERED");
+    });
+  });
+
+  describe("dial", () => {
+    it("tries the next device when one refuses", async () => {
+      const recusa = { code: "DEVICE_BUSY" as const, devices: [{ token: "tok-1", error: { code: "DEVICE_BUSY" as const } }] };
+      const outgoing = new FakeOutgoingCall("c1", "tok-2");
+      let tentativas = 0;
+      wavoip.startCall = (async (params: { fromTokens?: string[]; to: string }) => {
+        tentativas++;
+        wavoip.startCallCalls.push(params);
+        return tentativas === 1 ? { data: null, error: recusa } : { data: outgoing, error: null };
+      }) as typeof wavoip.startCall;
+
+      await controller.dial("5511", ["tok-1", "tok-2"]);
+
+      expect(wavoip.startCallCalls.map((c) => c.fromTokens?.[0])).toEqual(["tok-1", "tok-2"]);
+      expect(store.getState().dialIsLoading).toBe(false);
+    });
+
+    it("stops without trying anyone else when there is no device", async () => {
+      wavoip.startCallResult = { data: null, error: { code: "NO_DEVICES", devices: [] } };
+
+      await controller.dial("5511", ["tok-1", "tok-2"]);
+
+      expect(wavoip.startCallCalls).toHaveLength(1);
+      expect(store.getState().dialError).toBe("NO_DEVICES");
+    });
+
+    it("gives up between devices once the dial token moves", async () => {
+      const recusa = { code: "DEVICE_BUSY" as const, devices: [{ token: "tok-1", error: { code: "DEVICE_BUSY" as const } }] };
+      wavoip.startCall = (async (params: { fromTokens?: string[]; to: string }) => {
+        wavoip.startCallCalls.push(params);
+        // Desistir chega enquanto este device é tentado, e não antes.
+        controller.abortDial();
+        return { data: null, error: recusa };
+      }) as typeof wavoip.startCall;
+
+      await controller.dial("5511", ["tok-1", "tok-2"]);
+
+      expect(wavoip.startCallCalls).toHaveLength(1);
+    });
+
+    it("keeps the dialled number out of the input only when the call goes through", async () => {
+      store.getState().setKeyboardInput("5511");
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
+
+      await controller.dial("5511", ["tok-1"]);
+
+      expect(store.getState().keyboardInput).toBe("");
+      expect(store.getState().recentNumbers).toContain("5511");
     });
   });
 

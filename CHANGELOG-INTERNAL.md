@@ -107,6 +107,17 @@ Nenhuma destas tinha teste, e nenhuma apareceria numa tradução mecânica.
 - O `WebPhone` tinha a escolha de tela escrita duas vezes, uma para a página e outra para a
   janela do PiP, sem nada garantindo que continuassem iguais.
 
+### Discagem
+
+O laço que tenta os devices um a um saiu do `KeyboardScreen` e virou
+`CallController.dial`. Ele conta o andamento pelo store (`dialStatus`, `dialError`,
+`dialIsLoading`), que já existia; a tela só lê.
+
+Era regra de negócio numa tela: qual device tentar em seguida, o que fazer com cada
+recusa, o que conta como desistência. E a tela é justamente o lugar que pode estar
+montado duas vezes, por causa do Picture-in-Picture — razão de o `dialToken` viver no
+store desde sempre.
+
 ### Build
 
 - `pnpm build` produz `dist` (pacote npm, lib) e `dist-app` (PWA).
