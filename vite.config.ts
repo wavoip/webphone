@@ -27,6 +27,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Duas cópias do solid-js quebram contexto e reatividade entre elas, em silêncio.
+    dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
   },
   server: {
     host: "127.0.0.1",
