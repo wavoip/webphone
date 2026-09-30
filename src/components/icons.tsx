@@ -66,63 +66,81 @@ export type IconProps = LucideProps & {
 
 type Glyph = (props: LucideProps) => JSX.Element;
 
+const QUADRO_LUCIDE = 24;
+
+/**
+ * Cada ícone tem o fator com que o desenho do lucide saiu maior que o do pacote anterior
+ * na mesma caixa, medido par a par com `getBBox` na migração — de 0,93 a 1,37, porque são
+ * desenhos diferentes. Alargar o quadro na proporção devolve o tamanho de antes sem
+ * encostar em nenhum uso, e ainda afina o traço junto.
+ *
+ * **Ícone novo não leva fator.** A tabela existe para a v1.9.1 não mudar de cara na
+ * atualização; fora disso, o tamanho do lucide é o tamanho.
+ */
+function viewBox(escala: number): string {
+  const lado = QUADRO_LUCIDE * escala;
+  const folga = (lado - QUADRO_LUCIDE) / 2;
+  return `${-folga} ${-folga} ${lado} ${lado}`;
+}
+
 /**
  * O lucide desenha 24px quando ninguém pede tamanho; o pacote anterior desenhava `1em`, e
  * é disso que os tamanhos do webphone dependem — ícone sem classe acompanha a fonte de
- * quem o contém. Trocar o padrão aqui é mais barato que anotar tamanho em cada uso.
+ * quem o contém.
  */
-function icon(Glyph: Glyph) {
+function icon(Glyph: Glyph, escala = 1) {
+  const quadro = viewBox(escala);
   return (props: IconProps): JSX.Element => {
     const [local, rest] = splitProps(props, ["filled"]);
-    return <Glyph size="1em" fill={local.filled ? "currentColor" : "none"} {...rest} />;
+    return <Glyph size="1em" viewBox={quadro} fill={local.filled ? "currentColor" : "none"} {...rest} />;
   };
 }
 
-export const ArrowLeft = icon(ArrowLeftGlyph);
-export const Backspace = icon(BackspaceGlyph);
-export const Bell = icon(BellGlyph);
-export const Browser = icon(BrowserGlyph);
-export const CaretDown = icon(CaretDownGlyph);
-export const Check = icon(CheckGlyph);
-export const CheckCircle = icon(CheckCircleGlyph);
-export const Copy = icon(CopyGlyph);
-export const Desktop = icon(DesktopGlyph);
-export const DeviceMobile = icon(DeviceMobileGlyph);
-export const DotsNine = icon(DotsNineGlyph);
-export const Eye = icon(EyeGlyph);
-export const EyeSlash = icon(EyeSlashGlyph);
-export const Gear = icon(GearGlyph);
-export const Globe = icon(GlobeGlyph);
-export const Microphone = icon(MicrophoneGlyph);
-export const MicrophoneSlash = icon(MicrophoneSlashGlyph);
-export const Moon = icon(MoonGlyph);
-export const Package = icon(PackageGlyph);
-export const Pause = icon(PauseGlyph);
-export const Phone = icon(PhoneGlyph);
-export const PhoneIncoming = icon(PhoneIncomingGlyph);
-export const PhoneSlash = icon(PhoneSlashGlyph);
-export const PhoneTransfer = icon(PhoneTransferGlyph);
-export const PhoneX = icon(PhoneXGlyph);
-export const PictureInPicture = icon(PictureInPictureGlyph);
-export const Plus = icon(PlusGlyph);
-export const Power = icon(PowerGlyph);
-export const QrCode = icon(QrCodeGlyph);
-export const Sliders = icon(SlidersGlyph);
-export const Spinner = icon(SpinnerGlyph);
-export const Stethoscope = icon(StethoscopeGlyph);
-export const Sun = icon(SunGlyph);
-export const Translate = icon(TranslateGlyph);
-export const Trash = icon(TrashGlyph);
-export const User = icon(UserGlyph);
-export const VideoCameraSlash = icon(VideoCameraSlashGlyph);
-export const Warning = icon(WarningGlyph);
-export const Waveform = icon(WaveformGlyph);
-export const WifiHigh = icon(WifiHighGlyph);
-export const WifiLow = icon(WifiLowGlyph);
-export const WifiMedium = icon(WifiMediumGlyph);
-export const WifiSlash = icon(WifiSlashGlyph);
+export const ArrowLeft = icon(ArrowLeftGlyph, 0.97);
+export const Backspace = icon(BackspaceGlyph, 1.048);
+export const Bell = icon(BellGlyph, 1.086);
+export const Browser = icon(BrowserGlyph, 1.222);
+export const CaretDown = icon(CaretDownGlyph, 0.933);
+export const Check = icon(CheckGlyph, 1.143);
+export const CheckCircle = icon(CheckCircleGlyph, 1.128);
+export const Copy = icon(CopyGlyph, 1.333);
+export const Desktop = icon(DesktopGlyph, 1.222);
+export const DeviceMobile = icon(DeviceMobileGlyph, 1.048);
+export const DotsNine = icon(DotsNineGlyph, 1.333);
+export const Eye = icon(EyeGlyph, 1.048);
+export const EyeSlash = icon(EyeSlashGlyph, 1.048);
+export const Gear = icon(GearGlyph, 1.167);
+export const Globe = icon(GlobeGlyph, 1.222);
+export const Microphone = icon(MicrophoneGlyph, 1.048);
+export const MicrophoneSlash = icon(MicrophoneSlashGlyph, 1.048);
+export const Moon = icon(MoonGlyph, 1.18);
+export const Package = icon(PackageGlyph, 1.098);
+export const Pause = icon(PauseGlyph, 1.111);
+export const Phone = icon(PhoneGlyph, 1.175);
+export const PhoneIncoming = icon(PhoneIncomingGlyph, 1.175);
+export const PhoneSlash = icon(PhoneSlashGlyph, 0.993);
+export const PhoneTransfer = icon(PhoneTransferGlyph, 1.175);
+export const PhoneX = icon(PhoneXGlyph, 1.175);
+export const PictureInPicture = icon(PictureInPictureGlyph, 1.128);
+export const Plus = icon(PlusGlyph, 0.97);
+export const Power = icon(PowerGlyph, 1.331);
+export const QrCode = icon(QrCodeGlyph, 1.213);
+export const Sliders = icon(SlidersGlyph, 1.159);
+export const Spinner = icon(SpinnerGlyph, 1.111);
+export const Stethoscope = icon(StethoscopeGlyph, 1.128);
+export const Sun = icon(SunGlyph, 1.048);
+export const Translate = icon(TranslateGlyph, 1.128);
+export const Trash = icon(TrashGlyph, 1.222);
+export const User = icon(UserGlyph, 1.1);
+export const VideoCameraSlash = icon(VideoCameraSlashGlyph, 0.978);
+export const Warning = icon(WarningGlyph, 1.049);
+export const Waveform = icon(WaveformGlyph, 1.333);
+export const WifiHigh = icon(WifiHighGlyph, 1.14);
+export const WifiLow = icon(WifiLowGlyph, 1.369);
+export const WifiMedium = icon(WifiMediumGlyph, 1.236);
+export const WifiSlash = icon(WifiSlashGlyph, 1.14);
 export const WifiX = icon(WifiXGlyph);
-export const X = icon(XGlyph);
+export const X = icon(XGlyph, 1.037);
 
 /**
  * O lucide não desenha marca de terceiro, e esta é a única de que precisamos. Sempre

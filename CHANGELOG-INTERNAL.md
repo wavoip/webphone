@@ -77,12 +77,19 @@ caminho do import, ao lado — foi apelido sem origem visível que deixou quatro
 apontando para o desenho errado. A única marca de terceiro, o logo do WhatsApp, é SVG
 nosso: o lucide não desenha marca.
 
-Duas coisas que a troca quebra em silêncio, e que a fronteira resolve:
+Três coisas que a troca quebra em silêncio, e que a fronteira resolve:
 
 - **O padrão de tamanho.** O lucide desenha 24px quando ninguém pede; o phosphor desenhava
   `1em`. Ícone com classe de tamanho não sente — CSS ganha do atributo —, mas os seis sem
   classe cresceram 50%. A fronteira devolve `1em`, então ícone sem classe volta a
   acompanhar a fonte de quem o contém.
+- **A escala do desenho dentro da caixa.** O lucide encosta a arte na borda do quadro de
+  24; o phosphor deixava folga. Na mesma caixa o desenho sai maior, e não por um fator só:
+  medidos par a par com `getBBox`, os 45 vão de 0,93 a 1,37, mediana 1,125. Um ajuste
+  global acertaria o telefone e encolheria o telefone cortado ao lado dele, que são vizinhos
+  na tela de chamada. Então cada ícone leva o seu fator, e a fronteira alarga o `viewBox` na
+  proporção — o que também afina o traço junto. **Ícone novo não leva fator**: a tabela
+  existe para a v1.9.1 não mudar de cara na atualização, e não é escala de casa.
 - **O preenchimento.** O lucide passa qualquer atributo de SVG adiante, então `fill` existe
   — e é o `filled` que a fronteira expõe. Mas só funciona onde a silhueta é fechada:
   telefone, sino e microfone ficam bons; engrenagem, aviso, QR code e apagar perdem o
