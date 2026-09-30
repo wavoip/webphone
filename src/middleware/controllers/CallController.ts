@@ -113,9 +113,9 @@ export class CallController {
    * uma chamada de `startCall` por token — e reimplementar o que a lib faz foi o que
    * deixou códigos de erro da v2 sobreviverem aqui.
    *
-   * O que é nosso é só a desistência. O `dialToken` vive no store porque o
-   * Picture-in-Picture monta um segundo teclado, e um contador por instância deixaria o
-   * botão de abortar de uma sem efeito sobre o laço da outra.
+   * O que é nosso é só a desistência. O `dialToken` vive no store porque a tela remonta
+   * ao entrar e ao sair do Picture-in-Picture — muda de documento —, e um contador por
+   * instância voltaria ao início no meio da discagem.
    */
   async dial(to: string, tokens: string[]): Promise<void> {
     const { store } = this.deps;
@@ -140,10 +140,12 @@ export class CallController {
 
     const { data: call, error } = step.value;
 
-    // Desistiu enquanto o último device era tentado: se a chamada chegou a existir, o
-    // cancelamento vai pelo id, para não cancelar uma discagem começada nesse meio-tempo.
+    // Desistiu enquanto o último device era tentado: a chamada chegou a existir e
+    // ninguém mais tem a referência, porque ela nunca entrou no store. Cancelar direto
+    // no objeto é o que alcança essa — passar pelo `cancel` do store cancelaria outra
+    // discagem, ou nenhuma.
     if (desistiu()) {
-      if (call) void this.cancel(call.id);
+      if (call) void call.cancel();
       return;
     }
 
@@ -296,13 +298,6 @@ export class CallController {
     // quando é só o transporte piscando. Espelhar acerta os dois — derivar do payload
     // pintaria queda toda vez que a mídia parasse, inclusive ao desligar daqui.
     call.on("connectionChanged", mirror);
-  }
-
-  /** O motivo vem como `code`: a v3 não devolve texto legível, e quem traduz é o `i18n`. */
-  private failWith(code: string): void {
-    const { store } = this.deps;
-    store.getState().setCallFailReason(code);
-    store.getState().setCallStatus("FAILED");
   }
 
   private enabledTokens(): string[] {
