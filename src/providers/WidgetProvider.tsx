@@ -34,17 +34,15 @@ export function WidgetProvider(props: { children: JSX.Element }) {
   const [isDragging, setIsDragging] = createSignal(false);
   let widgetEl: HTMLDivElement | undefined;
   let offset: Position = { x: 0, y: 0 };
+  let size = { width: 0, height: 0 };
+
+  const dentroDaJanela = (valor: number, limite: number) => Math.min(Math.max(0, valor), Math.max(0, limite));
 
   const handleMouseMove = (e: MouseEvent) => {
-    if (!widgetEl) return;
-    let x = Math.max(0, e.clientX - offset.x);
-    let y = Math.max(0, e.clientY - offset.y);
-
-    const rect = widgetEl.getBoundingClientRect();
-    if (x > window.innerWidth - rect.width) x = window.innerWidth - rect.width;
-    if (y > window.innerHeight - rect.height) y = window.innerHeight - rect.height;
-
-    state.setWidgetPosition({ x, y });
+    state.setWidgetPosition({
+      x: dentroDaJanela(e.clientX - offset.x, window.innerWidth - size.width),
+      y: dentroDaJanela(e.clientY - offset.y, window.innerHeight - size.height),
+    });
   };
 
   const startDrag = (e: MouseEvent) => {
@@ -54,6 +52,11 @@ export function WidgetProvider(props: { children: JSX.Element }) {
     document.body.style.userSelect = "none";
     setIsDragging(true);
     offset = { x: e.clientX - state.position.x, y: e.clientY - state.position.y };
+    // O tamanho não muda enquanto se arrasta. Medir a cada movimento obrigava o
+    // navegador a refazer o layout logo depois de a posição ter mudado, uma vez por
+    // evento do mouse.
+    const rect = widgetEl?.getBoundingClientRect();
+    size = { width: rect?.width ?? 0, height: rect?.height ?? 0 };
     document.addEventListener("mousemove", handleMouseMove);
   };
 
@@ -128,10 +131,23 @@ export function WidgetProvider(props: { children: JSX.Element }) {
         class={
           isFilled
             ? "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-full wv:h-dvh wv:max-w-[420px] wv:mx-auto wv:bg-background wv:touch-manipulation"
-            : "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:bg-background wv:shadow-lg wv:touch-manipulation"
+            : "wv:data-[closed=true]:hidden wv:flex wv:flex-col wv:w-70 wv:h-120 wv:rounded-2xl wv:max-sm:w-dvw wv:max-sm:h-dvh wv:max-sm:!left-[0px] wv:max-sm:!top-[0px] wv:max-sm:!transform-none wv:bg-background wv:shadow-lg wv:touch-manipulation"
         }
+        /**
+         * `transform`, e não `left`/`top`: mexer nas coordenadas refaz o layout e repinta
+         * o widget inteiro — sombra e cantos arredondados junto — a cada evento do mouse.
+         * Transladar é trabalho de compositor, e o arrasto deixa a thread principal em paz.
+         */
         style={
-          isFilled ? undefined : { position: "fixed", left: `${state.position.x}px`, top: `${state.position.y}px` }
+          isFilled
+            ? undefined
+            : {
+                position: "fixed",
+                left: "0px",
+                top: "0px",
+                transform: `translate3d(${state.position.x}px, ${state.position.y}px, 0)`,
+                "will-change": isDragging() ? "transform" : undefined,
+              }
         }
       >
         {props.children}
