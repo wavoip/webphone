@@ -1,5 +1,5 @@
 import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
-import { useEffect, useRef, useState } from "react";
+import { createSignal, For, type JSX, onCleanup, onMount, Show } from "solid-js";
 import {
   Browser,
   CircleNotch,
@@ -32,26 +32,28 @@ const SEVERITY_GLYPHS: Record<DiagnosticSeverity, string> = { ok: "✓", warning
 
 export function DebugScreen() {
   const debug = useDebugInfo();
-  const [system, setSystem] = useState<SystemInfo | null>(null);
-  const [checkup, setCheckup] = useState<{ at: number; report: DiagnosticsReport } | null>(null);
-  const [checkupRunning, setCheckupRunning] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [system, setSystem] = createSignal<SystemInfo | null>(null);
+  const [checkup, setCheckup] = createSignal<{ at: number; report: DiagnosticsReport } | null>(null);
+  const [checkupRunning, setCheckupRunning] = createSignal(false);
+  const [copied, setCopied] = createSignal(false);
+  let scrollEl: HTMLDivElement | undefined;
 
-  useEffect(() => {
+  onMount(() => {
     let cancelled = false;
     collectSystemInfo()
       .then((info) => {
         if (!cancelled) setSystem(info);
       })
       .catch((err) => console.warn("[DebugScreen] collectSystemInfo failed", err));
-    return () => {
+    onCleanup(() => {
       cancelled = true;
-    };
-  }, []);
+    });
+  });
 
-  useEffect(() => {
-    const el = scrollRef.current;
+  // O widget vive dentro do diálogo de configurações, que já trata a roda; sem isto a
+  // aba de diagnóstico não rola.
+  onMount(() => {
+    const el = scrollEl;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
       if (!e.defaultPrevented) return;
@@ -59,8 +61,8 @@ export function DebugScreen() {
       el.scrollLeft += e.deltaX;
     };
     el.addEventListener("wheel", onWheel);
-    return () => el.removeEventListener("wheel", onWheel);
-  }, []);
+    onCleanup(() => el.removeEventListener("wheel", onWheel));
+  });
 
   const handleCheckup = async () => {
     setCheckupRunning(true);
@@ -78,8 +80,8 @@ export function DebugScreen() {
       versions: {
         webphone: __WEBPHONE_VERSION__,
       },
-      system,
-      checkup,
+      system: system(),
+      checkup: checkup(),
       recentIceDiagnostics: debug.recentIceDiagnostics,
       recentIssues: debug.recentIssues,
     };
@@ -89,10 +91,10 @@ export function DebugScreen() {
   };
 
   return (
-    <div className="wv:flex wv:flex-col wv:h-full wv:text-foreground">
-      <div className="wv:sticky wv:top-0 wv:z-10 wv:flex wv:items-center wv:justify-between wv:gap-2 wv:px-6 wv:pt-4 wv:pb-2 wv:max-sm:px-4 wv:bg-background/95 wv:backdrop-blur">
-        <span className="wv:inline-flex wv:items-center wv:gap-1.5 wv:rounded-full wv:border wv:border-border/60 wv:bg-muted/40 wv:px-2 wv:py-0.5 wv:text-xs wv:font-mono wv:tabular-nums wv:text-muted-foreground">
-          <Package className="wv:size-3.5" weight="duotone" />v{__WEBPHONE_VERSION__}
+    <div class="wv:flex wv:flex-col wv:h-full wv:text-foreground">
+      <div class="wv:sticky wv:top-0 wv:z-10 wv:flex wv:items-center wv:justify-between wv:gap-2 wv:px-6 wv:pt-4 wv:pb-2 wv:max-sm:px-4 wv:bg-background/95 wv:backdrop-blur">
+        <span class="wv:inline-flex wv:items-center wv:gap-1.5 wv:rounded-full wv:border wv:border-border/60 wv:bg-muted/40 wv:px-2 wv:py-0.5 wv:text-xs wv:font-mono wv:tabular-nums wv:text-muted-foreground">
+          <Package class="wv:size-3.5" weight="duotone" />v{__WEBPHONE_VERSION__}
         </span>
         <Button
           type="button"
@@ -100,163 +102,159 @@ export function DebugScreen() {
           size="sm"
           onClick={handleCopy}
           aria-label={t("Copy report")}
-          className="wv:gap-2"
+          class="wv:gap-2"
         >
-          <Copy className="wv:size-4" weight="duotone" />
-          <span aria-live="polite">{copied ? "✓" : t("Copy report")}</span>
+          <Copy class="wv:size-4" weight="duotone" />
+          <span aria-live="polite">{copied() ? "✓" : t("Copy report")}</span>
         </Button>
       </div>
 
       <div
-        ref={scrollRef}
-        className="wv:flex-1 wv:overflow-auto wv:px-6 wv:pb-6 wv:max-sm:px-4 wv:flex wv:flex-col wv:gap-3"
+        ref={scrollEl}
+        class="wv:flex-1 wv:overflow-auto wv:px-6 wv:pb-6 wv:max-sm:px-4 wv:flex wv:flex-col wv:gap-3"
       >
-        <Card title={t("Browser")} icon={<Browser className="wv:size-4" weight="duotone" />}>
-          <p className="wv:text-xs wv:font-mono wv:break-all wv:text-foreground">{system?.userAgent ?? "…"}</p>
+        <Card title={t("Browser")} icon={<Browser class="wv:size-4" weight="duotone" />}>
+          <p class="wv:text-xs wv:font-mono wv:break-all wv:text-foreground">{system()?.userAgent ?? "…"}</p>
         </Card>
 
-        <div className="wv:grid wv:gap-3 wv:sm:grid-cols-2">
-          <Card title={t("Network")} icon={<Globe className="wv:size-4" weight="duotone" />}>
+        <div class="wv:grid wv:gap-3 wv:sm:grid-cols-2">
+          <Card title={t("Network")} icon={<Globe class="wv:size-4" weight="duotone" />}>
             <KeyValue
               k="online"
-              v={system == null ? "…" : <StatusDot ok={system.online} label={system.online ? "online" : "offline"} />}
+              v={
+                system() == null ? (
+                  "…"
+                ) : (
+                  <StatusDot ok={!!system()?.online} label={system()?.online ? "online" : "offline"} />
+                )
+              }
             />
-            {system?.network && (
-              <>
-                <KeyValue k="effectiveType" v={system.network.effectiveType} />
-                <KeyValue k="downlink (Mbps)" v={String(system.network.downlinkMbps)} />
-                <KeyValue k="rtt (ms)" v={String(system.network.rttMs)} />
-              </>
-            )}
+            <Show when={system()?.network}>
+              {(rede) => (
+                <>
+                  <KeyValue k="effectiveType" v={rede().effectiveType} />
+                  <KeyValue k="downlink (Mbps)" v={String(rede().downlinkMbps)} />
+                  <KeyValue k="rtt (ms)" v={String(rede().rttMs)} />
+                </>
+              )}
+            </Show>
           </Card>
 
-          <Card title={t("Audio devices")} icon={<Microphone className="wv:size-4" weight="duotone" />}>
-            <KeyValue k="microphone permission" v={system?.microphonePermission ?? "…"} />
-            <KeyValue k="inputs" v={String(system?.audioInputs.length ?? 0)} />
-            <KeyValue k="outputs" v={String(system?.audioOutputs.length ?? 0)} />
+          <Card title={t("Audio devices")} icon={<Microphone class="wv:size-4" weight="duotone" />}>
+            <KeyValue k="microphone permission" v={system()?.microphonePermission ?? "…"} />
+            <KeyValue k="inputs" v={String(system()?.audioInputs.length ?? 0)} />
+            <KeyValue k="outputs" v={String(system()?.audioOutputs.length ?? 0)} />
           </Card>
         </div>
 
-        <Card title={t("Environment check")} icon={<Waveform className="wv:size-4" weight="duotone" />}>
-          <div className="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
+        <Card title={t("Environment check")} icon={<Waveform class="wv:size-4" weight="duotone" />}>
+          <div class="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
             <Button
               type="button"
               size="sm"
               onClick={handleCheckup}
-              disabled={checkupRunning}
+              disabled={checkupRunning()}
               aria-label={t("Run check")}
-              className="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
+              class="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
             >
-              {checkupRunning ? (
-                <CircleNotch className="wv:size-4 wv:animate-spin" />
-              ) : (
-                <Waveform className="wv:size-4" weight="duotone" />
-              )}
+              <Show when={checkupRunning()} fallback={<Waveform class="wv:size-4" weight="duotone" />}>
+                <CircleNotch class="wv:size-4 wv:animate-spin" />
+              </Show>
               {t("Run check")}
             </Button>
-            {checkup && (
-              <span className="wv:text-xs wv:text-muted-foreground">
-                {t("Tested at")} {formatTimestamp(checkup.at)}
-              </span>
-            )}
+            <Show when={checkup()}>
+              {(feito) => (
+                <span class="wv:text-xs wv:text-muted-foreground">
+                  {t("Tested at")} {formatTimestamp(feito().at)}
+                </span>
+              )}
+            </Show>
           </div>
-          {checkup && (
-            <>
-              <ul className="wv:mt-1 wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-1">
-                {Object.entries(checkup.report.readiness).map(([callType, readiness]) => (
-                  <li
-                    key={callType}
-                    className="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
-                  >
-                    <SeverityBadge severity={readiness.ready ? "ok" : "failure"} />
-                    <span className="wv:flex-1 wv:truncate">{callType}</span>
-                    {!readiness.ready && (
-                      <span className="wv:text-muted-foreground wv:truncate">{readiness.blockedBy.join(", ")}</span>
+          <Show when={checkup()}>
+            {(feito) => (
+              <>
+                <ul class="wv:mt-1 wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-1">
+                  <For each={Object.entries(feito().report.readiness)}>
+                    {([callType, readiness]) => (
+                      <li class="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1">
+                        <SeverityBadge severity={readiness.ready ? "ok" : "failure"} />
+                        <span class="wv:flex-1 wv:truncate">{callType}</span>
+                        <Show when={!readiness.ready}>
+                          <span class="wv:text-muted-foreground wv:truncate">{readiness.blockedBy.join(", ")}</span>
+                        </Show>
+                      </li>
                     )}
-                  </li>
-                ))}
-              </ul>
-              <ul className="wv:mt-1 wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
-                {checkup.report.checks.map((check) => (
-                  <li
-                    key={check.code}
-                    className="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
-                  >
-                    <SeverityBadge severity={check.severity} />
-                    <span className="wv:flex-1 wv:truncate" title={check.code}>
-                      {check.code}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          )}
+                  </For>
+                </ul>
+                <ul class="wv:mt-1 wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
+                  <For each={feito().report.checks}>
+                    {(check) => (
+                      <li class="wv:flex wv:items-center wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1">
+                        <SeverityBadge severity={check.severity} />
+                        <span class="wv:flex-1 wv:truncate" title={check.code}>
+                          {check.code}
+                        </span>
+                      </li>
+                    )}
+                  </For>
+                </ul>
+              </>
+            )}
+          </Show>
         </Card>
 
-        <Card title={t("Recent ICE diagnostics")} icon={<Stethoscope className="wv:size-4" weight="duotone" />}>
-          {debug.recentIceDiagnostics.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <ul className="wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-2">
-              {debug.recentIceDiagnostics
-                .slice()
-                .reverse()
-                .map((r) => (
-                  <li
-                    key={`${r.at}-${r.callId}`}
-                    className="wv:flex wv:flex-col wv:gap-1 wv:rounded wv:bg-muted/40 wv:p-2"
-                  >
-                    <div className="wv:flex wv:flex-wrap wv:items-center wv:gap-x-2 wv:gap-y-1">
-                      <span className="wv:tabular-nums wv:text-muted-foreground">{formatTimestamp(r.at)}</span>
-                      <span className="wv:rounded wv:bg-background wv:px-1.5 wv:py-0.5 wv:text-foreground">
+        <Card title={t("Recent ICE diagnostics")} icon={<Stethoscope class="wv:size-4" weight="duotone" />}>
+          <Show when={debug.recentIceDiagnostics.length > 0} fallback={<EmptyState />}>
+            <ul class="wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-2">
+              <For each={debug.recentIceDiagnostics.slice().reverse()}>
+                {(r) => (
+                  <li class="wv:flex wv:flex-col wv:gap-1 wv:rounded wv:bg-muted/40 wv:p-2">
+                    <div class="wv:flex wv:flex-wrap wv:items-center wv:gap-x-2 wv:gap-y-1">
+                      <span class="wv:tabular-nums wv:text-muted-foreground">{formatTimestamp(r.at)}</span>
+                      <span class="wv:rounded wv:bg-background wv:px-1.5 wv:py-0.5 wv:text-foreground">
                         call: {r.callId}
                       </span>
                     </div>
-                    <pre className="wv:whitespace-pre-wrap wv:break-all wv:text-foreground">
+                    <pre class="wv:whitespace-pre-wrap wv:break-all wv:text-foreground">
                       {JSON.stringify(r.diag, null, 2)}
                     </pre>
                   </li>
-                ))}
+                )}
+              </For>
             </ul>
-          )}
+          </Show>
         </Card>
 
-        <Card title={t("Recent issues")} icon={<Warning className="wv:size-4" weight="duotone" />}>
-          {debug.recentIssues.length === 0 ? (
-            <EmptyState />
-          ) : (
-            <ul className="wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
-              {debug.recentIssues
-                .slice()
-                .reverse()
-                .map((r, idx) => (
-                  <li
-                    key={`${r.at}-${idx}`}
-                    className="wv:flex wv:flex-wrap wv:items-center wv:gap-x-2 wv:gap-y-1 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1"
-                  >
-                    <span className="wv:tabular-nums wv:text-muted-foreground">{formatTimestamp(r.at)}</span>
-                    <span className="wv:rounded wv:bg-background wv:px-1.5 wv:py-0.5 wv:text-foreground">
+        <Card title={t("Recent issues")} icon={<Warning class="wv:size-4" weight="duotone" />}>
+          <Show when={debug.recentIssues.length > 0} fallback={<EmptyState />}>
+            <ul class="wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
+              <For each={debug.recentIssues.slice().reverse()}>
+                {(r) => (
+                  <li class="wv:flex wv:flex-wrap wv:items-center wv:gap-x-2 wv:gap-y-1 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1">
+                    <span class="wv:tabular-nums wv:text-muted-foreground">{formatTimestamp(r.at)}</span>
+                    <span class="wv:rounded wv:bg-background wv:px-1.5 wv:py-0.5 wv:text-foreground">
                       call: {r.callId}
                     </span>
-                    <span className="wv:rounded wv:bg-red-500/10 wv:px-1.5 wv:py-0.5 wv:text-red-500">{r.issue}</span>
+                    <span class="wv:rounded wv:bg-red-500/10 wv:px-1.5 wv:py-0.5 wv:text-red-500">{r.issue}</span>
                   </li>
-                ))}
+                )}
+              </For>
             </ul>
-          )}
+          </Show>
         </Card>
       </div>
     </div>
   );
 }
 
-function Card({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
+function Card(props: { title: string; icon?: JSX.Element; children: JSX.Element }) {
   return (
-    <section className="wv:flex wv:flex-col wv:gap-2 wv:rounded-xl wv:border wv:border-border/60 wv:bg-card wv:p-4">
-      <h3 className="wv:flex wv:items-center wv:gap-1.5 wv:text-xs wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">
-        {icon}
-        {title}
+    <section class="wv:flex wv:flex-col wv:gap-2 wv:rounded-xl wv:border wv:border-border/60 wv:bg-card wv:p-4">
+      <h3 class="wv:flex wv:items-center wv:gap-1.5 wv:text-xs wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">
+        {props.icon}
+        {props.title}
       </h3>
-      <div className="wv:flex wv:flex-col wv:gap-1.5 wv:text-foreground">{children}</div>
+      <div class="wv:flex wv:flex-col wv:gap-1.5 wv:text-foreground">{props.children}</div>
     </section>
   );
 }
@@ -273,38 +271,38 @@ function formatTimestamp(at: number): string {
   });
 }
 
-function KeyValue({ k, v }: { k: string; v: React.ReactNode }) {
+function KeyValue(props: { k: string; v: JSX.Element }) {
   return (
-    <div className="wv:grid wv:grid-cols-[minmax(0,9rem)_1fr] wv:gap-2 wv:text-xs wv:font-mono wv:items-center">
-      <span className="wv:text-muted-foreground wv:truncate" title={k}>
-        {k}
+    <div class="wv:grid wv:grid-cols-[minmax(0,9rem)_1fr] wv:gap-2 wv:text-xs wv:font-mono wv:items-center">
+      <span class="wv:text-muted-foreground wv:truncate" title={props.k}>
+        {props.k}
       </span>
-      <span className="wv:text-foreground wv:tabular-nums wv:break-all">{v}</span>
+      <span class="wv:text-foreground wv:tabular-nums wv:break-all">{props.v}</span>
     </div>
   );
 }
 
-function StatusDot({ ok, label }: { ok: boolean; label: string }) {
+function StatusDot(props: { ok: boolean; label: string }) {
   return (
-    <span className="wv:inline-flex wv:items-center wv:gap-1.5">
-      <span aria-hidden className={`wv:size-2 wv:rounded-full ${ok ? "wv:bg-green-500" : "wv:bg-red-500"}`} />
-      <span>{label}</span>
+    <span class="wv:inline-flex wv:items-center wv:gap-1.5">
+      <span aria-hidden class={`wv:size-2 wv:rounded-full ${props.ok ? "wv:bg-green-500" : "wv:bg-red-500"}`} />
+      <span>{props.label}</span>
     </span>
   );
 }
 
-function SeverityBadge({ severity }: { severity: DiagnosticSeverity }) {
+function SeverityBadge(props: { severity: DiagnosticSeverity }) {
   return (
     <span
       role="img"
-      aria-label={severity}
-      className={`wv:inline-flex wv:size-4 wv:items-center wv:justify-center wv:rounded-full ${SEVERITY_STYLES[severity]}`}
+      aria-label={props.severity}
+      class={`wv:inline-flex wv:size-4 wv:items-center wv:justify-center wv:rounded-full ${SEVERITY_STYLES[props.severity]}`}
     >
-      {SEVERITY_GLYPHS[severity]}
+      {SEVERITY_GLYPHS[props.severity]}
     </span>
   );
 }
 
 function EmptyState() {
-  return <p className="wv:text-xs wv:text-muted-foreground wv:italic">—</p>;
+  return <p class="wv:text-xs wv:text-muted-foreground wv:italic">—</p>;
 }
