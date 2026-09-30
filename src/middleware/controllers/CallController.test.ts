@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { CallController } from "@/middleware/controllers/CallController";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
@@ -190,46 +190,54 @@ describe("CallController", () => {
   });
 
   describe("dial", () => {
-    it("tries the next device when one refuses", async () => {
-      const recusa = { code: "DEVICE_BUSY" as const, devices: [{ token: "tok-1", error: { code: "DEVICE_BUSY" as const } }] };
-      const outgoing = new FakeOutgoingCall("c1", "tok-2");
-      let tentativas = 0;
-      wavoip.startCall = (async (params: { fromTokens?: string[]; to: string }) => {
-        tentativas++;
-        wavoip.startCallCalls.push(params);
-        return tentativas === 1 ? { data: null, error: recusa } : { data: outgoing, error: null };
-      }) as typeof wavoip.startCall;
+    it("lets the library walk the devices, and reports each refusal", async () => {
+      wavoip.attemptsBeforeSuccess = [
+        { token: "tok-1", error: { code: "DEVICE_BUSY" } },
+        { token: "tok-2", error: { code: "DEVICE_NOT_READY" } },
+      ];
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-3"), error: null };
 
-      await controller.dial("5511", ["tok-1", "tok-2"]);
+      await controller.dial("5511", ["tok-1", "tok-2", "tok-3"]);
 
-      expect(wavoip.startCallCalls.map((c) => c.fromTokens?.[0])).toEqual(["tok-1", "tok-2"]);
+      // Uma chamada só ao iterador, com a lista inteira: quem percorre é a lib.
+      expect(wavoip.startCallCalls).toHaveLength(1);
+      expect(wavoip.startCallCalls[0].fromTokens).toEqual(["tok-1", "tok-2", "tok-3"]);
+      // A lista guarda a mais recente primeiro.
+      expect(store.getState().notifications.map((n) => n.message)).toEqual(["DEVICE_NOT_READY", "DEVICE_BUSY"]);
       expect(store.getState().dialIsLoading).toBe(false);
     });
 
-    it("stops without trying anyone else when there is no device", async () => {
+    it("reports the failure code when no device could place the call", async () => {
       wavoip.startCallResult = { data: null, error: { code: "NO_DEVICES", devices: [] } };
 
-      await controller.dial("5511", ["tok-1", "tok-2"]);
+      await controller.dial("5511", ["tok-1"]);
 
-      expect(wavoip.startCallCalls).toHaveLength(1);
       expect(store.getState().dialError).toBe("NO_DEVICES");
+      expect(store.getState().dialIsLoading).toBe(false);
     });
 
-    it("gives up between devices once the dial token moves", async () => {
-      const recusa = { code: "DEVICE_BUSY" as const, devices: [{ token: "tok-1", error: { code: "DEVICE_BUSY" as const } }] };
-      wavoip.startCall = (async (params: { fromTokens?: string[]; to: string }) => {
-        wavoip.startCallCalls.push(params);
-        // Desistir chega enquanto este device é tentado, e não antes.
-        controller.abortDial();
-        return { data: null, error: recusa };
-      }) as typeof wavoip.startCall;
+    it("stops walking the devices once the dial token moves", async () => {
+      wavoip.attemptsBeforeSuccess = [
+        { token: "tok-1", error: { code: "DEVICE_BUSY" } },
+        { token: "tok-2", error: { code: "DEVICE_BUSY" } },
+      ];
+      wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-3"), error: null };
+      // Desiste assim que a primeira recusa é anunciada.
+      const unsub = store.subscribe(
+        (s) => s.dialStatus,
+        (status) => {
+          if (status === "tok-1") controller.abortDial();
+        },
+      );
 
-      await controller.dial("5511", ["tok-1", "tok-2"]);
+      await controller.dial("5511", ["tok-1", "tok-2", "tok-3"]);
+      unsub();
 
-      expect(wavoip.startCallCalls).toHaveLength(1);
+      expect(store.getState().outgoing).toBeUndefined();
+      expect(store.getState().notifications.map((n) => n.message)).toEqual(["DEVICE_BUSY"]);
     });
 
-    it("keeps the dialled number out of the input only when the call goes through", async () => {
+    it("clears the input and remembers the number only when the call goes through", async () => {
       store.getState().setKeyboardInput("5511");
       wavoip.startCallResult = { data: new FakeOutgoingCall("c1", "tok-1"), error: null };
 
@@ -237,6 +245,7 @@ describe("CallController", () => {
 
       expect(store.getState().keyboardInput).toBe("");
       expect(store.getState().recentNumbers).toContain("5511");
+      expect(store.getState().callStatus).toBe("CALLING");
     });
   });
 

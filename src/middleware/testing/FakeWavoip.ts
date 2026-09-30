@@ -185,6 +185,15 @@ export class FakeWavoip extends FakeEmitter<WavoipEvents> {
     return this.startCallResult;
   };
 
+  /** Espelha o laço da lib: entrega cada recusa e devolve o desfecho no fim. */
+  attemptsBeforeSuccess: { token: string; error: { code: string } }[] = [];
+
+  startCallIterator = async function* (this: FakeWavoip, params: { fromTokens?: string[]; to: string }) {
+    this.startCallCalls.push(params);
+    for (const attempt of this.attemptsBeforeSuccess) yield attempt;
+    return this.startCallResult;
+  }.bind(this) as unknown as Wavoip["startCallIterator"];
+
   getDevices = () => this._devices as unknown as Device[];
 
   addDevices = (tokens: string[] = []) => {

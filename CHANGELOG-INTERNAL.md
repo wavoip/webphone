@@ -109,9 +109,13 @@ Nenhuma destas tinha teste, e nenhuma apareceria numa tradução mecânica.
 
 ### Discagem
 
-O laço que tenta os devices um a um saiu do `KeyboardScreen` e virou
-`CallController.dial`. Ele conta o andamento pelo store (`dialStatus`, `dialError`,
-`dialIsLoading`), que já existia; a tela só lê.
+Quem percorre os devices é a lib. O `startCall` já tenta um por vez, e o
+`startCallIterator` entrega cada recusa enquanto acontece — o webphone chamava
+`startCall` uma vez por token, reimplementando por fora o laço que já existia dentro.
+
+Sobrou `CallController.dial`, que consome o iterador e conta o andamento pelo store
+(`dialStatus`, `dialError`, `dialIsLoading`); a tela só lê. O que continua sendo nosso é
+a desistência.
 
 Era regra de negócio numa tela: qual device tentar em seguida, o que fazer com cada
 recusa, o que conta como desistência. E a tela é justamente o lugar que pode estar
