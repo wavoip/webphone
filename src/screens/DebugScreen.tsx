@@ -1,7 +1,16 @@
-import { Browser, Copy, Globe, Microphone, Package, Stethoscope, Warning, Waveform } from "@/components/icons";
 import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
-import { CircleNotch } from "@/components/icons";
 import { useEffect, useRef, useState } from "react";
+import {
+  Browser,
+  CircleNotch,
+  Copy,
+  Globe,
+  Microphone,
+  Package,
+  Stethoscope,
+  Warning,
+  Waveform,
+} from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { collectSystemInfo, type SystemInfo } from "@/lib/system-info";

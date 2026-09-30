@@ -1,43 +1,42 @@
-import { useEffect, useRef } from "react";
+import { createEffect, onCleanup } from "solid-js";
 import type { CallStatus } from "@/middleware/store/slices/callSlice";
 
 /**
- * O timer da próxima repetição é cancelado na recuperação, no fim e no unmount — senão
+ * O timer da próxima repetição é cancelado na recuperação, no fim e ao desmontar — senão
  * um timer agendado nos 3s de silêncio toca na chamada que já voltou ou já acabou.
  */
-export function useReconnectingSound(callStatus: CallStatus, sound: HTMLAudioElement) {
-  const replayRef = useRef<number | null>(null);
+export function useReconnectingSound(callStatus: () => CallStatus, sound: HTMLAudioElement) {
+  let replay: ReturnType<typeof setTimeout> | null = null;
 
-  useEffect(() => {
-    const cancelReplay = () => {
-      if (replayRef.current) {
-        clearTimeout(replayRef.current);
-        replayRef.current = null;
-      }
-    };
+  const cancelReplay = () => {
+    if (!replay) return;
+    clearTimeout(replay);
+    replay = null;
+  };
 
-    const stop = () => {
-      sound.onended = null;
-      cancelReplay();
-      sound.pause();
-      sound.currentTime = 0;
-    };
+  const stop = () => {
+    sound.onended = null;
+    cancelReplay();
+    sound.pause();
+    sound.currentTime = 0;
+  };
 
-    if (callStatus === "DISCONNECTED") {
-      cancelReplay();
-      sound.pause();
-      sound.currentTime = 0;
-      sound.onended = () => {
-        replayRef.current = setTimeout(() => {
-          sound.currentTime = 0;
-          sound.play();
-        }, 3000) as unknown as number;
-      };
-      sound.play();
-    } else {
+  createEffect(() => {
+    if (callStatus() !== "DISCONNECTED") {
       stop();
+      return;
     }
+    cancelReplay();
+    sound.pause();
+    sound.currentTime = 0;
+    sound.onended = () => {
+      replay = setTimeout(() => {
+        sound.currentTime = 0;
+        sound.play();
+      }, 3000);
+    };
+    sound.play();
+  });
 
-    return cancelReplay;
-  }, [callStatus, sound]);
+  onCleanup(cancelReplay);
 }

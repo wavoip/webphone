@@ -1,4 +1,3 @@
-import { Backspace, CaretDown, Phone, PhoneSlash } from "@/components/icons";
 import { useState } from "react";
 import { useStore } from "zustand";
 import { useShallow } from "zustand/react/shallow";
@@ -15,12 +14,13 @@ import SoundDTMF8 from "@/assets/sounds/dtmf-8.mp3";
 import SoundDTMF9 from "@/assets/sounds/dtmf-9.mp3";
 import SoundDTMFHash from "@/assets/sounds/dtmf-hash.mp3";
 import SoundDTMFStar from "@/assets/sounds/dtmf-star.mp3";
+import { Backspace, CaretDown, Phone, PhoneSlash } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RecentNumbersDropdown } from "@/components/ui/recentNumbers";
 import { type TranslationKey, t } from "@/lib/i18n";
-import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 import { useNotificationManager } from "@/lib/notifications";
+import { useDialState, useMiddleware } from "@/middleware/react/hooks";
 
 const buttons = [
   { digit: "1", letters: "", audio: new Audio(SoundDTMF1) },

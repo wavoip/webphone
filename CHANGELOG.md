@@ -47,9 +47,12 @@ distribuição — o widget de sempre e um PWA instalável.
   rótulo tinha sido importado da biblioteca de ícones por engano.
 - **Abrir as configurações reordenava a lista de números** para o resto da interface, e não
   só para aquela tela.
+- **O som de reconexão podia tocar depois da chamada voltar** ou de acabar: a regra estava
+  escrita em dois lugares, e a segunda cópia agendava uma repetição que ninguém cancelava.
 - **Cinco botões da tela de chamada ficavam em português** em qualquer idioma — espera,
   vídeo, transferir, teclado e silenciar/falar estavam escritos direto na tela. "Video"
-  vira "Vídeo" em português, de quebra.
+  vira "Vídeo" em português, de quebra. "Silenciado", na tela de chamada, também passa a
+  ser traduzido.
 
 ### Acessibilidade e desempenho
 

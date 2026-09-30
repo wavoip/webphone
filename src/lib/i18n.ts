@@ -55,6 +55,7 @@ export type TranslationKey =
   | "Video"
   | "Mute"
   | "Unmute"
+  | "Muted"
   | "Call"
   | "Erase digit"
   | "Recent numbers"
@@ -184,6 +185,7 @@ const ptBR: LocaleResource = {
   Video: "Vídeo",
   Mute: "Silenciar",
   Unmute: "Falar",
+  Muted: "Silenciado",
   Call: "Ligar",
   "Erase digit": "Apagar dígito",
   "Recent numbers": "Números recentes",
@@ -312,6 +314,7 @@ const es: LocaleResource = {
   Video: "Vídeo",
   Mute: "Silenciar",
   Unmute: "Hablar",
+  Muted: "Silenciado",
   Call: "Llamar",
   "Erase digit": "Borrar dígito",
   "Recent numbers": "Números recientes",
