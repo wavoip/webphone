@@ -1,5 +1,5 @@
 import type { ActiveCall, CallStats } from "@wavoip/wavoip-api/web";
-import { createEffect, createMemo, createSignal, type JSX, onCleanup, Show } from "solid-js";
+import { createEffect, createMemo, createSignal, For, type JSX, onCleanup, Show } from "solid-js";
 import { AudioLevelBar } from "@/components/layout/status-bar/AudioLevelBar";
 import {
   Dialog,
@@ -37,6 +37,9 @@ export function CallDiagnosticsDialog(props: Props) {
     return own.at(-1)?.diag ?? null;
   });
   const issues = createMemo(() => debug.recentIssues.filter((r) => r.callId === props.call.id));
+  // Cópia antes de inverter: o `filter` já devolveu array novo, mas deixar explícito
+  // evita que uma troca de fonte volte a inverter o do estado.
+  const newestFirst = createMemo(() => issues().slice().reverse());
 
   // Só mede com o diálogo aberto: são cinco leituras por segundo do transporte.
   createEffect(() => {
@@ -120,52 +123,49 @@ export function CallDiagnosticsDialog(props: Props) {
         </Section>
 
         <Section title={t("Recent issues")}>
-          {issues().length === 0 ? (
-            <Empty />
-          ) : (
+          <Show when={issues().length > 0} fallback={<Empty />}>
             <ul class="wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
-              {issues
-                .slice()
-                .reverse()
-                .map((r, idx) => (
-                  <li key={`${r.at}-${idx}`} class="wv:flex wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1">
-                    <span class="wv:tabular-nums wv:text-muted-foreground">{formatTime(r.at)}</span>
-                    <span class="wv:text-red-500">{r.issue}</span>
+              <For each={newestFirst()}>
+                {(record) => (
+                  <li class="wv:flex wv:gap-2 wv:rounded wv:bg-muted/40 wv:px-2 wv:py-1">
+                    <span class="wv:tabular-nums wv:text-muted-foreground">{formatTime(record.at)}</span>
+                    <span class="wv:text-red-500">{record.issue}</span>
                   </li>
-                ))}
+                )}
+              </For>
             </ul>
-          )}
+          </Show>
         </Section>
       </DialogContent>
     </Dialog>
   );
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section(props: { title: string; children: JSX.Element }) {
   return (
     <section class="wv:flex wv:flex-col wv:gap-2">
-      <h3 class="wv:text-xs wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">{title}</h3>
+      <h3 class="wv:text-xs wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">{props.title}</h3>
       {props.children}
     </section>
   );
 }
 
-function StatGroup({ label, children }: { label: string; children: ReactNode }) {
+function StatGroup(props: { label: string; children: JSX.Element }) {
   return (
     <div class="wv:flex wv:flex-col wv:gap-1 wv:rounded wv:bg-muted/40 wv:p-2">
       <span class="wv:text-[12px] wv:font-semibold wv:uppercase wv:tracking-wide wv:text-muted-foreground">
-        {label}
+        {props.label}
       </span>
       {props.children}
     </div>
   );
 }
 
-function KV({ k, v }: { k: string; v: string }) {
+function KV(props: { k: string; v: string }) {
   return (
     <div class="wv:flex wv:justify-between wv:gap-2">
-      <span class="wv:text-muted-foreground">{k}</span>
-      <span class="wv:text-foreground wv:tabular-nums">{v}</span>
+      <span class="wv:text-muted-foreground">{props.k}</span>
+      <span class="wv:text-foreground wv:tabular-nums">{props.v}</span>
     </div>
   );
 }

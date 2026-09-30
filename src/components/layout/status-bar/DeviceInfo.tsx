@@ -43,7 +43,7 @@ export function DeviceInfo(props: Props) {
                 >
                   <Power class="wv:size-3.5" />
                 </TooltipTrigger>
-                <TooltipContent container={props.root}>
+                <TooltipContent container={root}>
                   <p>{t("Power on device")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -184,7 +184,7 @@ function TokenLine(props: { token: string }) {
             <EyeSlash class="wv:size-3.5" />
           </Show>
         </TooltipTrigger>
-        <TooltipContent container={props.root}>
+        <TooltipContent container={root}>
           <p>{visible() ? t("Hide token") : t("Show token")}</p>
         </TooltipContent>
       </Tooltip>
