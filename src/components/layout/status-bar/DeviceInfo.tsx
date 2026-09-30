@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { createSignal, Show } from "solid-js";
 import { CopyableText } from "@/components/CopyableText";
 import { Copy, Eye, EyeSlash, Phone, Power, QrCode, Trash, Warning } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { useMiddleware } from "@/middleware/solid/context";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
 import { useMount } from "@/providers/MountProvider";
 
@@ -15,89 +15,94 @@ type Props = {
     showRemove: boolean;
   };
   device: DeviceStateEntry;
-  setShowQRCode: React.Dispatch<React.SetStateAction<null | string>>;
+  setShowQRCode: (codigo: string | null) => void;
 };
 
-export function DeviceInfo({ device, settings, setShowQRCode }: Props) {
+export function DeviceInfo(props: Props) {
   const { device: deviceController } = useMiddleware().controllers;
-  const middleware = useMiddleware();
   const { root } = useMount();
-  const { showEnable, showRemove } = settings;
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [confirmDelete, setConfirmDelete] = createSignal(false);
 
-  const needsWake = device.status === "hibernating";
+  const device = () => props.device;
+  const needsWake = () => device().status === "hibernating";
 
   return (
     <div
-      data-enable={device.enable}
-      className="wv:relative wv:flex wv:flex-col wv:gap-3 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors"
+      data-enable={device().enable}
+      class="wv:relative wv:flex wv:flex-col wv:gap-3 wv:p-4 wv:bg-muted wv:data-[enable=false]:bg-background/60 wv:data-[enable=false]:opacity-70 wv:rounded-lg wv:border wv:border-border/60 wv:overflow-hidden wv:transition-colors"
     >
-      <div className="wv:flex wv:flex-row wv:justify-between wv:items-start wv:gap-4 wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3">
-        <div className="wv:flex wv:flex-col wv:gap-2 wv:min-w-0 wv:flex-1">
-          <div className="wv:flex wv:flex-row wv:items-center wv:gap-2">
-            {needsWake && (
+      <div class="wv:flex wv:flex-row wv:justify-between wv:items-start wv:gap-4 wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:gap-3">
+        <div class="wv:flex wv:flex-col wv:gap-2 wv:min-w-0 wv:flex-1">
+          <div class="wv:flex wv:flex-row wv:items-center wv:gap-2">
+            <Show when={needsWake()}>
               <Tooltip>
                 <TooltipTrigger
                   aria-label={t("Power on device")}
-                  className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
-                  onClick={() => middleware.controllers.device.wakeUp(device.token)}
+                  class="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded-full wv:border wv:border-border wv:hover:bg-accent wv:hover:cursor-pointer"
+                  onClick={() => deviceController.wakeUp(device().token)}
                 >
-                  <Power className="wv:size-3.5" />
+                  <Power class="wv:size-3.5" />
                 </TooltipTrigger>
-                <TooltipContent container={root}>
+                <TooltipContent container={props.root}>
                   <p>{t("Power on device")}</p>
                 </TooltipContent>
               </Tooltip>
-            )}
-            <StatusDot status={device.status} connectionStatus={device.connectionStatus} hasQrCode={!!device.qrCode} />
+            </Show>
+            <StatusDot
+              status={device().status}
+              connectionStatus={device().connectionStatus}
+              hasQrCode={!!device().qrCode}
+            />
           </div>
 
-          {device.contact?.phone && <PhoneLine phone={device.contact.phone} />}
+          <Show when={device().contact?.phone}>{(phone) => <PhoneLine phone={phone()} />}</Show>
 
-          <TokenLine token={device.token} />
+          <TokenLine token={device().token} />
         </div>
 
         <ActionCluster
-          showEnable={showEnable}
-          showRemove={showRemove}
-          device={device}
+          showEnable={props.settings.showEnable}
+          showRemove={props.settings.showRemove}
+          device={device()}
           root={root}
-          onEnable={() => enableDevice(device.token)}
-          onDisable={() => disableDevice(device.token)}
-          onShowQRCode={() => setShowQRCode(device.qrCode ?? null)}
+          onEnable={() => deviceController.enable(device().token)}
+          onDisable={() => deviceController.disable(device().token)}
+          onShowQRCode={() => props.setShowQRCode(device().qrCode ?? null)}
           onConfirmDelete={() => setConfirmDelete(true)}
         />
       </div>
 
-      {device.restricted && <RestrictionBar until={device.restrictedUntil} />}
+      <Show when={device().restricted}>
+        <RestrictionBar until={device().restrictedUntil} />
+      </Show>
 
-      {confirmDelete && (
+      <Show when={confirmDelete()}>
         <div
           role="alertdialog"
           aria-label={t("Delete this device?")}
-          className="wv:absolute wv:inset-0 wv:flex wv:items-center wv:justify-between wv:gap-3 wv:px-4 wv:bg-destructive wv:rounded-lg wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:justify-center wv:max-sm:py-3"
+          class="wv:absolute wv:inset-0 wv:flex wv:items-center wv:justify-between wv:gap-3 wv:px-4 wv:bg-destructive wv:rounded-lg wv:max-sm:flex-col wv:max-sm:items-stretch wv:max-sm:justify-center wv:max-sm:py-3"
         >
-          <p className="wv:font-medium wv:text-destructive-foreground wv:select-none">{t("Delete this device?")}</p>
-          <div className="wv:flex wv:flex-row wv:gap-2 wv:max-sm:justify-end">
+          <p class="wv:font-medium wv:text-destructive-foreground wv:select-none">{t("Delete this device?")}</p>
+          <div class="wv:flex wv:flex-row wv:gap-2 wv:max-sm:justify-end">
             <Button
               variant="outline"
               aria-label={t("Delete")}
-              className="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
-              onClick={() => removeDevice(device.token)}
+              class="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
+              onClick={() => deviceController.remove(device().token)}
             >
               {t("Delete")}
             </Button>
             <Button
               variant="outline"
               aria-label={t("Cancel")}
-              className="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
+              class="wv:bg-transparent wv:border-destructive-foreground/60 wv:text-destructive-foreground wv:hover:bg-destructive-foreground/10 wv:hover:text-destructive-foreground wv:cursor-pointer"
               onClick={() => setConfirmDelete(false)}
             >
               {t("Cancel")}
             </Button>
           </div>
         </div>
-      )}
+      </Show>
     </div>
   );
 }
@@ -123,35 +128,32 @@ function statusVisual(
   return { label: "Disconnected", dot: "wv:bg-red-500", pulse: false };
 }
 
-function StatusDot({
-  status,
-  connectionStatus,
-  hasQrCode,
-}: {
+function StatusDot(props: {
   status: DeviceStateEntry["status"];
   connectionStatus: DeviceStateEntry["connectionStatus"];
   hasQrCode: boolean;
 }) {
-  if (!status) return null;
-  const v = statusVisual(status, connectionStatus, hasQrCode);
+  const v = () => statusVisual(props.status, props.connectionStatus, props.hasQrCode);
   return (
-    <span className="wv:inline-flex wv:items-center wv:gap-1.5 wv:text-[12px] wv:font-medium wv:text-muted-foreground">
-      <span className={`wv:relative wv:inline-flex wv:size-2 wv:rounded-full ${v.dot}`}>
-        {v.pulse && (
-          <span className={`wv:absolute wv:inset-0 wv:rounded-full wv:animate-ping wv:opacity-60 ${v.dot}`} />
-        )}
+    <Show when={props.status}>
+      <span class="wv:inline-flex wv:items-center wv:gap-1.5 wv:text-[12px] wv:font-medium wv:text-muted-foreground">
+        <span class={`wv:relative wv:inline-flex wv:size-2 wv:rounded-full ${v().dot}`}>
+          <Show when={v().pulse}>
+            <span class={`wv:absolute wv:inset-0 wv:rounded-full wv:animate-ping wv:opacity-60 ${v().dot}`} />
+          </Show>
+        </span>
+        {t(v().label)}
       </span>
-      {t(v.label)}
-    </span>
+    </Show>
   );
 }
 
-function PhoneLine({ phone }: { phone: string }) {
+function PhoneLine(props: { phone: string }) {
   return (
-    <CopyableText value={phone} ariaLabel={t("Copy phone")}>
-      <span className="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
-        <Phone size={16} weight="fill" className="wv:text-green-500" />
-        <span className="wv:truncate">{phone}</span>
+    <CopyableText value={props.phone} ariaLabel={t("Copy phone")}>
+      <span class="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
+        <Phone size={16} weight="fill" class="wv:text-green-500" />
+        <span class="wv:truncate">{props.phone}</span>
       </span>
     </CopyableText>
   );
@@ -159,64 +161,59 @@ function PhoneLine({ phone }: { phone: string }) {
 
 const TOKEN_MASK = "••••••••••••";
 
-function TokenLine({ token }: { token: string }) {
-  const [visible, setVisible] = useState(false);
+function TokenLine(props: { token: string }) {
+  const [visible, setVisible] = createSignal(false);
   const { root } = useMount();
 
   return (
-    <div className="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:min-w-0">
+    <div class="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:min-w-0">
       <span
-        title={visible ? token : undefined}
-        className="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[10rem]"
+        title={visible() ? props.token : undefined}
+        class="wv:text-[12px] wv:font-mono wv:text-muted-foreground wv:truncate wv:max-w-[18rem] wv:max-sm:max-w-[10rem]"
       >
-        {visible ? token : TOKEN_MASK}
+        {visible() ? props.token : TOKEN_MASK}
       </span>
       <Tooltip>
         <TooltipTrigger
           type="button"
-          aria-label={visible ? t("Hide token") : t("Show token")}
-          className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
+          aria-label={visible() ? t("Hide token") : t("Show token")}
+          class="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:rounded wv:text-muted-foreground wv:hover:bg-foreground/10 wv:hover:text-foreground wv:hover:cursor-pointer"
           onClick={() => setVisible((v) => !v)}
         >
-          {visible ? <EyeSlash className="wv:size-3.5" /> : <Eye className="wv:size-3.5" />}
+          <Show when={visible()} fallback={<Eye class="wv:size-3.5" />}>
+            <EyeSlash class="wv:size-3.5" />
+          </Show>
         </TooltipTrigger>
-        <TooltipContent container={root}>
-          <p>{visible ? t("Hide token") : t("Show token")}</p>
+        <TooltipContent container={props.root}>
+          <p>{visible() ? t("Hide token") : t("Show token")}</p>
         </TooltipContent>
       </Tooltip>
-      <CopyableText value={token} ariaLabel={t("Copy token")}>
-        <span className="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:text-muted-foreground wv:hover:text-foreground">
-          <Copy className="wv:size-3.5" />
+      <CopyableText value={props.token} ariaLabel={t("Copy token")}>
+        <span class="wv:inline-flex wv:items-center wv:justify-center wv:size-6 wv:text-muted-foreground wv:hover:text-foreground">
+          <Copy class="wv:size-3.5" />
         </span>
       </CopyableText>
     </div>
   );
 }
 
-function RestrictionBar({ until }: { until: Date | null }) {
+function RestrictionBar(props: { until: Date | null }) {
   return (
-    <div className="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
-      <Warning size={16} weight="fill" className="wv:text-amber-500 wv:shrink-0" />
-      <span className="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
-      {until && (
-        <span className="wv:text-[12px] wv:text-foreground/70 wv:ml-auto wv:truncate">
-          {t("Lifted on")} {formatRestrictionDate(until)}
-        </span>
-      )}
+    <div class="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
+      <Warning size={16} weight="fill" class="wv:text-amber-500 wv:shrink-0" />
+      <span class="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
+      <Show when={props.until}>
+        {(quando) => (
+          <span class="wv:text-[12px] wv:text-foreground/70 wv:ml-auto wv:truncate">
+            {t("Lifted on")} {formatRestrictionDate(quando())}
+          </span>
+        )}
+      </Show>
     </div>
   );
 }
 
-function ActionCluster({
-  showEnable,
-  showRemove,
-  device,
-  root,
-  onEnable,
-  onDisable,
-  onShowQRCode,
-  onConfirmDelete,
-}: {
+function ActionCluster(props: {
   showEnable: boolean;
   showRemove: boolean;
   device: DeviceStateEntry;
@@ -226,62 +223,62 @@ function ActionCluster({
   onShowQRCode: () => void;
   onConfirmDelete: () => void;
 }) {
-  const hasAny = showEnable || device.qrCode || showRemove;
-  if (!hasAny) return null;
-
-  const switchDisabled = !["open", "CONNECTED"].includes(device.status as string);
+  const hasAny = () => props.showEnable || props.device.qrCode || props.showRemove;
+  const switchDisabled = () => !["open", "CONNECTED"].includes(props.device.status as string);
 
   return (
-    <div className="wv:flex wv:items-center wv:gap-3 wv:shrink-0 wv:max-sm:justify-end wv:max-sm:self-end">
-      {showEnable && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="wv:inline-flex">
-              <Switch
-                aria-label={device.enable ? "disable device" : "enable device"}
-                className="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
-                checked={device.enable}
-                onCheckedChange={(checked) => (checked ? onEnable() : onDisable())}
-                disabled={switchDisabled}
-              />
-            </span>
-          </TooltipTrigger>
-          <TooltipContent container={root}>
-            <p>{device.enable ? t("Disable device") : t("Enable device")}</p>
-          </TooltipContent>
-        </Tooltip>
-      )}
+    <Show when={hasAny()}>
+      <div class="wv:flex wv:items-center wv:gap-3 wv:shrink-0 wv:max-sm:justify-end wv:max-sm:self-end">
+        <Show when={props.showEnable}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span class="wv:inline-flex">
+                <Switch
+                  aria-label={props.device.enable ? "disable device" : "enable device"}
+                  class="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
+                  checked={props.device.enable}
+                  onCheckedChange={(checked) => (checked ? props.onEnable() : props.onDisable())}
+                  disabled={switchDisabled()}
+                />
+              </span>
+            </TooltipTrigger>
+            <TooltipContent container={props.root}>
+              <p>{props.device.enable ? t("Disable device") : t("Enable device")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </Show>
 
-      {device.qrCode && (
-        <Tooltip>
-          <TooltipTrigger
-            aria-label={t("Show QR Code")}
-            className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer wv:text-muted-foreground wv:hover:text-foreground"
-            onClick={onShowQRCode}
-          >
-            <QrCode className="wv:size-4" />
-          </TooltipTrigger>
-          <TooltipContent container={root}>
-            <p>{t("Show QR Code")}</p>
-          </TooltipContent>
-        </Tooltip>
-      )}
+        <Show when={props.device.qrCode}>
+          <Tooltip>
+            <TooltipTrigger
+              aria-label={t("Show QR Code")}
+              class="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:hover:bg-accent wv:hover:cursor-pointer wv:text-muted-foreground wv:hover:text-foreground"
+              onClick={props.onShowQRCode}
+            >
+              <QrCode class="wv:size-4" />
+            </TooltipTrigger>
+            <TooltipContent container={props.root}>
+              <p>{t("Show QR Code")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </Show>
 
-      {showRemove && (
-        <Tooltip>
-          <TooltipTrigger
-            aria-label={t("Delete")}
-            className="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:text-destructive wv:hover:bg-destructive/10 wv:hover:cursor-pointer"
-            onClick={onConfirmDelete}
-          >
-            <Trash className="wv:size-4" />
-          </TooltipTrigger>
-          <TooltipContent container={root}>
-            <p>{t("Delete")}</p>
-          </TooltipContent>
-        </Tooltip>
-      )}
-    </div>
+        <Show when={props.showRemove}>
+          <Tooltip>
+            <TooltipTrigger
+              aria-label={t("Delete")}
+              class="wv:inline-flex wv:items-center wv:justify-center wv:size-8 wv:rounded-md wv:text-destructive wv:hover:bg-destructive/10 wv:hover:cursor-pointer"
+              onClick={props.onConfirmDelete}
+            >
+              <Trash class="wv:size-4" />
+            </TooltipTrigger>
+            <TooltipContent container={props.root}>
+              <p>{t("Delete")}</p>
+            </TooltipContent>
+          </Tooltip>
+        </Show>
+      </div>
+    </Show>
   );
 }
 
