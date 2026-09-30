@@ -16,10 +16,9 @@ export function useNotificationManager() {
   const controller = middleware.controllers.notifications;
 
   return {
-    get notifications() {
-      return state.notifications;
-    },
-    getNotifications: () => state.notifications,
+    // Acessor, e não valor: quem desestruturasse um array levaria a lista de agora e
+    // pararia de ver as próximas.
+    notifications: () => state.notifications,
     addNotification: (input: NotificationInput): Notification => {
       if (state.notifications.length > MAX_NOTIFICATIONS) controller.clear();
       const stamped: Notification = { ...input, id: newId(), created_at: new Date() };

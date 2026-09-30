@@ -38,7 +38,9 @@ export function Notifications() {
 
   // `filter` já devolve array novo, então ordenar aqui não encosta no estado.
   const visible = createMemo(() =>
-    notifications.filter((n) => !n.isHidden).sort((a, b) => Number(a.isRead) - Number(b.isRead)),
+    notifications()
+      .filter((n) => !n.isHidden)
+      .sort((a, b) => Number(a.isRead) - Number(b.isRead)),
   );
   const unreadCount = createMemo(() => visible().filter((n) => !n.isRead).length);
 
