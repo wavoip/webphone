@@ -179,12 +179,33 @@ store desde sempre.
   Foi assim com o `phosphor-solid`, e o sintoma no teste é o conteúdo que nunca aparece.
   Ao escolher biblioteca, confira se ela publica a condição `solid`.
 
-### Build
+### Build e desenvolvimento
+
+Um modo por casca, com a mesma forma nos dois: a raiz do Vite é a pasta da casca, que
+carrega o próprio `index.html`.
+
+| | widget | PWA |
+| -- | -- | -- |
+| raiz | `src/shells/widget` | `src/shells/app` |
+| desenvolvimento | `pnpm dev:widget`, porta 5173 | `pnpm dev:app`, porta 5174 |
+| saída | `dist` (pacote npm) | `dist-app` |
+
+As portas são fixas (`strictPort`) porque os dois rodam ao mesmo tempo, e porta que anda
+sozinha faz perder tempo procurando qual é a de hoje.
+
+O `index.html` do widget é uma **página hospedeira de mentira**: a camada cinza com
+`z-index: 99999` existe para o widget brigar por empilhamento como briga na página de
+quem o embute.
+
+Não há `preview` do widget. `vite preview` serve o `outDir`, e o build de biblioteca não
+tem página nenhuma — o comando existia e respondia 404. Exercitar o UMD construído contra
+uma página hospedeira é trabalho que ainda falta.
 
 - `pnpm build` produz `dist` (pacote npm, lib) e `dist-app` (PWA).
 - O modo PWA tem config própria (`vite.app.config.ts`): build de aplicação, CSS em arquivo,
   sons como requisições, service worker.
-- O `publicDir` está desligado no build do widget — `files` publica o `dist` inteiro, e sem
-  isso os ícones do PWA entrariam no pacote.
+- Os ícones do PWA moram em `public/`, que é do PWA: com a raiz do widget na casca dele,
+  eles deixaram de estar no caminho do build da biblioteca, e o `publicDir: false` que os
+  segurava saiu junto.
 - O Tailwind v4 varre a partir da raiz do Vite, que difere entre os dois modos. O `@source`
   no CSS fixa a fonte; sem ele o PWA saía **sem estilo nenhum**.

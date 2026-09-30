@@ -1,15 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Webphone</title>
+  <title>Webphone — widget</title>
 </head>
 
 <body style="height: 1000px; margin: 0px; overflow-y: auto;">
+  <!-- Página hospedeira de mentira: a camada cinza existe para o widget ter um z-index
+       alto contra o qual brigar, que é a situação real de quem embute o script. -->
   <div style="z-index: 99999; height: 100%; width: 100%; background-color: gray; position: absolute;">z-index tester</div>
-  <script type="module" src="/src/shells/widget/dev.tsx"></script>
+  <script type="module" src="./dev.tsx"></script>
 </body>
 
 </html>

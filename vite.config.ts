@@ -11,18 +11,32 @@ const pkg = require("./package.json") as { version: string };
 // Para fingir uma versão publicada mais velha e exercitar a auto-atualização local.
 const version = process.env.WEBPHONE_VERSION_OVERRIDE ?? pkg.version;
 
+/**
+ * O modo widget. A raiz é a casca, como no PWA (`vite.app.config.ts`): em
+ * desenvolvimento o servidor entrega o `index.html` de lá — a página hospedeira de
+ * mentira —, e no build a mesma pasta dá a entrada da biblioteca.
+ */
 export default defineConfig({
+  root: path.resolve(__dirname, "src/shells/widget"),
   plugins: [
     solid(),
     tailwindcss(),
-    dts({ insertTypesEntry: true, tsconfigPath: "./tsconfig.app.json", rollupTypes: true }),
+    // Só no build: gerar os tipos a cada start de servidor custa segundos e não serve a
+    // ninguém em desenvolvimento.
+    {
+      // Caminhos absolutos: o plugin resolve a partir da raiz do Vite, que aqui é a casca.
+      ...dts({
+        insertTypesEntry: true,
+        root: __dirname,
+        tsconfigPath: path.resolve(__dirname, "tsconfig.app.json"),
+        rollupTypes: true,
+      }),
+      apply: "build",
+    },
   ],
   define: {
     __WEBPHONE_VERSION__: JSON.stringify(version),
   },
-  // O `public/` é do PWA: sem isto os ícones dele entram no pacote publicado, que é o
-  // `dist` inteiro (ver `files` no package.json).
-  publicDir: false,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -32,13 +46,13 @@ export default defineConfig({
     conditions: ["solid"],
     dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
   },
-  server: {
-    host: "127.0.0.1",
-  },
+  // Porta fixa, e diferente da do PWA, para os dois rodarem juntos sem disputa.
+  server: { host: "127.0.0.1", port: 5173, strictPort: true },
   build: {
+    outDir: path.resolve(__dirname, "dist"),
     cssCodeSplit: false,
     lib: {
-      entry: "src/shells/widget/index.tsx",
+      entry: path.resolve(__dirname, "src/shells/widget/index.tsx"),
       name: "wavoipWebphone",
       formats: ["es", "umd"],
       fileName: (format) => {

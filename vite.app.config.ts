@@ -52,7 +52,9 @@ export default defineConfig({
     conditions: ["solid"],
     dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
   },
-  server: { host: "127.0.0.1" },
+  // Porta fixa, e diferente da do widget, para os dois rodarem juntos sem disputa.
+  server: { host: "127.0.0.1", port: 5174, strictPort: true },
+  preview: { host: "127.0.0.1", port: 4174, strictPort: true },
   build: {
     outDir: path.resolve(__dirname, "dist-app"),
     emptyOutDir: true,
