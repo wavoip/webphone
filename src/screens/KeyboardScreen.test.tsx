@@ -1,6 +1,6 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import type { OutgoingCall, Result, StartCallFailure } from "@wavoip/wavoip-api/web";
 import { beforeEach, describe, expect, it } from "vitest";
+import { act, fireEvent, screen, waitFor } from "@/middleware/testing/dom";
 import { FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 import KeyboardScreen from "@/screens/KeyboardScreen";
@@ -34,7 +34,7 @@ function deferredStartCall(wavoip: FakeWavoip) {
 async function dial(number = "5511999999999") {
   const wavoip = new FakeWavoip();
   const control = deferredStartCall(wavoip);
-  const { rendered, api } = await renderWithProviders({ wavoip, children: <KeyboardScreen /> });
+  const { rendered, api } = await renderWithProviders({ wavoip, children: () => <KeyboardScreen /> });
 
   // O loop anda pelos devices habilitados do *store*, e não do SDK — e um device só
   // nasce habilitado com o status já em "open".

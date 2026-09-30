@@ -1,5 +1,5 @@
-import { waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { waitFor } from "@/middleware/testing/dom";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 

@@ -1,9 +1,9 @@
-import { act, renderHook } from "@testing-library/react";
 import type { ConnectivityIssue, IceDiagnostics } from "@wavoip/wavoip-api/web";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Middleware } from "@/middleware/Middleware";
-import { MiddlewareProvider } from "@/middleware/react/hooks";
+import { MiddlewareProvider } from "@/middleware/solid/context";
+import { act, renderHook } from "@/middleware/testing/dom";
 import { FakeActiveCall, FakeIncomingCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { DebugProvider, useDebugInfo } from "@/providers/DebugProvider";
 

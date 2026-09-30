@@ -231,17 +231,19 @@ function ActionCluster(props: {
       <div class="wv:flex wv:items-center wv:gap-3 wv:shrink-0 wv:max-sm:justify-end wv:max-sm:self-end">
         <Show when={props.showEnable}>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <span class="wv:inline-flex">
-                <Switch
-                  aria-label={props.device.enable ? "disable device" : "enable device"}
-                  class="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
-                  checked={props.device.enable}
-                  onCheckedChange={(checked) => (checked ? props.onEnable() : props.onDisable())}
-                  disabled={switchDisabled()}
-                />
-              </span>
-            </TooltipTrigger>
+            <TooltipTrigger
+              asChild={(triggerProps) => (
+                <span {...triggerProps()} class="wv:inline-flex">
+                  <Switch
+                    aria-label={props.device.enable ? "disable device" : "enable device"}
+                    class="wv:hover:cursor-pointer wv:data-[state=checked]:!bg-green-500 wv:data-[state=unchecked]:!bg-foreground/25 wv:[&>span]:!bg-white"
+                    checked={props.device.enable}
+                    onCheckedChange={(checked) => (checked ? props.onEnable() : props.onDisable())}
+                    disabled={switchDisabled()}
+                  />
+                </span>
+              )}
+            />
             <TooltipContent container={props.root}>
               <p>{props.device.enable ? t("Disable device") : t("Enable device")}</p>
             </TooltipContent>

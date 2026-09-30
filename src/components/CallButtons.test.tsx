@@ -1,6 +1,6 @@
-import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { CallButtons } from "@/components/CallButtons";
+import { act, fireEvent, screen, waitFor } from "@/middleware/testing/dom";
 import { FakeActiveCall, FakeOutgoingCall, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { renderWithProviders, resetPublicApiBetweenTests } from "@/middleware/testing/renderWithMiddleware";
 
@@ -9,7 +9,7 @@ async function withOutgoing(outgoing = new FakeOutgoingCall("c1", "tok-1")) {
   wavoip.startCallResult = { data: outgoing, error: null };
   const { api } = await renderWithProviders({
     wavoip,
-    children: <CallButtons call={outgoing} />,
+    children: () => <CallButtons call={outgoing} />,
   });
   await act(async () => {
     api.device.add("tok-1", false);
@@ -52,7 +52,7 @@ describe("CallButtons hang-up", () => {
 
   it("says 'end', not 'cancel', once the call is connected", async () => {
     const active = new FakeActiveCall("c1", "tok-1");
-    await renderWithProviders({ children: <CallButtons call={active} /> });
+    await renderWithProviders({ children: () => <CallButtons call={active} /> });
 
     expect(hangUp().getAttribute("aria-label")).toBe("Finalizar");
   });

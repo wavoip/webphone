@@ -1,9 +1,9 @@
 import type { ActiveCall, CallPeer, IncomingCall, OutgoingCall } from "@wavoip/wavoip-api/web";
+import type { NotificationsType } from "@/lib/notifications";
 import type { WebphoneEventMap, WebphoneEventName } from "@/middleware/events/eventTypes";
 import type { MiddlewareEvent, MiddlewareEventMap } from "@/middleware/pipeline/types";
 import type { DeviceStateEntry as DeviceState } from "@/middleware/store/slices/deviceSlice";
 import type { NotificationInput } from "@/middleware/store/slices/notificationsSlice";
-import type { NotificationsType } from "@/lib/notifications";
 import type { Theme, WebphonePosition, WidgetButtonPosition } from "@/providers/settings/settings";
 
 /**

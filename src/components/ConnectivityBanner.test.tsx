@@ -1,6 +1,6 @@
-import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ConnectivityBanner } from "@/components/ConnectivityBanner";
+import { render, screen, within } from "@/middleware/testing/dom";
 
 describe("ConnectivityBanner", () => {
   it("renders nothing when no issue is provided", () => {

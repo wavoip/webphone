@@ -1,10 +1,10 @@
-import { type RenderResult, render } from "@testing-library/react";
-import type { ReactNode } from "react";
+import { render } from "@solidjs/testing-library";
+import type { JSX } from "solid-js";
 import { resetForTesting, webphoneAPIPromise } from "@/lib/webphone-api/api";
 import type { WebphoneAPI } from "@/lib/webphone-api/WebphoneAPI";
 import type { FocusTracker } from "@/middleware/browser/focusTracker";
 import type { BrowserNotifier } from "@/middleware/browser/notifier";
-import { MiddlewareRoot } from "@/middleware/react/MiddlewareRoot";
+import { MiddlewareRoot } from "@/middleware/solid/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { MountContext } from "@/providers/MountProvider";
 import { PipProvider } from "@/providers/PipProvider";
@@ -16,7 +16,11 @@ import { WidgetProvider } from "@/providers/WidgetProvider";
 type MountOptions = {
   wavoip?: FakeWavoip;
   config?: WebphoneSettings;
-  children?: ReactNode;
+  /**
+   * Função, e não JSX pronto: no Solid o JSX vira DOM na hora em que é escrito, e um
+   * elemento criado antes do `render` nasce fora da árvore — sem contexto nenhum.
+   */
+  children?: () => JSX.Element;
   notifier?: BrowserNotifier;
   focus?: FocusTracker;
 };
@@ -26,18 +30,18 @@ type MountOptions = {
  * `api.ts` vaza de um teste para o outro.
  */
 export async function renderWithMiddleware(options: MountOptions = {}): Promise<{
-  rendered: RenderResult;
+  rendered: ReturnType<typeof render>;
   wavoip: FakeWavoip;
   api: WebphoneAPI;
 }> {
   const fake = options.wavoip ?? new FakeWavoip();
-  const rendered = render(
+  const rendered = render(() => (
     <SettingsProvider config={options.config ?? {}}>
       <MiddlewareRoot wavoip={fake.asWavoip()} notifier={options.notifier} focus={options.focus}>
-        {options.children ?? null}
+        {options.children?.()}
       </MiddlewareRoot>
-    </SettingsProvider>,
-  );
+    </SettingsProvider>
+  ));
   const api = await webphoneAPIPromise();
   return { rendered, wavoip: fake, api };
 }
@@ -51,7 +55,7 @@ export function resetPublicApiBetweenTests(): void {
  * dos providers rodarem de verdade.
  */
 export async function renderWithProviders(options: MountOptions = {}): Promise<{
-  rendered: RenderResult;
+  rendered: ReturnType<typeof render>;
   wavoip: FakeWavoip;
   api: WebphoneAPI;
 }> {
@@ -60,7 +64,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   document.body.appendChild(root);
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
-  const rendered = render(
+  const rendered = render(() => (
     <MountContext.Provider value={{ layout: "floating", root, rootNode: shadowRoot }}>
       <SettingsProvider config={options.config ?? {}}>
         <MiddlewareRoot
@@ -71,13 +75,13 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
         >
           <ThemeProvider root={root}>
             <PipProvider rootNode={shadowRoot}>
-              <WidgetProvider>{options.children ?? null}</WidgetProvider>
+              <WidgetProvider>{options.children?.()}</WidgetProvider>
             </PipProvider>
           </ThemeProvider>
         </MiddlewareRoot>
       </SettingsProvider>
-    </MountContext.Provider>,
-  );
+    </MountContext.Provider>
+  ));
   const api = await webphoneAPIPromise();
   return { rendered, wavoip: fake, api };
 }

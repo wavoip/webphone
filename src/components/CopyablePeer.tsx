@@ -61,21 +61,26 @@ export function CopyablePeer(props: Props) {
       }
     >
       <Tooltip open={copied()} positioning={{ placement: "top", gutter: 4 }}>
-        <TooltipTrigger asChild>
-          {/* biome-ignore lint/a11y/useSemanticElements: o MarqueeText renderiza <div>, que é HTML inválido dentro de <button>; span + role=button + teclado mantêm a semântica. */}
-          <span
-            role="button"
-            tabIndex={0}
-            aria-label="Copiar telefone"
-            onClick={handleClick}
-            onKeyDown={handleKeyDown}
-            class="wv:cursor-pointer wv:select-none wv:block wv:w-full"
-          >
-            <MarqueeText speed={props.marqueeSpeed ?? 10} class={props.class}>
-              {label()}
-            </MarqueeText>
-          </span>
-        </TooltipTrigger>
+        {/* `asChild` no Solid é função, e não booleano: o Ark passa os props do gatilho
+            para quem vai desenhar. */}
+        <TooltipTrigger
+          asChild={(triggerProps) => (
+            // biome-ignore lint/a11y/useSemanticElements: o MarqueeText renderiza <div>, que é HTML inválido dentro de <button>; span + role=button + teclado mantêm a semântica.
+            <span
+              {...triggerProps()}
+              role="button"
+              tabIndex={0}
+              aria-label="Copiar telefone"
+              onClick={handleClick}
+              onKeyDown={handleKeyDown}
+              class="wv:cursor-pointer wv:select-none wv:block wv:w-full"
+            >
+              <MarqueeText speed={props.marqueeSpeed ?? 10} class={props.class}>
+                {label()}
+              </MarqueeText>
+            </span>
+          )}
+        />
         <TooltipContent container={tooltipContainer()} class="wv:bg-green-600 wv:text-white">
           Copiado
         </TooltipContent>

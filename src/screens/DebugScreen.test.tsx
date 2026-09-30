@@ -1,9 +1,9 @@
-import { render, screen, waitFor } from "@testing-library/react";
 import type { IceDiagnostics } from "@wavoip/wavoip-api/web";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Middleware } from "@/middleware/Middleware";
-import { MiddlewareProvider } from "@/middleware/react/hooks";
+import { MiddlewareProvider } from "@/middleware/solid/context";
+import { render, screen, waitFor } from "@/middleware/testing/dom";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { DebugProvider } from "@/providers/DebugProvider";
 import { DebugScreen } from "@/screens/DebugScreen";

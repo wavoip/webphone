@@ -41,19 +41,22 @@ export function CopyableText(props: Props) {
 
   return (
     <Tooltip open={copied()} positioning={{ placement: "top", gutter: 4 }}>
-      <TooltipTrigger asChild>
-        {/* biome-ignore lint/a11y/useSemanticElements: quem chama pode passar filhos de bloco, inválidos dentro de <button>; span + role=button + teclado mantêm a semântica. */}
-        <span
-          role="button"
-          tabIndex={0}
-          aria-label={props.ariaLabel}
-          onClick={handleClick}
-          onKeyDown={handleKeyDown}
-          class={`wv:inline-flex wv:items-center wv:gap-1 wv:rounded wv:px-1 wv:-mx-1 wv:cursor-pointer wv:select-none wv:transition-colors wv:hover:bg-foreground/10 wv:active:bg-foreground/20 wv:active:scale-[0.98] ${props.class ?? ""}`}
-        >
-          {props.children}
-        </span>
-      </TooltipTrigger>
+      <TooltipTrigger
+        asChild={(triggerProps) => (
+          // biome-ignore lint/a11y/useSemanticElements: quem chama pode passar filhos de bloco, inválidos dentro de <button>; span + role=button + teclado mantêm a semântica.
+          <span
+            {...triggerProps()}
+            role="button"
+            tabIndex={0}
+            aria-label={props.ariaLabel}
+            onClick={handleClick}
+            onKeyDown={handleKeyDown}
+            class={`wv:inline-flex wv:items-center wv:gap-1 wv:rounded wv:px-1 wv:-mx-1 wv:cursor-pointer wv:select-none wv:transition-colors wv:hover:bg-foreground/10 wv:active:bg-foreground/20 wv:active:scale-[0.98] ${props.class ?? ""}`}
+          >
+            {props.children}
+          </span>
+        )}
+      />
       <TooltipContent container={mount?.root} class="wv:bg-green-600 wv:text-white">
         {t("Copied")}
       </TooltipContent>
