@@ -39,15 +39,40 @@ inteiro; agrupar só tinha valor porque o React assinava por componente.
 
 ### Providers
 
-De nove para sete. Saíram:
+De nove para seis. Saíram:
 
 - **`WavoipProvider`** — tudo que os oito consumidores tiravam dele era campo do store ou
   chamada de controller. Era ponte para o React.
 - **`NotificationsProvider`** — provider vazio; o estado sempre esteve no store. Virou
   `lib/notifications.ts`.
+- **`MountProvider` e `PipProvider`** viraram um, o `SurfaceProvider`.
 
 Quem expõe estado agora expõe **acessor**, não valor: `isPiP()`, `isClosed()`. A janela do
 Picture-in-Picture some sem passar pelo nosso código, e um booleano capturado mentiria.
+
+#### A superfície
+
+São **duas superfícies e só uma ativa por vez**: a da página — shadow root fechado no
+widget, documento no PWA — e a janela do Picture-in-Picture, que ao abrir leva a tela
+inteira para lá. Enquanto eram dois providers, quem precisava de destino para portal tinha
+que perguntar aos dois qual valia, e quem esquecesse abria o conteúdo na superfície errada:
+
+- o diálogo de diagnóstico e o de configurações portavam sempre para a página, então com o
+  PiP aberto eles abriam atrás dele;
+- o tooltip do `CopyablePeer` ia para o `body` da janela do PiP, fora do quadro que carrega
+  a classe de tema — aparecia sem tema.
+
+Agora `useSurface()` responde `container()`, `rootNode()` e `window()` já resolvidos, e
+componente nenhum decide. Quem registra o quadro do PiP é o `PipPortal`, que é quem o
+desenha; o `container()` só o usa enquanto a janela existe, para um quadro órfão não virar
+destino.
+
+O `rootNode()` também alimenta o `EnvironmentProvider` do Ark, que aceita função — então a
+consulta de DOM dele acompanha a superfície em vez de ficar presa à página.
+
+A regra "voltar ao teclado fecha o PiP" saiu do provider e foi para `lib/call-effects.tsx`,
+onde moram as outras reações da interface à chamada. A superfície sabe abrir e fechar; o
+quando é decisão de tela.
 
 ### Componentes
 

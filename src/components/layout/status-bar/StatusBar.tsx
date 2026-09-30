@@ -7,16 +7,15 @@ import { Ping } from "@/components/layout/status-bar/Ping";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { useStore } from "@/middleware/solid/context";
-import { useMount } from "@/providers/MountProvider";
-import { usePip } from "@/providers/PipProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 export default function StatusBar() {
   const { startDrag, stopDrag, close } = useWidget();
-  const { togglePip } = usePip();
+  const { togglePip, layout } = useSurface();
   const state = useStore();
   // Dono da janela não se fecha nem se destaca dela: os dois botões são do widget.
-  const isFloating = useMount().layout === "floating";
+  const isFloating = layout === "floating";
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: precisa de interação

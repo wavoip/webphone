@@ -27,13 +27,13 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { t } from "@/lib/i18n";
 import { useMiddleware, useStore } from "@/middleware/solid/context";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 import { useSettings } from "@/providers/settings/Provider";
 import { DebugScreen } from "@/screens/DebugScreen";
 
 export function SettingsModal() {
   const state = useStore();
-  const { root } = useMount();
+  const { container } = useSurface();
   const [open, setOpen] = createSignal(false);
   const [qrcode, setQrcode] = createSignal<string | null>(null);
 
@@ -63,7 +63,7 @@ export function SettingsModal() {
         <Gear class="wv:max-sm:size-6 wv:max-sm:text-blue wv:pointer-events-none" />
       </DialogTrigger>
       <DialogContent
-        container={root}
+        container={container()}
         onClick={(e) => e.stopPropagation()}
         class="wv:flex wv:flex-col wv:gap-0 wv:h-[85vh] wv:max-h-[85vh] wv:sm:max-w-3xl wv:p-0 wv:overflow-hidden wv:max-sm:h-[100vh] wv:max-sm:max-h-[100vh] wv:max-sm:max-w-full wv:max-sm:rounded-none"
       >

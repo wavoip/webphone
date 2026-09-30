@@ -7,8 +7,7 @@ import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/solid/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
 import { DebugProvider } from "@/providers/DebugProvider";
-import { MountContext } from "@/providers/MountProvider";
-import { PipProvider } from "@/providers/PipProvider";
+import { SurfaceProvider } from "@/providers/SurfaceProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
 import type { WebphoneSettings } from "@/providers/settings/settings";
 import { ThemeProvider } from "@/providers/ThemeProvider";
@@ -66,7 +65,7 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
   const shadowHost = document.createElement("div");
   const shadowRoot = shadowHost.attachShadow({ mode: "open" });
   const rendered = render(() => (
-    <MountContext.Provider value={{ layout: "floating", root, rootNode: shadowRoot }}>
+    <SurfaceProvider layout="floating" root={root} rootNode={shadowRoot}>
       <SettingsProvider config={options.config ?? {}}>
         <MiddlewareRoot
           wavoip={fake.asWavoip()}
@@ -75,15 +74,13 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
           focus={options.focus}
         >
           <ThemeProvider root={root}>
-            <PipProvider rootNode={shadowRoot}>
-              <WidgetProvider>
-                <DebugProvider>{options.children?.()}</DebugProvider>
-              </WidgetProvider>
-            </PipProvider>
+            <WidgetProvider>
+              <DebugProvider>{options.children?.()}</DebugProvider>
+            </WidgetProvider>
           </ThemeProvider>
         </MiddlewareRoot>
       </SettingsProvider>
-    </MountContext.Provider>
+    </SurfaceProvider>
   ));
   const api = await webphoneAPIPromise();
   return { rendered, wavoip: fake, api };

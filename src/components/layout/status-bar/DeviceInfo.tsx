@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getLanguage, type TranslationKey, t } from "@/lib/i18n";
 import { useMiddleware } from "@/middleware/solid/context";
 import type { DeviceStateEntry } from "@/middleware/store/slices/deviceSlice";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 type Props = {
   settings: {
@@ -20,7 +20,7 @@ type Props = {
 
 export function DeviceInfo(props: Props) {
   const { device: deviceController } = useMiddleware().controllers;
-  const { root } = useMount();
+  const { container } = useSurface();
   const [confirmDelete, setConfirmDelete] = createSignal(false);
 
   const device = () => props.device;
@@ -43,7 +43,7 @@ export function DeviceInfo(props: Props) {
                 >
                   <Power class="wv:size-3.5" />
                 </TooltipTrigger>
-                <TooltipContent container={root}>
+                <TooltipContent container={container()}>
                   <p>{t("Power on device")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -64,7 +64,6 @@ export function DeviceInfo(props: Props) {
           showEnable={props.settings.showEnable}
           showRemove={props.settings.showRemove}
           device={device()}
-          root={root}
           onEnable={() => deviceController.enable(device().token)}
           onDisable={() => deviceController.disable(device().token)}
           onShowQRCode={() => props.setShowQRCode(device().qrCode ?? null)}
@@ -163,7 +162,7 @@ const TOKEN_MASK = "••••••••••••";
 
 function TokenLine(props: { token: string }) {
   const [visible, setVisible] = createSignal(false);
-  const { root } = useMount();
+  const { container } = useSurface();
 
   return (
     <div class="wv:flex wv:flex-row wv:items-center wv:gap-1 wv:min-w-0">
@@ -184,7 +183,7 @@ function TokenLine(props: { token: string }) {
             <EyeSlash class="wv:size-3.5" />
           </Show>
         </TooltipTrigger>
-        <TooltipContent container={root}>
+        <TooltipContent container={container()}>
           <p>{visible() ? t("Hide token") : t("Show token")}</p>
         </TooltipContent>
       </Tooltip>
@@ -217,12 +216,12 @@ function ActionCluster(props: {
   showEnable: boolean;
   showRemove: boolean;
   device: DeviceStateEntry;
-  root: HTMLDivElement;
   onEnable: () => void;
   onDisable: () => void;
   onShowQRCode: () => void;
   onConfirmDelete: () => void;
 }) {
+  const { container } = useSurface();
   const hasAny = () => props.showEnable || props.device.qrCode || props.showRemove;
   const switchDisabled = () => !["open", "CONNECTED"].includes(props.device.status as string);
 
@@ -244,7 +243,7 @@ function ActionCluster(props: {
                 </span>
               )}
             />
-            <TooltipContent container={props.root}>
+            <TooltipContent container={container()}>
               <p>{props.device.enable ? t("Disable device") : t("Enable device")}</p>
             </TooltipContent>
           </Tooltip>
@@ -259,7 +258,7 @@ function ActionCluster(props: {
             >
               <QrCode class="wv:size-4" />
             </TooltipTrigger>
-            <TooltipContent container={props.root}>
+            <TooltipContent container={container()}>
               <p>{t("Show QR Code")}</p>
             </TooltipContent>
           </Tooltip>
@@ -274,7 +273,7 @@ function ActionCluster(props: {
             >
               <Trash class="wv:size-4" />
             </TooltipTrigger>
-            <TooltipContent container={props.root}>
+            <TooltipContent container={container()}>
               <p>{t("Delete")}</p>
             </TooltipContent>
           </Tooltip>

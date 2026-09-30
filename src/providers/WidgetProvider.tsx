@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { resolveWebphonePosition, resolveWidgetButtonPosition } from "@/lib/widget-position";
 import { useStore } from "@/middleware/solid/context";
-import { useMount } from "@/providers/MountProvider";
-import { usePip } from "@/providers/PipProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 import { useSettings } from "@/providers/settings/Provider";
 
 type Position = { x: number; y: number };
@@ -29,8 +28,7 @@ const WidgetContext = createContext<WidgetContextType>();
 export function WidgetProvider(props: { children: JSX.Element }) {
   const state = useStore();
   const { position: positionInitial, buttonPosition: buttonPositionInitial } = useSettings();
-  const { isPiP } = usePip();
-  const { layout } = useMount();
+  const { isPiP, layout } = useSurface();
   const isFilled = layout === "filled";
 
   const [isDragging, setIsDragging] = createSignal(false);

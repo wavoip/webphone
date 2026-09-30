@@ -1,6 +1,6 @@
 import type { ActiveCall, AudioAnalyser } from "@wavoip/wavoip-api/web";
 import { createEffect, onCleanup } from "solid-js";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 type Props = {
   call?: ActiveCall;
@@ -10,7 +10,7 @@ const BARS = 15;
 const GAP = 2;
 
 export function WaveSound(props: Props) {
-  const { root } = useMount();
+  const { root } = useSurface();
   const theme = () => (root.classList.contains("dark") ? "dark" : "light");
   const smooth: number[] = Array(BARS).fill(0);
   let canvas: HTMLCanvasElement | undefined;

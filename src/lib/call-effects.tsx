@@ -2,7 +2,7 @@ import { createEffect, onCleanup } from "solid-js";
 import { toast } from "solid-sonner";
 import { OfferNotification } from "@/components/OfferNotification";
 import type { Middleware } from "@/middleware/Middleware";
-import { usePip } from "@/providers/PipProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 
 /**
@@ -13,6 +13,24 @@ import { useWidget } from "@/providers/WidgetProvider";
 export function wireCallToInterface(middleware: Middleware): void {
   showOffersAsToasts(middleware);
   followCallWithWidget(middleware);
+  closePipOnKeyboard(middleware);
+}
+
+/**
+ * Voltar ao teclado fecha o Picture-in-Picture: a janelinha existe para acompanhar uma
+ * chamada. A regra é de interface e mora aqui; a superfície só sabe abrir e fechar.
+ */
+function closePipOnKeyboard(middleware: Middleware): void {
+  const { closePip, isPiP } = useSurface();
+
+  onCleanup(
+    middleware.store.subscribe(
+      (s) => s.screen,
+      (tela, anterior) => {
+        if (tela === "keyboard" && anterior !== "keyboard" && isPiP()) closePip();
+      },
+    ),
+  );
 }
 
 function showOffersAsToasts(middleware: Middleware): void {
@@ -47,7 +65,7 @@ function showOffersAsToasts(middleware: Middleware): void {
  */
 function followCallWithWidget(middleware: Middleware): void {
   const { isClosed, setIsClosed, open: openWidget } = useWidget();
-  const { isPiP } = usePip();
+  const { isPiP } = useSurface();
   let closedBeforePip: boolean | null = null;
   let closedBeforeCall: boolean | null = null;
 

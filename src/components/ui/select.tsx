@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web";
 
 import { CaretDown, Check } from "@/components/icons";
 import { cn } from "@/lib/utils";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 export type SelectOption = { value: string; label: string };
 
@@ -21,7 +21,7 @@ type Props = {
  * de estado precisa dela inteira para navegar por teclado e por digitação.
  */
 function Select(props: Props) {
-  const { root } = useMount();
+  const { container } = useSurface();
   const collection = createMemo(() => createListCollection({ items: props.options }));
 
   return (
@@ -48,7 +48,7 @@ function Select(props: Props) {
         </ArkSelect.Trigger>
       </ArkSelect.Control>
 
-      <Portal mount={root}>
+      <Portal mount={container()}>
         <ArkSelect.Positioner>
           <ArkSelect.Content
             data-slot="select-content"

@@ -3,7 +3,7 @@ import { Portal } from "solid-js/web";
 import { type ComponentProps, splitProps } from "solid-js";
 
 import { cn } from "@/lib/utils";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 function Popover(props: ComponentProps<typeof ArkPopover.Root>) {
   return <ArkPopover.Root lazyMount unmountOnExit {...props} />;
@@ -13,13 +13,13 @@ function PopoverTrigger(props: ComponentProps<typeof ArkPopover.Trigger>) {
   return <ArkPopover.Trigger data-slot="popover-trigger" {...props} />;
 }
 
-/** Porta para o `root` do shell: é ele que carrega a classe de tema. */
+/** Porta para a superfície ativa: é ela que carrega a classe de tema. */
 function PopoverContent(props: ComponentProps<typeof ArkPopover.Content>) {
-  const { root } = useMount();
+  const { container } = useSurface();
   const [local, rest] = splitProps(props, ["class"]);
 
   return (
-    <Portal mount={root}>
+    <Portal mount={container()}>
       <ArkPopover.Positioner>
         <ArkPopover.Content
           data-slot="popover-content"

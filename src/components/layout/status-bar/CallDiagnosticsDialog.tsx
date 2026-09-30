@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { t } from "@/lib/i18n";
 import { useDebugInfo } from "@/providers/DebugProvider";
-import { useMount } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 const STATS_POLL_MS = 200;
 
@@ -27,7 +27,7 @@ function ms(value: number | null): string {
 }
 
 export function CallDiagnosticsDialog(props: Props) {
-  const { root } = useMount();
+  const { container } = useSurface();
   const debug = useDebugInfo();
   const [open, setOpen] = createSignal(false);
   const [stats, setStats] = createSignal<CallStats | null>(null);
@@ -64,7 +64,7 @@ export function CallDiagnosticsDialog(props: Props) {
         {props.children}
       </DialogTrigger>
       <DialogContent
-        container={root}
+        container={container()}
         onClick={(e) => e.stopPropagation()}
         class="wv:flex wv:flex-col wv:gap-3 wv:max-w-md wv:max-h-[85vh] wv:overflow-auto wv:p-6 wv:text-foreground"
       >

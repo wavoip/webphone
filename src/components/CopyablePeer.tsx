@@ -1,8 +1,7 @@
 import { createSignal, onCleanup, Show } from "solid-js";
 import MarqueeText from "@/components/MarqueeText";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useMount } from "@/providers/MountProvider";
-import { usePip } from "@/providers/PipProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 type Props = {
   displayName: string | null | undefined;
@@ -19,8 +18,7 @@ const FEEDBACK_DURATION_MS = 1500;
  */
 export function CopyablePeer(props: Props) {
   const [copied, setCopied] = createSignal(false);
-  const mount = useMount();
-  const pip = usePip();
+  const surface = useSurface();
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   onCleanup(() => {
@@ -28,14 +26,10 @@ export function CopyablePeer(props: Props) {
   });
 
   const label = () => props.displayName?.trim() || props.phone;
-  // Acessores: a janela do PiP abre e fecha durante a chamada, e o destino do tooltip
-  // (e a área de transferência) mudam com ela.
-  const tooltipContainer = () => pip.pipWindow()?.document.body ?? mount.root;
-  const clipboard = () => pip.pipWindow()?.navigator.clipboard ?? navigator.clipboard;
 
   const handleClick = async () => {
     try {
-      await clipboard().writeText(props.phone);
+      await surface.window().navigator.clipboard.writeText(props.phone);
     } catch (e) {
       console.error(e);
       return;
@@ -81,7 +75,7 @@ export function CopyablePeer(props: Props) {
             </span>
           )}
         />
-        <TooltipContent container={tooltipContainer()} class="wv:bg-green-600 wv:text-white">
+        <TooltipContent container={surface.container()} class="wv:bg-green-600 wv:text-white">
           Copiado
         </TooltipContent>
       </Tooltip>

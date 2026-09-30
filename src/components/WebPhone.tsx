@@ -3,8 +3,7 @@ import StatusBar from "@/components/layout/status-bar/StatusBar";
 import { PipPortal } from "@/components/PipPortal";
 import { wireCallToInterface } from "@/lib/call-effects";
 import { useMiddleware, useStore } from "@/middleware/solid/context";
-import { useMount } from "@/providers/MountProvider";
-import { usePip } from "@/providers/PipProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 import { useWidget } from "@/providers/WidgetProvider";
 import CallScreen from "@/screens/CallScreen";
 import KeyboardScreen from "@/screens/KeyboardScreen";
@@ -13,8 +12,7 @@ import OutgoingScreen from "@/screens/OutgoingScreen";
 export function WebPhone() {
   const state = useStore();
   const { startDrag, stopDrag } = useWidget();
-  const { root } = useMount();
-  const { pipWindow, isPiP } = usePip();
+  const { root, pipWindow, isPiP } = useSurface();
 
   // Aqui dentro porque depende de widget e de Picture-in-Picture, que são os providers
   // logo acima.

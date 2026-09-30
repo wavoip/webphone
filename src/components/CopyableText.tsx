@@ -1,7 +1,7 @@
-import { createSignal, type JSX, onCleanup, useContext } from "solid-js";
+import { createSignal, type JSX, onCleanup } from "solid-js";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { t } from "@/lib/i18n";
-import { MountContext } from "@/providers/MountProvider";
+import { useSurface } from "@/providers/SurfaceProvider";
 
 type Props = {
   value: string;
@@ -14,7 +14,7 @@ const FEEDBACK_DURATION_MS = 1500;
 
 export function CopyableText(props: Props) {
   const [copied, setCopied] = createSignal(false);
-  const mount = useContext(MountContext);
+  const { container } = useSurface();
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   onCleanup(() => {
@@ -57,7 +57,7 @@ export function CopyableText(props: Props) {
           </span>
         )}
       />
-      <TooltipContent container={mount?.root} class="wv:bg-green-600 wv:text-white">
+      <TooltipContent container={container()} class="wv:bg-green-600 wv:text-white">
         {t("Copied")}
       </TooltipContent>
     </Tooltip>
