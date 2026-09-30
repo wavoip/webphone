@@ -7,6 +7,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      /**
+       * O `phosphor-solid` não declara `exports` e o `main` dele é CJS, que faz
+       * `require("solid-js")` e carrega um segundo Solid — os dois param de enxergar o
+       * contexto um do outro e as máquinas do Ark nunca abrem. Os builds de produção
+       * pegam o `module` sozinhos; só o vitest precisa disto. Some quando os SVGs forem
+       * inlinados (DEV-544).
+       */
+      "phosphor-solid": path.resolve(__dirname, "./node_modules/phosphor-solid/dist/index.esm.js"),
     },
     // Duas cópias do solid-js quebram contexto e reatividade entre elas, em silêncio.
     dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
