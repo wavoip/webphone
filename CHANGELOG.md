@@ -47,6 +47,9 @@ distribuição — o widget de sempre e um PWA instalável.
   rótulo tinha sido importado da biblioteca de ícones por engano.
 - **Abrir as configurações reordenava a lista de números** para o resto da interface, e não
   só para aquela tela.
+- **Cinco botões da tela de chamada ficavam em português** em qualquer idioma — espera,
+  vídeo, transferir, teclado e silenciar/falar estavam escritos direto na tela. "Video"
+  vira "Vídeo" em português, de quebra.
 
 ### Acessibilidade e desempenho
 

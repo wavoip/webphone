@@ -53,7 +53,7 @@ export function CallButtons(props: Props) {
             <Pause size={32} weight="fill" />
           </p>
         </Button>
-        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
+        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">{t("Hold")}</p>
       </div>
 
       <div class="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -67,7 +67,9 @@ export function CallButtons(props: Props) {
             <VideoCameraSlash size={32} weight="fill" />
           </p>
         </Button>
-        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
+        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Video")}
+        </p>
       </div>
 
       {/* Um botão só: o que muda entre mudo e falando é o ícone, a cor e qual comando
@@ -91,7 +93,7 @@ export function CallButtons(props: Props) {
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
-          {muted() ? "Falar" : "Silenciar"}
+          {muted() ? t("Unmute") : t("Mute")}
         </p>
       </div>
 
@@ -106,7 +108,9 @@ export function CallButtons(props: Props) {
             <PhoneTransfer size={32} weight="fill" />{" "}
           </p>
         </Button>
-        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Transferir</p>
+        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Transfer")}
+        </p>
       </div>
       <div class="wv:flex wv:flex-col wv:justify-center wv:items-center">
         <Button
@@ -138,7 +142,9 @@ export function CallButtons(props: Props) {
             <DotsNine size={32} />
           </p>
         </Button>
-        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>
+        <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Keypad")}
+        </p>
       </div>
     </div>
   );

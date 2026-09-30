@@ -49,6 +49,12 @@ export type TranslationKey =
   | "Timed out"
   | "Canceled by the caller"
   | "Latency (ms)"
+  | "Hold"
+  | "Keypad"
+  | "Transfer"
+  | "Video"
+  | "Mute"
+  | "Unmute"
   | "Call"
   | "Erase digit"
   | "Recent numbers"
@@ -172,6 +178,12 @@ const ptBR: LocaleResource = {
   "Call ended": "Chamada encerrada",
   "Canceled by the caller": "Cancelada por quem ligou",
   "Latency (ms)": "Latência (ms)",
+  Hold: "Espera",
+  Keypad: "Teclado",
+  Transfer: "Transferir",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Falar",
   Call: "Ligar",
   "Erase digit": "Apagar dígito",
   "Recent numbers": "Números recentes",
@@ -294,6 +306,12 @@ const es: LocaleResource = {
   "Call ended": "Llamada finalizada",
   "Canceled by the caller": "Cancelada por quien llamó",
   "Latency (ms)": "Latencia (ms)",
+  Hold: "Espera",
+  Keypad: "Teclado",
+  Transfer: "Transferir",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Hablar",
   Call: "Llamar",
   "Erase digit": "Borrar dígito",
   "Recent numbers": "Números recientes",
