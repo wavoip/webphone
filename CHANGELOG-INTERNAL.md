@@ -66,9 +66,16 @@ Diferenças que não eram óbvias:
   tick.
 - O `Portal` vem do `solid-js/web`; o Ark não publica um para Solid.
 
-Uma biblioteca de ícones só (`phosphor-solid`), atrás de `src/components/icons.ts`. Trocar
-de pacote — ou inlinar os SVGs, que resolveria os seis pesos que o phosphor carrega — é
-mexer num arquivo só.
+Uma biblioteca de ícones só, o `lucide-solid`, atrás de `src/components/icons.tsx`. Eram
+duas em React (`@phosphor-icons/react` e `lucide-react`), e o phosphor embarcava os seis
+pesos de cada ícone para desenharmos três — 236 KB de bundle, 23 KB gzip, que saíram
+junto. O `lucide-solid` publica a condição `solid`, então também não traz um segundo
+runtime.
+
+O nome que exportamos descreve o desenho no nosso vocabulário e o nome do lucide está no
+caminho do import, ao lado — foi apelido sem origem visível que deixou quatro ícones
+apontando para o desenho errado. A única marca de terceiro, o logo do WhatsApp, é SVG
+nosso: o lucide não desenha marca.
 
 ### Delegação de evento
 
@@ -148,11 +155,10 @@ store desde sempre.
   `fireEvent.input`.
 - O Ark monta e desmonta com transição; depois do clique, adiante o timer antes de
   afirmar que o conteúdo apareceu.
-- O `phosphor-solid` não declara `exports` e o `main` dele é CJS, que faz
-  `require("solid-js")` e carrega um **segundo Solid** — contexto e reatividade param de
-  atravessar, e as máquinas do Ark nunca abrem. Os builds pegam o `module` sozinhos; o
-  `vitest.config.ts` tem um alias para o ESM. Sai junto com o pacote, quando os SVGs forem
-  inlinados.
+- Pacote sem `exports` e com `main` CJS faz `require("solid-js")` e carrega um **segundo
+  Solid** — contexto e reatividade param de atravessar, e as máquinas do Ark nunca abrem.
+  Foi assim com o `phosphor-solid`, e o sintoma no teste é o conteúdo que nunca aparece.
+  Ao escolher biblioteca, confira se ela publica a condição `solid`.
 
 ### Build
 

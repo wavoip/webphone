@@ -32,6 +32,14 @@ distribuição — o widget de sempre e um PWA instalável.
 
   Antes era preciso remontar o estado a partir dos eventos e manter uma cópia local em dia.
 
+### Aparência
+
+- **Os ícones passam a ser traçados**, e não preenchidos. O webphone usa uma biblioteca de
+  ícones só, e o desenho muda onde havia preenchimento — os botões de atender, desligar e
+  recusar entre eles. Nada muda no que cada botão faz, nem no nome ou no rótulo de
+  acessibilidade de nenhum deles.
+- **O aplicativo instalável ganha o ícone da Wavoip**, no lugar do provisório.
+
 ### Correções
 
 - **Picture-in-Picture ficava inerte.** A janela abria e desenhava certo, mas nenhum botão
