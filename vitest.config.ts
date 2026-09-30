@@ -10,14 +10,19 @@ export default defineConfig({
     },
     // Duas cópias do solid-js quebram contexto e reatividade entre elas, em silêncio.
     dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
-    // Sem isto o vitest resolve o runtime de servidor do Solid e nada renderiza.
-    conditions: ["development", "browser"],
+    /**
+     * `solid` é o que faz diferença: bibliotecas como o Ark publicam o JSX cru nessa
+     * condição, para o plugin do consumidor compilar. Sem ela vem o `default`, que já
+     * está compilado com o runtime dentro — e aí existem dois Solid, que não enxergam o
+     * contexto um do outro.
+     */
+    conditions: ["solid", "development", "browser"],
   },
   test: {
     // Sem isto o vitest resolve as dependências pela condição de servidor e o
     // `solid-js` acaba carregado duas vezes — contexto e reatividade param de
     // atravessar a fronteira, sem erro nenhum.
-    server: { deps: { inline: [/solid-js/, /@solidjs/, /@ark-ui/, /solid-sonner/, /phosphor-solid/] } },
+    server: { deps: { inline: true } },
     environment: "happy-dom",
     globals: true,
     include: ["src/**/*.test.{ts,tsx}"],

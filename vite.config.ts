@@ -27,7 +27,9 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    // Duas cópias do solid-js quebram contexto e reatividade entre elas, em silêncio.
+    // `solid` traz o JSX cru das bibliotecas para o nosso plugin compilar; sem ela vem
+    // o pré-compilado, com um segundo runtime dentro.
+    conditions: ["solid"],
     dedupe: ["solid-js", "solid-js/web", "solid-js/store"],
   },
   server: {
