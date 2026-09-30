@@ -94,6 +94,19 @@ sabe, e a mídia foi mantida de propósito).
 Os dublês em `FakeWavoip.ts` movem o status antes de resolver, como a lib. **Dublê que não
 cumpre o contrato da lib faz o teste concordar com a suposição, não com a realidade.**
 
+### Armadilhas encontradas traduzindo
+
+Nenhuma destas tinha teste, e nenhuma apareceria numa tradução mecânica.
+
+- `devices.sort(...)` ordenava o array **do estado**. Em React só reordenava; com store
+  reativo é mutação durante o desenho. Ordene uma cópia.
+- `hasWarnings` encadeava contagens com `&&`, exigindo todos os problemas ao mesmo tempo.
+- O `connectionChanged` derivava status do payload, então parar a mídia virava "caiu" —
+  inclusive quando era o próprio usuário desligando.
+- `Badge` foi importado da biblioteca de ícones e usado envolvendo texto.
+- O `WebPhone` tinha a escolha de tela escrita duas vezes, uma para a página e outra para a
+  janela do PiP, sem nada garantindo que continuassem iguais.
+
 ### Build
 
 - `pnpm build` produz `dist` (pacote npm, lib) e `dist-app` (PWA).

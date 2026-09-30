@@ -45,6 +45,8 @@ distribuição — o widget de sempre e um PWA instalável.
   números recentes, apagar dígito e ligar. Eram invisíveis para leitor de tela.
 - **O token do device aparecia dentro de um ícone** na lista de avisos: o componente de
   rótulo tinha sido importado da biblioteca de ícones por engano.
+- **Abrir as configurações reordenava a lista de números** para o resto da interface, e não
+  só para aquela tela.
 
 ### Acessibilidade e desempenho
 
