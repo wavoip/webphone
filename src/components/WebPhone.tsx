@@ -51,19 +51,9 @@ export function WebPhone() {
         onMouseUp={stopDrag}
         onMouseDown={handleMouseDown}
       >
-        <Show when={state.screen === "keyboard"}>
-          <KeyboardScreen />
-        </Show>
-        {/* Com o PiP aberto a chamada mora lá; deixar as duas montadas daria dois
-            KeyboardScreen disputando o mesmo laço de discagem. */}
-        <Show when={!isPiP()}>
-          <Show when={state.screen === "outgoing"}>
-            <OutgoingScreen />
-          </Show>
-          <Show when={state.screen === "call"}>
-            <CallScreen />
-          </Show>
-        </Show>
+        {/* A tela mora num lugar só: com o PiP aberto ela está lá. Montar as duas daria
+            dois KeyboardScreen disputando o mesmo laço de discagem. */}
+        <Show when={!isPiP()}>{telaAtual()}</Show>
 
         <p
           class="wv:text-neutral-500 pointer-events-none wv:absolute wv:bottom-1 wv:left-2 wv:select-none wv:z-50 wv:text-[12px]"
