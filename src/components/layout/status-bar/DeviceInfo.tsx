@@ -152,7 +152,7 @@ function PhoneLine(props: { phone: string }) {
   return (
     <CopyableText value={props.phone} ariaLabel={t("Copy phone")}>
       <span class="wv:inline-flex wv:items-center wv:gap-2 wv:text-base wv:font-semibold wv:text-foreground">
-        <Phone size={16} weight="fill" class="wv:text-green-500" />
+        <Phone size={16} class="wv:text-green-500" />
         <span class="wv:truncate">{props.phone}</span>
       </span>
     </CopyableText>
@@ -200,7 +200,7 @@ function TokenLine(props: { token: string }) {
 function RestrictionBar(props: { until: Date | null }) {
   return (
     <div class="wv:flex wv:flex-row wv:items-center wv:gap-2 wv:px-2.5 wv:py-1.5 wv:rounded-md wv:bg-amber-500/10 wv:border-l-4 wv:border-amber-500">
-      <Warning size={16} weight="fill" class="wv:text-amber-500 wv:shrink-0" />
+      <Warning size={16} class="wv:text-amber-500 wv:shrink-0" />
       <span class="wv:text-[12px] wv:font-semibold wv:text-amber-500">{t("Restricted")}</span>
       <Show when={props.until}>
         {(quando) => (

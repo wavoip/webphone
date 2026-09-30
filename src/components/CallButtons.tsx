@@ -6,8 +6,8 @@ import {
   Microphone,
   MicrophoneSlash,
   Pause,
-  PhoneOutgoing,
   PhoneSlash,
+  PhoneTransfer,
   VideoCameraSlash,
 } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export function CallButtons(props: Props) {
           disabled
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <Pause size={32} weight="fill" />
+            <Pause size={32} />
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">{t("Hold")}</p>
@@ -64,7 +64,7 @@ export function CallButtons(props: Props) {
           disabled
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <VideoCameraSlash size={32} weight="fill" />
+            <VideoCameraSlash size={32} />
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
@@ -87,8 +87,8 @@ export function CallButtons(props: Props) {
           disabled={actionMade()}
         >
           <p class={`wv:text-[24px] wv:leading-6 wv:font-semibold ${muted() ? "wv:text-[red]" : ""}`}>
-            <Show when={muted()} fallback={<Microphone size={32} weight="fill" />}>
-              <MicrophoneSlash size={32} weight="fill" />
+            <Show when={muted()} fallback={<Microphone size={32} />}>
+              <MicrophoneSlash size={32} />
             </Show>
           </p>
         </Button>
@@ -105,7 +105,7 @@ export function CallButtons(props: Props) {
           disabled
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PhoneOutgoing size={32} weight="fill" />{" "}
+            <PhoneTransfer size={32} />{" "}
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
@@ -124,7 +124,7 @@ export function CallButtons(props: Props) {
           aria-busy={actionMade() && isOutgoing()}
         >
           <p class="wv:text-[24px] wv:leading-6 wv:font-semibold ">
-            <PhoneSlash size={32} weight="fill" />
+            <PhoneSlash size={32} />
           </p>
         </Button>
         <p class="wv:text-[12px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">

@@ -1,6 +1,6 @@
 import { type DiagnosticSeverity, type DiagnosticsReport, runDiagnostics, webRuntime } from "@wavoip/wavoip-api/web";
 import { createSignal, For, type JSX, onCleanup, onMount, Show } from "solid-js";
-import { Activity, Browser, Copy, Globe, Microphone, Package, SpinnerGap, Warning, Waves } from "@/components/icons";
+import { Browser, Copy, Globe, Microphone, Package, Spinner, Stethoscope, Warning, Waveform } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
 import { collectSystemInfo, type SystemInfo } from "@/lib/system-info";
@@ -84,7 +84,7 @@ export function DebugScreen() {
     <div class="wv:flex wv:flex-col wv:h-full wv:text-foreground">
       <div class="wv:sticky wv:top-0 wv:z-10 wv:flex wv:items-center wv:justify-between wv:gap-2 wv:px-6 wv:pt-4 wv:pb-2 wv:max-sm:px-4 wv:bg-background/95 wv:backdrop-blur">
         <span class="wv:inline-flex wv:items-center wv:gap-1.5 wv:rounded-full wv:border wv:border-border/60 wv:bg-muted/40 wv:px-2 wv:py-0.5 wv:text-xs wv:font-mono wv:tabular-nums wv:text-muted-foreground">
-          <Package class="wv:size-3.5" weight="duotone" />v{__WEBPHONE_VERSION__}
+          <Package class="wv:size-3.5" />v{__WEBPHONE_VERSION__}
         </span>
         <Button
           type="button"
@@ -94,7 +94,7 @@ export function DebugScreen() {
           aria-label={t("Copy report")}
           class="wv:gap-2"
         >
-          <Copy class="wv:size-4" weight="duotone" />
+          <Copy class="wv:size-4" />
           <span aria-live="polite">{copied() ? "✓" : t("Copy report")}</span>
         </Button>
       </div>
@@ -103,12 +103,12 @@ export function DebugScreen() {
         ref={scrollEl}
         class="wv:flex-1 wv:overflow-auto wv:px-6 wv:pb-6 wv:max-sm:px-4 wv:flex wv:flex-col wv:gap-3"
       >
-        <Card title={t("Browser")} icon={<Browser class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Browser")} icon={<Browser class="wv:size-4" />}>
           <p class="wv:text-xs wv:font-mono wv:break-all wv:text-foreground">{system()?.userAgent ?? "…"}</p>
         </Card>
 
         <div class="wv:grid wv:gap-3 wv:sm:grid-cols-2">
-          <Card title={t("Network")} icon={<Globe class="wv:size-4" weight="duotone" />}>
+          <Card title={t("Network")} icon={<Globe class="wv:size-4" />}>
             <KeyValue
               k="online"
               v={
@@ -130,14 +130,14 @@ export function DebugScreen() {
             </Show>
           </Card>
 
-          <Card title={t("Audio devices")} icon={<Microphone class="wv:size-4" weight="duotone" />}>
+          <Card title={t("Audio devices")} icon={<Microphone class="wv:size-4" />}>
             <KeyValue k="microphone permission" v={system()?.microphonePermission ?? "…"} />
             <KeyValue k="inputs" v={String(system()?.audioInputs.length ?? 0)} />
             <KeyValue k="outputs" v={String(system()?.audioOutputs.length ?? 0)} />
           </Card>
         </div>
 
-        <Card title={t("Environment check")} icon={<Waves class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Environment check")} icon={<Waveform class="wv:size-4" />}>
           <div class="wv:flex wv:flex-wrap wv:items-center wv:gap-3">
             <Button
               type="button"
@@ -147,8 +147,8 @@ export function DebugScreen() {
               aria-label={t("Run check")}
               class="wv:bg-green-500 wv:hover:bg-green-600 wv:gap-2 wv:w-fit"
             >
-              <Show when={checkupRunning()} fallback={<Waves class="wv:size-4" weight="duotone" />}>
-                <SpinnerGap class="wv:size-4 wv:animate-spin" />
+              <Show when={checkupRunning()} fallback={<Waveform class="wv:size-4" />}>
+                <Spinner class="wv:size-4 wv:animate-spin" />
               </Show>
               {t("Run check")}
             </Button>
@@ -193,7 +193,7 @@ export function DebugScreen() {
           </Show>
         </Card>
 
-        <Card title={t("Recent ICE diagnostics")} icon={<Activity class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Recent ICE diagnostics")} icon={<Stethoscope class="wv:size-4" />}>
           <Show when={debug.recentIceDiagnostics.length > 0} fallback={<EmptyState />}>
             <ul class="wv:text-xs wv:font-mono wv:flex wv:flex-col wv:gap-2">
               <For each={debug.recentIceDiagnostics.slice().reverse()}>
@@ -215,7 +215,7 @@ export function DebugScreen() {
           </Show>
         </Card>
 
-        <Card title={t("Recent issues")} icon={<Warning class="wv:size-4" weight="duotone" />}>
+        <Card title={t("Recent issues")} icon={<Warning class="wv:size-4" />}>
           <Show when={debug.recentIssues.length > 0} fallback={<EmptyState />}>
             <ul class="wv:text-xs wv:font-mono wv:break-all wv:flex wv:flex-col wv:gap-1">
               <For each={debug.recentIssues.slice().reverse()}>

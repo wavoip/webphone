@@ -105,7 +105,7 @@ export function OfferNotification(props: Props) {
               class="wv:text-[white] wv:p-4 wv:bg-red-500 wv:hover:bg-red-700 wv:active:bg-red-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
               onClick={() => resolver(props.offer.reject())}
             >
-              <PhoneSlash class="wv:size-5" weight="fill" />
+              <PhoneSlash class="wv:size-5" />
             </Button>
             <Button
               type="submit"
@@ -118,7 +118,7 @@ export function OfferNotification(props: Props) {
                 toast.dismiss(props.offer.id);
               }}
             >
-              <X class="wv:size-5" weight="bold" />
+              <X class="wv:size-5" />
             </Button>
             <Button
               type="submit"
@@ -126,7 +126,7 @@ export function OfferNotification(props: Props) {
               class="wv:text-[white]  wv:p-4 wv:bg-green-500 wv:hover:bg-green-700 wv:active:bg-green-700 wv:hover:cursor-pointer wv:rounded-full wv:h-[40px] wv:w-[40px]"
               onClick={() => resolver(props.offer.accept())}
             >
-              <Phone class="wv:size-5" weight="fill" />
+              <Phone class="wv:size-5" />
             </Button>
           </div>
         </Show>

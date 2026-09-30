@@ -6,9 +6,9 @@ import type { Theme } from "@/providers/settings/settings";
 import { useTheme } from "@/providers/ThemeProvider";
 
 const THEMES: { value: Theme; label: string; icon: () => JSX.Element }[] = [
-  { value: "light", label: "Light", icon: () => <Sun class="wv:size-4" weight="duotone" /> },
-  { value: "dark", label: "Dark", icon: () => <Moon class="wv:size-4" weight="duotone" /> },
-  { value: "system", label: "System", icon: () => <Desktop class="wv:size-4" weight="duotone" /> },
+  { value: "light", label: "Light", icon: () => <Sun class="wv:size-4" /> },
+  { value: "dark", label: "Dark", icon: () => <Moon class="wv:size-4" /> },
+  { value: "system", label: "System", icon: () => <Desktop class="wv:size-4" /> },
 ];
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -25,7 +25,7 @@ export function PreferencesConfig() {
     <div class="wv:flex wv:flex-col wv:gap-6">
       <Section
         title={t("Theme")}
-        icon={<Sun class="wv:size-4" weight="duotone" />}
+        icon={<Sun class="wv:size-4" />}
         description={t("Pick light, dark, or follow the system")}
       >
         <div class="wv:grid wv:grid-cols-3 wv:gap-2">
@@ -46,7 +46,7 @@ export function PreferencesConfig() {
 
       <Section
         title={t("Language")}
-        icon={<Translate class="wv:size-4" weight="duotone" />}
+        icon={<Translate class="wv:size-4" />}
         description={t("Switch the webphone interface language")}
       >
         <div class="wv:grid wv:grid-cols-1 wv:gap-2 wv:sm:grid-cols-3">

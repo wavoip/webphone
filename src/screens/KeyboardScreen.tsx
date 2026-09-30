@@ -77,7 +77,6 @@ export default function KeyboardScreen() {
             class="wv:absolute wv:right-0 wv:top-1/2 wv:-translate-y-1/2 wv:p-1 wv:text-muted-400 wv:cursor-pointer"
           >
             <CaretDown
-              weight="bold"
               class={`wv:size-4 wv:transition-transform wv:duration-200 ${recentOpen() ? "wv:rotate-180" : ""}`}
             />
           </button>
@@ -162,7 +161,7 @@ export default function KeyboardScreen() {
             }}
             class="wv:aspect-square wv:size-fit wv:p-2 wv:shadow-none wv:bg-[transparent] wv:hover:bg-[transparent] wv:hover:text-[green] wv:text-foreground wv:hover:cursor-pointer wv:h-[56px] wv:touch-manipulation"
           >
-            <Backspace class="wv:size-5 wv:max-sm:size-8" weight="fill" />
+            <Backspace class="wv:size-5 wv:max-sm:size-8" />
           </Button>
 
           {/* Discando, o botão verde vira a saída do loop. */}
@@ -176,7 +175,7 @@ export default function KeyboardScreen() {
                 aria-label={t("Call")}
                 class="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-green-700 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
               >
-                <Phone class="wv:size-7" weight="fill" />
+                <Phone class="wv:size-7" />
               </Button>
             }
           >
@@ -188,7 +187,7 @@ export default function KeyboardScreen() {
               onClick={() => middleware.controllers.call.abortDial()}
               class="wv:aspect-square wv:size-full wv:rounded-full wv:bg-[#e7000b] wv:hover:bg-red-800 wv:hover:text-background wv:hover:cursor-pointer wv:text-[white] wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0"
             >
-              <PhoneSlash class="wv:size-7" weight="fill" />
+              <PhoneSlash class="wv:size-7" />
             </Button>
           </Show>
         </div>

@@ -1,6 +1,16 @@
 import { QrCode as ArkQrCode } from "@ark-ui/solid/qr-code";
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js";
-import { Activity, ArrowLeft, DeviceMobile, Gear, Microphone, Phone, Plus, QrCode, Sliders } from "@/components/icons";
+import {
+  ArrowLeft,
+  DeviceMobile,
+  Gear,
+  Microphone,
+  Phone,
+  Plus,
+  QrCode,
+  Sliders,
+  Stethoscope,
+} from "@/components/icons";
 import { AudioConfig } from "@/components/layout/settings/AudioConfig";
 import { PreferencesConfig } from "@/components/layout/settings/PreferencesConfig";
 import { DeviceInfo } from "@/components/layout/status-bar/DeviceInfo";
@@ -80,7 +90,7 @@ function PainelQrCode(props: { codigo: string; onVoltar: () => void }) {
         </button>
         <div class="wv:flex wv:flex-col wv:gap-0.5 wv:min-w-0 wv:flex-1">
           <DialogTitle class="wv:flex wv:items-center wv:gap-2 wv:text-lg wv:font-semibold wv:text-foreground">
-            <QrCode class="wv:size-5 wv:text-green-500" weight="fill" />
+            <QrCode class="wv:size-5 wv:text-green-500" />
             {t("Link a WhatsApp number")}
           </DialogTitle>
           <DialogDescription class="wv:text-sm wv:text-muted-foreground">
@@ -91,15 +101,15 @@ function PainelQrCode(props: { codigo: string; onVoltar: () => void }) {
 
       <ol class="wv:flex wv:flex-col wv:gap-2 wv:px-1 wv:text-sm wv:text-muted-foreground">
         <li class="wv:flex wv:items-start wv:gap-2">
-          <DeviceMobile class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+          <DeviceMobile class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" />
           <span>{t("Open WhatsApp on your phone")}</span>
         </li>
         <li class="wv:flex wv:items-start wv:gap-2">
-          <Gear class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+          <Gear class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" />
           <span>{t("Tap menu, then Linked devices")}</span>
         </li>
         <li class="wv:flex wv:items-start wv:gap-2">
-          <QrCode class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" weight="fill" />
+          <QrCode class="wv:size-4 wv:mt-0.5 wv:text-foreground/60 wv:shrink-0" />
           <span>{t("Point your camera at the code below")}</span>
         </li>
       </ol>
@@ -154,22 +164,22 @@ function PainelConfiguracoes(props: { onQrCode: (codigo: string | null) => void 
         >
           <Show when={state.settings.showDevices}>
             <TabsTrigger value="devices" class="wv:gap-2 wv:max-sm:min-h-9">
-              <Phone class="wv:size-4" weight="duotone" />
+              <Phone class="wv:size-4" />
               {t("Numbers")}
             </TabsTrigger>
           </Show>
           <Show when={showAudio}>
             <TabsTrigger value="settings" disabled class="wv:gap-2 wv:max-sm:min-h-9">
-              <Microphone class="wv:size-4" weight="duotone" />
+              <Microphone class="wv:size-4" />
               Audio
             </TabsTrigger>
           </Show>
           <TabsTrigger value="preferences" class="wv:gap-2 wv:max-sm:min-h-9">
-            <Sliders class="wv:size-4" weight="duotone" />
+            <Sliders class="wv:size-4" />
             {t("Preferences")}
           </TabsTrigger>
           <TabsTrigger value="diagnostics" class="wv:gap-2 wv:max-sm:min-h-9">
-            <Activity class="wv:size-4" weight="duotone" />
+            <Stethoscope class="wv:size-4" />
             {t("Diagnostics")}
           </TabsTrigger>
         </TabsList>

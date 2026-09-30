@@ -42,7 +42,7 @@ export default function StatusBar() {
             class="wv:size-fit wv:rounded-full wv:aspect-square wv:active:bg-[#D9D9DD] wv:transition-colors wv:duration-200 wv:touch-manipulation wv:!p-1 wv:max-sm:!p-2 wv:text-foreground"
             onClick={() => togglePip()}
           >
-            <PictureInPicture class="wv:size-5 wv:max-sm:size-8 wv:pointer-events-none" weight="fill" />
+            <PictureInPicture class="wv:size-5 wv:max-sm:size-8 wv:pointer-events-none" />
           </Button>
         </Show>
         <Show when={state.active}>{(call) => <Ping call={call()} />}</Show>
