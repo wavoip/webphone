@@ -1,6 +1,6 @@
 import type { ActiveCall, CallConnection } from "@wavoip/wavoip-api/web";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
-import { WifiHigh, WifiLow, WifiMedium, WifiSlash, WifiX } from "@/components/icons";
+import { WifiHigh, WifiLow, WifiMedium, WifiSlash } from "@/components/icons";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
 
 const PING_POLL_MS = 500;
@@ -85,7 +85,7 @@ export function Ping(props: Props) {
         when={connection() !== "disconnected"}
         fallback={
           <>
-            <WifiX class="wv:size-4" />
+            <WifiSlash class="wv:size-4" />
             <span class="wv:text-[12px] wv:font-medium">offline</span>
           </>
         }

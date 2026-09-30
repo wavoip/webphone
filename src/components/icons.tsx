@@ -42,7 +42,6 @@ import WifiHighGlyph from "lucide-solid/icons/wifi";
 import WifiMediumGlyph from "lucide-solid/icons/wifi-high";
 import WifiLowGlyph from "lucide-solid/icons/wifi-low";
 import WifiSlashGlyph from "lucide-solid/icons/wifi-off";
-import WifiXGlyph from "lucide-solid/icons/wifi-zero";
 import XGlyph from "lucide-solid/icons/x";
 import { type JSX, splitProps } from "solid-js";
 
@@ -139,7 +138,6 @@ export const WifiHigh = icon(WifiHighGlyph, 1.14);
 export const WifiLow = icon(WifiLowGlyph, 1.369);
 export const WifiMedium = icon(WifiMediumGlyph, 1.236);
 export const WifiSlash = icon(WifiSlashGlyph, 1.14);
-export const WifiX = icon(WifiXGlyph);
 export const X = icon(XGlyph, 1.037);
 
 /**
