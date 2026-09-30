@@ -14,6 +14,15 @@ class FakeClipboard {
   };
 }
 
+// O Ark monta e desmonta o tooltip depois da transição, e não no tick em que `open` muda.
+const TRANSITION_MS = 50;
+
+async function settleTooltip(): Promise<void> {
+  await act(async () => {
+    vi.advanceTimersByTime(TRANSITION_MS);
+  });
+}
+
 describe("CopyablePeer", () => {
   let clipboard: FakeClipboard;
   let originalClipboard: PropertyDescriptor | undefined;
@@ -62,6 +71,7 @@ describe("CopyablePeer", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /copiar telefone/i }));
     });
+    await settleTooltip();
     expect(screen.getAllByText("Copiado").length).toBeGreaterThan(0);
   });
 
@@ -70,15 +80,12 @@ describe("CopyablePeer", () => {
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: /copiar telefone/i }));
     });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado").length).toBeGreaterThan(0);
     await act(async () => {
       vi.advanceTimersByTime(1500);
     });
-    await act(async () => {
-      // O Ark desmonta o tooltip depois da transição de saída, e não no mesmo tick em
-      // que o estado fecha. O que se observa é igual; só não é mais instantâneo.
-      vi.advanceTimersByTime(50);
-    });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });
 
@@ -102,11 +109,7 @@ describe("CopyablePeer", () => {
     await act(async () => {
       vi.advanceTimersByTime(600);
     });
-    await act(async () => {
-      // O Ark desmonta o tooltip depois da transição de saída, e não no mesmo tick em
-      // que o estado fecha. O que se observa é igual; só não é mais instantâneo.
-      vi.advanceTimersByTime(50);
-    });
+    await settleTooltip();
     expect(screen.queryAllByText("Copiado")).toHaveLength(0);
   });
 

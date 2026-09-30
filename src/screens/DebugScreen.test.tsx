@@ -1,5 +1,5 @@
 import type { IceDiagnostics } from "@wavoip/wavoip-api/web";
-import type { ReactNode } from "react";
+import type { JSX } from "solid-js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Middleware } from "@/middleware/Middleware";
 import { MiddlewareProvider } from "@/middleware/solid/context";
@@ -25,11 +25,11 @@ vi.mock("@wavoip/wavoip-api/web", async (importOriginal) => {
   };
 });
 
-function Wrapper({ children }: { children: ReactNode }) {
+function Wrapper(props: { children: JSX.Element }) {
   const middleware = new Middleware({ wavoip: new FakeWavoip(["tok-1"]).asWavoip() }).init();
   return (
     <MiddlewareProvider middleware={middleware}>
-      <DebugProvider>{children}</DebugProvider>
+      <DebugProvider>{props.children}</DebugProvider>
     </MiddlewareProvider>
   );
 }
@@ -50,7 +50,7 @@ describe("DebugScreen", () => {
   });
 
   it("renders the main sections", () => {
-    render(<DebugScreen />, { wrapper: Wrapper });
+    render(() => <DebugScreen />, { wrapper: Wrapper });
     expect(screen.getByText(/Navegador/i)).toBeDefined();
     expect(screen.getByText(/Rede/i)).toBeDefined();
     expect(screen.getByText(/Áudio/i)).toBeDefined();
@@ -59,7 +59,7 @@ describe("DebugScreen", () => {
 
   it("runs runDiagnostics when the user clicks the check button and renders the report", async () => {
     const api = await import("@wavoip/wavoip-api/web");
-    render(<DebugScreen />, { wrapper: Wrapper });
+    render(() => <DebugScreen />, { wrapper: Wrapper });
 
     const button = screen.getByRole("button", { name: /Testar ambiente/i });
     button.click();
@@ -74,7 +74,7 @@ describe("DebugScreen", () => {
   });
 
   it("copies a JSON report when the copy button is clicked", async () => {
-    render(<DebugScreen />, { wrapper: Wrapper });
+    render(() => <DebugScreen />, { wrapper: Wrapper });
 
     const copy = screen.getByRole("button", { name: /Copiar relatório/i });
     copy.click();

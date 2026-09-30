@@ -6,6 +6,7 @@ import type { FocusTracker } from "@/middleware/browser/focusTracker";
 import type { BrowserNotifier } from "@/middleware/browser/notifier";
 import { MiddlewareRoot } from "@/middleware/solid/MiddlewareRoot";
 import { FakeWavoip } from "@/middleware/testing/FakeWavoip";
+import { DebugProvider } from "@/providers/DebugProvider";
 import { MountContext } from "@/providers/MountProvider";
 import { PipProvider } from "@/providers/PipProvider";
 import { SettingsProvider } from "@/providers/settings/Provider";
@@ -75,7 +76,9 @@ export async function renderWithProviders(options: MountOptions = {}): Promise<{
         >
           <ThemeProvider root={root}>
             <PipProvider rootNode={shadowRoot}>
-              <WidgetProvider>{options.children?.()}</WidgetProvider>
+              <WidgetProvider>
+                <DebugProvider>{options.children?.()}</DebugProvider>
+              </WidgetProvider>
             </PipProvider>
           </ThemeProvider>
         </MiddlewareRoot>

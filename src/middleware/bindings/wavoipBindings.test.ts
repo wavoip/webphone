@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { bindWavoipEvents } from "@/middleware/bindings/wavoipBindings";
 import { CallController } from "@/middleware/controllers/CallController";
+import { NotificationsController } from "@/middleware/controllers/NotificationsController";
 import { EventBus } from "@/middleware/events/EventBus";
 import type { WebphoneEventMap } from "@/middleware/events/eventTypes";
 import { MiddlewareRegistry } from "@/middleware/pipeline/MiddlewareRegistry";
@@ -18,7 +19,11 @@ describe("bindWavoipEvents", () => {
     wavoip = new FakeWavoip();
     registry = new MiddlewareRegistry();
     store = createMiddlewareStore();
-    callController = new CallController({ wavoip: wavoip.asWavoip(), store });
+    callController = new CallController({
+      wavoip: wavoip.asWavoip(),
+      store,
+      notifications: new NotificationsController({ store }),
+    });
     events = new EventBus<WebphoneEventMap>();
   });
 
