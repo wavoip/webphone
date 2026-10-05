@@ -117,6 +117,8 @@ desistência só tem efeito **entre** dispositivos.
 *Cancelar* em vez de *Finalizar*, e mostra *Cancelando...* até o servidor confirmar. Cancelar
 pode ser recusado — o caso real é o destinatário atender no exato instante do clique. Nesse
 caso o botão volta a ficar disponível, um aviso aparece, e **a chamada continua com áudio**.
+O mesmo acontece quando o pedido fica sem resposta: passados doze segundos o botão volta com
+o aviso, em vez de ficar desabilitado com a chamada parada na tela.
 
 O desfecho chega como o status `CANCELLED` no evento [`call:ended`](#eventos-disponiveis).
 

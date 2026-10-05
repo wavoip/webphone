@@ -96,9 +96,15 @@ export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements
   mute = async () => ({ err: null });
   unmute = async () => ({ err: null });
   cancelResult: { err: string | null } = { err: null };
+  /** A biblioteca que lança no lugar de responder, como numa versão incompatível. */
+  cancelFailure?: Error;
+  /** A biblioteca que nunca responde: Promise pendente para sempre. */
+  cancelHangs = false;
   cancelCalls = 0;
   cancel = async () => {
     this.cancelCalls++;
+    if (this.cancelFailure) throw this.cancelFailure;
+    if (this.cancelHangs) return new Promise<{ err: string | null }>(() => {});
     return this.cancelResult;
   };
   end = async () => this.cancel();

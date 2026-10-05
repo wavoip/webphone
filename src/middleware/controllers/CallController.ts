@@ -5,6 +5,11 @@ import type { IgnorableOffer, OfferOutcome } from "@/middleware/store/slices/cal
 
 type Deps = { wavoip: Wavoip; store: MiddlewareStoreApi };
 
+/** Acima do teto de ack da wavoip-api, para um servidor lento responder antes de vencer. */
+export const HANG_UP_DEADLINE_MS = 12_000;
+
+export const HANG_UP_TIMEOUT = "HANG_UP_TIMEOUT";
+
 export type StartCallSuccess = { call: { id: string; peer: CallPeer }; err: null };
 export type StartCallFailure = {
   call: null;
@@ -43,7 +48,7 @@ export class CallController {
     const { store } = this.deps;
     const { active, outgoing } = store.getState();
     if (!active) return outgoing ? this.cancel() : { err: null };
-    const result = await active.end();
+    const result = await this.settle(() => active.end());
     store.getState().setCallStatus("ENDED");
     return result;
   }
@@ -65,9 +70,23 @@ export class CallController {
     // operador pode já ter discado de novo.
     if (callId !== undefined && outgoing.id !== callId) return { err: null };
 
-    const result = await outgoing.cancel();
+    const result = await this.settle(() => outgoing.cancel());
     if (result.err === null) store.getState().setCallStatus("CANCELLED");
     return result;
+  }
+
+  /**
+   * A biblioteca sempre responde, mesmo quando ela não responde: exceção e espera sem fim
+   * viram `err`. O ack do servidor tem teto na wavoip-api, mas a liberação da mídia que
+   * ela espera depois do ack não tem — e sem isto o botão de desligar ficava desabilitado
+   * para sempre, com a chamada parada na tela.
+   */
+  private async settle(request: () => Promise<{ err: string | null }>): Promise<{ err: string | null }> {
+    try {
+      return await raceDeadline(request(), { err: HANG_UP_TIMEOUT }, HANG_UP_DEADLINE_MS);
+    } catch (cause) {
+      return { err: cause instanceof Error ? cause.message : String(cause) };
+    }
   }
 
   ingestOffer(offer: Offer): void {
@@ -172,5 +191,20 @@ export class CallController {
       .getState()
       .devices.filter((d) => d.enable)
       .map((d) => d.token);
+  }
+}
+
+async function raceDeadline<T>(work: Promise<T>, onDeadline: T, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<T>((resolve) => {
+    timer = setTimeout(() => resolve(onDeadline), ms);
+  });
+  // O `catch` cobre a rejeição que chega depois do prazo: sem dono, ela subiria como
+  // rejeição não tratada.
+  work.catch(() => {});
+  try {
+    return await Promise.race([work, deadline]);
+  } finally {
+    clearTimeout(timer);
   }
 }

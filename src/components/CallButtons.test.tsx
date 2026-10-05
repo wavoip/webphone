@@ -19,7 +19,8 @@ async function withOutgoing(outgoing = new FakeCallOutgoing("c1", "tok-1")) {
   return { outgoing };
 }
 
-const hangUp = () => screen.getByRole("button", { name: /cancelar|finalizar/i }) as HTMLButtonElement;
+// `cancel` sem o fim da palavra: o mesmo botão se chama "Cancelar" e "Cancelando...".
+const hangUp = () => screen.getByRole("button", { name: /cancel|finalizar/i }) as HTMLButtonElement;
 
 describe("CallButtons hang-up", () => {
   beforeEach(() => {
@@ -48,6 +49,25 @@ describe("CallButtons hang-up", () => {
     fireEvent.click(hangUp());
 
     await waitFor(() => expect(hangUp().disabled).toBe(false));
+  });
+
+  it("comes back when the library throws instead of answering", async () => {
+    const outgoing = new FakeCallOutgoing("c1", "tok-1");
+    outgoing.cancelFailure = new Error("outgoing.cancel is not a function");
+    await withOutgoing(outgoing);
+
+    fireEvent.click(hangUp());
+
+    await waitFor(() => expect(hangUp().disabled).toBe(false));
+  });
+
+  it("stays out of use once the call is cancelled", async () => {
+    const { outgoing } = await withOutgoing();
+
+    fireEvent.click(hangUp());
+
+    await waitFor(() => expect(outgoing.cancelCalls).toBe(1));
+    expect(hangUp().disabled).toBe(true);
   });
 
   it("says 'end', not 'cancel', once the call is connected", async () => {

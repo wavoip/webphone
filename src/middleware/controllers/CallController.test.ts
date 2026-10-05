@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { CallController } from "@/middleware/controllers/CallController";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CallController, HANG_UP_DEADLINE_MS, HANG_UP_TIMEOUT } from "@/middleware/controllers/CallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
@@ -260,6 +260,34 @@ describe("CallController", () => {
       expect(seen).not.toContain("CANCELLED");
       expect(store.getState().callStatus).toBe("RINGING");
       unsub();
+    });
+
+    it("turns a library exception into an error instead of letting it escape", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.cancelFailure = new Error("outgoing.cancel is not a function");
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+
+      const result = await controller.cancel();
+
+      expect(result.err).toBe("outgoing.cancel is not a function");
+      expect(store.getState().callStatus).toBe("RINGING");
+    });
+
+    it("gives up on a library that never answers", async () => {
+      vi.useFakeTimers();
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.cancelHangs = true;
+      store.getState().setOutgoing(outgoing);
+      store.getState().setCallStatus("RINGING");
+
+      const pending = controller.cancel();
+      await vi.advanceTimersByTimeAsync(HANG_UP_DEADLINE_MS);
+      const result = await pending;
+
+      expect(result.err).toBe(HANG_UP_TIMEOUT);
+      expect(store.getState().callStatus).toBe("RINGING");
+      vi.useRealTimers();
     });
 
     it("no-ops when there is no outgoing call", async () => {
