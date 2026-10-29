@@ -27,11 +27,7 @@ export class CallController {
    * while `rebaseMuteOntoActive` is mid-round-trip) would let the slower one
    * land last and leave the SDK contradicting the store.
    */
-  private enqueueMicOp<T>(op: () => Promise<T>): Promise<T> {
-    const next = this.micOps.then(op, op);
-    this.micOps = next.catch(() => undefined);
-    return next;
-  }
+
 
   async start(to: string, config: { fromTokens?: string[] } = {}): Promise<StartCallResult> {
     const fromTokens = config.fromTokens ?? this.enabledTokens();
@@ -100,7 +96,6 @@ export class CallController {
    * await middleware.controllers.call.setMicMuted(true);
    */
   async setMicMuted(muted: boolean): Promise<{ err: string | null }> {
-    return this.enqueueMicOp(async () => {
       const { store } = this.deps;
       const { active, outgoing } = store.getState();
       const call = active ?? outgoing;
@@ -108,7 +103,7 @@ export class CallController {
       const result = muted ? await call.mute() : await call.unmute();
       if (!result.err) store.getState().setMicMuted(muted);
       return result;
-    });
+ 
   }
 
   /**
@@ -131,13 +126,12 @@ export class CallController {
    * flag lived on. Clearing it through the outgoing handle (still valid here)
    * and re-muting on the active call keeps the user's intent with no residue.
    */
-  private rebaseMuteOntoActive(outgoing: CallOutgoing, active: CallActive): Promise<void> {
-    return this.enqueueMicOp(async () => {
+  private async rebaseMuteOntoActive(outgoing: CallOutgoing, active: CallActive): Promise<void> {
       const { store } = this.deps;
       if (!store.getState().micMuted) return;
       await outgoing.unmute();
       await active.mute();
-    });
+
   }
 
   ingestOffer(offer: Offer): void {
