@@ -42,6 +42,10 @@ export function useCallState() {
   }));
 }
 
+export function useMicMuted(): boolean {
+  return useMiddlewareSelector((s) => s.micMuted);
+}
+
 export function useDialState() {
   const middleware = useMiddleware();
   const { dialStatus, dialError, dialIsLoading } = useMiddlewareShallow((s) => ({

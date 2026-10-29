@@ -1,6 +1,7 @@
-import type { CallActive, CallStats } from "@wavoip/wavoip-api";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import type { CallActive } from "@wavoip/wavoip-api";
+import { type ReactNode, useMemo, useState } from "react";
 import { AudioLevelBar } from "@/components/layout/status-bar/AudioLevelBar";
+import { useCallStats } from "@/components/layout/status-bar/useCallStats";
 import {
   Dialog,
   DialogContent,
@@ -25,29 +26,13 @@ export function CallDiagnosticsDialog({ call, triggerClassName, children }: Prop
   const { root } = useShadowRoot();
   const debug = useDebugInfo();
   const [open, setOpen] = useState(false);
-  const [stats, setStats] = useState<CallStats | null>(null);
+  const stats = useCallStats(call, STATS_POLL_MS, open);
 
   const lastIce = useMemo(() => {
     const own = debug.recentIceDiagnostics.filter((r) => r.callId === call.id);
     return own.length ? own[own.length - 1].diag : null;
   }, [debug.recentIceDiagnostics, call.id]);
   const issues = useMemo(() => debug.recentIssues.filter((r) => r.callId === call.id), [debug.recentIssues, call.id]);
-
-  useEffect(() => {
-    if (!open) return;
-    let cancelled = false;
-    const pull = () => {
-      call.getStats().then((s) => {
-        if (!cancelled) setStats(s);
-      });
-    };
-    pull();
-    const id = setInterval(pull, STATS_POLL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [call, open]);
 
   return (
     <Dialog modal open={open} onOpenChange={setOpen}>
