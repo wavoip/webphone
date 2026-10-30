@@ -3,6 +3,12 @@ import { CallController } from "@/middleware/controllers/CallController";
 import { createMiddlewareStore, type MiddlewareStoreApi } from "@/middleware/store/createStore";
 import { FakeCallActive, FakeCallOutgoing, FakeOffer, FakeWavoip } from "@/middleware/testing/FakeWavoip";
 
+/**
+ * Lets fire-and-forget (`void`) controller work settle before asserting, so a
+ * test cannot pass merely because the write landed after the expectation.
+ */
+const flushMicrotasks = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
+
 describe("CallController", () => {
   let store: MiddlewareStoreApi;
   let wavoip: FakeWavoip;
@@ -216,6 +222,16 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("CANCELLED");
     });
 
+    it("clears micMuted once the server confirms the cancel", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      store.getState().setOutgoing(outgoing);
+      store.getState().setMicMuted(true);
+
+      await controller.cancel();
+
+      expect(store.getState().micMuted).toBe(false);
+    });
+
     it("hands the refusal back to the caller", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       outgoing.cancelResult = { err: "IS_NOT_OFFER" };
@@ -293,6 +309,127 @@ describe("CallController", () => {
       outgoing.emitEvent("ended");
 
       expect(store.getState().callStatus).toBe("ENDED");
+    });
+  });
+
+  describe("setMicMuted", () => {
+    it("records the mute in the store so remounting CallButtons cannot lose it", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+
+      await controller.setMicMuted(true);
+
+      expect(store.getState().micMuted).toBe(true);
+    });
+
+    // Regression: muting while ringing left the mic silent for the whole call.
+    // The SDK keeps mute across the transition, so the store must too —
+    // CallButtons is remounted here (outgoing screen → call screen).
+    it("keeps micMuted across the outgoing→active transition", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      await controller.setMicMuted(true);
+
+      outgoing.emitEvent("peerAccept", new FakeCallActive("c1", "tok-1"));
+      await flushMicrotasks();
+
+      expect(store.getState().micMuted).toBe(true);
+    });
+
+    it("unmutes the active call once it took over from the outgoing one", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      await controller.setMicMuted(true);
+      outgoing.emitEvent("peerAccept", active);
+      await flushMicrotasks();
+
+      await controller.setMicMuted(false);
+
+      // Muted on the active call by the rebase, then unmuted by the user.
+      expect(active.microphone.calls).toEqual([true, false]);
+      expect(store.getState().micMuted).toBe(false);
+    });
+
+    it("leaves micMuted untouched when the SDK reports an error", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      outgoing.microphone.result = { err: "socket down" };
+
+      const result = await controller.setMicMuted(true);
+
+      expect(result.err).toBe("socket down");
+      expect(store.getState().micMuted).toBe(false);
+    });
+
+    it("no-ops when no call is in flight", async () => {
+      const result = await controller.setMicMuted(true);
+      expect(result.err).toBeNull();
+      expect(store.getState().micMuted).toBe(false);
+    });
+
+    // Regression: CallOutgoing.mute() sets a server-side flag that
+    // CallActive.unmute() cannot clear, so a call muted while ringing stayed
+    // silent even after the UI showed an open mic.
+    it("clears the server-side mute and re-mutes locally when the peer answers", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      await controller.setMicMuted(true);
+
+      outgoing.emitEvent("peerAccept", active);
+      await flushMicrotasks();
+
+      expect(outgoing.microphone.calls).toEqual([false, true, false]);
+      expect(active.microphone.calls).toEqual([true]);
+      expect(store.getState().micMuted).toBe(true);
+    });
+
+    it("leaves the outgoing call alone when the peer answers an unmuted call", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+
+      outgoing.emitEvent("peerAccept", active);
+      await flushMicrotasks();
+
+      expect(active.microphone.calls).toEqual([]);
+      expect(store.getState().micMuted).toBe(false);
+    });
+  });
+
+  describe("mic reset between calls", () => {
+    // MediaManager.muted survives stopMedia(), so a call that ended muted would
+    // leave the next one silent while the UI showed an open mic.
+    it("unmutes the SDK when an outgoing call starts", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      wavoip.startCallResult = { call: outgoing, err: null };
+      store.getState().setMicMuted(true);
+
+      await controller.start("5511");
+
+      expect(outgoing.microphone.calls).toEqual([false]);
+      expect(store.getState().micMuted).toBe(false);
+    });
+
+    it("unmutes the SDK when an incoming offer is accepted", async () => {
+      const offer = new FakeOffer("o1", "tok-1");
+      const active = new FakeCallActive("c1", "tok-1");
+      offer.acceptResult = { call: active, err: null };
+      store.getState().setMicMuted(true);
+      controller.ingestOffer(offer);
+
+      await store.getState().offers[0].accept();
+      await flushMicrotasks();
+
+      expect(active.microphone.calls).toEqual([false]);
+      expect(store.getState().micMuted).toBe(false);
     });
   });
 

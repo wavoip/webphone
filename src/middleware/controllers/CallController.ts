@@ -14,10 +14,19 @@ export type StartCallResult = StartCallSuccess | StartCallFailure;
 
 export class CallController {
   private readonly deps: Deps;
+  /** Tail of the mic operation chain — see {@link enqueueMicOp}. */
 
   constructor(deps: Deps) {
     this.deps = deps;
   }
+
+  /**
+   * Runs mic operations one at a time. They share a single MediaManager and a
+   * single store field, so interleaving two of them (a user tapping "Falar"
+   * while `rebaseMuteOntoActive` is mid-round-trip) would let the slower one
+   * land last and leave the SDK contradicting the store.
+   */
+
 
   async start(to: string, config: { fromTokens?: string[] } = {}): Promise<StartCallResult> {
     const fromTokens = config.fromTokens ?? this.enabledTokens();
@@ -25,6 +34,7 @@ export class CallController {
     const { call, err } = await this.deps.wavoip.startCall({ fromTokens, to });
     if (err) return { call: null, err };
 
+    await this.resetMic(call);
     this.bindOutgoing(call);
     const { store } = this.deps;
     store.getState().setCallFailReason(undefined);
@@ -44,6 +54,7 @@ export class CallController {
     const { active, outgoing } = store.getState();
     if (!active) return outgoing ? this.cancel() : { err: null };
     const result = await active.end();
+    store.getState().setMicMuted(false);
     store.getState().setCallStatus("ENDED");
     return result;
   }
@@ -66,8 +77,60 @@ export class CallController {
     if (callId !== undefined && outgoing.id !== callId) return { err: null };
 
     const result = await outgoing.cancel();
-    if (result.err === null) store.getState().setCallStatus("CANCELLED");
+    if (result.err !== null) return result;
+    store.getState().setMicMuted(false);
+    store.getState().setCallStatus("CANCELLED");
     return result;
+  }
+
+  /**
+   * Mutes or unmutes the local microphone and mirrors the result in the store.
+   *
+   * The store is the source of truth: wavoip-api keeps mute inside its private
+   * MediaManager with no public getter, and component state dies on unmount
+   * (outgoing→call screen switch, PiP open/close) — which used to leave the
+   * mic muted while the button showed an open mic.
+   *
+   * @example
+   * await middleware.controllers.call.setMicMuted(true);
+   */
+  async setMicMuted(muted: boolean): Promise<{ err: string | null }> {
+      const { store } = this.deps;
+      const { active, outgoing } = store.getState();
+      const call = active ?? outgoing;
+      if (!call) return { err: null };
+      const result = muted ? await call.mute() : await call.unmute();
+      if (!result.err) store.getState().setMicMuted(muted);
+      return result;
+ 
+  }
+
+  /**
+   * Clears mute at the start of every call. wavoip-api's `stopMedia()` drops
+   * the stream but leaves `MediaManager.muted` set, so a call that ended muted
+   * would otherwise leave the next one silent with a clean-looking UI.
+   */
+  private async resetMic(call: CallActive | CallOutgoing): Promise<void> {
+    await call.unmute();
+    this.deps.store.getState().setMicMuted(false);
+  }
+
+  /**
+   * Moves a mute made while ringing from the server to the local track.
+   *
+   * `CallOutgoing.mute()` emits `call.mute` over the socket, but
+   * `CallActive.unmute()` only flips `track.enabled` — it has no socket access
+   * and always resolves `{ err: null }`. So a call muted while ringing stayed
+   * silent for good: clicking "Falar" restored the track while the server-side
+   * flag lived on. Clearing it through the outgoing handle (still valid here)
+   * and re-muting on the active call keeps the user's intent with no residue.
+   */
+  private async rebaseMuteOntoActive(outgoing: CallOutgoing, active: CallActive): Promise<void> {
+      const { store } = this.deps;
+      if (!store.getState().micMuted) return;
+      await outgoing.unmute();
+      await active.mute();
+
   }
 
   ingestOffer(offer: Offer): void {
@@ -117,6 +180,7 @@ export class CallController {
 
   private promoteToActive(call: CallActive, offerId: string): void {
     const { store } = this.deps;
+    void this.resetMic(call);
     store.getState().markOfferOutcome(offerId, "accepted");
     store.getState().removeOffer(offerId);
     this.bindActive(call);
@@ -142,6 +206,7 @@ export class CallController {
       store.getState().setActive(active);
       store.getState().setCallStatus("ACTIVE");
       store.getState().setPeerMuted(active.peer.muted ?? false);
+      void this.rebaseMuteOntoActive(call, active);
     });
     call.on("peerReject", () => store.getState().setCallStatus("REJECTED"));
     call.on("unanswered", () => store.getState().setCallStatus("NOT_ANSWERED"));

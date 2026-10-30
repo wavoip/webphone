@@ -2,6 +2,7 @@ import { WifiHighIcon, WifiLowIcon, WifiMediumIcon, WifiSlashIcon, WifiXIcon } f
 import type { CallActive, TransportStatus } from "@wavoip/wavoip-api";
 import { useEffect, useState } from "react";
 import { CallDiagnosticsDialog } from "@/components/layout/status-bar/CallDiagnosticsDialog";
+import { useCallStats } from "@/components/layout/status-bar/useCallStats";
 
 const PING_POLL_MS = 500;
 
@@ -42,25 +43,15 @@ const STRENGTH_STYLES: Record<ConnectionStrength, { text: string; bg: string; ri
 };
 
 export function Ping({ call }: Props) {
-  const [ping, setPing] = useState<number | null>(null);
+  const ping = useCallStats(call, PING_POLL_MS)?.rtt.avg ?? null;
   const [connectionStatus, setConnectionStatus] = useState<TransportStatus>(call.connectionStatus);
   const [strength, setStrength] = useState<ConnectionStrength>(ConnectionStrength.high);
 
   useEffect(() => {
-    const applyPing = (ms: number) => {
-      setPing(ms);
-      setStrength(getPingLevel(ms));
-    };
+    if (ping !== null) setStrength(getPingLevel(ping));
+  }, [ping]);
 
-    let cancelled = false;
-    const pull = () => {
-      call.getStats().then((s) => {
-        if (!cancelled) applyPing(s.rtt.avg);
-      });
-    };
-    pull();
-    const id = setInterval(pull, PING_POLL_MS);
-
+  useEffect(() => {
     const unsubConnection = call.on("connectionStatus", (status) => {
       setConnectionStatus(status);
       if (status === "connected")
@@ -68,11 +59,7 @@ export function Ping({ call }: Props) {
       if (status === "disconnected") setStrength(ConnectionStrength.none);
     });
 
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-      unsubConnection();
-    };
+    return unsubConnection;
   }, [call]);
 
   if (connectionStatus === "disconnected") {
