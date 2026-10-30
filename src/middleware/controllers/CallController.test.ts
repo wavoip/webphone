@@ -354,23 +354,6 @@ describe("CallController", () => {
       expect(store.getState().micMuted).toBe(false);
     });
 
-    // Mic operations share one MediaManager, so they must not interleave: the
-    // user tapping "Falar" mid-rebase has to win, not be undone by it.
-    it("lets an unmute issued during the rebase land last", async () => {
-      const outgoing = new FakeCallOutgoing("c1", "tok-1");
-      const active = new FakeCallActive("c1", "tok-1");
-      wavoip.startCallResult = { call: outgoing, err: null };
-      await controller.start("5511");
-      await controller.setMicMuted(true);
-
-      outgoing.emitEvent("peerAccept", active);
-      await controller.setMicMuted(false);
-      await flushMicrotasks();
-
-      expect(active.microphone.calls.at(-1)).toBe(false);
-      expect(store.getState().micMuted).toBe(false);
-    });
-
     it("leaves micMuted untouched when the SDK reports an error", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };

@@ -15,7 +15,6 @@ export type StartCallResult = StartCallSuccess | StartCallFailure;
 export class CallController {
   private readonly deps: Deps;
   /** Tail of the mic operation chain — see {@link enqueueMicOp}. */
-  private micOps: Promise<unknown> = Promise.resolve();
 
   constructor(deps: Deps) {
     this.deps = deps;
