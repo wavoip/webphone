@@ -76,6 +76,30 @@ export class FakeOffer extends FakeEmitter<OfferEvents> implements Offer {
   onStatus() {}
 }
 
+/**
+ * Records what reached the SDK's mute API and lets a test inject a failure.
+ * Shared by both fake call classes because wavoip-api exposes mute on
+ * `CallOutgoing` and `CallActive` alike.
+ *
+ * @example
+ * outgoing.microphone.result = { err: "socket down" };
+ * expect(outgoing.microphone.calls).toEqual([false, true]);
+ */
+export class FakeMicrophone {
+  calls: boolean[] = [];
+  result: { err: string | null } = { err: null };
+
+  mute = async (): Promise<{ err: string | null }> => {
+    this.calls.push(true);
+    return this.result;
+  };
+
+  unmute = async (): Promise<{ err: string | null }> => {
+    this.calls.push(false);
+    return this.result;
+  };
+}
+
 export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements CallOutgoing {
   type = "OFFICIAL" as const;
   direction = "OUTGOING" as const;
@@ -93,8 +117,9 @@ export class FakeCallOutgoing extends FakeEmitter<CallOutgoingEvents> implements
     this.peer = peer;
   }
 
-  mute = async () => ({ err: null });
-  unmute = async () => ({ err: null });
+  readonly microphone = new FakeMicrophone();
+  mute = this.microphone.mute;
+  unmute = this.microphone.unmute;
   cancelResult: { err: string | null } = { err: null };
   cancelCalls = 0;
   cancel = async () => {
@@ -131,8 +156,9 @@ export class FakeCallActive extends FakeEmitter<CallActiveEvents> implements Cal
     this.peer = peer;
   }
 
-  mute = async () => ({ err: null });
-  unmute = async () => ({ err: null });
+  readonly microphone = new FakeMicrophone();
+  mute = this.microphone.mute;
+  unmute = this.microphone.unmute;
   end = async () => ({ err: null });
   getStats = async () => makeEmptyCallStats();
   onError() {}

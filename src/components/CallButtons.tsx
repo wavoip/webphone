@@ -12,7 +12,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { t } from "@/lib/i18n";
-import { useMiddleware } from "@/middleware/react/hooks";
+import { useMicMuted, useMiddleware } from "@/middleware/react/hooks";
 
 type Props = {
   call?: CallActive | CallOutgoing;
@@ -20,8 +20,8 @@ type Props = {
 
 export function CallButtons({ call }: Props) {
   const middleware = useMiddleware();
+  const micMuted = useMicMuted();
   const [actionMade, setActionMade] = useState(false);
-  const [muted, setMuted] = useState(false);
 
   // Numa chamada ainda não atendida o botão vermelho cancela, e o cancelamento pode ser
   // recusado (ver CallController.cancel) — por isso o botão volta, e não trava.
@@ -67,13 +67,13 @@ export function CallButtons({ call }: Props) {
         <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
       </div>
 
-      {muted ? (
+      {micMuted ? (
         <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
           <Button
             type="button"
             variant={"secondary"}
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:h-[55px] wv:w-[55px]"
-            onClick={() => call?.unmute().then(() => setMuted(false))}
+            onClick={() => middleware.controllers.call.setMicMuted(false)}
             disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold wv:text-[red] ">
@@ -88,7 +88,7 @@ export function CallButtons({ call }: Props) {
             type="button"
             variant={"secondary"}
             className="wv:aspect-square wv:size-full wv:rounded-full wv:hover:bg-muted-foreground wv:hover:text-background wv:hover:cursor-pointer wv:text-foreground wv:flex wv:flex-col wv:justify-center wv:items-center wv:gap-0 wv:h-[55px] wv:w-[55px]"
-            onClick={() => call?.mute().then(() => setMuted(true))}
+            onClick={() => middleware.controllers.call.setMicMuted(true)}
             disabled={actionMade}
           >
             <p className="wv:text-[24px] wv:leading-6 wv:font-semibold ">
