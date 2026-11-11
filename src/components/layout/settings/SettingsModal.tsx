@@ -160,7 +160,7 @@ export const SettingsModal = forwardRef(() => {
                 {showAudio && (
                   <TabsTrigger value="settings" disabled className="wv:gap-2 wv:max-sm:min-h-9">
                     <MicrophoneIcon className="wv:size-4" weight="duotone" />
-                    Audio
+                    {t("Audio")}
                   </TabsTrigger>
                 )}
                 <TabsTrigger value="preferences" className="wv:gap-2 wv:max-sm:min-h-9">

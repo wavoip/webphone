@@ -1,5 +1,6 @@
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import MarqueeText from "@/components/MarqueeText";
+import { t } from "@/lib/i18n";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { usePip } from "@/providers/PipProvider";
 import { useShadowRoot } from "@/providers/ShadowRootProvider";
@@ -77,7 +78,7 @@ export function CopyablePeer({ displayName, phone, className, marqueeSpeed = 10 
         </span>
       </TooltipTrigger>
       <TooltipContent container={tooltipContainer} side="top" sideOffset={4} className="wv:bg-green-600 wv:text-white">
-        Copiado
+        {t("Copied")}
       </TooltipContent>
     </Tooltip>
   );

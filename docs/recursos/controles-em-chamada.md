@@ -13,6 +13,8 @@ A tela de chamada apresenta uma grade de seis controles. Nesta versão, apenas *
 
 A mesma grade é exibida na tela de discagem (durante o toque) e na tela de chamada ativa.
 
+Os rótulos dos controles seguem o idioma do webphone, que por padrão é o idioma do navegador e pode ser trocado em **Preferências** (português, inglês ou espanhol). Os nomes acima correspondem ao português.
+
 ## Silenciamento do microfone
 
 O botão alterna entre dois rótulos: **Silenciar** quando o microfone está aberto e **Falar** quando está silenciado, este último acompanhado de ícone em vermelho.
