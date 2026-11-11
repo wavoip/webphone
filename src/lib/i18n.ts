@@ -60,9 +60,16 @@ export type TranslationKey =
   | "Call rejected"
   | "Call unanswered"
   | "Call canceled"
-  | "Cancel call"
   | "Canceling..."
   | "End"
+  | "Hold"
+  | "Video"
+  | "Mute"
+  | "Unmute"
+  | "Transfer"
+  | "Keypad"
+  | "Muted"
+  | "Audio"
   | "Abort"
   | "Could not cancel the call"
   | "Could not end the call"
@@ -180,9 +187,16 @@ const ptBR: LocaleResource = {
   "Call rejected": "Chamada rejeitada",
   "Call unanswered": "Chamada não atendida",
   "Call canceled": "Chamada cancelada",
-  "Cancel call": "Cancelar",
   "Canceling...": "Cancelando...",
   End: "Finalizar",
+  Hold: "Espera",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Falar",
+  Transfer: "Transferir",
+  Keypad: "Teclado",
+  Muted: "Silenciado",
+  Audio: "Áudio",
   Abort: "Desistir",
   "Could not cancel the call": "Não foi possível cancelar a chamada",
   "Could not end the call": "Não foi possível encerrar a chamada",
@@ -296,9 +310,16 @@ const es: LocaleResource = {
   "Call rejected": "Llamada rechazada",
   "Call unanswered": "Llamada no contestada",
   "Call canceled": "Llamada cancelada",
-  "Cancel call": "Cancelar",
   "Canceling...": "Cancelando...",
   End: "Finalizar",
+  Hold: "Espera",
+  Video: "Vídeo",
+  Mute: "Silenciar",
+  Unmute: "Hablar",
+  Transfer: "Transferir",
+  Keypad: "Teclado",
+  Muted: "Silenciado",
+  Audio: "Audio",
   Abort: "Desistir",
   "Could not cancel the call": "No se pudo cancelar la llamada",
   "Could not end the call": "No se pudo finalizar la llamada",

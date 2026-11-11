@@ -108,7 +108,7 @@ export default function CallScreen() {
           {peerMuted ? (
             <div className="wv:flex wv:text-foreground wv:h-[40px] wv:items-center wv:justify-cente wv:gap-1">
               <MicrophoneSlashIcon />
-              <p className="wv:text-[16px]">Silenciado</p>
+              <p className="wv:text-[16px]">{t("Muted")}</p>
             </div>
           ) : (
             <WaveSound call={callActive} />

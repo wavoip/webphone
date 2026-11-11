@@ -27,7 +27,7 @@ export function CallButtons({ call }: Props) {
   // recusado (ver CallController.cancel) — por isso o botão volta, e não trava.
   const isOutgoing = call?.direction === "OUTGOING" && call.status !== "ACTIVE";
 
-  const hangUpLabel = actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel call") : t("End");
+  const hangUpLabel = actionMade && isOutgoing ? t("Canceling...") : isOutgoing ? t("Cancel") : t("End");
 
   const hangUp = async () => {
     setActionMade(true);
@@ -50,7 +50,9 @@ export function CallButtons({ call }: Props) {
             <PauseIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Espera</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Hold")}
+        </p>
       </div>
 
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -64,7 +66,9 @@ export function CallButtons({ call }: Props) {
             <VideoCameraSlashIcon size={32} weight="fill" />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Video</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Video")}
+        </p>
       </div>
 
       {micMuted ? (
@@ -80,7 +84,9 @@ export function CallButtons({ call }: Props) {
               <MicrophoneSlashIcon size={32} weight="fill" />
             </p>
           </Button>
-          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">Falar</p>
+          <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
+            {t("Unmute")}
+          </p>
         </div>
       ) : (
         <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -96,7 +102,7 @@ export function CallButtons({ call }: Props) {
             </p>
           </Button>
           <p className="wv:text-[10px] wv:font-light wv:text-foreground wv:tracking-[.15em] wv:text-center">
-            Silenciar
+            {t("Mute")}
           </p>
         </div>
       )}
@@ -113,7 +119,7 @@ export function CallButtons({ call }: Props) {
           </p>
         </Button>
         <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
-          Transferir
+          {t("Transfer")}
         </p>
       </div>
       <div className="wv:flex wv:flex-col wv:justify-center wv:items-center">
@@ -146,7 +152,9 @@ export function CallButtons({ call }: Props) {
             <DotsNineIcon size={32} />
           </p>
         </Button>
-        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">Teclado</p>
+        <p className="wv:text-[10px] wv:font-light wv:text-foreground/40 wv:tracking-[.15em] wv:text-center">
+          {t("Keypad")}
+        </p>
       </div>
     </div>
   );
