@@ -34,12 +34,14 @@ export class CallController {
     const { call, err } = await this.deps.wavoip.startCall({ fromTokens, to });
     if (err) return { call: null, err };
 
-    await this.resetMic(call);
+    // Os listeners entram antes do resetMic: o `call:ringing` da chamada oficial chega
+    // durante o round-trip do `call.mute`, e a wavoip-api não reemite status perdido.
     this.bindOutgoing(call);
     const { store } = this.deps;
     store.getState().setCallFailReason(undefined);
     store.getState().setOutgoing(call);
     store.getState().setCallStatus("CALLING");
+    await this.resetMic(call);
 
     return { call: { id: call.id, peer: call.peer }, err: null };
   }

@@ -86,6 +86,17 @@ describe("CallController", () => {
       expect(store.getState().callStatus).toBe("RINGING");
     });
 
+    it("keeps RINGING that arrives while the mic reset is in flight", async () => {
+      const outgoing = new FakeCallOutgoing("c1", "tok-1");
+      outgoing.unmute = async () => {
+        outgoing.emitEvent("status", "RINGING");
+        return { err: null };
+      };
+      wavoip.startCallResult = { call: outgoing, err: null };
+      await controller.start("5511");
+      expect(store.getState().callStatus).toBe("RINGING");
+    });
+
     it("outgoing status FAILED transitions to 'failed'", async () => {
       const outgoing = new FakeCallOutgoing("c1", "tok-1");
       wavoip.startCallResult = { call: outgoing, err: null };
