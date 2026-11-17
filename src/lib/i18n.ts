@@ -123,6 +123,7 @@ export type TranslationKey =
   | "CONNECTION_TIMEOUT"
   | "ACCOUNT_RESTRICTED"
   | "NO_CALL_PERMISSION"
+  | "UNKNOWN_NUMBER_BLOCKED"
   | "INTERNAL_ERROR";
 
 type LocaleResource = Record<TranslationKey, string>;
@@ -249,6 +250,7 @@ const ptBR: LocaleResource = {
   CONNECTION_TIMEOUT: "A chamada perdeu contato com o servidor",
   ACCOUNT_RESTRICTED: "Conta do WhatsApp restrita",
   NO_CALL_PERMISSION: "Conta sem permissão para realizar chamadas",
+  UNKNOWN_NUMBER_BLOCKED: "Você precisa ter uma conversa antes de ligar para esse número",
   INTERNAL_ERROR: "Algo deu errado no servidor",
 };
 
@@ -372,6 +374,7 @@ const es: LocaleResource = {
   CONNECTION_TIMEOUT: "La llamada perdió contacto con el servidor",
   ACCOUNT_RESTRICTED: "Cuenta de WhatsApp restringida",
   NO_CALL_PERMISSION: "Cuenta sin permiso para realizar llamadas",
+  UNKNOWN_NUMBER_BLOCKED: "Necesitas tener una conversación antes de llamar a este número",
   INTERNAL_ERROR: "Algo salió mal en el servidor",
 };
 
@@ -384,6 +387,7 @@ const enOverrides: Partial<LocaleResource> = {
   CONNECTION_TIMEOUT: "The call lost contact with the server",
   ACCOUNT_RESTRICTED: "WhatsApp account is restricted",
   NO_CALL_PERMISSION: "Account is not allowed to place calls",
+  UNKNOWN_NUMBER_BLOCKED: "You need to have a conversation with this number before calling it",
   INTERNAL_ERROR: "Something went wrong on the server",
 };
 
