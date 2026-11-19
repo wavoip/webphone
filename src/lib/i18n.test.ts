@@ -40,4 +40,15 @@ describe("webphone i18n", () => {
     const keys = ["Hold", "Video", "Mute", "Unmute", "Transfer", "Keypad", "Muted", "Audio"] as const;
     expect(keys.map((key) => t(key))).toEqual(expected);
   });
+
+  // Sem a chave, o a18n devolve o próprio código e a notificação de falha mostrava
+  // "UNKNOWN_NUMBER_BLOCKED" cru.
+  it.each([
+    ["en", "You need to have a conversation with this number before calling it"],
+    ["pt-BR", "Você precisa ter uma conversa antes de ligar para esse número"],
+    ["es", "Necesitas tener una conversación antes de llamar a este número"],
+  ] as const)("translates the UNKNOWN_NUMBER_BLOCKED call error for %s", (lang, expected) => {
+    setLanguage(lang);
+    expect(t("UNKNOWN_NUMBER_BLOCKED")).toBe(expected);
+  });
 });
