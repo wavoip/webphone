@@ -157,6 +157,8 @@ O texto exibido em tela e no `message` da notificação é o motivo **traduzido*
 | `CONNECTION_TIMEOUT`  | A chamada perdeu contato com o servidor.                  |
 | `ACCOUNT_RESTRICTED`  | Conta do WhatsApp restrita.                               |
 | `NO_CALL_PERMISSION`  | Conta sem permissão para realizar chamadas.               |
+| `NOT_PRIMARY_CALL_APP` | Outro aplicativo é o principal para chamadas do número.   |
+| `INTEGRATION_FORBIDDEN` | A Meta não autorizou a chamada.                          |
 | `UNKNOWN_NUMBER_BLOCKED` | Você precisa ter uma conversa antes de ligar para esse número. |
 | `INTERNAL_ERROR`      | Algo deu errado no servidor.                              |
 
